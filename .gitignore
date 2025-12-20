@@ -1,9 +1,63 @@
-﻿bin/
-obj/
-node_modules/
-.env
+﻿# ========== OS junk ==========
 .DS_Store
-*.log
-.vscode/
-.idea/
+Thumbs.db
 
+# ========== Logs ==========
+*.log
+logs/
+log/
+
+# ========== Secrets / env ==========
+.env
+.env.*
+!.env.example
+
+# ========== Node / frontend ==========
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+dist/
+build/
+.vite/
+.next/
+.nuxt/
+.svelte-kit/
+.cache/
+coverage/
+
+# ========== .NET / backend ==========
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.cache
+*.pdb
+*.dll
+*.exe
+*.app
+*.deps.json
+*.runtimeconfig.json
+TestResults/
+artifacts/
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Visual Studio / VS Code
+.vscode/
+.vs/
+
+# ========== DB / local volumes / dumps ==========
+*.sql.bak
+*.dump
+*.backup
+*.gz
+*.zip
+
+# ========== Keepers ==========
+!.gitkeep
