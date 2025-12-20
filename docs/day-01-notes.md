@@ -4,4 +4,3 @@
 - Настроен .gitignore.
 - Добавлен README.
 - Отработан цикл add/commit/push.
-- Проверка staging vs working tree.
