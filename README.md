@@ -10,23 +10,3 @@
 ```bash
 git clone https://github.com/dimonrtm/geoservice.git
 cd geoservice
-Проверить структуру:
-
-bash
-Копировать код
-ls -la
-ls -la backend frontend db
-Структура репозитория
-backend/ — серверная часть (API, фоновые задачи, бизнес-логика)
-
-frontend/ — клиентская часть (веб-интерфейс)
-
-db/ — миграции и скрипты БД (PostgreSQL/PostGIS будет подключаться позже)
-
-Соглашения
-Пустые директории фиксируются через файлы .gitkeep.
-
-Секреты и локальные конфиги не коммитим (см. .gitignore).
-
-Лицензия
-См. файл LICENSE.
