@@ -10,3 +10,7 @@
 ```bash
 git clone https://github.com/dimonrtm/geoservice.git
 cd geoservice
+
+## Статус
+
+Проект в активной разработке. Сейчас настроена базовая структура репозитория и Git-процессы.
