@@ -22,18 +22,18 @@ def main() -> int:
     # ignore comments
     lines = [ln.strip() for ln in raw.splitlines() if ln.strip() and not ln.strip().startswith("#")]
     if not lines:
-        print("❌ Commit message is empty.")
+        print("Error: Commit message is empty.")
         return 1
 
     first = lines[0]
 
     if first.strip().lower() in BANNED_EXACT:
-        print(f"❌ Bad commit message '{first}'. Use format: <type>: <description>")
+        print(f"Error: Bad commit message '{first}'. Use format: <type>: <description>")
         print(f"Allowed types: {', '.join(ALLOWED_TYPES)}")
         return 1
 
     if not PATTERN.match(first):
-        print("❌ Commit message must match: <type>: <description>")
+        print("Error: Commit message must match: <type>: <description>")
         print(f"Allowed types: {', '.join(ALLOWED_TYPES)}")
         print(f"Got: {first}")
         return 1
