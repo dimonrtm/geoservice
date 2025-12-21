@@ -61,3 +61,6 @@ artifacts/
 
 # ========== Keepers ==========
 !.gitkeep
+
+# Windows device-name artifact
+nul
