@@ -25,4 +25,3 @@ main: изменение от peer во время merge demo.
 Конкурирующее изменение в README (conflict demo).
 Временная правка (stash demo).
 Случайный коммит в main (oops).
-
