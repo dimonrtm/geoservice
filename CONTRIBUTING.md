@@ -30,6 +30,26 @@
   - `git diff`
   - `git diff --staged`
 
+  ## Сообщения коммитов (обязательно)
+Формат:
+
+type: короткое описание
+
+Где type ∈ {feat, fix, docs, chore, ci, refactor, test}
+
+Примеры:
+- feat: add layer import pipeline
+- fix: handle null geometry in parser
+- docs: update day 1 notes
+- chore: bump dependencies
+- ci: add pre-commit workflow
+
+Запрещены сообщения вида:
+- fix
+- update
+- wip
+- temp
+
 ## Секреты и конфиги
 - `.env` и любые секреты не коммитим.
 - Вместо этого используем `.env.example`.

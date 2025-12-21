@@ -18,3 +18,8 @@ repos:
         entry: python scripts/precommit/block_dotenv_and_secrets.py
         language: python
         types: [text]
+      - id: commit-message-style
+        name: Enforce commit message style
+        entry: python scripts/precommit/validate_commit_msg.py
+        language: python
+        stages: [commit-msg]
