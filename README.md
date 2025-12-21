@@ -18,3 +18,4 @@ cd geoservice
 ## Документы
 
 - [День 1 — чеклист](docs/day-01-checklist.md)
+Изменение из второго клона (peer).
