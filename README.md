@@ -21,4 +21,4 @@ cd geoservice
 Изменение из второго клона (peer).
 Изменение с peer перед pull.
 Локальное изменение перед pull.
-
+main: изменение от peer во время merge demo.
