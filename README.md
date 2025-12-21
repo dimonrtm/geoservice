@@ -22,3 +22,4 @@ cd geoservice
 Изменение с peer перед pull.
 Локальное изменение перед pull.
 main: изменение от peer во время merge demo.
+Конкурирующее изменение в README (conflict demo).
