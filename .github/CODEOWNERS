@@ -1,0 +1,10 @@
+# Default owner for everything
+* @dimonrtm
+
+# Areas
+/backend/ @dimonrtm
+/frontend/ @dimonrtm
+/db/ @dimonrtm
+/docs/ @dimonrtm
+/scripts/ @dimonrtm
+.github/ @dimonrtm
