@@ -20,3 +20,5 @@ cd geoservice
 - [День 1 — чеклист](docs/day-01-checklist.md)
 Изменение из второго клона (peer).
 Изменение с peer перед pull.
+Локальное изменение перед pull.
+
