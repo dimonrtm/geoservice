@@ -23,3 +23,13 @@ repos:
         entry: python scripts/precommit/validate_commit_msg.py
         language: python
         stages: [commit-msg]
+      - id: dotnet-format
+        name: dotnet format (if backend exists)
+        entry: python scripts/precommit/run_dotnet_format.py
+        language: python
+        pass_filenames: false
+      - id: frontend-prettier
+        name: prettier (if frontend exists)
+        entry: python scripts/precommit/run_prettier.py
+        language: python
+        pass_filenames: false
