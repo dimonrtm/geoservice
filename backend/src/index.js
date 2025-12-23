@@ -1,35 +1,15 @@
-const http = require("http")
+const express = require("express");
 
-const server = http.createServer((req, res) =>{
-	const host = req.headers.host ?? "localhost";
-	const url = new URL(req.url ?? "/", `http://${host}`);
-	const path = url.pathname;
-	if(req.method !== "GET"){
-		res.statusCode = 405;
-		res.setHeader("Content-Type", "text/plain; charset=utf-8");
-        res.end("Method Not Allowed");
-        return;
-	}
+const app = express();
 
-	if(path === "/"){
-		res.statusCode = 200;
-        res.setHeader("Content-Type", "text/plain; charset=utf-8");
-        res.end("Hello");
-        return;
-	}
-
-	if (path === "/health") {
-    res.statusCode = 200;
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.end("OK");
-    return;
-  }
-
-  res.statusCode = 404;
-  res.setHeader("Content-Type", "text/plain; charset=utf-8");
-  res.end("Not Found");
+app.get("/", (req, res) =>{
+res.type("text/plain").send("Hello World!");
 });
 
-server.listen(3000, "0.0.0.0", () =>{
-	console.log("Server is listening on http://localhost:3000");
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
+
+const HOST = "0.0.0.0";
+
+app.listen(PORT, HOST, () =>{
+	console.log(`Server is running on http://localhost:${PORT}/`);
 });
