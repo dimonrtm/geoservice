@@ -12,6 +12,10 @@ app.get("/users/health", (req, res) =>{
 	res.send("ok");
 });
 
+app.get("/health", (req, res) =>{
+	res.send("ok");
+});
+
 app.get("/users/:id", (req, res) => {
 res.send(`user ${req.params.id}`);
 });
