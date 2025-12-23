@@ -2,6 +2,8 @@ const express = require("express");
 
 const app = express();
 
+app.use(express.json())
+
 app.get("/", (req, res) =>{
 res.type("text/plain").send("Hello World!");
 });
@@ -12,6 +14,10 @@ app.get("/users/health", (req, res) =>{
 
 app.get("/users/:id", (req, res) => {
 res.send(`user ${req.params.id}`);
+});
+
+app.post("/echo", (req, res) =>{
+res.json({youSent: req.body});
 });
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3000;
