@@ -33,7 +33,7 @@ def read_text_safely(path: Path, max_bytes: int = 200_000) -> str:
 
 def fail(msg: str) -> int:
     print("")
-    print(f"❌ pre-commit: {msg}")
+    print(f"Error pre-commit: {msg}")
     print("")
     return 1
 
