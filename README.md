@@ -18,10 +18,7 @@ cd geoservice
 ## Документы
 
 - [День 1 — чеклист](docs/day-01-checklist.md)
-Изменение из второго клона (peer).
-Изменение с peer перед pull.
-Локальное изменение перед pull.
-main: изменение от peer во время merge demo.
-Конкурирующее изменение в README (conflict demo).
-Временная правка (stash demo).
-Случайный коммит в main (oops).
+
+Сборка образа: docker build -t my-backend .
+Запуск контейнера: docker run -p 3000:3000 my-backend
+Проверка работоспособности сервера: curl http://localhost:3000/health
