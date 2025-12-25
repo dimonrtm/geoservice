@@ -23,7 +23,7 @@ services:
       dockerfile: Dockerfile
     container_name: geo-backend
     environment:
-      PORT: ${BACKEND_PORT}
+      PORT: ${APP_PORT}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
