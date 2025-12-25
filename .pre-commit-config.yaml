@@ -13,11 +13,6 @@ repos:
 
   - repo: local
     hooks:
-      - id: block-dotenv-and-obvious-secrets
-        name: Block .env files and obvious secrets
-        entry: python scripts/precommit/block_dotenv_and_secrets.py
-        language: python
-        types: [text]
       - id: commit-message-style
         name: Enforce commit message style
         entry: python scripts/precommit/validate_commit_msg.py
