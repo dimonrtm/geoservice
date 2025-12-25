@@ -7,7 +7,6 @@
 
 Клонировать репозиторий:
 
-bash
 git clone https://github.com/dimonrtm/geoservice.git
 cd geoservice
 
@@ -30,6 +29,21 @@ curl -i http://localhost:3000/ → HTTP/1.1 200 OK и Hello World!
 
 docker compose exec postgis psql -U postgres -d geo -c "SELECT PostGIS_Full_Version();"
 Ожидаемый результат: одна строка с версией PostGIS (любая, главное что запрос выполнился).
+
+## Definition of Done (Неделя 1)
+
+docker compose up -d --build поднимает backend + postgis без ошибок
+
+curl -i http://localhost:3000/ → HTTP/1.1 200 OK и Hello World!
+
+PostGIS отвечает на SELECT PostGIS_Full_Version();
+
+репозиторий чистый (git status clean), есть финальный коммит, всё запушено
+
+docker compose up -d --build
+docker compose ps
+docker compose logs --tail=100 backend
+docker compose down
 
 
 ## Документы
