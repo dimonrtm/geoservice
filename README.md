@@ -7,9 +7,9 @@
 
 Клонировать репозиторий:
 
-```bash
+bash
 git clone https://github.com/dimonrtm/geoservice.git
-cd geoservice```
+cd geoservice
 
 ## Статус
 
