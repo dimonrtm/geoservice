@@ -43,5 +43,5 @@ docs/
 packages/
   shared/
     schemas/
-	
+
 ## Скрипты и команды
