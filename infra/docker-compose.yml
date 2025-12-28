@@ -1,22 +1,20 @@
 services:
-  db:
+  postgis:
     image: postgis/postgis:16-3.4
     container_name: geo-postgis
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ...
-      POSTGRES_DB: geo
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - geo_pgdata:/var/lib/postgresql/data
-      - ./init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d geo"]
       interval: 5s
       timeout: 3s
       retries: 20
     restart: unless-stopped
-
 volumes:
   geo_pgdata:
