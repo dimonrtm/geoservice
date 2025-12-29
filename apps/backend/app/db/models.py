@@ -21,7 +21,8 @@ class Feature(Base):
     )
     properties: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     geom: Mapped[WKBElement] = mapped_column(
-        Geometry(geometry_type="GEOMETRY", spatial_index=True), nullable=False
+        Geometry(geometry_type="GEOMETRY", srid=4326, spatial_index=True),
+        nullable=False,
     )
 
 
