@@ -1,0 +1,23 @@
+# --- Web ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# --- Settings / config ---
+pydantic==2.10.4
+pydantic-settings==2.6.1
+python-dotenv==1.0.1
+
+# --- DB core ---
+SQLAlchemy==2.0.36
+alembic==1.14.0
+
+# --- PostgreSQL driver ---
+psycopg2-binary==2.9.9
+
+# --- PostGIS / geometry ---
+GeoAlchemy2==0.16.0
+shapely==2.0.6
+
+# --- Useful utils (optional but common) ---
+httpx==0.28.1
+orjson==3.10.12
