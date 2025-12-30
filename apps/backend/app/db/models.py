@@ -4,6 +4,7 @@ from uuid import UUID
 from datetime import datetime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import Index
 from sqlalchemy import DateTime, func
 from geoalchemy2 import Geometry
@@ -17,8 +18,8 @@ class FeaturePoint(Base):
     )
     """dataset_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True), ForeignKey("datasets.id"), default=uuid.uuid4
-    )
-    properties: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)"""
+    )"""
+    properties: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     geom: Mapped[object] = mapped_column(
         Geometry(geometry_type="POINT", srid=4326),
         nullable=False,
@@ -36,6 +37,7 @@ class FeaturePolygon(Base):
     id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
+    properties: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     geom: Mapped[object] = mapped_column(
         Geometry(geometry_type="POLYGON", srid=4326),
         nullable=False,
