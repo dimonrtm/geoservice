@@ -15,5 +15,5 @@ Lattitude = Annotated[float, Field(ge=-90, le=90)]
 class GeoJSONPoint(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    type: Literal["POINT"]
+    type: Literal["Point"]
     coordinates: tuple[Longitude, Lattitude]
