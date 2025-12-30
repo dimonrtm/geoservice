@@ -30,6 +30,24 @@ class FeaturePoint(Base):
 
 Index("ix_feature_points_geom_gist", FeaturePoint.geom, postgresql_using="gist")
 
+
+class FeaturePolygon(Base):
+    __tablename__ = "feature_polygons"
+    id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    geom: Mapped[object] = mapped_column(
+        Geometry(geometry_type="POLYGON", srid=4326),
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+
+
+Index("ix_feature_polygons_geom_gist", FeaturePolygon.geom, postgresql_using="gist")
+
+
 """class Dataset(Base):
     __tablename__ = "datasets"
     id: Mapped[UUID] = mapped_column(
