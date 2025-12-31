@@ -10,7 +10,7 @@ import uuid
 from uuid import UUID
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy import text, func, insert, select, delete
+from sqlalchemy import text, func, insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_session, engine
 from app.core.schemas.create_feature_point_request import CreateFeaturePointRequest
@@ -100,3 +100,33 @@ async def delete_point(
         if row is None:
             raise HTTPException(status_code=404, detail="Точка не найдена")
         return {"id": str(row.id)}
+
+
+@app.put("/points/{id}")
+async def update_point(
+    id: UUID,
+    request: CreateFeaturePointRequest,
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    async with session.begin():
+        geojson_str = json.dumps(request.geometry.model_dump())
+        geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), 4326)
+        stmt = (
+            update(FeaturePoint)
+            .values(geom=geom_expr, properties=request.properties)
+            .where(FeaturePoint.id == id)
+            .returning(
+                FeaturePoint.id,
+                func.ST_AsGeoJSON(FeaturePoint.geom).label("geometry"),
+                FeaturePoint.properties,
+            )
+        )
+        res = await session.execute(stmt)
+        row = res.one_or_none()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Точка не найдена")
+        return {
+            "id": str(row.id),
+            "geometry": json.loads(row.geometry),
+            "properties": row.properties,
+        }
