@@ -196,6 +196,35 @@ async def delete_polygon(
         return {"id": str(row.id)}
 
 
+@app.put("/polygons/{id}")
+async def update_polygon(
+    id: UUID,
+    request: CreateFeaturePolygonRequest,
+    session: AsyncSession = Depends(get_session),
+) -> dict[str, Any]:
+    async with session.begin():
+        geom_expr = get_geom_expr(request)
+        stmt = (
+            update(FeaturePolygon)
+            .where(FeaturePolygon.id == id)
+            .values(geom=geom_expr, properties=request.properties)
+            .returning(
+                FeaturePolygon.id,
+                func.ST_AsGeoJSON(FeaturePolygon.geom).label("geometry"),
+                FeaturePolygon.properties,
+            )
+        )
+        res = await session.execute(stmt)
+        row = res.one_or_none()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Полигон не найден")
+        return {
+            "id": str(row.id),
+            "geometry": json.loads(row.geometry),
+            "properties": row.properties,
+        }
+
+
 def get_geom_expr(request):
     geojson_str = json.dumps(request.geometry.model_dump())
     geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), 4326)
