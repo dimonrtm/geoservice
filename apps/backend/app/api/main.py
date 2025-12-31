@@ -10,7 +10,7 @@ import uuid
 from uuid import UUID
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy import text, func, insert, select
+from sqlalchemy import text, func, insert, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_session, engine
 from app.core.schemas.create_feature_point_request import CreateFeaturePointRequest
@@ -75,7 +75,7 @@ async def get_point(
         res = await session.execute(stmt)
         row = res.one_or_none()
         if row is None:
-            raise HTTPException(status_code=404, detal="Точка не найдена")
+            raise HTTPException(status_code=404, detail="Точка не найдена")
         return {
             "id": str(row.id),
             "geometry": json.loads(row.geometry),
@@ -85,3 +85,18 @@ async def get_point(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail="БД не доступна") from e
+
+
+@app.delete("/points/{id}")
+async def delete_point(
+    id: UUID, session: AsyncSession = Depends(get_session)
+) -> dict[str, Any]:
+    async with session.begin():
+        stmt = (
+            delete(FeaturePoint).where(FeaturePoint.id == id).returning(FeaturePoint.id)
+        )
+        res = await session.execute(stmt)
+        row = res.one_or_none()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Точка не найдена")
+        return {"id": str(row.id)}
