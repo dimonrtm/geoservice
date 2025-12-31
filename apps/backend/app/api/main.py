@@ -14,7 +14,8 @@ from sqlalchemy import text, func, insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_session, engine
 from app.core.schemas.create_feature_point_request import CreateFeaturePointRequest
-from app.db.models import FeaturePoint
+from app.core.schemas.create_feature_polygon_request import CreateFeaturePolygonRequest
+from app.db.models import FeaturePoint, FeaturePolygon
 from typing import Any
 
 
@@ -122,6 +123,30 @@ async def update_point(
         row = res.one_or_none()
         if row is None:
             raise HTTPException(status_code=404, detail="Точка не найдена")
+        return {
+            "id": str(row.id),
+            "geometry": json.loads(row.geometry),
+            "properties": row.properties,
+        }
+
+
+@app.post("/polygons")
+async def add_polygon(
+    request: CreateFeaturePolygonRequest, session: AsyncSession = Depends(get_session)
+):
+    async with session.begin():
+        geom_expr = get_geom_expr(request)
+        stmt = (
+            insert(FeaturePolygon)
+            .values(id=uuid.uuid4(), geom=geom_expr, properties=request.properties)
+            .returning(
+                FeaturePolygon.id,
+                func.ST_AsGeoJSON(FeaturePolygon.geom).label("geometry"),
+                FeaturePolygon.properties,
+            )
+        )
+        res = await session.execute(stmt)
+        row = res.one()
         return {
             "id": str(row.id),
             "geometry": json.loads(row.geometry),

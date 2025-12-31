@@ -7,7 +7,7 @@ Created on Tue Dec 30 20:55:34 2025
 
 from pydantic import BaseModel, Field
 from typing import Any
-from geojson_polygon import GeoJSONPolygon
+from .geojson_polygon import GeoJSONPolygon
 
 
 class CreateFeaturePolygonRequest(BaseModel):
