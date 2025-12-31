@@ -179,6 +179,23 @@ async def get_polygon(
         raise HTTPException(status_code=500, detail="БД недоступна") from e
 
 
+@app.delete("/polygons/{id}")
+async def delete_polygon(
+    id: UUID, session: AsyncSession = Depends(get_session)
+) -> dict[str, Any]:
+    async with session.begin():
+        stmt = (
+            delete(FeaturePolygon)
+            .where(FeaturePolygon.id == id)
+            .returning(FeaturePolygon.id)
+        )
+        res = await session.execute(stmt)
+        row = res.one_or_none()
+        if row is None:
+            raise HTTPException(status_code=404, detail="Полигон не найден")
+        return {"id": str(row.id)}
+
+
 def get_geom_expr(request):
     geojson_str = json.dumps(request.geometry.model_dump())
     geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), 4326)
