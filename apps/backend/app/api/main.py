@@ -17,6 +17,7 @@ from app.core.schemas.create_feature_point_request import CreateFeaturePointRequ
 from app.core.schemas.create_feature_polygon_request import CreateFeaturePolygonRequest
 from app.db.models import FeaturePoint, FeaturePolygon
 from typing import Any
+from pydantic import BaseModel
 
 
 @asynccontextmanager
@@ -42,13 +43,13 @@ async def add_point(
     request: CreateFeaturePointRequest, session: AsyncSession = Depends(get_session)
 ) -> dict[str, Any]:
     async with session.begin():
-        geom_expr = get_geom_expr(request)
+        geom_expr = geom_from_geojson(request.geometry)
         stmt = (
             insert(FeaturePoint)
             .values(id=uuid.uuid4(), geom=geom_expr, properties=request.properties)
             .returning(
                 FeaturePoint.id,
-                func.ST_ASGeoJSON(FeaturePoint.geom).label("geometry"),
+                func.ST_AsGeoJSON(FeaturePoint.geom).label("geometry"),
                 FeaturePoint.properties,
             )
         )
@@ -108,7 +109,7 @@ async def update_point(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
     async with session.begin():
-        geom_expr = get_geom_expr(request)
+        geom_expr = geom_from_geojson(request.geometry)
         stmt = (
             update(FeaturePoint)
             .values(geom=geom_expr, properties=request.properties)
@@ -135,7 +136,7 @@ async def add_polygon(
     request: CreateFeaturePolygonRequest, session: AsyncSession = Depends(get_session)
 ) -> dict[str, Any]:
     async with session.begin():
-        geom_expr = get_geom_expr(request)
+        geom_expr = geom_from_geojson(request.geometry)
         stmt = (
             insert(FeaturePolygon)
             .values(id=uuid.uuid4(), geom=geom_expr, properties=request.properties)
@@ -203,7 +204,7 @@ async def update_polygon(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
     async with session.begin():
-        geom_expr = get_geom_expr(request)
+        geom_expr = geom_from_geojson(request.geometry)
         stmt = (
             update(FeaturePolygon)
             .where(FeaturePolygon.id == id)
@@ -225,7 +226,7 @@ async def update_polygon(
         }
 
 
-def get_geom_expr(request):
-    geojson_str = json.dumps(request.geometry.model_dump())
-    geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), 4326)
+def geom_from_geojson(geometry: BaseModel, srid: int = 4326) -> Any:
+    geojson_str = json.dumps(geometry.model_dump())
+    geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), srid)
     return geom_expr
