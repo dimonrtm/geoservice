@@ -7,9 +7,10 @@ Created on Mon Dec 29 20:31:28 2025
 
 import json
 import uuid
+from uuid import UUID
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy import text, func, insert
+from sqlalchemy import text, func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_session, engine
 from app.core.schemas.create_feature_point_request import CreateFeaturePointRequest
@@ -59,3 +60,28 @@ async def add_point(
             "geometry": json.loads(row.geometry),
             "properties": row.properties,
         }
+
+
+@app.get("/points/{id}")
+async def get_point(
+    id: UUID, session: AsyncSession = Depends(get_session)
+) -> dict[str, Any]:
+    try:
+        stmt = select(
+            FeaturePoint.id,
+            func.ST_AsGeoJSON(FeaturePoint.geom).label("geometry"),
+            FeaturePoint.properties,
+        ).where(FeaturePoint.id == id)
+        res = await session.execute(stmt)
+        row = res.one_or_none()
+        if row is None:
+            raise HTTPException(status_code=404, detal="Точка не найдена")
+        return {
+            "id": str(row.id),
+            "geometry": json.loads(row.geometry),
+            "properties": row.properties,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="БД не доступна") from e
