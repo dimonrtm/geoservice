@@ -41,9 +41,7 @@ async def add_point(
     request: CreateFeaturePointRequest, session: AsyncSession = Depends(get_session)
 ) -> dict[str, Any]:
     async with session.begin():
-        geojson_str = json.dumps(request.geometry.model_dump())
-        geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), 4326)
-
+        geom_expr = get_geom_expr(request)
         stmt = (
             insert(FeaturePoint)
             .values(id=uuid.uuid4(), geom=geom_expr, properties=request.properties)
@@ -109,8 +107,7 @@ async def update_point(
     session: AsyncSession = Depends(get_session),
 ) -> dict[str, Any]:
     async with session.begin():
-        geojson_str = json.dumps(request.geometry.model_dump())
-        geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), 4326)
+        geom_expr = get_geom_expr(request)
         stmt = (
             update(FeaturePoint)
             .values(geom=geom_expr, properties=request.properties)
@@ -130,3 +127,9 @@ async def update_point(
             "geometry": json.loads(row.geometry),
             "properties": row.properties,
         }
+
+
+def get_geom_expr(request):
+    geojson_str = json.dumps(request.geometry.model_dump())
+    geom_expr = func.ST_SetSRID(func.ST_GeomFromGeoJSON(geojson_str), 4326)
+    return geom_expr
