@@ -6,6 +6,7 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-json
+        exclude: ^apps/frontend/tsconfig\.(app|node)\.json$
       - id: check-merge-conflict
       - id: check-added-large-files
         args: ["--maxkb=5120"]
