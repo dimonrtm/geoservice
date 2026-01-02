@@ -9,7 +9,7 @@ import json
 import uuid
 from uuid import UUID
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, File, Form
 from sqlalchemy import text, func, insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_session, engine
@@ -224,6 +224,72 @@ async def update_polygon(
             "geometry": json.loads(row.geometry),
             "properties": row.properties,
         }
+
+
+@app.post("/api/geojson/import")
+async def upload_geojson(
+    file: UploadFile = File(...), srid: int = Form(4326)
+) -> dict[str, Any]:
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Имя файла пустое")
+    if (not file.filename.lower().endswith(".geojson")) and (
+        not file.filename.lower().endswith(".json")
+    ):
+        raise HTTPException(
+            status_code=400, detail="Файл должен быть либо Geojson либо Json"
+        )
+    raw = await file.read()
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Файл не является валидным GeoJson")
+
+    typ = data.get("type")
+    if typ not in ["Feature", "FeatureCollection"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Поле type Должно быть либо Feature либо FeatureCollection",
+        )
+
+    if typ == "FeatureCollection":
+        features = data.get("features")
+        if features is not list:
+            raise HTTPException(
+                status_code=400, detail="Поле features должно быть списком элементов"
+            )
+        if len(features) == 0:
+            raise HTTPException(status_code=400, detail="Поле features пустой список")
+    if typ == "Feature":
+        geometry = data.get("geometry")
+        if geometry is None:
+            raise HTTPException(
+                status_code=400, detail="Не корректная геометрия у Feature"
+            )
+        if geometry is not dict:
+            raise HTTPException(
+                status_code=400, detail="Некорректная геометрия у Feature"
+            )
+        geom_type = geometry.get("type")
+        if geom_type is None or geom_type == "":
+            raise HTTPException(status_code=400, detail="Тип геометрии не указан")
+        coordinates = geometry.get("coordinates")
+        if coordinates is None or coordinates == []:
+            raise HTTPException(
+                status_code=400, detail="Координаты геометрии не указаны"
+            )
+
+    result = {
+        "status": "ok",
+        "filename": file.filename,
+        "rootType": data.get("type"),
+        "srid": srid,
+    }
+    if typ == "FeatureCollection":
+        result["count"] = len(features)
+    else:
+        result["count"] = 1
+
+    return result
 
 
 def geom_from_geojson(geometry: BaseModel, srid: int = 4326) -> Any:
