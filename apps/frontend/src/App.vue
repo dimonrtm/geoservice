@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import FileLoader from './components/FileLoader.vue'
 import Map from './components/Map.vue'
 import { ref } from "vue";
 const isOpen = ref(true);
@@ -16,6 +16,7 @@ const isOpen = ref(true);
     </a>
   </div>
   <Map v-if="isOpen"/>
+  <FileLoader/>
 </template>
 
 <style scoped>
