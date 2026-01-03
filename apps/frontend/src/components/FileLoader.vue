@@ -1,7 +1,7 @@
 <template>
 <div>
 <input type="file" accept=".geojson,.json,application/geo+json" @change = "onFileChange"/>
-<div>{{ labelText }}</div>
+<div style="white-space: pre-wrap;">{{ labelText }}</div>
 <button type="button" @click="uploadTo" :disabled="!selectedFile || isUploading">
       Отправить
 </button>
@@ -82,7 +82,11 @@ async function uploadTo(){
         }
         return;
        }
-       labelText.value = "Файл успешно загружен";
+       const data = await res.json();
+       const idsText = Array.isArray(data.ids) ? data.ids.join(", ") : String(data.ids);
+       labelText.value = "Файл успешно загружен\n" +
+       "Название файла\t Количество отправленных объектов\t Количество сохраненных объектов\t Id объектов\n" +
+       `${data.filename}\t${data.inputCount}\t${data.savedCount}\t${idsText}`;
   }
   catch(err){
     if(err instanceof DOMException && err.name ==="AbortError"){
