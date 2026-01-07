@@ -9,7 +9,7 @@
     "preview": "vite preview",
 	"lint": "eslint .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "maplibre-gl": "^5.15.0",
