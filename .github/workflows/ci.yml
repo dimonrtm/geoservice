@@ -102,18 +102,7 @@ jobs:
 
       - name: Install deps
         working-directory: apps/frontend
-        run: |
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm i --frozen-lockfile
-          elif [ -f yarn.lock ]; then
-            corepack enable
-            yarn install --frozen-lockfile
-          elif [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm i
-          fi
+        run: npm ci
 
       - name: Prettier check
         working-directory: apps/frontend
