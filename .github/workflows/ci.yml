@@ -13,8 +13,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend dev image (with ruff/black/pytest)
-        run: docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build backend dev image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend/app
+          target: dev
+          tags: geoservice-backend:dev
+          load: true
+          cache-from: type=gha,scope=backend-dev
+          cache-to: type=gha,mode=max,scope=backend-dev
 
       - name: Black check
         run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "black --check ."
@@ -24,8 +33,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend dev image (with ruff/black/pytest)
-        run: docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build backend dev image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend/app
+          target: dev
+          tags: geoservice-backend:dev
+          load: true
+          cache-from: type=gha,scope=backend-dev
+          cache-to: type=gha,mode=max,scope=backend-dev
 
       - name: Ruff check
         run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "ruff check ."
@@ -35,8 +53,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend dev image (with ruff/black/pytest)
-        run: docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build backend dev image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend/app
+          target: dev
+          tags: geoservice-backend:dev
+          load: true
+          cache-from: type=gha,scope=backend-dev
+          cache-to: type=gha,mode=max,scope=backend-dev
 
       - name: Pytest
         run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "pytest"
@@ -47,8 +74,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend prod image
-        run: docker build --target prod -t geoservice-backend:prod ./apps/backend/app
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build backend prod image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/backend/app
+          target: prod
+          tags: geoservice-backend:prod
+          load: true
+          cache-from: type=gha,scope=backend-prod
+          cache-to: type=gha,mode=max,scope=backend-prod
 
   smoke_test:
     runs-on: ubuntu-latest
@@ -99,6 +135,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
 
       - name: Install deps
         working-directory: apps/frontend
@@ -106,10 +144,7 @@ jobs:
 
       - name: Prettier check
         working-directory: apps/frontend
-        run: |
-          if [ -f pnpm-lock.yaml ]; then pnpm run format:check;
-          elif [ -f yarn.lock ]; then yarn format:check;
-          else npm run format:check; fi
+        run: npm run format:check
 
   frontend_lint:
     runs-on: ubuntu-latest
@@ -119,6 +154,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
 
       - name: Install deps
         working-directory: apps/frontend
@@ -126,7 +163,8 @@ jobs:
 
       - name: ESLint
         working-directory: apps/frontend
-        run: npm run lint;
+        run: npm run lint
+
   frontend_typecheck:
     runs-on: ubuntu-latest
     steps:
@@ -135,28 +173,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
 
       - name: Install deps
         working-directory: apps/frontend
-        run: |
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm i --frozen-lockfile
-          elif [ -f yarn.lock ]; then
-            corepack enable
-            yarn install --frozen-lockfile
-          elif [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm i
-          fi
+        run: npm ci
 
       - name: Typecheck
         working-directory: apps/frontend
-        run: |
-          if [ -f pnpm-lock.yaml ]; then pnpm run typecheck;
-          elif [ -f yarn.lock ]; then yarn typecheck;
-          else npm run typecheck; fi
+        run: npm run typecheck
 
   frontend_build:
     runs-on: ubuntu-latest
@@ -167,25 +193,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: apps/frontend/package-lock.json
 
       - name: Install deps
         working-directory: apps/frontend
-        run: |
-          if [ -f pnpm-lock.yaml ]; then
-            corepack enable
-            pnpm i --frozen-lockfile
-          elif [ -f yarn.lock ]; then
-            corepack enable
-            yarn install --frozen-lockfile
-          elif [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm i
-          fi
+        run: npm ci
 
       - name: Build
         working-directory: apps/frontend
-        run: |
-          if [ -f pnpm-lock.yaml ]; then pnpm run build;
-          elif [ -f yarn.lock ]; then yarn build;
-          else npm run build; fi
+        run: npm run build
