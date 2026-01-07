@@ -38,5 +38,5 @@ export default tseslint.config(
   },
 
   // ВАЖНО: prettier-конфиг ставим ПОСЛЕДНИМ, чтобы выключить конфликтующие правила
-  eslintConfigPrettier
+  eslintConfigPrettier,
 );
