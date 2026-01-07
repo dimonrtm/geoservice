@@ -8,8 +8,8 @@
     <div style="white-space: pre-wrap">{{ labelText }}</div>
     <button
       type="button"
-      @click="uploadTo"
       :disabled="!selectedFile || isUploading"
+      @click="uploadTo"
     >
       Отправить
     </button>
