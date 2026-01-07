@@ -1,0 +1,86 @@
+stages:
+  - quality
+  - test
+  - build
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  COMPOSE_DOCKER_CLI_BUILD: "1"
+  DOCKER_BUILDKIT: "1"
+
+# Если у тебя GitLab Runner с Docker-in-Docker
+default:
+  image: docker:27
+  services:
+    - name: docker:27-dind
+      command: ["--tls=false"]
+  before_script:
+    - docker info
+    - docker version
+
+backend_format:
+  stage: quality
+  script:
+    - docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+    - docker run --rm --entrypoint bash geoservice-backend:dev -lc "black --check ."
+  rules:
+    - if: $CI_PIPELINE_SOURCE
+
+backend_lint:
+  stage: quality
+  script:
+    - docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+    - docker run --rm --entrypoint bash geoservice-backend:dev -lc "ruff check ."
+  rules:
+    - if: $CI_PIPELINE_SOURCE
+
+backend_test:
+  stage: test
+  script:
+    - docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+    - docker run --rm --entrypoint bash geoservice-backend:dev -lc "pytest"
+  rules:
+    - if: $CI_PIPELINE_SOURCE
+
+backend_build_prod:
+  stage: build
+  script:
+    - docker build --target prod -t geoservice-backend:prod ./apps/backend/app
+  rules:
+    - if: $CI_PIPELINE_SOURCE
+
+smoke_test:
+  stage: test
+  variables:
+    COMPOSE_PROJECT_NAME: "ci"
+  script:
+    - docker compose version
+    - docker compose -f infra/docker-compose.yml up -d --build postgis backend
+    - docker compose -f infra/docker-compose.yml ps
+
+    # Ждём health backend (до ~60 секунд)
+    - |
+      CID="$(docker compose -f infra/docker-compose.yml ps -q backend)"
+      echo "backend container id: $CID"
+      for i in $(seq 1 30); do
+        STATUS="$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || echo unknown)"
+        echo "wait #$i: backend health = $STATUS"
+        if [ "$STATUS" = "healthy" ]; then break; fi
+        sleep 2
+      done
+      STATUS="$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || echo unknown)"
+      if [ "$STATUS" != "healthy" ]; then
+        echo "Backend did not become healthy"
+        docker compose -f infra/docker-compose.yml ps
+        docker compose -f infra/docker-compose.yml logs backend --tail=200
+        exit 1
+      fi
+
+    # Дёргаем /health внутри контейнера (порты наружу в CI не нужны)
+    - docker compose -f infra/docker-compose.yml exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2); print('health ok')"
+
+  after_script:
+    - docker compose -f infra/docker-compose.yml down -v || true
+  rules:
+    - if: $CI_PIPELINE_SOURCE

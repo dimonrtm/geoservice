@@ -9,7 +9,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.lifespan import lifespan
 
-
 app = FastAPI(lifespan=lifespan)
 
 origins = [

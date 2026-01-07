@@ -299,10 +299,10 @@ function filterValidFeatures(features: unknown[]): GeoJSON.Feature[]{
   return resultFeatures;
 }
 
-function clearFeatures(): void{
+/*function clearFeatures(): void{
   updateFeatures({type: "FeatureCollection", features: []}, "features");
   updateFeatures({type: "FeatureCollection", features: []}, "points");
-}
+}*/
 
 function onPointsMove(e: maplibregl.MapLayerMouseEvent): void{
   if(!map){
