@@ -12,7 +12,7 @@ services:
       - geo_pgdata:/var/lib/postgresql/data
       - ./docker/postgis/init:/docker-entrypoint-initdb.d/
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d geo"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -26,7 +26,48 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: ${DATABASE_URL}
-    command: ["bash", "-lc", "alembic upgrade head"]
+    command: ["bash", "-lc", "set -euo pipefail; alembic upgrade head"]
     restart: no
+    profiles: ["migrate"]
+  backend:
+    build:
+      context: ../apps/backend/app/
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      HOST: 0.0.0.0
+      PORT: 8000
+    command: ["bash", "-lc", "set -euo pipefail; alembic upgrade head; uvicorn main:app --host 0.0.0.0 --port 8000"]
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)\""]
+      interval: 20s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: Dockerfile
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const http=require('http');const req=http.get('http://127.0.0.1:5173',res=>process.exit(res.statusCode>=200&&res.statusCode<400?0:1));req.on('error',()=>process.exit(1));\""]
+      interval: 20s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
+    profiles: ["dev"]
 volumes:
   geo_pgdata:
