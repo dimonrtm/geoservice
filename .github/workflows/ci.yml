@@ -1,0 +1,217 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend_format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend dev image (with ruff/black/pytest)
+        run: docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+
+      - name: Black check
+        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "black --check ."
+
+  backend_lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend dev image (with ruff/black/pytest)
+        run: docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+
+      - name: Ruff check
+        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "ruff check ."
+
+  backend_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend dev image (with ruff/black/pytest)
+        run: docker build --target dev -t geoservice-backend:dev ./apps/backend/app
+
+      - name: Pytest
+        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "pytest"
+
+  backend_build_prod:
+    runs-on: ubuntu-latest
+    needs: [backend_format, backend_lint, backend_test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend prod image
+        run: docker build --target prod -t geoservice-backend:prod ./apps/backend/app
+
+  smoke_test:
+    runs-on: ubuntu-latest
+    needs: [backend_test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start postgis + backend (compose)
+        working-directory: infra
+        run: |
+          docker compose -f docker-compose.yml up -d --build postgis backend
+          docker compose -f docker-compose.yml ps
+
+      - name: Wait for backend health
+        working-directory: infra
+        run: |
+          CID="$(docker compose -f docker-compose.yml ps -q backend)"
+          echo "backend container id: $CID"
+          for i in $(seq 1 30); do
+            STATUS="$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || echo unknown)"
+            echo "wait #$i: backend health = $STATUS"
+            if [ "$STATUS" = "healthy" ]; then break; fi
+            sleep 2
+          done
+          STATUS="$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || echo unknown)"
+          if [ "$STATUS" != "healthy" ]; then
+            echo "Backend did not become healthy"
+            docker compose -f docker-compose.yml ps
+            docker compose -f docker-compose.yml logs backend --tail=200
+            exit 1
+          fi
+
+      - name: GET /health inside container
+        working-directory: infra
+        run: |
+          docker compose -f docker-compose.yml exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2); print('health ok')"
+
+      - name: Teardown
+        if: always()
+        working-directory: infra
+        run: docker compose -f docker-compose.yml down -v
+
+  frontend_format_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm i --frozen-lockfile
+          elif [ -f yarn.lock ]; then
+            corepack enable
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm i
+          fi
+
+      - name: Prettier check
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then pnpm run format:check;
+          elif [ -f yarn.lock ]; then yarn format:check;
+          else npm run format:check; fi
+
+  frontend_lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm i --frozen-lockfile
+          elif [ -f yarn.lock ]; then
+            corepack enable
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm i
+          fi
+
+      - name: ESLint
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then pnpm run lint;
+          elif [ -f yarn.lock ]; then yarn lint;
+          else npm run lint; fi
+
+  frontend_typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm i --frozen-lockfile
+          elif [ -f yarn.lock ]; then
+            corepack enable
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm i
+          fi
+
+      - name: Typecheck
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then pnpm run typecheck;
+          elif [ -f yarn.lock ]; then yarn typecheck;
+          else npm run typecheck; fi
+
+  frontend_build:
+    runs-on: ubuntu-latest
+    needs: [frontend_format_check, frontend_lint, frontend_typecheck]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm i --frozen-lockfile
+          elif [ -f yarn.lock ]; then
+            corepack enable
+            yarn install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm i
+          fi
+
+      - name: Build
+        working-directory: apps/frontend
+        run: |
+          if [ -f pnpm-lock.yaml ]; then pnpm run build;
+          elif [ -f yarn.lock ]; then yarn build;
+          else npm run build; fi
