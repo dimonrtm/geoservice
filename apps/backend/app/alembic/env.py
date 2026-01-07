@@ -16,7 +16,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # --- IMPORT MODELS HERE (важно для autogenerate) ---
-from db.base import Base  # noqa: E402
+from models.base import Base  # noqa: E402
 
 target_metadata = Base.metadata
 

@@ -13,10 +13,10 @@ from fastapi import Depends, FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text, func, insert, select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.db import get_session, engine
-from app.core.schemas.create_feature_point_request import CreateFeaturePointRequest
-from app.core.schemas.create_feature_polygon_request import CreateFeaturePolygonRequest
-from app.db.models import FeaturePoint, FeaturePolygon
+from app.db.session import get_session, engine
+from app.schemas.create_feature_point_request import CreateFeaturePointRequest
+from app.schemas.create_feature_polygon_request import CreateFeaturePolygonRequest
+from app.models.models import FeaturePoint, FeaturePolygon
 from typing import Any
 
 
