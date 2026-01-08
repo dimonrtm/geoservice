@@ -24,7 +24,8 @@ jobs:
           load: true
           cache-from: type=gha,scope=backend-dev
           cache-to: type=gha,mode=max,scope=backend-dev
-
+      - name: Black version
+        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "black --version"
       - name: Black check
         run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "black --check ."
 
