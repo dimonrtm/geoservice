@@ -10,8 +10,3 @@ target-version = ["py312"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-
-[project.optional-dependencies]
-dev = [
-  "black==24.8.0",
-]
