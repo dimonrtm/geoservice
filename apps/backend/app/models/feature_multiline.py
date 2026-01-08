@@ -18,9 +18,7 @@ from .base import Base
 
 class FeatureMultiLine(Base):
     __tablename__ = "feature_multilines"
-    id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     geom: Mapped[object] = mapped_column(
         Geometry(geometry_type="MultiLineString", srid=4326), nullable=False
     )

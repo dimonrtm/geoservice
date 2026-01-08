@@ -52,9 +52,7 @@ class FeatureService:
         self, layer_id: UUID, bbox, limit_value: int | None
     ) -> FeatureCollectionOut:
         limit_value = self.normalize_limit(limit_value)
-        rows = await self.layer_repository.list_features_bbox(
-            layer_id, bbox, limit_value
-        )
+        rows = await self.layer_repository.list_features_bbox(layer_id, bbox, limit_value)
         return self.to_feature_collection_out(rows)
 
     def normalize_limit(self, limit_value: int | None) -> int:

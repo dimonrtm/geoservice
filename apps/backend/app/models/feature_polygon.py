@@ -18,9 +18,7 @@ from .base import Base
 
 class FeaturePolygon(Base):
     __tablename__ = "feature_polygons"
-    id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     geom: Mapped[object] = mapped_column(
         Geometry(geometry_type="Polygon", srid=4326), nullable=False
     )

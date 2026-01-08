@@ -18,12 +18,8 @@ from .base import Base
 
 class FeaturePoint(Base):
     __tablename__ = "feature_points"
-    id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
-    geom: Mapped[object] = mapped_column(
-        Geometry(geometry_type="Point", srid=4326), nullable=False
-    )
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    geom: Mapped[object] = mapped_column(Geometry(geometry_type="Point", srid=4326), nullable=False)
     properties: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
     version: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("1"), default=1

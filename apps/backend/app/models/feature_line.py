@@ -18,9 +18,7 @@ from .base import Base
 
 class FeatureLine(Base):
     __tablename__ = "feature_lines"
-    id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     geom: Mapped[object] = mapped_column(
         Geometry(geometry_type="LineString", srid=4326), nullable=False
     )

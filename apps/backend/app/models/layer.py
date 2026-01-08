@@ -15,9 +15,7 @@ from .base import Base
 
 class Layer(Base):
     __tablename__ = "layers"
-    id: Mapped[UUID] = mapped_column(
-        PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
-    )
+    id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     geometry_type: Mapped[str] = mapped_column(String(200), nullable=False)
