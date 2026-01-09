@@ -39,7 +39,7 @@ JWT_ALG = os.getenv("JWT_ALG", "HS256")
 ACCESS_TOKEN_TTL_MIN = env_int("ACCESS_TOKEN_TTL_MIN", 30)
 
 
-bearer = HTTPBearer(auto_error=True)
+bearer = HTTPBearer(auto_error=False)
 auth_router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
