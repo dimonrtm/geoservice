@@ -8,6 +8,8 @@ Created on Mon Dec 29 20:31:28 2025
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.lifespan import lifespan
+from api.auth import auth_router
+from api.secure_router import secure_router
 
 app = FastAPI(lifespan=lifespan)
 
@@ -23,6 +25,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router)
+app.include_router(secure_router)
 
 
 @app.get("/health")

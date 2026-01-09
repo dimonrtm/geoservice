@@ -34,6 +34,10 @@ services:
       target: dev
     environment:
       DATABASE_URL: ${DATABASE_URL-postgresql+asyncpg://postgres:postgres@postgis:5432/geo}
+      DEV_MODE: "${DEV_MODE-true}"
+      JWT_SECRET: "${JWT_SECRET-CHANGE_ME_IN_ENV}"
+      JWT_ALG: "${JWT_ALG-HS256}"
+      ACCESS_TOKEN_TTL_MIN: "${ACCESS_TOKEN_TTL_MIN-30}"
       HOST: 0.0.0.0
       PORT: 8000
     command: ["bash", "-lc", "set -euo pipefail; alembic upgrade head; uvicorn main:app --host 0.0.0.0 --port 8000"]

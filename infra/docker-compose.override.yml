@@ -36,6 +36,10 @@ services:
       target: dev
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      DEV_MODE: ${DEV_MODE}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ALG: ${JWT_ALG}
+      ACCESS_TOKEN_TTL_MIN: ${ACCESS_TOKEN_TTL_MIN}
       HOST: 0.0.0.0
       PORT: 8000
     command: ["bash", "-lc", "set -euo pipefail; alembic upgrade head; uvicorn main:app --host 0.0.0.0 --port 8000"]

@@ -21,3 +21,6 @@ shapely==2.0.6
 # --- Useful utils (optional but common) ---
 httpx==0.28.1
 orjson==3.10.12
+
+# --- Auth ---
+python-jose[cryptography]==3.5.0
