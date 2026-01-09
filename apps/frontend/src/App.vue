@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import FileLoader from "./components/FileLoader.vue";
+import CheckAuthComponent from "./components/CheckAuthComponent.vue";
 </script>
 
 <template>
+  <CheckAuthComponent />
   <FileLoader />
 </template>
 
