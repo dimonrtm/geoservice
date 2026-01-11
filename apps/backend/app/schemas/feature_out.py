@@ -13,7 +13,7 @@ from typing import Literal, Any
 class FeatureOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
     id: UUID
-    type: Literal["Feature"]
+    type: Literal["Feature"] = "Feature"
     version: int
     geometry: dict[str, Any]
     properties: dict[str, Any]

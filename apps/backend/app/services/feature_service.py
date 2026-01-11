@@ -11,7 +11,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
 from schemas.feature_out import FeatureOut
 from schemas.feature_collection_out import FeatureCollectionOut
+from schemas.create_feature_in import CreateFeatureIn
 from repositories.layer_repository import LayerRepository
+from models.layer import Layer
+from domain.exceptions.layer_not_found_exception import LayerNotFoundException
 
 
 class FeatureService:
@@ -26,24 +29,29 @@ class FeatureService:
         properties: dict[str, Any],
         geometry_json: str,
     ) -> FeatureOut:
-        return FeatureOut(
-            id=feature_id,
-            version=version,
-            properties=properties,
-            geometry=json.loads(geometry_json),
-        )
+        if not geometry_json:
+            raise ValueError(f"У Feature с идентифкатором {feature_id} пустая геометрия")
+        try:
+            return FeatureOut(
+                id=feature_id,
+                version=version,
+                properties=properties,
+                geometry=json.loads(geometry_json),
+            )
+        except (json.JSONDecodeError, TypeError) as e:
+            raise ValueError(
+                f"У Feature с идентификатором {feature_id} невалидный JSON геометрии: {e}"
+            )
 
-    def to_feature_collection_out(
-        self, rows: list[tuple[UUID, int, dict[str, Any], str]]
-    ) -> FeatureCollectionOut:
+    def to_feature_collection_out(self, rows) -> FeatureCollectionOut:
         features = []
-        for feature_id, version, properties, geometry_json in rows:
+        for row in rows:
             features.append(
                 self.to_feature_out(
-                    id=feature_id,
-                    version=version,
-                    properties=properties,
-                    geometry=json.loads(geometry_json),
+                    feature_id=row.id,
+                    version=row.version,
+                    properties=row.properties,
+                    geometry_json=row.geometry_json,
                 )
             )
         return FeatureCollectionOut(features=features)
@@ -52,8 +60,28 @@ class FeatureService:
         self, layer_id: UUID, bbox, limit_value: int | None
     ) -> FeatureCollectionOut:
         limit_value = self.normalize_limit(limit_value)
-        rows = await self.layer_repository.list_features_bbox(layer_id, bbox, limit_value)
+        layer = await self.layer_repository.get_layer_by_id(layer_id)
+        if layer is None:
+            raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
+        rows = await self.layer_repository.list_features_bbox(layer, bbox, limit_value)
         return self.to_feature_collection_out(rows)
+
+    async def create_feature(self, layer_id: UUID, request: CreateFeatureIn) -> FeatureOut:
+        async with self.session.begin():
+            layer = await self.layer_repository.get_layer_by_id(layer_id)
+            if layer is None:
+                raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
+            if not self.check_geometry_type_match(request, layer):
+                raise ValueError("Тип создаваемой геометрии не соответствует типу геометрии слоя")
+            row = await self.layer_repository.create_feature(
+                layer, request.geometry, request.properties
+            )
+            return self.to_feature_out(
+                feature_id=row.id,
+                version=row.version,
+                properties=row.properties,
+                geometry_json=row.geometry_json,
+            )
 
     def normalize_limit(self, limit_value: int | None) -> int:
         if limit_value is None:
@@ -63,3 +91,8 @@ class FeatureService:
         if limit_value > 5000:
             limit_value = 5000
         return limit_value
+
+    def check_geometry_type_match(self, request: CreateFeatureIn, layer: Layer) -> bool:
+        geojson_type = request.geometry.get("type")
+        expected = layer.geometry_type
+        return geojson_type == expected
