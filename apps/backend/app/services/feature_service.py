@@ -12,9 +12,12 @@ from typing import Any
 from schemas.feature_out import FeatureOut
 from schemas.feature_collection_out import FeatureCollectionOut
 from schemas.create_feature_in import CreateFeatureIn
+from schemas.patch_feature_request import PatchFeatureRequest
 from repositories.layer_repository import LayerRepository
 from models.layer import Layer
 from domain.exceptions.layer_not_found_exception import LayerNotFoundException
+from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
+from domain.exceptions.version_mismatch_exception import VersionMismatchException
 
 
 class FeatureService:
@@ -76,6 +79,38 @@ class FeatureService:
             row = await self.layer_repository.create_feature(
                 layer, request.geometry, request.properties
             )
+            return self.to_feature_out(
+                feature_id=row.id,
+                version=row.version,
+                properties=row.properties,
+                geometry_json=row.geometry_json,
+            )
+
+    async def update_feature(
+        self, layer_id: UUID, feature_id: UUID, request: PatchFeatureRequest
+    ) -> FeatureOut:
+        async with self.session.begin():
+            layer = await self.layer_repository.get_layer_by_id(layer_id)
+            if layer is None:
+                raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
+            if request.geometry and not self.check_geometry_type_match(request, layer):
+                raise ValueError("Тип обновляемой геометрии не соответствует типу геометрии слоя")
+            (row, model_type) = await self.layer_repository.update_feature_if_version_matches(
+                layer, feature_id, request.geometry, request.properties, request.version
+            )
+            if row is None:
+                current = await self.layer_repository.get_current_version(model_type, feature_id)
+                if current is None:
+                    raise FeatureNotFoundException(
+                        f"Feature с идентификатором {feature_id} не найдена"
+                    )
+                else:
+                    raise VersionMismatchException(
+                        feature_id=feature_id,
+                        request_version=request.version,
+                        current_version=current.version,
+                        message=f"Ожидалась версия {current.version}, а получили {request.version}. Перезагрузите фичу и отредактируйте ее снова",
+                    )
             return self.to_feature_out(
                 feature_id=row.id,
                 version=row.version,

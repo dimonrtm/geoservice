@@ -5,7 +5,7 @@ Created on Tue Jan  6 19:47:19 2026
 @author: dimon
 """
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, model_validator, field_validator
 from typing import Any
 
 
@@ -20,3 +20,10 @@ class PatchFeatureRequest(BaseModel):
         if self.geometry is None and self.properties is None:
             raise ValueError("Должны быть предоставлены или геометрия или properties")
         return self
+
+    @field_validator("version")
+    @classmethod
+    def validate_version(cls, version: int) -> int:
+        if version < 1:
+            raise ValueError("Версия должна быть >= 1")
+        return version

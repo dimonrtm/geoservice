@@ -10,6 +10,7 @@ from fastapi.responses import Response
 from schemas.feature_collection_out import FeatureCollectionOut
 from schemas.feature_out import FeatureOut
 from schemas.create_feature_in import CreateFeatureIn
+from schemas.patch_feature_request import PatchFeatureRequest
 from .deps import get_feature_service
 from services.feature_service import FeatureService
 from domain.bbox import parse_bbox
@@ -30,11 +31,8 @@ async def get_layer_features_from_bbox(
     user=Depends(get_current_user),
 ) -> FeatureCollectionOut:
     if user.get("role") in ("viewer", "editor"):
-        try:
-            bb = parse_bbox(bbox)
-            return await feature_service.get_features_from_bbox(layer_id, bb, limit)
-        except ValueError as e:
-            raise HTTPException(status_code=422, detail=str(e))
+        bb = parse_bbox(bbox)
+        return await feature_service.get_features_from_bbox(layer_id, bb, limit)
     else:
         raise HTTPException(
             status_code=403,
@@ -54,9 +52,21 @@ async def create_feature(
     response: Response,
     feature_service: FeatureService = Depends(get_feature_service),
 ) -> FeatureOut:
-    try:
-        feature = await feature_service.create_feature(layer_id, request)
-        response.headers["Location"] = f"/api/v1/layers/{layer_id}/features/{feature.id}"
-        return feature
-    except ValueError as e:
-        raise HTTPException(status_code=422, detail=str(e))
+    feature = await feature_service.create_feature(layer_id, request)
+    response.headers["Location"] = f"/api/v1/layers/{layer_id}/features/{feature.id}"
+    return feature
+
+
+@layers_router.patch(
+    "/{layer_id}/features/{feature_id}",
+    dependencies=[Depends(require_editor)],
+    response_model=FeatureOut,
+)
+async def update_feature(
+    layer_id: UUID,
+    feature_id: UUID,
+    request: PatchFeatureRequest,
+    feature_service: FeatureService = Depends(get_feature_service),
+) -> FeatureOut:
+    feature = await feature_service.update_feature(layer_id, feature_id, request)
+    return feature
