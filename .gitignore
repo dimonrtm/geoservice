@@ -64,3 +64,6 @@ artifacts/
 
 # Windows device-name artifact
 nul
+
+#Python
+*.pyc
