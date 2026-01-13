@@ -13,6 +13,7 @@ from schemas.feature_out import FeatureOut
 from schemas.feature_collection_out import FeatureCollectionOut
 from schemas.create_feature_in import CreateFeatureIn
 from schemas.patch_feature_request import PatchFeatureRequest
+from schemas.delete_feature_request import DeleteFeatureRequest
 from repositories.layer_repository import LayerRepository
 from models.layer import Layer
 from domain.exceptions.layer_not_found_exception import LayerNotFoundException
@@ -99,24 +100,27 @@ class FeatureService:
                 layer, feature_id, request.geometry, request.properties, request.version
             )
             if row is None:
-                current = await self.layer_repository.get_current_version(model_type, feature_id)
-                if current is None:
-                    raise FeatureNotFoundException(
-                        f"Feature с идентификатором {feature_id} не найдена"
-                    )
-                else:
-                    raise VersionMismatchException(
-                        feature_id=feature_id,
-                        request_version=request.version,
-                        current_version=current.version,
-                        message=f"Ожидалась версия {current.version}, а получили {request.version}. Перезагрузите фичу и отредактируйте ее снова",
-                    )
+                await self.version_error_handler(feature_id, request.version, model_type)
             return self.to_feature_out(
                 feature_id=row.id,
                 version=row.version,
                 properties=row.properties,
                 geometry_json=row.geometry_json,
             )
+
+    async def delete_feature(
+        self, layer_id: UUID, feature_id: UUID, request: DeleteFeatureRequest
+    ) -> dict[str, Any]:
+        async with self.session.begin():
+            layer = await self.layer_repository.get_layer_by_id(layer_id)
+            if layer is None:
+                raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
+            deleted, model_type = await self.layer_repository.delete_feature_if_version_matches(
+                layer, feature_id, request.version
+            )
+            if not deleted:
+                await self.version_error_handler(feature_id, request.version, model_type)
+            return {"status": "deleted", "featureId": str(feature_id)}
 
     def normalize_limit(self, limit_value: int | None) -> int:
         if limit_value is None:
@@ -131,3 +135,17 @@ class FeatureService:
         geojson_type = request.geometry.get("type")
         expected = layer.geometry_type
         return geojson_type == expected
+
+    async def version_error_handler(
+        self, feature_id: UUID, expected_version: int, model_type: type
+    ):
+        current = await self.layer_repository.get_current_version(model_type, feature_id)
+        if current is None:
+            raise FeatureNotFoundException(f"Feature с идентификатором {feature_id} не найдена")
+        else:
+            raise VersionMismatchException(
+                feature_id=feature_id,
+                request_version=expected_version,
+                current_version=current.version,
+                message=f"Ожидалась версия {current.version}, а получили {expected_version}. Перезагрузите фичу и отредактируйте ее снова",
+            )
