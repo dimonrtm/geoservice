@@ -12,12 +12,12 @@ from schemas.feature_out import FeatureOut
 from schemas.create_feature_in import CreateFeatureIn
 from schemas.patch_feature_request import PatchFeatureRequest
 from schemas.delete_feature_request import DeleteFeatureRequest
+from schemas.delete_feature_response import DeleteFeatureResponse
 from .deps import get_feature_service
 from services.feature_service import FeatureService
 from domain.bbox import parse_bbox
 from uuid import UUID
 from .auth import get_current_user, require_editor
-from typing import Any
 
 layers_router = APIRouter(
     prefix="/api/v1/layers", tags=["layers"], dependencies=[Depends(get_current_user)]
@@ -74,11 +74,15 @@ async def update_feature(
     return feature
 
 
-@layers_router.delete("/{layer_id}/features/{feature_id}", dependencies=[Depends(require_editor)])
+@layers_router.delete(
+    "/{layer_id}/features/{feature_id}",
+    dependencies=[Depends(require_editor)],
+    response_model=DeleteFeatureResponse,
+)
 async def delete_feature(
     layer_id: UUID,
     feature_id: UUID,
     request: DeleteFeatureRequest,
     feature_service: FeatureService = Depends(get_feature_service),
-) -> dict[str, Any]:
+) -> DeleteFeatureResponse:
     return await feature_service.delete_feature(layer_id, feature_id, request)

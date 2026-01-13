@@ -14,6 +14,7 @@ from schemas.feature_collection_out import FeatureCollectionOut
 from schemas.create_feature_in import CreateFeatureIn
 from schemas.patch_feature_request import PatchFeatureRequest
 from schemas.delete_feature_request import DeleteFeatureRequest
+from schemas.delete_feature_response import DeleteFeatureResponse
 from repositories.layer_repository import LayerRepository
 from models.layer import Layer
 from domain.exceptions.layer_not_found_exception import LayerNotFoundException
@@ -110,7 +111,7 @@ class FeatureService:
 
     async def delete_feature(
         self, layer_id: UUID, feature_id: UUID, request: DeleteFeatureRequest
-    ) -> dict[str, Any]:
+    ) -> DeleteFeatureResponse:
         async with self.session.begin():
             layer = await self.layer_repository.get_layer_by_id(layer_id)
             if layer is None:
@@ -120,7 +121,7 @@ class FeatureService:
             )
             if not deleted:
                 await self.version_error_handler(feature_id, request.version, model_type)
-            return {"status": "deleted", "featureId": str(feature_id)}
+            return DeleteFeatureResponse(featureId=feature_id)
 
     def normalize_limit(self, limit_value: int | None) -> int:
         if limit_value is None:
