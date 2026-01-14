@@ -10,6 +10,7 @@ from db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.auth_service import AuthService
 from services.feature_service import FeatureService
+from services.layer_service import LayerService
 from repositories.user_repository import UserRepository
 from repositories.layer_repository import LayerRepository
 
@@ -20,3 +21,7 @@ def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthServic
 
 def get_feature_service(session: AsyncSession = Depends(get_session)) -> FeatureService:
     return FeatureService(session, LayerRepository(session))
+
+
+def get_layer_service(session: AsyncSession = Depends(get_session)) -> LayerService:
+    return LayerService(session, LayerRepository(session))

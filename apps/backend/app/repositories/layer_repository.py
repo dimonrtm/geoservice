@@ -115,6 +115,11 @@ class LayerRepository:
         deleted_id = res.scalar_one_or_none()
         return (deleted_id is not None, model_type)
 
+    async def get_layers(self):
+        stmt = select(Layer)
+        res = await self.session.execute(stmt)
+        return res.scalars().all()
+
     async def get_current_version(self, model_type: type, feature_id: UUID):
         stmt = select(model_type.version.label("version")).where(model_type.id == feature_id)
         res = await self.session.execute(stmt)

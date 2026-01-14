@@ -13,8 +13,11 @@ from schemas.create_feature_in import CreateFeatureIn
 from schemas.patch_feature_request import PatchFeatureRequest
 from schemas.delete_feature_request import DeleteFeatureRequest
 from schemas.delete_feature_response import DeleteFeatureResponse
+from schemas.layer_list_out import LayerListOut
 from .deps import get_feature_service
+from .deps import get_layer_service
 from services.feature_service import FeatureService
+from services.layer_service import LayerService
 from domain.bbox import parse_bbox
 from uuid import UUID
 from .auth import get_current_user, require_editor
@@ -22,6 +25,11 @@ from .auth import get_current_user, require_editor
 layers_router = APIRouter(
     prefix="/api/v1/layers", tags=["layers"], dependencies=[Depends(get_current_user)]
 )
+
+
+@layers_router.get("", response_model=LayerListOut)
+async def get_layers(layer_service: LayerService = Depends(get_layer_service)) -> LayerListOut:
+    return await layer_service.get_layers()
 
 
 @layers_router.get("/{layer_id}/features", response_model=FeatureCollectionOut)
