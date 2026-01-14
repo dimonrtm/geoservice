@@ -1,24 +1,15 @@
 <script setup lang="ts">
-import FileLoader from "./components/FileLoader.vue";
 import CheckAuthComponent from "./components/CheckAuthComponent.vue";
+import MapView from "./components/MapView.vue";
+import "./assets/main.css"
 </script>
 
 <template>
   <CheckAuthComponent />
-  <FileLoader />
+  <MapView/>
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
+.page { height: 100%; display: flex; flex-direction: column; }
+.content { flex: 1; min-height: 0; } /* важно для flex-раскладки */
 </style>
