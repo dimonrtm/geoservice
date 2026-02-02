@@ -5,8 +5,12 @@ import "./assets/main.css";
 </script>
 
 <template>
-  <CheckAuthComponent />
-  <MapView />
+  <div class="page">
+    <CheckAuthComponent />
+    <div class="content">
+      <MapView />
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -14,6 +18,7 @@ import "./assets/main.css";
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 .content {
   flex: 1;
