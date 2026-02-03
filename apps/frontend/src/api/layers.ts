@@ -60,8 +60,11 @@ export async function fetchLayerFeaturesByBbox(args: {
       params: { bbox: args.bbox.join(","), limit: limit },
       signal: args.signal,
     });
-    const featureCollection = response.data as FeatureCollection;
-    return featureCollection;
+    const raw = response.data as unknown;
+    if (isFeatureCollection(raw)) {
+      return raw;
+    }
+    throw Error("Пришел объект неожиданного типа");
   } catch (err: unknown) {
     if (
       err instanceof AxiosError &&
@@ -71,4 +74,27 @@ export async function fetchLayerFeaturesByBbox(args: {
     }
     throw err;
   }
+}
+
+function isRecord(raw: unknown): raw is Record<string, unknown> {
+  return typeof raw === "object" && raw !== null;
+}
+
+function isFeatureCollection(raw: unknown): raw is FeatureCollection {
+  if (!isRecord(raw)) {
+    return false;
+  }
+  if (!("type" in raw)) {
+    return false;
+  }
+  if (!("features" in raw)) {
+    return false;
+  }
+  if (typeof raw["type"] !== "string" || raw["type"] !== "FeatureCollection") {
+    return false;
+  }
+  if (!Array.isArray(raw["features"])) {
+    return false;
+  }
+  return true;
 }

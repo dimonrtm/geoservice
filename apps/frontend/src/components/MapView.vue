@@ -7,17 +7,25 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, shallowRef } from "vue";
-import { Map, NavigationControl, type StyleSpecification } from "maplibre-gl";
+import type { FeatureCollection, Geometry } from "geojson";
+import {
+  Map,
+  NavigationControl,
+  type StyleSpecification,
+  type GeoJSONSource,
+} from "maplibre-gl";
 import type { LayerDto } from "@/api/layers";
-import { fetchLayers } from "@/api/layers";
+import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
 import "maplibre-gl/dist/maplibre-gl.css";
 
+type Bbox = [number, number, number, number];
 const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
 const layers = ref<LayerDto[]>([]);
 let activeLayer = ref<LayerDto | null>(null);
 let labelText = ref("Карта загружается...");
 let layerAbortController = ref<AbortController | null>(null);
+const featuresAbortController = ref<AbortController | null>(null);
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -52,6 +60,8 @@ onMounted(() => {
     labelText.value = "Карта готова. Загружаю слои...";
     const controller = new AbortController();
     layerAbortController.value = controller;
+    const featuresController = new AbortController();
+    featuresAbortController.value = featuresController;
     layers.value = await fetchLayers(controller.signal);
     console.log(layers.value);
     activeLayer.value = (layers.value[0] as LayerDto) ?? null;
@@ -62,6 +72,33 @@ onMounted(() => {
     }
     labelText.value = `Слои загружены ${layers.value.length}. Выбран ${activeLayer.value?.title}`;
     ensureLayerOnMap(map.value, activeLayer.value);
+    try {
+      const bbox = getCurrentBbox(map.value);
+      const featureCollection = await fetchLayerFeaturesByBbox({
+        layerId: activeLayer.value.id,
+        bbox: bbox,
+        limit: 500,
+        signal: featuresController.signal,
+      });
+      setSourceData(
+        map.value,
+        getSourceId(activeLayer.value),
+        featureCollection,
+      );
+      labelText.value = `Загружено фич: ${featureCollection.features.length}`;
+    } catch (err: unknown) {
+      if (err instanceof HttpError) {
+        if (err.status === 404) {
+          labelText.value = "Слой не найден (404)";
+        } else if (err.status === 422) {
+          labelText.value = "Невалидный Bbox (422)";
+        } else {
+          labelText.value = `Ошибка загрузки. HTTP ${err.status}`;
+        }
+      } else {
+        labelText.value = "Сетевая/неизвестная ошибка";
+      }
+    }
   });
   console.log("Карта создана");
 });
@@ -70,7 +107,12 @@ onBeforeUnmount(() => {
   map.value?.remove();
   map.value = null;
   if (layerAbortController.value) {
+    layerAbortController.value?.abort();
     layerAbortController.value = null;
+  }
+  if (featuresAbortController.value) {
+    featuresAbortController.value?.abort();
+    featuresAbortController.value = null;
   }
   console.log("Карта удалена");
 });
@@ -113,6 +155,38 @@ function ensureLayerOnMap(map: Map | null, layer: LayerDto): void {
       });
     }
   }
+}
+
+function getCurrentBbox(map: Map | null): Bbox {
+  if (!map) {
+    return [0, 0, 0, 0];
+  }
+  const bounds = map.getBounds();
+  return [
+    bounds.getWest(),
+    bounds.getSouth(),
+    bounds.getEast(),
+    bounds.getNorth(),
+  ];
+}
+
+function setSourceData(
+  map: Map | null,
+  sourceId: string,
+  featureCollection: { type: "FeatureCollection"; features: unknown[] },
+) {
+  if (!map) {
+    return;
+  }
+  const source = map.getSource(sourceId) as GeoJSONSource | undefined;
+  if (!source) {
+    return;
+  }
+  source.setData(featureCollection as FeatureCollection<Geometry>);
+}
+
+function getSourceId(layer: LayerDto): string {
+  return "src:" + layer.id;
 }
 </script>
 
