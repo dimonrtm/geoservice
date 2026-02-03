@@ -1,14 +1,18 @@
 import { http } from "@/api/http";
 import { AxiosError } from "axios";
-type LayerDto = {
+export type LayerDto = {
   id: string;
   name: string;
   title: string;
   geometryType: string;
   srid: number;
 };
-type FeatureCollection = { type: "FeatureCollection"; features: unknown[] };
-class HttpError extends Error {
+export type FeatureCollection = {
+  type: "FeatureCollection";
+  features: unknown[];
+};
+
+export class HttpError extends Error {
   status: number;
   body: unknown;
   constructor(status: number, body: unknown) {
@@ -21,8 +25,16 @@ class HttpError extends Error {
 export async function fetchLayers(signal?: AbortSignal): Promise<LayerDto[]> {
   try {
     const response = await http.get("/api/v1/layers", { signal: signal });
-    const layerDtos = response.data as LayerDto[];
-    return layerDtos;
+    const raw = response.data as unknown;
+    console.log(raw);
+    if (
+      raw &&
+      typeof raw === "object" &&
+      Array.isArray((raw as { layers: LayerDto[] }).layers)
+    ) {
+      return (raw as { layers: LayerDto[] }).layers as LayerDto[];
+    }
+    throw Error("Объект неизвестного типа");
   } catch (err: unknown) {
     if (
       err instanceof AxiosError &&

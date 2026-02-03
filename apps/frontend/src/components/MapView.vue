@@ -8,11 +8,16 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, shallowRef } from "vue";
 import { Map, NavigationControl, type StyleSpecification } from "maplibre-gl";
+import type { LayerDto } from "@/api/layers";
+import { fetchLayers } from "@/api/layers";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
+const layers = ref<LayerDto[]>([]);
+let activeLayer = ref<LayerDto | null>(null);
 let labelText = ref("Карта загружается...");
+let layerAbortController = ref<AbortController | null>(null);
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -43,8 +48,20 @@ onMounted(() => {
     zoom: 3,
   });
   map.value.addControl(new NavigationControl(), "top-right");
-  map.value.once("load", () => {
-    labelText.value = "Карта готова";
+  map.value.once("load", async () => {
+    labelText.value = "Карта готова. Загружаю слои...";
+    const controller = new AbortController();
+    layerAbortController.value = controller;
+    layers.value = await fetchLayers(controller.signal);
+    console.log(layers.value);
+    activeLayer.value = (layers.value[0] as LayerDto) ?? null;
+    console.log(activeLayer.value);
+    if (layers.value.length === 0) {
+      labelText.value = "Слоев нет";
+      return;
+    }
+    labelText.value = `Слои загружены ${layers.value.length}. Выбран ${activeLayer.value?.title}`;
+    ensureLayerOnMap(map.value, activeLayer.value);
   });
   console.log("Карта создана");
 });
@@ -52,8 +69,51 @@ onMounted(() => {
 onBeforeUnmount(() => {
   map.value?.remove();
   map.value = null;
+  if (layerAbortController.value) {
+    layerAbortController.value = null;
+  }
   console.log("Карта удалена");
 });
+
+function ensureLayerOnMap(map: Map | null, layer: LayerDto): void {
+  if (!map) {
+    return;
+  }
+  const sourceId = "src:" + layer.id;
+  const layerId = "layer:" + layer.id;
+  const source = map.getSource(sourceId);
+  if (!source) {
+    map.addSource(sourceId, {
+      type: "geojson",
+      data: { type: "FeatureCollection", features: [] },
+    });
+  }
+  const existLayer = map.getLayer(layerId);
+  if (!existLayer) {
+    if (layer.geometryType.includes("Point")) {
+      map.addLayer({
+        id: layerId,
+        type: "circle",
+        source: sourceId,
+        paint: { "circle-color": "#000000" },
+      });
+    } else if (layer.geometryType.includes("Line")) {
+      map.addLayer({
+        id: layerId,
+        type: "line",
+        source: sourceId,
+        paint: { "line-color": "#000000" },
+      });
+    } else {
+      map.addLayer({
+        id: layerId,
+        type: "fill",
+        source: sourceId,
+        paint: { "fill-color": "#000000" },
+      });
+    }
+  }
+}
 </script>
 
 <style scoped>
