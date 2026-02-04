@@ -29,6 +29,7 @@ let layerAbortController = ref<AbortController | null>(null);
 const featuresAbortController = ref<AbortController | null>(null);
 let moveTimer: number | null = null;
 const DEBOUNCE_MS = 250;
+const isLoadingFeature = ref(false);
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -76,13 +77,13 @@ onMounted(() => {
     labelText.value = `Слои загружены ${layers.value.length}. Выбран ${activeLayer.value?.title}`;
     ensureLayerOnMap(map.value, activeLayer.value);
     await reloadFeatures(activeLayer.value);
-    map.value?.on("moveend", sheduleReload);
+    map.value?.on("moveend", scheduleReload);
   });
   console.log("Карта создана");
 });
 
 onBeforeUnmount(() => {
-  map.value?.off("moveend", sheduleReload);
+  map.value?.off("moveend", scheduleReload);
   map.value?.remove();
   map.value = null;
   if (layerAbortController.value) {
@@ -93,7 +94,11 @@ onBeforeUnmount(() => {
     featuresAbortController.value?.abort();
     featuresAbortController.value = null;
   }
-  clearTimeout(moveTimer!);
+  if (moveTimer !== null) {
+    clearTimeout(moveTimer);
+    moveTimer = null;
+  }
+
   console.log("Карта удалена");
 });
 
@@ -170,11 +175,17 @@ function getSourceId(layer: LayerDto): string {
 }
 
 async function reloadFeatures(layer: LayerDto): Promise<void> {
+  isLoadingFeature.value = true;
+  labelText.value = "Загружаю объекты...";
   featuresAbortController.value?.abort();
   const featuresController = new AbortController();
   featuresAbortController.value = featuresController;
   try {
     const bbox = getCurrentBbox(map.value);
+    if (!isValidBbox(bbox)) {
+      labelText.value = "Bbox не валиден на клиенте";
+      return;
+    }
     const featureCollection = await fetchLayerFeaturesByBbox({
       layerId: layer.id,
       bbox: bbox,
@@ -198,17 +209,30 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
     } else {
       labelText.value = "Сетевая/неизвестная ошибка";
     }
+  } finally {
+    isLoadingFeature.value = false;
   }
 }
 
-function sheduleReload(): void {
-  clearTimeout(moveTimer!);
-  moveTimer = setTimeout(() => {
+function scheduleReload(): void {
+  if (isLoadingFeature.value) {
+    return;
+  }
+  if (moveTimer !== null) {
+    clearTimeout(moveTimer);
+    moveTimer = null;
+  }
+
+  moveTimer = setTimeout(async () => {
     if (!activeLayer.value) {
       return;
     }
-    reloadFeatures(activeLayer.value);
+    await reloadFeatures(activeLayer.value);
   }, DEBOUNCE_MS);
+}
+
+function isValidBbox(bbox: Bbox): boolean {
+  return bbox.every(Number.isFinite) && bbox[0] < bbox[2] && bbox[1] < bbox[3];
 }
 </script>
 
