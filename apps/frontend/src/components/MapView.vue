@@ -1,4 +1,12 @@
 <template>
+  <div class="modal">
+    <h3>Выберите слой</h3>
+    <select v-model="activeLayerId" @change="onChangeLayer">
+      <option v-for="layer in layers" :key="layer.id" :value="layer.id">
+        {{ layer.title ?? layer.name }}
+      </option>
+    </select>
+  </div>
   <div class="mapRoot">
     <div class="badge">{{ labelText }}</div>
     <div ref="mapEl" class="mapCanvas"></div>
@@ -24,6 +32,7 @@ const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
 const layers = ref<LayerDto[]>([]);
 let activeLayer = ref<LayerDto | null>(null);
+const activeLayerId = ref<string | null>(null);
 let labelText = ref("Карта загружается...");
 let layerAbortController = ref<AbortController | null>(null);
 const featuresAbortController = ref<AbortController | null>(null);
@@ -69,6 +78,7 @@ onMounted(() => {
       labelText.value = "Слоев нет";
       return;
     }
+    activeLayerId.value = layers.value[0]?.id ?? null;
     activeLayer.value = layers.value[0] ?? null;
     if (!activeLayer.value) {
       labelText.value = "Слои загружены, но выбрать нечего";
@@ -250,6 +260,28 @@ function scheduleReload(): void {
 
 function isValidBbox(bbox: Bbox): boolean {
   return bbox.every(Number.isFinite) && bbox[0] < bbox[2] && bbox[1] < bbox[3];
+}
+
+async function onChangeLayer(): Promise<void> {
+  const m = map.value;
+  const layerId = activeLayerId.value;
+  if (!m || !layerId) {
+    return;
+  }
+  console.log(layerId);
+  const layer = layers.value.find((layer) => layer.id === layerId) ?? null;
+  if (!layer) {
+    labelText.value = "Слой ненайден в списке";
+    return;
+  }
+  activeLayer.value = layer;
+  ensureLayerOnMap(map.value, layer);
+  featuresAbortController.value?.abort();
+  if (moveTimer !== null) {
+    clearTimeout(moveTimer);
+    moveTimer = null;
+  }
+  await reloadFeatures(layer);
 }
 </script>
 
