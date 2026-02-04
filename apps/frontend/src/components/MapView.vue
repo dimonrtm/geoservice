@@ -17,6 +17,7 @@ import {
 import type { LayerDto } from "@/api/layers";
 import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { AxiosError } from "axios";
 
 type Bbox = [number, number, number, number];
 const mapEl = ref<HTMLDivElement | null>(null);
@@ -26,6 +27,8 @@ let activeLayer = ref<LayerDto | null>(null);
 let labelText = ref("Карта загружается...");
 let layerAbortController = ref<AbortController | null>(null);
 const featuresAbortController = ref<AbortController | null>(null);
+let moveTimer: number | null = null;
+const DEBOUNCE_MS = 250;
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -60,50 +63,26 @@ onMounted(() => {
     labelText.value = "Карта готова. Загружаю слои...";
     const controller = new AbortController();
     layerAbortController.value = controller;
-    const featuresController = new AbortController();
-    featuresAbortController.value = featuresController;
     layers.value = await fetchLayers(controller.signal);
-    console.log(layers.value);
-    activeLayer.value = (layers.value[0] as LayerDto) ?? null;
-    console.log(activeLayer.value);
     if (layers.value.length === 0) {
       labelText.value = "Слоев нет";
       return;
     }
+    activeLayer.value = layers.value[0] ?? null;
+    if (!activeLayer.value) {
+      labelText.value = "Слои загружены, но выбрать нечего";
+      return;
+    }
     labelText.value = `Слои загружены ${layers.value.length}. Выбран ${activeLayer.value?.title}`;
     ensureLayerOnMap(map.value, activeLayer.value);
-    try {
-      const bbox = getCurrentBbox(map.value);
-      const featureCollection = await fetchLayerFeaturesByBbox({
-        layerId: activeLayer.value.id,
-        bbox: bbox,
-        limit: 500,
-        signal: featuresController.signal,
-      });
-      setSourceData(
-        map.value,
-        getSourceId(activeLayer.value),
-        featureCollection,
-      );
-      labelText.value = `Загружено фич: ${featureCollection.features.length}`;
-    } catch (err: unknown) {
-      if (err instanceof HttpError) {
-        if (err.status === 404) {
-          labelText.value = "Слой не найден (404)";
-        } else if (err.status === 422) {
-          labelText.value = "Невалидный Bbox (422)";
-        } else {
-          labelText.value = `Ошибка загрузки. HTTP ${err.status}`;
-        }
-      } else {
-        labelText.value = "Сетевая/неизвестная ошибка";
-      }
-    }
+    await reloadFeatures(activeLayer.value);
+    map.value?.on("moveend", sheduleReload);
   });
   console.log("Карта создана");
 });
 
 onBeforeUnmount(() => {
+  map.value?.off("moveend", sheduleReload);
   map.value?.remove();
   map.value = null;
   if (layerAbortController.value) {
@@ -114,6 +93,7 @@ onBeforeUnmount(() => {
     featuresAbortController.value?.abort();
     featuresAbortController.value = null;
   }
+  clearTimeout(moveTimer!);
   console.log("Карта удалена");
 });
 
@@ -188,6 +168,48 @@ function setSourceData(
 function getSourceId(layer: LayerDto): string {
   return "src:" + layer.id;
 }
+
+async function reloadFeatures(layer: LayerDto): Promise<void> {
+  featuresAbortController.value?.abort();
+  const featuresController = new AbortController();
+  featuresAbortController.value = featuresController;
+  try {
+    const bbox = getCurrentBbox(map.value);
+    const featureCollection = await fetchLayerFeaturesByBbox({
+      layerId: layer.id,
+      bbox: bbox,
+      limit: 500,
+      signal: featuresController.signal,
+    });
+    setSourceData(map.value, getSourceId(layer), featureCollection);
+    labelText.value = `Загружено фич: ${featureCollection.features.length}`;
+  } catch (err: unknown) {
+    if (err instanceof AxiosError && err.code === "ERR_CANCELED") {
+      return;
+    }
+    if (err instanceof HttpError) {
+      if (err.status === 404) {
+        labelText.value = "Слой не найден (404)";
+      } else if (err.status === 422) {
+        labelText.value = "Невалидный Bbox (422)";
+      } else {
+        labelText.value = `Ошибка загрузки. HTTP ${err.status}`;
+      }
+    } else {
+      labelText.value = "Сетевая/неизвестная ошибка";
+    }
+  }
+}
+
+function sheduleReload(): void {
+  clearTimeout(moveTimer!);
+  moveTimer = setTimeout(() => {
+    if (!activeLayer.value) {
+      return;
+    }
+    reloadFeatures(activeLayer.value);
+  }, DEBOUNCE_MS);
+}
 </script>
 
 <style scoped>
@@ -209,6 +231,6 @@ function getSourceId(layer: LayerDto): string {
   background: rgba(255, 255, 255, 0.9);
   padding: 6px 10px;
   border-radius: 8px;
-  font-size: 14;
+  font-size: 14px;
 }
 </style>
