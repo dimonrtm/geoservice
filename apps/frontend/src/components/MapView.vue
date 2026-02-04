@@ -108,6 +108,7 @@ function ensureLayerOnMap(map: Map | null, layer: LayerDto): void {
   }
   const sourceId = "src:" + layer.id;
   const layerId = "layer:" + layer.id;
+  const outlineId = "layer:" + layer.id + ":outline";
   const source = map.getSource(sourceId);
   if (!source) {
     map.addSource(sourceId, {
@@ -122,21 +123,37 @@ function ensureLayerOnMap(map: Map | null, layer: LayerDto): void {
         id: layerId,
         type: "circle",
         source: sourceId,
-        paint: { "circle-color": "#000000" },
+        paint: {
+          "circle-radius": 5,
+          "circle-stroke-width": 1,
+          "circle-color": "#000000",
+          "circle-stroke-color": "#FFFFFF",
+        },
       });
     } else if (layer.geometryType.includes("Line")) {
       map.addLayer({
         id: layerId,
         type: "line",
         source: sourceId,
-        paint: { "line-color": "#000000" },
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: { "line-width": 2, "line-color": "#000000" },
       });
     } else {
       map.addLayer({
         id: layerId,
         type: "fill",
         source: sourceId,
-        paint: { "fill-color": "#000000" },
+        paint: { "fill-color": "#000000", "fill-opacity": 0.25 },
+      });
+      map.addLayer({
+        id: outlineId,
+        type: "line",
+        source: sourceId,
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-width": 2, "line-color": "#000000" },
       });
     }
   }
