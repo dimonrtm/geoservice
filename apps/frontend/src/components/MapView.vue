@@ -15,19 +15,22 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, shallowRef } from "vue";
-import type { FeatureCollection, Geometry } from "geojson";
-import {
-  Map,
-  NavigationControl,
-  type StyleSpecification,
-  type GeoJSONSource,
-} from "maplibre-gl";
+import { Map, NavigationControl, type StyleSpecification } from "maplibre-gl";
 import type { LayerDto } from "@/api/layers";
 import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { AxiosError } from "axios";
+import {
+  ensureLayerOnMap,
+  getCurrentBbox,
+  setSourceData,
+  isValidBbox,
+  setAnyLayerVisibility,
+  formatBbox,
+  BboxClose,
+} from "@/map/maplibrelayers";
+import type { Bbox } from "@/map/maplibrelayers";
 
-type Bbox = [number, number, number, number];
 const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
 const layers = ref<LayerDto[]>([]);
@@ -118,92 +121,6 @@ onBeforeUnmount(() => {
 
   console.log("Карта удалена");
 });
-
-function ensureLayerOnMap(map: Map | null, layer: LayerDto): void {
-  if (!map) {
-    return;
-  }
-  const sourceId = "src:" + layer.id;
-  const layerId = "layer:" + layer.id;
-  const outlineId = "layer:" + layer.id + ":outline";
-  const source = map.getSource(sourceId);
-  if (!source) {
-    map.addSource(sourceId, {
-      type: "geojson",
-      data: { type: "FeatureCollection", features: [] },
-    });
-  }
-  const existLayer = map.getLayer(layerId);
-  if (!existLayer) {
-    if (layer.geometryType.includes("Point")) {
-      map.addLayer({
-        id: layerId,
-        type: "circle",
-        source: sourceId,
-        paint: {
-          "circle-radius": 5,
-          "circle-stroke-width": 1,
-          "circle-color": "#000000",
-          "circle-stroke-color": "#FFFFFF",
-        },
-      });
-    } else if (layer.geometryType.includes("Line")) {
-      map.addLayer({
-        id: layerId,
-        type: "line",
-        source: sourceId,
-        layout: {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: { "line-width": 2, "line-color": "#000000" },
-      });
-    } else {
-      map.addLayer({
-        id: layerId,
-        type: "fill",
-        source: sourceId,
-        paint: { "fill-color": "#000000", "fill-opacity": 0.25 },
-      });
-      map.addLayer({
-        id: outlineId,
-        type: "line",
-        source: sourceId,
-        layout: { "line-join": "round", "line-cap": "round" },
-        paint: { "line-width": 2, "line-color": "#000000" },
-      });
-    }
-  }
-}
-
-function getCurrentBbox(map: Map | null): Bbox {
-  if (!map) {
-    return [0, 0, 0, 0];
-  }
-  const bounds = map.getBounds();
-  return [
-    bounds.getWest(),
-    bounds.getSouth(),
-    bounds.getEast(),
-    bounds.getNorth(),
-  ];
-}
-
-function setSourceData(
-  map: Map | null,
-  sourceId: string,
-  featureCollection: { type: "FeatureCollection"; features: unknown[] },
-) {
-  if (!map) {
-    return;
-  }
-  const source = map.getSource(sourceId) as GeoJSONSource | undefined;
-  if (!source) {
-    return;
-  }
-  source.setData(featureCollection as FeatureCollection<Geometry>);
-}
-
 function getSourceId(layer: LayerDto): string {
   return "src:" + layer.id;
 }
@@ -283,10 +200,6 @@ function scheduleReload(): void {
   }, DEBOUNCE_MS);
 }
 
-function isValidBbox(bbox: Bbox): boolean {
-  return bbox.every(Number.isFinite) && bbox[0] < bbox[2] && bbox[1] < bbox[3];
-}
-
 async function onChangeLayer(): Promise<void> {
   const m = map.value;
   const layerId = activeLayerId.value;
@@ -311,66 +224,6 @@ async function onChangeLayer(): Promise<void> {
     moveTimer = null;
   }
   await reloadFeatures(layer);
-}
-
-function setLayerVisibility(
-  map: Map | null,
-  layerId: string,
-  visible: boolean,
-): void {
-  if (!map) {
-    return;
-  }
-  const v = visible ? "visible" : "none";
-  if (map.getLayer(layerId)) {
-    map.setLayoutProperty(layerId, "visibility", v);
-  }
-}
-
-function setLayerPairVisibility(
-  map: Map | null,
-  layer: LayerDto,
-  visible: boolean,
-): void {
-  if (!map) {
-    return;
-  }
-  const baseId = "layer:" + layer.id;
-  const outlineId = "layer:" + layer.id + ":outline";
-  setLayerVisibility(map, baseId, visible);
-  setLayerVisibility(map, outlineId, visible);
-}
-
-function setAnyLayerVisibility(
-  map: Map | null,
-  layer: LayerDto,
-  visible: boolean,
-): void {
-  if (!map) {
-    return;
-  }
-  if (layer.geometryType.includes("Polygon")) {
-    setLayerPairVisibility(map, layer, visible);
-  } else {
-    setLayerVisibility(map, "layer:" + layer.id, visible);
-  }
-}
-
-function formatNumber(n: number): string {
-  return n.toFixed(4);
-}
-
-function formatBbox(bbox: Bbox): string {
-  return `${formatNumber(bbox[0])},${formatNumber(bbox[1])},${formatNumber(bbox[2])},${formatNumber(bbox[3])}`;
-}
-
-function BboxClose(a: Bbox, b: Bbox, eps: number): boolean {
-  return (
-    Math.abs(a[0] - b[0]) < eps &&
-    Math.abs(a[1] - b[1]) < eps &&
-    Math.abs(a[2] - b[2]) < eps &&
-    Math.abs(a[3] - b[3]) < eps
-  );
 }
 </script>
 
