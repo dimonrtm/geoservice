@@ -41,6 +41,7 @@ const DEBOUNCE_MS = 250;
 const isLoadingFeature = ref(false);
 const lastRequestedBbox = ref<Bbox | null>(null);
 const BBOX_EPS = 0.002;
+const MIN_ZOOM = 8;
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -68,7 +69,7 @@ onMounted(() => {
     container: mapEl.value,
     style,
     center: [70.1902, 52.937],
-    zoom: 3,
+    zoom: 7,
   });
   map.value.addControl(new NavigationControl(), "top-right");
   map.value.once("load", async () => {
@@ -208,6 +209,11 @@ function getSourceId(layer: LayerDto): string {
 }
 
 async function reloadFeatures(layer: LayerDto): Promise<void> {
+  const z = map.value?.getZoom();
+  if (z && z < MIN_ZOOM) {
+    labelText.value = `Zoom ${z.toFixed(1)}: приблизтесь к ${MIN_ZOOM}`;
+    return;
+  }
   isLoadingFeature.value = true;
   labelText.value = "Загружаю объекты...";
   featuresAbortController.value?.abort();
