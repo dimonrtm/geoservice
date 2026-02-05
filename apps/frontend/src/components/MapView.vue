@@ -39,6 +39,7 @@ const featuresAbortController = ref<AbortController | null>(null);
 let moveTimer: number | null = null;
 const DEBOUNCE_MS = 250;
 const isLoadingFeature = ref(false);
+const lastBbox = ref<Bbox | null>(null);
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -217,6 +218,7 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
       labelText.value = "Bbox не валиден на клиенте";
       return;
     }
+    lastBbox.value = bbox;
     const featureCollection = await fetchLayerFeaturesByBbox({
       layerId: layer.id,
       bbox: bbox,
@@ -224,7 +226,7 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
       signal: featuresController.signal,
     });
     setSourceData(map.value, getSourceId(layer), featureCollection);
-    labelText.value = `Загружено фич: ${featureCollection.features.length}`;
+    labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${featureCollection.features.length} | limit ${500}`;
   } catch (err: unknown) {
     if (err instanceof AxiosError && err.code === "ERR_CANCELED") {
       return;
@@ -333,6 +335,14 @@ function setAnyLayerVisibility(
   } else {
     setLayerVisibility(map, "layer:" + layer.id, visible);
   }
+}
+
+function formatNumber(n: number): string {
+  return n.toFixed(4);
+}
+
+function formatBbox(bbox: Bbox): string {
+  return `${formatNumber(bbox[0])},${formatNumber(bbox[1])},${formatNumber(bbox[2])},${formatNumber(bbox[3])}`;
 }
 </script>
 
