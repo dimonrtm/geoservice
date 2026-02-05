@@ -39,7 +39,8 @@ const featuresAbortController = ref<AbortController | null>(null);
 let moveTimer: number | null = null;
 const DEBOUNCE_MS = 250;
 const isLoadingFeature = ref(false);
-const lastBbox = ref<Bbox | null>(null);
+const lastRequestedBbox = ref<Bbox | null>(null);
+const BBOX_EPS = 0.002;
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -218,7 +219,13 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
       labelText.value = "Bbox не валиден на клиенте";
       return;
     }
-    lastBbox.value = bbox;
+    if (
+      lastRequestedBbox.value &&
+      BboxClose(bbox, lastRequestedBbox.value, BBOX_EPS)
+    ) {
+      return;
+    }
+    lastRequestedBbox.value = bbox;
     const featureCollection = await fetchLayerFeaturesByBbox({
       layerId: layer.id,
       bbox: bbox,
@@ -343,6 +350,15 @@ function formatNumber(n: number): string {
 
 function formatBbox(bbox: Bbox): string {
   return `${formatNumber(bbox[0])},${formatNumber(bbox[1])},${formatNumber(bbox[2])},${formatNumber(bbox[3])}`;
+}
+
+function BboxClose(a: Bbox, b: Bbox, eps: number): boolean {
+  return (
+    Math.abs(a[0] - b[0]) < eps &&
+    Math.abs(a[1] - b[1]) < eps &&
+    Math.abs(a[2] - b[2]) < eps &&
+    Math.abs(a[3] - b[3]) < eps
+  );
 }
 </script>
 
