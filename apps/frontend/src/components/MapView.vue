@@ -214,6 +214,7 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
     labelText.value = `Zoom ${z.toFixed(1)}: приблизтесь к ${MIN_ZOOM}`;
     return;
   }
+  const limit = 500;
   isLoadingFeature.value = true;
   labelText.value = "Загружаю объекты...";
   featuresAbortController.value?.abort();
@@ -235,11 +236,16 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
     const featureCollection = await fetchLayerFeaturesByBbox({
       layerId: layer.id,
       bbox: bbox,
-      limit: 500,
+      limit: limit,
       signal: featuresController.signal,
     });
     setSourceData(map.value, getSourceId(layer), featureCollection);
-    labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${featureCollection.features.length} | limit ${500}`;
+    const n = featureCollection.features.length;
+    if (n == 0) {
+      labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | пусто | limit ${limit}`;
+    } else {
+      labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${n} | limit ${limit}`;
+    }
   } catch (err: unknown) {
     if (err instanceof AxiosError && err.code === "ERR_CANCELED") {
       return;
