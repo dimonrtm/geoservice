@@ -86,6 +86,10 @@ onMounted(() => {
     }
     labelText.value = `Слои загружены ${layers.value.length}. Выбран ${activeLayer.value?.title}`;
     ensureLayerOnMap(map.value, activeLayer.value);
+    for (var layer of layers.value) {
+      setAnyLayerVisibility(map.value, layer, false);
+    }
+    setAnyLayerVisibility(map.value, activeLayer.value, true);
     await reloadFeatures(activeLayer.value);
     map.value?.on("moveend", scheduleReload);
   });
@@ -274,14 +278,61 @@ async function onChangeLayer(): Promise<void> {
     labelText.value = "Слой ненайден в списке";
     return;
   }
+  if (activeLayer.value) {
+    setAnyLayerVisibility(m, activeLayer.value, false);
+  }
   activeLayer.value = layer;
   ensureLayerOnMap(map.value, layer);
+  setAnyLayerVisibility(m, activeLayer.value, true);
   featuresAbortController.value?.abort();
   if (moveTimer !== null) {
     clearTimeout(moveTimer);
     moveTimer = null;
   }
   await reloadFeatures(layer);
+}
+
+function setLayerVisibility(
+  map: Map | null,
+  layerId: string,
+  visible: boolean,
+): void {
+  if (!map) {
+    return;
+  }
+  const v = visible ? "visible" : "none";
+  if (map.getLayer(layerId)) {
+    map.setLayoutProperty(layerId, "visibility", v);
+  }
+}
+
+function setLayerPairVisibility(
+  map: Map | null,
+  layer: LayerDto,
+  visible: boolean,
+): void {
+  if (!map) {
+    return;
+  }
+  const baseId = "layer:" + layer.id;
+  const outlineId = "layer:" + layer.id + ":outline";
+  setLayerVisibility(map, baseId, visible);
+  setLayerVisibility(map, outlineId, visible);
+}
+
+function setAnyLayerVisibility(
+  map: Map | null,
+  layer: LayerDto,
+  visible: boolean,
+): void {
+  if (!map) {
+    return;
+  }
+  if (layer.geometryType.includes("Polygon")) {
+    setLayerPairVisibility(map, layer, visible);
+  } else {
+    setLayerVisibility(map, "layer:" + layer.id, visible);
+  }
 }
 </script>
 
