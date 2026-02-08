@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, shallowRef } from "vue";
+import { ref, onMounted, onBeforeUnmount, shallowRef, watch } from "vue";
 import { Map, NavigationControl, type StyleSpecification } from "maplibre-gl";
 import type { LayerDto } from "@/api/layers";
 import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
@@ -28,8 +28,12 @@ import {
   setAnyLayerVisibility,
   formatBbox,
   BboxClose,
+  ensureEditSource,
+  ensureEditLayer,
+  renderEditOverlay,
 } from "@/map/maplibrelayers";
 import type { Bbox } from "@/map/maplibrelayers";
+import { useEditStore } from "@/stores/edit";
 
 const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
@@ -45,6 +49,8 @@ const isLoadingFeature = ref(false);
 const lastRequestedBbox = ref<Bbox | null>(null);
 const BBOX_EPS = 0.002;
 const MIN_ZOOM = 8;
+const editStore = useEditStore();
+let stopWatch: (() => void) | null = null;
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -98,11 +104,24 @@ onMounted(() => {
     setAnyLayerVisibility(map.value, activeLayer.value, true);
     await reloadFeatures(activeLayer.value);
     map.value?.on("moveend", scheduleReload);
+    ensureEditSource(map.value);
+    ensureEditLayer(map.value);
+    renderEditOverlay(map.value, editStore.edit);
+    stopWatch = watch([() => editStore.edit, map], ([nextEditState, m]) => {
+      if (!m) {
+        return;
+      }
+      renderEditOverlay(m, nextEditState);
+    });
   });
   console.log("Карта создана");
 });
 
 onBeforeUnmount(() => {
+  if (stopWatch) {
+    stopWatch();
+  }
+  stopWatch = null;
   map.value?.off("moveend", scheduleReload);
   map.value?.remove();
   map.value = null;

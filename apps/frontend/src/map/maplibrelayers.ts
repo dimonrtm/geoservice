@@ -1,7 +1,16 @@
 import { Map, type GeoJSONSource } from "maplibre-gl";
 import type { LayerDto } from "@/api/layers";
-import type { FeatureCollection, Geometry } from "geojson";
+import type { FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
+import { type EditSession, type EditState } from "@/stores/edit";
 export type Bbox = [number, number, number, number];
+
+const emptyFc: FeatureCollection<Geometry, GeoJsonProperties> = {
+  type: "FeatureCollection",
+  features: [],
+};
+const editPolygonSourceId = "edit:polygon";
+const editVerticesSourceId = "edit:vertices";
+
 export function ensureLayerOnMap(map: Map | null, layer: LayerDto): void {
   if (!map) {
     return;
@@ -56,6 +65,63 @@ export function ensureLayerOnMap(map: Map | null, layer: LayerDto): void {
         paint: { "line-width": 2, "line-color": "#000000" },
       });
     }
+  }
+}
+
+export function ensureEditSource(map: Map | null): void {
+  if (!map) {
+    return;
+  }
+  const editPolygonSource = map.getSource(editPolygonSourceId);
+  if (!editPolygonSource) {
+    map.addSource(editPolygonSourceId, { type: "geojson", data: emptyFc });
+  }
+  const editVerticesSource = map.getSource(editVerticesSourceId);
+  if (!editVerticesSource) {
+    map.addSource(editVerticesSourceId, { type: "geojson", data: emptyFc });
+  }
+}
+
+export function ensureEditLayer(map: Map | null): void {
+  if (!map) {
+    return;
+  }
+
+  const editPolygonFillId: string = "edit:polygon:fill";
+  const editPolygonOutlineId: string = "edit:polygon:outline";
+  const editVerticesPointId: string = "edit:vertices:point";
+  const editPolygonFill = map.getLayer(editPolygonFillId);
+  if (!editPolygonFill) {
+    map.addLayer({
+      id: editPolygonFillId,
+      type: "fill",
+      source: editPolygonSourceId,
+      paint: { "fill-color": "#FF0000", "fill-opacity": 0.25 },
+    });
+  }
+  const editPolygonOutline = map.getLayer(editPolygonOutlineId);
+  if (!editPolygonOutline) {
+    map.addLayer({
+      id: editPolygonOutlineId,
+      type: "line",
+      source: editPolygonSourceId,
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: { "line-width": 2, "line-color": "#FF0000" },
+    });
+  }
+  const editVerticesPoint = map.getLayer(editVerticesPointId);
+  if (!editVerticesPoint) {
+    map.addLayer({
+      id: editVerticesPointId,
+      type: "circle",
+      source: editVerticesSourceId,
+      paint: {
+        "circle-radius": 3,
+        "circle-stroke-width": 1,
+        "circle-color": "#FF0000",
+        "circle-stroke-color": "#FFFFFF",
+      },
+    });
   }
 }
 
@@ -149,4 +215,69 @@ export function BboxClose(a: Bbox, b: Bbox, eps: number): boolean {
     Math.abs(a[2] - b[2]) < eps &&
     Math.abs(a[3] - b[3]) < eps
   );
+}
+
+function buildPolygonFC(
+  session: EditSession,
+): FeatureCollection<Geometry, GeoJsonProperties> {
+  return {
+    type: "FeatureCollection",
+    features: [
+      {
+        type: "Feature",
+        geometry: session.draft.geometry,
+        properties: session.draft.properties,
+      },
+    ],
+  };
+}
+
+function buildVerticesFC(
+  polygon: GeoJSON.Polygon,
+): FeatureCollection<Geometry, GeoJsonProperties> {
+  const features: GeoJSON.Feature[] = [];
+  let ringIndex = 0;
+  for (const ring of polygon.coordinates) {
+    let vertexIndex = 0;
+    for (const point of ring.slice(0, ring.length - 2)) {
+      const feature: GeoJSON.Feature = {
+        type: "Feature",
+        geometry: { type: "Point", coordinates: point },
+        properties: { ring: ringIndex, i: vertexIndex },
+      };
+      features.push(feature);
+      vertexIndex++;
+    }
+    ringIndex++;
+  }
+  return { type: "FeatureCollection", features: features };
+}
+
+export function renderEditOverlay(map: Map | null, editState: EditState): void {
+  if (!map) {
+    return;
+  }
+  const editPolygonSource = map.getSource(editPolygonSourceId) as
+    | GeoJSONSource
+    | undefined;
+  const editVerticesSource = map.getSource(editVerticesSourceId) as
+    | GeoJSONSource
+    | undefined;
+  if (editState.mode === "idle") {
+    if (editPolygonSource) {
+      editPolygonSource.setData(emptyFc);
+    }
+    if (editVerticesSource) {
+      editVerticesSource.setData(emptyFc);
+    }
+  } else if (editState.mode === "editing") {
+    const polygonFc = buildPolygonFC(editState.session);
+    const verticesFc = buildVerticesFC(editState.session.draft.geometry);
+    if (editPolygonSource) {
+      editPolygonSource.setData(polygonFc);
+    }
+    if (editVerticesSource) {
+      editVerticesSource.setData(verticesFc);
+    }
+  }
 }
