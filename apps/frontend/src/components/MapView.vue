@@ -41,7 +41,7 @@ import {
 } from "@/map/maplibrelayers";
 import type { Bbox } from "@/map/maplibrelayers";
 import { useEditStore } from "@/stores/edit";
-import { type Polygon } from "geojson";
+type Polygon = import("geojson").Polygon;
 
 const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
