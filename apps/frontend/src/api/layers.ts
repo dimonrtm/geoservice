@@ -37,11 +37,18 @@ export type ApiFeatureCollectionOut<
   features: ApiFeatureOut<G, P>[];
 };
 
+type PatchFeatureIn = {
+  version: number;
+  properties: Record<string, unknown>;
+  geometry: GeoJSON.Geometry;
+};
+type DeleteFeatureIn = { version: number };
+type DeleteFeatureOut = { status: "deleted"; featureId: string };
+
 export async function fetchLayers(signal?: AbortSignal): Promise<LayerDto[]> {
   try {
     const response = await http.get("/api/v1/layers", { signal: signal });
     const raw = response.data as unknown;
-    console.log(raw);
     if (
       raw &&
       typeof raw === "object" &&
@@ -51,12 +58,7 @@ export async function fetchLayers(signal?: AbortSignal): Promise<LayerDto[]> {
     }
     throw Error("Объект неизвестного типа");
   } catch (err: unknown) {
-    if (
-      err instanceof AxiosError &&
-      typeof err?.response?.status === "number"
-    ) {
-      throw new HttpError(err?.response?.status, err?.response?.data);
-    }
+    throwHttpErrorIfAxiosError(err);
     throw err;
   }
 }
@@ -81,12 +83,47 @@ export async function fetchLayerFeaturesByBbox(args: {
     }
     throw Error("Пришел объект неожиданного типа");
   } catch (err: unknown) {
-    if (
-      err instanceof AxiosError &&
-      typeof err?.response?.status === "number"
-    ) {
-      throw new HttpError(err?.response?.status, err?.response?.data);
+    throwHttpErrorIfAxiosError(err);
+    throw err;
+  }
+}
+
+export async function patchLayerFeature(
+  layerId: string,
+  featureId: string,
+  body: PatchFeatureIn,
+  signal?: AbortSignal,
+): Promise<ApiFeatureOut> {
+  try {
+    const url = `/api/v1/layers/${layerId}/features/${featureId}`;
+    const response = await http.patch(url, body, { signal: signal });
+    const raw = response.data as unknown;
+    if (isApiFeatureOut((raw as { feature: unknown }).feature)) {
+      return (raw as { feature: unknown }).feature as ApiFeatureOut;
     }
+    throw new Error("Пришел объект неожиданного типа");
+  } catch (err: unknown) {
+    throwHttpErrorIfAxiosError(err);
+    throw err;
+  }
+}
+
+export async function deleteLayerFeature(
+  layerId: string,
+  featureId: string,
+  body: DeleteFeatureIn,
+  signal?: AbortSignal,
+): Promise<DeleteFeatureOut> {
+  try {
+    const url = `/api/v1/layers/${layerId}/features/${featureId}`;
+    const response = await http.delete(url, { data: body, signal: signal });
+    const raw = response.data as unknown;
+    if (isDeleteFeatureOut(raw)) {
+      return raw;
+    }
+    throw new Error("Пришел объект неожиданного типа");
+  } catch (err: unknown) {
+    throwHttpErrorIfAxiosError(err);
     throw err;
   }
 }
@@ -113,4 +150,26 @@ export function isApiFeatureCollectionOut(
   if (x["type"] !== "FeatureCollection") return false;
   if (!Array.isArray(x["features"])) return false;
   return x["features"].every(isApiFeatureOut);
+}
+
+function isDeleteFeatureOut(x: unknown): x is DeleteFeatureOut {
+  if (!isRecord(x)) {
+    return false;
+  }
+  if (x["status"] !== "deleted") {
+    return false;
+  }
+  if (!("featureId" in x) || typeof x["featureId"] !== "string") {
+    return false;
+  }
+  return true;
+}
+
+function throwHttpErrorIfAxiosError(error: unknown): void {
+  if (
+    error instanceof AxiosError &&
+    typeof error?.response?.status === "number"
+  ) {
+    throw new HttpError(error?.response?.status, error?.response?.data);
+  }
 }
