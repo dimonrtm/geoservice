@@ -1,8 +1,9 @@
 import { Map, type GeoJSONSource } from "maplibre-gl";
-import type { LayerDto } from "@/api/layers";
+import type { LayerDto, ApiFeatureCollectionOut } from "@/api/layers";
 import type { FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
 import { type EditSession, type EditState } from "@/stores/edit";
 export type Bbox = [number, number, number, number];
+export type VersionIndex = Record<string, number>;
 
 const emptyFc: FeatureCollection<Geometry, GeoJsonProperties> = {
   type: "FeatureCollection",
@@ -141,7 +142,7 @@ export function getCurrentBbox(map: Map | null): Bbox {
 export function setSourceData(
   map: Map | null,
   sourceId: string,
-  featureCollection: { type: "FeatureCollection"; features: unknown[] },
+  featureCollection: ApiFeatureCollectionOut,
 ) {
   if (!map) {
     return;
@@ -150,7 +151,7 @@ export function setSourceData(
   if (!source) {
     return;
   }
-  source.setData(featureCollection as FeatureCollection<Geometry>);
+  source.setData(featureCollection as unknown as FeatureCollection<Geometry>);
 }
 
 export function isValidBbox(bbox: Bbox): boolean {
@@ -239,7 +240,7 @@ function buildVerticesFC(
   let ringIndex = 0;
   for (const ring of polygon.coordinates) {
     let vertexIndex = 0;
-    for (const point of ring.slice(0, ring.length - 2)) {
+    for (const point of ring.slice(0, ring.length - 1)) {
       const feature: GeoJSON.Feature = {
         type: "Feature",
         geometry: { type: "Point", coordinates: point },
@@ -280,4 +281,14 @@ export function renderEditOverlay(map: Map | null, editState: EditState): void {
       editVerticesSource.setData(verticesFc);
     }
   }
+}
+
+export function buildVersionIndex(
+  featureCollection: ApiFeatureCollectionOut,
+): VersionIndex {
+  const versionIndex: VersionIndex = {};
+  for (const feature of featureCollection.features) {
+    versionIndex[feature.id] = feature.version;
+  }
+  return versionIndex;
 }

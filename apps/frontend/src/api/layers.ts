@@ -22,6 +22,21 @@ export class HttpError extends Error {
   }
 }
 
+export type ApiFeatureOut<
+  G extends GeoJSON.Geometry = GeoJSON.Geometry,
+  P extends GeoJSON.GeoJsonProperties = GeoJSON.GeoJsonProperties,
+> = GeoJSON.Feature<G, P> & {
+  id: string;
+  version: number;
+};
+
+export type ApiFeatureCollectionOut<
+  G extends GeoJSON.Geometry = GeoJSON.Geometry,
+  P extends GeoJSON.GeoJsonProperties = GeoJSON.GeoJsonProperties,
+> = Omit<GeoJSON.FeatureCollection<G, P>, "features"> & {
+  features: ApiFeatureOut<G, P>[];
+};
+
 export async function fetchLayers(signal?: AbortSignal): Promise<LayerDto[]> {
   try {
     const response = await http.get("/api/v1/layers", { signal: signal });
@@ -51,7 +66,7 @@ export async function fetchLayerFeaturesByBbox(args: {
   bbox: [number, number, number, number];
   limit: number;
   signal?: AbortSignal;
-}): Promise<FeatureCollection> {
+}): Promise<ApiFeatureCollectionOut> {
   try {
     let limit = Math.min(args.limit, 5000);
     limit = Math.max(limit, 1);
@@ -61,7 +76,7 @@ export async function fetchLayerFeaturesByBbox(args: {
       signal: args.signal,
     });
     const raw = response.data as unknown;
-    if (isFeatureCollection(raw)) {
+    if (isApiFeatureCollectionOut(raw)) {
       return raw;
     }
     throw Error("Пришел объект неожиданного типа");
@@ -80,21 +95,22 @@ function isRecord(raw: unknown): raw is Record<string, unknown> {
   return typeof raw === "object" && raw !== null;
 }
 
-function isFeatureCollection(raw: unknown): raw is FeatureCollection {
-  if (!isRecord(raw)) {
+function isApiFeatureOut(x: unknown): x is ApiFeatureOut {
+  if (!isRecord(x)) return false;
+  if (x["type"] !== "Feature") return false;
+  if (typeof x["id"] !== "string") return false;
+  if (typeof x["version"] !== "number" || !Number.isFinite(x["version"]))
     return false;
-  }
-  if (!("type" in raw)) {
-    return false;
-  }
-  if (!("features" in raw)) {
-    return false;
-  }
-  if (typeof raw["type"] !== "string" || raw["type"] !== "FeatureCollection") {
-    return false;
-  }
-  if (!Array.isArray(raw["features"])) {
-    return false;
-  }
+  if (!("geometry" in x) || !isRecord(x["geometry"])) return false;
+  if (!("properties" in x) || !isRecord(x["properties"])) return false;
   return true;
+}
+
+export function isApiFeatureCollectionOut(
+  x: unknown,
+): x is ApiFeatureCollectionOut {
+  if (!isRecord(x)) return false;
+  if (x["type"] !== "FeatureCollection") return false;
+  if (!Array.isArray(x["features"])) return false;
+  return x["features"].every(isApiFeatureOut);
 }

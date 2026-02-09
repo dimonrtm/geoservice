@@ -15,7 +15,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, shallowRef, watch } from "vue";
-import { Map, NavigationControl, type StyleSpecification } from "maplibre-gl";
+import {
+  Map,
+  NavigationControl,
+  type StyleSpecification,
+  type MapLayerMouseEvent,
+} from "maplibre-gl";
 import type { LayerDto } from "@/api/layers";
 import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -31,9 +36,12 @@ import {
   ensureEditSource,
   ensureEditLayer,
   renderEditOverlay,
+  type VersionIndex,
+  buildVersionIndex,
 } from "@/map/maplibrelayers";
 import type { Bbox } from "@/map/maplibrelayers";
 import { useEditStore } from "@/stores/edit";
+import { type Polygon } from "geojson";
 
 const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
@@ -51,6 +59,7 @@ const BBOX_EPS = 0.002;
 const MIN_ZOOM = 8;
 const editStore = useEditStore();
 let stopWatch: (() => void) | null = null;
+let versionIndex: VersionIndex | null = null;
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -104,6 +113,7 @@ onMounted(() => {
     setAnyLayerVisibility(map.value, activeLayer.value, true);
     await reloadFeatures(activeLayer.value);
     map.value?.on("moveend", scheduleReload);
+    map.value?.on("click", `layer:${activeLayer.value.id}`, onLayerClick);
     ensureEditSource(map.value);
     ensureEditLayer(map.value);
     renderEditOverlay(map.value, editStore.edit);
@@ -123,6 +133,7 @@ onBeforeUnmount(() => {
   }
   stopWatch = null;
   map.value?.off("moveend", scheduleReload);
+  map.value?.off("click", `layer:${activeLayer.value?.id}`, onLayerClick);
   map.value?.remove();
   map.value = null;
   if (layerAbortController.value) {
@@ -176,6 +187,7 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
       signal: featuresController.signal,
     });
     setSourceData(map.value, getSourceId(layer), featureCollection);
+    versionIndex = buildVersionIndex(featureCollection);
     const n = featureCollection.features.length;
     if (n == 0) {
       labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | пусто | limit ${limit}`;
@@ -233,16 +245,58 @@ async function onChangeLayer(): Promise<void> {
   }
   if (activeLayer.value) {
     setAnyLayerVisibility(m, activeLayer.value, false);
+    m.off("click", `layer:${activeLayer.value.id}`, onLayerClick);
   }
   activeLayer.value = layer;
   ensureLayerOnMap(map.value, layer);
   setAnyLayerVisibility(m, activeLayer.value, true);
+  m.on("click", `layer:${layer.id}`, onLayerClick);
   featuresAbortController.value?.abort();
   if (moveTimer !== null) {
     clearTimeout(moveTimer);
     moveTimer = null;
   }
   await reloadFeatures(layer);
+}
+
+function onLayerClick(e: MapLayerMouseEvent): void {
+  if (editStore.edit.mode === "editing" && editStore.edit.dirty) {
+    return;
+  }
+  if (!e.features?.length || e.features?.length <= 0) {
+    return;
+  }
+  const feature = e.features[0];
+  if (!feature || !feature.properties || !feature.geometry) {
+    return;
+  }
+  const featureId =
+    typeof feature.id === "string" || typeof feature.id === "number"
+      ? String(feature.id)
+      : null;
+  if (!featureId) {
+    return;
+  }
+  if (!versionIndex) {
+    return;
+  }
+  const version = versionIndex[featureId];
+  if (version === undefined) {
+    return;
+  }
+  if (!activeLayer.value) {
+    return;
+  }
+  if (feature.geometry.type === "Polygon") {
+    const polygon = feature.geometry as Polygon;
+    editStore.startEditing({
+      layerId: activeLayer.value.id,
+      featureId: featureId,
+      version: version,
+      properties: feature.properties,
+      geometry: polygon,
+    });
+  }
 }
 </script>
 
