@@ -9,6 +9,7 @@
   </div>
   <div>
     <button type="button" @click="saveChange">Сохранить</button>
+    <button type="button" @click="deleteFeature">Удалить</button>
   </div>
   <div class="mapRoot">
     <div class="badge">{{ labelText }}</div>
@@ -304,6 +305,10 @@ function onLayerClick(e: MapLayerMouseEvent): void {
 
 async function saveChange(): Promise<void> {
   await editStore.saveEditing();
+}
+
+async function deleteFeature(): Promise<void> {
+  await editStore.deleteEditing();
 }
 </script>
 

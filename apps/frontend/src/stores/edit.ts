@@ -1,5 +1,9 @@
 import { defineStore } from "pinia";
-import { fetchLayerFeatureById, patchLayerFeature } from "@/api/layers";
+import {
+  fetchLayerFeatureById,
+  patchLayerFeature,
+  deleteLayerFeature,
+} from "@/api/layers";
 import { HttpError } from "@/api/layers";
 import { isVersionMismatchBody } from "@/parsing/complex_errors";
 import { isRecord, isString } from "@/parsing/common";
@@ -143,41 +147,24 @@ export const useEditStore = defineStore("edit", {
         };
       } catch (err: unknown) {
         if (err instanceof HttpError) {
-          const status: number = err.status;
-          const body: unknown = err.body;
-          if (status === 422) {
-            if (isRecord(body) && isString(body["error"])) {
-              this.edit.lastError = {
-                ok: false,
-                code: "INVALID_COORDINATES",
-                message: body["error"],
-              };
-            } else {
-              this.edit.lastError = {
-                ok: false,
-                code: "INVALID_COORDINATES",
-                message: "ValidationError(422)",
-              };
-            }
-            return;
-          }
-          if (status === 409) {
-            if (isVersionMismatchBody(body)) {
-              this.edit.lastError = { kind: "conflict", body: body };
-              const session = this.edit.session;
-              const feature = await fetchLayerFeatureById(
-                session.layerId,
-                session.featureId,
-              );
-              this.startEditing({
-                layerId: session.layerId,
-                featureId: feature.id,
-                version: feature.version,
-                properties: feature.properties as Record<string, unknown>,
-                geometry: feature.geometry as GeoJSON.Polygon,
-              });
-            }
-          }
+          await this.handleHttpError(err);
+        }
+      }
+    },
+    async deleteEditing(): Promise<void> {
+      if (this.edit.mode !== "editing") {
+        return;
+      }
+      try {
+        await deleteLayerFeature(
+          this.edit.session.layerId,
+          this.edit.session.featureId,
+          { version: this.edit.session.version },
+        );
+        this.edit = { mode: "idle" };
+      } catch (err: unknown) {
+        if (err instanceof HttpError) {
+          await this.handleHttpError(err);
         }
       }
     },
@@ -189,6 +176,45 @@ export const useEditStore = defineStore("edit", {
         return this.edit.session;
       }
       return null;
+    },
+    async handleHttpError(err: HttpError): Promise<void> {
+      if (this.edit.mode !== "editing") {
+        return;
+      }
+      const status: number = err.status;
+      const body: unknown = err.body;
+      if (status === 422) {
+        if (isRecord(body) && isString(body["error"])) {
+          this.edit.lastError = {
+            ok: false,
+            code: "INVALID_COORDINATES",
+            message: body["error"],
+          };
+        } else {
+          this.edit.lastError = {
+            ok: false,
+            code: "INVALID_COORDINATES",
+            message: "ValidationError(422)",
+          };
+        }
+        return;
+      }
+      if (status === 409) {
+        if (isVersionMismatchBody(body)) {
+          this.edit.lastError = { kind: "conflict", body: body };
+          const feature = await fetchLayerFeatureById(
+            this.edit.session.layerId,
+            this.edit.session.featureId,
+          );
+          this.startEditing({
+            layerId: this.edit.session.layerId,
+            featureId: feature.id,
+            version: feature.version,
+            properties: feature.properties as Record<string, unknown>,
+            geometry: feature.geometry as GeoJSON.Polygon,
+          });
+        }
+      }
     },
   },
 });
