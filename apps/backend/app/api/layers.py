@@ -94,3 +94,11 @@ async def delete_feature(
     feature_service: FeatureService = Depends(get_feature_service),
 ) -> DeleteFeatureResponse:
     return await feature_service.delete_feature(layer_id, feature_id, request)
+
+
+@layers_router.get("/{layer_id}/features/{feature_id}", response_model=FeatureOut)
+async def get_feature(
+    layer_id: UUID, feature_id: UUID, feature_service: FeatureService = Depends(get_feature_service)
+) -> FeatureOut:
+    feature = await feature_service.get_feature(layer_id, feature_id)
+    return feature

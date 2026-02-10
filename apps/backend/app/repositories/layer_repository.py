@@ -115,6 +115,17 @@ class LayerRepository:
         deleted_id = res.scalar_one_or_none()
         return (deleted_id is not None, model_type)
 
+    async def get_feature(self, layer: Layer, feature_id: UUID):
+        model_type = get_layer_feature_model(layer)
+        stmt = select(
+            model_type.id.label("id"),
+            model_type.version.label("version"),
+            model_type.properties.label("properties"),
+            func.ST_AsGeoJSON(model_type.geom).label("geometry_json"),
+        ).where(model_type.id == feature_id)
+        res = await self.session.execute(stmt)
+        return res.one_or_none()
+
     async def get_layers(self):
         stmt = select(Layer)
         res = await self.session.execute(stmt)

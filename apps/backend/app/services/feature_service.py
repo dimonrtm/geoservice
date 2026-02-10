@@ -123,6 +123,18 @@ class FeatureService:
                 await self.version_error_handler(feature_id, request.version, model_type)
             return DeleteFeatureResponse(featureId=feature_id)
 
+    async def get_feature(self, layer_id: UUID, feature_id: UUID) -> FeatureOut:
+        layer = await self.layer_repository.get_layer_by_id(layer_id)
+        if layer is None:
+            raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
+        row = await self.layer_repository.get_feature(layer, feature_id)
+        return self.to_feature_out(
+            feature_id=row.id,
+            version=row.version,
+            properties=row.properties,
+            geometry_json=row.geometry_json,
+        )
+
     def normalize_limit(self, limit_value: int | None) -> int:
         if limit_value is None:
             limit_value = 500
