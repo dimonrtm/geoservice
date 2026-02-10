@@ -7,6 +7,9 @@
       </option>
     </select>
   </div>
+  <div>
+    <button type="button" @click="saveChange">Сохранить</button>
+  </div>
   <div class="mapRoot">
     <div class="badge">{{ labelText }}</div>
     <div ref="mapEl" class="mapCanvas"></div>
@@ -297,6 +300,10 @@ function onLayerClick(e: MapLayerMouseEvent): void {
       geometry: polygon,
     });
   }
+}
+
+async function saveChange(): Promise<void> {
+  await editStore.saveEditing();
 }
 </script>
 

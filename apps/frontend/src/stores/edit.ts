@@ -1,4 +1,8 @@
 import { defineStore } from "pinia";
+import { fetchLayerFeatureById, patchLayerFeature } from "@/api/layers";
+import { HttpError } from "@/api/layers";
+import { isVersionMismatchBody } from "@/parsing/complex_errors";
+import { isRecord, isString } from "@/parsing/common";
 
 type DraftFeature = {
   properties: Record<string, unknown>;
@@ -15,7 +19,7 @@ export type EditState =
   | {
       mode: "editing";
       session: EditSession;
-      lastError?: ValidationError;
+      lastError?: EditLastError;
       dirty: boolean;
     };
 type ValidationOk = { ok: true; value: GeoJSON.Polygon };
@@ -29,6 +33,21 @@ type ValidationError = {
   message: string;
 };
 type ValidationResult = ValidationOk | ValidationError;
+
+export type VersionMismatchBody = {
+  type: "VERSION_MISMATCH";
+  featureId: string;
+  requestVersion: number;
+  currentVersion: number;
+  message: string;
+};
+
+export type EditConflictError = {
+  kind: "conflict";
+  body: VersionMismatchBody;
+};
+
+export type EditLastError = ValidationError | EditConflictError;
 
 export const useEditStore = defineStore("edit", {
   state: () => ({
@@ -90,6 +109,76 @@ export const useEditStore = defineStore("edit", {
     cancelEditing(): void {
       if (this.isEditing()) {
         this.edit = { mode: "idle" };
+      }
+    },
+    async saveEditing(): Promise<void> {
+      if (this.edit.mode !== "editing") {
+        return;
+      }
+      const session: EditSession = this.edit.session;
+      if (this.edit.dirty === false) {
+        return;
+      }
+      try {
+        const feature = await patchLayerFeature(
+          session.layerId,
+          session.featureId,
+          {
+            version: session.version,
+            properties: session.draft.properties,
+            geometry: session.draft.geometry,
+          },
+        );
+        const draft = {
+          properties: cloneProperties(
+            feature.properties as Record<string, unknown>,
+          ),
+          geometry: cloneGeometry(feature.geometry as GeoJSON.Polygon),
+        };
+        this.edit = {
+          ...this.edit,
+          session: { ...session, version: feature.version, draft: draft },
+          dirty: false,
+          lastError: undefined,
+        };
+      } catch (err: unknown) {
+        if (err instanceof HttpError) {
+          const status: number = err.status;
+          const body: unknown = err.body;
+          if (status === 422) {
+            if (isRecord(body) && isString(body["error"])) {
+              this.edit.lastError = {
+                ok: false,
+                code: "INVALID_COORDINATES",
+                message: body["error"],
+              };
+            } else {
+              this.edit.lastError = {
+                ok: false,
+                code: "INVALID_COORDINATES",
+                message: "ValidationError(422)",
+              };
+            }
+            return;
+          }
+          if (status === 409) {
+            if (isVersionMismatchBody(body)) {
+              this.edit.lastError = { kind: "conflict", body: body };
+              const session = this.edit.session;
+              const feature = await fetchLayerFeatureById(
+                session.layerId,
+                session.featureId,
+              );
+              this.startEditing({
+                layerId: session.layerId,
+                featureId: feature.id,
+                version: feature.version,
+                properties: feature.properties as Record<string, unknown>,
+                geometry: feature.geometry as GeoJSON.Polygon,
+              });
+            }
+          }
+        }
       }
     },
     isEditing(): boolean {

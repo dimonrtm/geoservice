@@ -1,5 +1,10 @@
 import { http } from "@/api/http";
 import { AxiosError } from "axios";
+import {
+  isApiFeatureCollectionOut,
+  isApiFeatureOut,
+  isDeleteFeatureOut,
+} from "@/parsing/features";
 export type LayerDto = {
   id: string;
   name: string;
@@ -37,13 +42,13 @@ export type ApiFeatureCollectionOut<
   features: ApiFeatureOut<G, P>[];
 };
 
-type PatchFeatureIn = {
+export type PatchFeatureIn = {
   version: number;
   properties: Record<string, unknown>;
   geometry: GeoJSON.Geometry;
 };
-type DeleteFeatureIn = { version: number };
-type DeleteFeatureOut = { status: "deleted"; featureId: string };
+export type DeleteFeatureIn = { version: number };
+export type DeleteFeatureOut = { status: "deleted"; featureId: string };
 
 export async function fetchLayers(signal?: AbortSignal): Promise<LayerDto[]> {
   try {
@@ -128,41 +133,22 @@ export async function deleteLayerFeature(
   }
 }
 
-function isRecord(raw: unknown): raw is Record<string, unknown> {
-  return typeof raw === "object" && raw !== null;
-}
-
-function isApiFeatureOut(x: unknown): x is ApiFeatureOut {
-  if (!isRecord(x)) return false;
-  if (x["type"] !== "Feature") return false;
-  if (typeof x["id"] !== "string") return false;
-  if (typeof x["version"] !== "number" || !Number.isFinite(x["version"]))
-    return false;
-  if (!("geometry" in x) || !isRecord(x["geometry"])) return false;
-  if (!("properties" in x) || !isRecord(x["properties"])) return false;
-  return true;
-}
-
-export function isApiFeatureCollectionOut(
-  x: unknown,
-): x is ApiFeatureCollectionOut {
-  if (!isRecord(x)) return false;
-  if (x["type"] !== "FeatureCollection") return false;
-  if (!Array.isArray(x["features"])) return false;
-  return x["features"].every(isApiFeatureOut);
-}
-
-function isDeleteFeatureOut(x: unknown): x is DeleteFeatureOut {
-  if (!isRecord(x)) {
-    return false;
+export async function fetchLayerFeatureById(
+  layerId: string,
+  featureId: string,
+): Promise<ApiFeatureOut> {
+  try {
+    const url = `/api/v1/layers/${layerId}/features/${featureId}`;
+    const response = await http.get(url);
+    const raw = response.data as unknown;
+    if (isApiFeatureOut(raw)) {
+      return raw;
+    }
+    throw new Error("Пришел объект неизвестного типа");
+  } catch (err: unknown) {
+    throwHttpErrorIfAxiosError(err);
+    throw err;
   }
-  if (x["status"] !== "deleted") {
-    return false;
-  }
-  if (!("featureId" in x) || typeof x["featureId"] !== "string") {
-    return false;
-  }
-  return true;
 }
 
 function throwHttpErrorIfAxiosError(error: unknown): void {
