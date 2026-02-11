@@ -308,7 +308,10 @@ async function saveChange(): Promise<void> {
 }
 
 async function deleteFeature(): Promise<void> {
-  await editStore.deleteEditing();
+  const deleted = await editStore.deleteEditing();
+  if (editStore.edit.mode === "idle" && activeLayer.value && deleted) {
+    await reloadFeatures(activeLayer.value);
+  }
 }
 </script>
 

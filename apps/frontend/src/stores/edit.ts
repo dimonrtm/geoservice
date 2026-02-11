@@ -151,9 +151,9 @@ export const useEditStore = defineStore("edit", {
         }
       }
     },
-    async deleteEditing(): Promise<void> {
+    async deleteEditing(): Promise<boolean> {
       if (this.edit.mode !== "editing") {
-        return;
+        return false;
       }
       try {
         await deleteLayerFeature(
@@ -162,10 +162,13 @@ export const useEditStore = defineStore("edit", {
           { version: this.edit.session.version },
         );
         this.edit = { mode: "idle" };
+        return true;
       } catch (err: unknown) {
         if (err instanceof HttpError) {
           await this.handleHttpError(err);
+          return this.edit.mode === "idle";
         }
+        throw err;
       }
     },
     isEditing(): boolean {
@@ -202,17 +205,27 @@ export const useEditStore = defineStore("edit", {
       if (status === 409) {
         if (isVersionMismatchBody(body)) {
           this.edit.lastError = { kind: "conflict", body: body };
-          const feature = await fetchLayerFeatureById(
-            this.edit.session.layerId,
-            this.edit.session.featureId,
-          );
-          this.startEditing({
-            layerId: this.edit.session.layerId,
-            featureId: feature.id,
-            version: feature.version,
-            properties: feature.properties as Record<string, unknown>,
-            geometry: feature.geometry as GeoJSON.Polygon,
-          });
+          try {
+            const feature = await fetchLayerFeatureById(
+              this.edit.session.layerId,
+              this.edit.session.featureId,
+            );
+            this.startEditing({
+              layerId: this.edit.session.layerId,
+              featureId: feature.id,
+              version: feature.version,
+              properties: feature.properties as Record<string, unknown>,
+              geometry: feature.geometry as GeoJSON.Polygon,
+            });
+          } catch (err: unknown) {
+            if (err instanceof HttpError) {
+              if (err.status === 404) {
+                this.edit = { mode: "idle" };
+                return;
+              }
+            }
+            throw err;
+          }
         }
       }
     },
