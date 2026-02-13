@@ -262,7 +262,6 @@ async function onChangeLayer(): Promise<void> {
   if (!m || !layerId) {
     return;
   }
-  console.log(layerId);
   const layer = layers.value.find((layer) => layer.id === layerId) ?? null;
   if (!layer) {
     labelText.value = "Слой ненайден в списке";
@@ -271,6 +270,7 @@ async function onChangeLayer(): Promise<void> {
   if (activeLayer.value) {
     setAnyLayerVisibility(m, activeLayer.value, false);
     m.off("click", `layer:${activeLayer.value.id}`, onLayerClick);
+    editStore.edit = {mode: "idle"};
   }
   activeLayer.value = layer;
   ensureLayerOnMap(map.value, layer);
