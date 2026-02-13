@@ -1,29 +1,43 @@
 <template>
-  <div class="modal">
-    <h3>Выберите слой</h3>
-    <select v-model="activeLayerId" @change="onChangeLayer">
-      <option v-for="layer in layers" :key="layer.id" :value="layer.id">
-        {{ layer.title ?? layer.name }}
-      </option>
-    </select>
-  </div>
-  <div>
-    <button type="button" @click="saveChange">Сохранить</button>
-    <button type="button" @click="deleteFeature">Удалить</button>
-  </div>
-  <div class="mapRoot">
-    <div class="badge">{{ labelText }}</div>
-    <div ref="mapEl" class="mapCanvas"></div>
+  <div class="page">
+    <div class="toolbar">
+      <div class="modal">
+        <h3>Выберите слой</h3>
+        <select v-model="activeLayerId" @change="onChangeLayer">
+          <option v-for="layer in layers" :key="layer.id" :value="layer.id">
+            {{ layer.title ?? layer.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="actions">
+        <button type="button" @click="saveChange">Сохранить</button>
+        <button type="button" @click="deleteFeature">Удалить</button>
+      </div>
+    </div>
+
+    <div class="mapRoot">
+      <div class="badge">{{ labelText }}</div>
+      <div ref="mapEl" class="mapCanvas"></div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, shallowRef, watch } from "vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  shallowRef,
+  watch,
+  nextTick,
+} from "vue";
 import {
   Map,
   NavigationControl,
   type StyleSpecification,
   type MapLayerMouseEvent,
+  type MapMouseEvent,
 } from "maplibre-gl";
 import type { LayerDto } from "@/api/layers";
 import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
@@ -40,13 +54,12 @@ import {
   ensureEditSource,
   ensureEditLayer,
   renderEditOverlay,
-  type VersionIndex,
-  buildVersionIndex,
+  movePolygonVertex,
 } from "@/map/maplibrelayers";
 import type { Bbox } from "@/map/maplibrelayers";
 import { useEditStore } from "@/stores/edit";
+import { isFiniteNumber, toFiniteNumber } from "@/parsing/common";
 type Polygon = import("geojson").Polygon;
-
 const mapEl = ref<HTMLDivElement | null>(null);
 const map = shallowRef<Map | null>(null);
 const layers = ref<LayerDto[]>([]);
@@ -63,7 +76,9 @@ const BBOX_EPS = 0.002;
 const MIN_ZOOM = 8;
 const editStore = useEditStore();
 let stopWatch: (() => void) | null = null;
-let versionIndex: VersionIndex | null = null;
+let dragging = false;
+let dragRing = 0;
+let dragIndex = 0;
 const style: StyleSpecification = {
   version: 8,
   sources: {
@@ -83,7 +98,7 @@ const style: StyleSpecification = {
   ],
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (!mapEl.value) {
     return;
   }
@@ -91,10 +106,14 @@ onMounted(() => {
     container: mapEl.value,
     style,
     center: [70.1902, 52.937],
-    zoom: 7,
+    zoom: 8,
   });
   map.value.addControl(new NavigationControl(), "top-right");
+  await nextTick();
+  map.value.resize();
   map.value.once("load", async () => {
+    await nextTick();
+    map.value?.resize();
     labelText.value = "Карта готова. Загружаю слои...";
     const controller = new AbortController();
     layerAbortController.value = controller;
@@ -120,6 +139,7 @@ onMounted(() => {
     map.value?.on("click", `layer:${activeLayer.value.id}`, onLayerClick);
     ensureEditSource(map.value);
     ensureEditLayer(map.value);
+    map.value?.on("mousedown", "edit:vertices:point", onVertexDown);
     renderEditOverlay(map.value, editStore.edit);
     stopWatch = watch([() => editStore.edit, map], ([nextEditState, m]) => {
       if (!m) {
@@ -138,6 +158,8 @@ onBeforeUnmount(() => {
   stopWatch = null;
   map.value?.off("moveend", scheduleReload);
   map.value?.off("click", `layer:${activeLayer.value?.id}`, onLayerClick);
+  map.value?.off("mousedown", "edit:vertices:point", onVertexDown);
+  map.value?.off("mousemove", onVertexMove);
   map.value?.remove();
   map.value = null;
   if (layerAbortController.value) {
@@ -191,7 +213,6 @@ async function reloadFeatures(layer: LayerDto): Promise<void> {
       signal: featuresController.signal,
     });
     setSourceData(map.value, getSourceId(layer), featureCollection);
-    versionIndex = buildVersionIndex(featureCollection);
     const n = featureCollection.features.length;
     if (n == 0) {
       labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | пусто | limit ${limit}`;
@@ -255,11 +276,14 @@ async function onChangeLayer(): Promise<void> {
   ensureLayerOnMap(map.value, layer);
   setAnyLayerVisibility(m, activeLayer.value, true);
   m.on("click", `layer:${layer.id}`, onLayerClick);
+  m.off("mousemove", onVertexMove);
+  dragging = false;
   featuresAbortController.value?.abort();
   if (moveTimer !== null) {
     clearTimeout(moveTimer);
     moveTimer = null;
   }
+  lastRequestedBbox.value = null;
   await reloadFeatures(layer);
 }
 
@@ -274,18 +298,14 @@ function onLayerClick(e: MapLayerMouseEvent): void {
   if (!feature || !feature.properties || !feature.geometry) {
     return;
   }
-  const featureId =
-    typeof feature.id === "string" || typeof feature.id === "number"
-      ? String(feature.id)
-      : null;
+  const props = feature.properties as Record<string, unknown>;
+  const featureId = typeof props["__id"] === "string" ? props["__id"] : null;
   if (!featureId) {
     return;
   }
-  if (!versionIndex) {
-    return;
-  }
-  const version = versionIndex[featureId];
-  if (version === undefined) {
+  const v = props["__version"];
+  const version = isFiniteNumber(v) ? (v as number) : null;
+  if (version === null) {
     return;
   }
   if (!activeLayer.value) {
@@ -297,7 +317,7 @@ function onLayerClick(e: MapLayerMouseEvent): void {
       layerId: activeLayer.value.id,
       featureId: featureId,
       version: version,
-      properties: feature.properties,
+      properties: props,
       geometry: polygon,
     });
   }
@@ -310,21 +330,107 @@ async function saveChange(): Promise<void> {
 async function deleteFeature(): Promise<void> {
   const deleted = await editStore.deleteEditing();
   if (editStore.edit.mode === "idle" && activeLayer.value && deleted) {
+    lastRequestedBbox.value = null;
     await reloadFeatures(activeLayer.value);
   }
+}
+
+function onVertexDown(e: MapLayerMouseEvent): void {
+  if (editStore.edit.mode !== "editing") {
+    return;
+  }
+  const m = map.value;
+  if (!m) {
+    return;
+  }
+  e.preventDefault();
+  if (!e.features?.length || !e.features[0]) {
+    return;
+  }
+  const feature = e.features[0];
+  if (feature.properties["ring"] === undefined) {
+    return;
+  }
+  const ring = toFiniteNumber(feature.properties["ring"]);
+  if (feature.properties["i"] === undefined) {
+    return;
+  }
+  const i = toFiniteNumber(feature.properties["i"]);
+  if (ring === null || i === null) {
+    return;
+  }
+  dragging = true;
+  dragRing = ring;
+  dragIndex = i;
+  m.dragPan.disable();
+  m.on("mousemove", onVertexMove);
+  m.once("mouseup", onVertexUp);
+}
+
+function onVertexMove(e: MapMouseEvent): void {
+  if (!dragging) {
+    return;
+  }
+  if (editStore.edit.mode !== "editing") {
+    return;
+  }
+  const session = editStore.edit.session;
+  const lng = e.lngLat.lng;
+  const lat = e.lngLat.lat;
+  const nextGeometry = movePolygonVertex(
+    session.draft.geometry,
+    dragRing,
+    dragIndex,
+    lng,
+    lat,
+  );
+  editStore.updateDraft({
+    properties: session.draft.properties,
+    geometry: nextGeometry,
+  });
+}
+
+function onVertexUp(): void {
+  if (!map.value) {
+    return;
+  }
+  dragging = false;
+  map.value.off("mousemove", onVertexMove);
+  map.value.dragPan.enable();
 }
 </script>
 
 <style scoped>
-.mapRoot {
-  position: relative;
+.page {
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  width: 100%;
   min-height: 0;
 }
+.toolbar {
+  flex: 0 0 auto;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  position: relative;
+  z-index: 10;
+}
+.modal h3 {
+  margin: 0 0 6px 0;
+  font-size: 16px;
+}
+.actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+.mapRoot {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+}
 .mapCanvas {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
 }
 .badge {
   position: absolute;

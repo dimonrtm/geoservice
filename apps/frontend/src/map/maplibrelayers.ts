@@ -139,6 +139,24 @@ export function getCurrentBbox(map: Map | null): Bbox {
   ];
 }
 
+function toMapLibreFeatureCollection(
+  featureCollection: ApiFeatureCollectionOut,
+): GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties> {
+  return {
+    type: "FeatureCollection",
+    features: featureCollection.features.map((feature) => ({
+      type: "Feature",
+      id: feature.id,
+      geometry: feature.geometry as GeoJSON.Geometry,
+      properties: {
+        ...(feature.properties ?? {}),
+        __id: feature.id,
+        __version: feature.version,
+      } as GeoJSON.GeoJsonProperties,
+    })),
+  };
+}
+
 export function setSourceData(
   map: Map | null,
   sourceId: string,
@@ -151,7 +169,7 @@ export function setSourceData(
   if (!source) {
     return;
   }
-  source.setData(featureCollection as unknown as FeatureCollection<Geometry>);
+  source.setData(toMapLibreFeatureCollection(featureCollection));
 }
 
 export function isValidBbox(bbox: Bbox): boolean {
@@ -283,12 +301,27 @@ export function renderEditOverlay(map: Map | null, editState: EditState): void {
   }
 }
 
-export function buildVersionIndex(
-  featureCollection: ApiFeatureCollectionOut,
-): VersionIndex {
-  const versionIndex: VersionIndex = {};
-  for (const feature of featureCollection.features) {
-    versionIndex[feature.id] = feature.version;
+export function movePolygonVertex(
+  polygon: GeoJSON.Polygon,
+  ring: number,
+  i: number,
+  lng: number,
+  lat: number,
+): GeoJSON.Polygon {
+  const nextCoords: GeoJSON.Position[][] = polygon.coordinates.map((ring) =>
+    ring.map((point) => point.slice() as GeoJSON.Position),
+  );
+  const nextRing = nextCoords[ring];
+  if (!nextRing) {
+    return polygon;
   }
-  return versionIndex;
+  nextRing[i] = [lng, lat];
+  if (i === 0 && nextRing.length >= 1) {
+    nextRing[nextRing.length - 1] = [lng, lat];
+  }
+  const out: GeoJSON.Polygon = { type: "Polygon", coordinates: nextCoords };
+  if (polygon.bbox) {
+    out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
+  }
+  return out;
 }
