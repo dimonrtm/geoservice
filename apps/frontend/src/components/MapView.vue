@@ -270,7 +270,7 @@ async function onChangeLayer(): Promise<void> {
   if (activeLayer.value) {
     setAnyLayerVisibility(m, activeLayer.value, false);
     m.off("click", `layer:${activeLayer.value.id}`, onLayerClick);
-    editStore.edit = {mode: "idle"};
+    editStore.edit = { mode: "idle" };
   }
   activeLayer.value = layer;
   ensureLayerOnMap(map.value, layer);
