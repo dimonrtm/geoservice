@@ -7,36 +7,13 @@ Created on Thu Jan  8 22:52:16 2026
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import os
 from schemas.dev_login_in import DevLoginIn
 from services.auth_service import AuthService
 from .deps import get_auth_service
 from typing import Any
 from datetime import datetime, timezone, timedelta
 from jose import jwt, JWTError
-
-
-def env_bool(name: str, default: bool = False) -> bool:
-    v = os.getenv(name)
-    if v is None:
-        return default
-    return v.strip().lower() in {"1", "true", "yes", "y", "on"}
-
-
-def env_int(name: str, default: int) -> int:
-    v = os.getenv(name)
-    if v is None or v.strip() == "":
-        return default
-    try:
-        return int(v)
-    except ValueError:
-        return default
-
-
-DEV_MODE = env_bool("DEV_MODE", True)
-JWT_SECRET = os.getenv("JWT_SECRET", "CHANGE_ME_IN_ENV")
-JWT_ALG = os.getenv("JWT_ALG", "HS256")
-ACCESS_TOKEN_TTL_MIN = env_int("ACCESS_TOKEN_TTL_MIN", 30)
+from core.settings import settings
 
 
 bearer = HTTPBearer(auto_error=False)
@@ -49,14 +26,14 @@ def create_access_token(user_id: str, role: str) -> str:
         "sub": user_id,
         "role": role,
         "iat": int(now.timestamp()),
-        "exp": int((now + timedelta(minutes=ACCESS_TOKEN_TTL_MIN)).timestamp()),
+        "exp": int((now + timedelta(minutes=settings.access_token_ttl_min)).timestamp()),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_alg)
 
 
 def decode_token(token: str) -> dict:
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_alg])
         return payload
     except JWTError:
         raise HTTPException(
@@ -91,16 +68,15 @@ def require_editor(user: dict = Depends(get_current_user)) -> dict:
     return user
 
 
-@auth_router.post("/dev-login")
-async def dev_login(
-    body: DevLoginIn, auth_service: AuthService = Depends(get_auth_service)
-) -> dict[str, Any]:
-    if not DEV_MODE:
-        print(DEV_MODE)
-        raise HTTPException(status_code=404, detail="not found DEV_MODE")
-    user = await auth_service.get_dev_user(body)
-    token = create_access_token(str(user.id), user.role.value)
-    return {"access_token": token, "token_type": "bearer"}
+if settings.dev_auth_enabled:
+
+    @auth_router.post("/dev-login")
+    async def dev_login(
+        body: DevLoginIn, auth_service: AuthService = Depends(get_auth_service)
+    ) -> dict[str, Any]:
+        user = await auth_service.get_dev_user(body)
+        token = create_access_token(str(user.id), user.role.value)
+        return {"access_token": token, "token_type": "bearer"}
 
 
 @auth_router.get("/me")

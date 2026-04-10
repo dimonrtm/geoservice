@@ -17,16 +17,13 @@ from domain.exceptions.layer_not_found_exception import LayerNotFoundException
 from domain.exceptions.unknown_storage_table_error import UnknownStorageTableError
 from domain.exceptions.version_mismatch_exception import VersionMismatchException
 from schemas.patch_feature_conflict_response import PatchFeatureConflictResponse
-import os
+from core.settings import settings
 
 app = FastAPI(lifespan=lifespan)
 
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
-origins = CORS_ORIGINS.split(",")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.cors_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type"],

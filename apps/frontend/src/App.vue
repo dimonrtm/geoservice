@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import CheckAuthComponent from "./components/CheckAuthComponent.vue";
 import MapPageView from "./components/MapPageView.vue";
+import { appConfig } from "@/config/app";
 import "./assets/main.css";
 </script>
 
 <template>
   <div class="page">
-    <div class="topPanel">
+    <div v-if="appConfig.enableDevAuth" class="topPanel">
       <CheckAuthComponent />
     </div>
     <div class="content">
