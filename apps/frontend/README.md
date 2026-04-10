@@ -1,5 +1,25 @@
-# Vue 3 + TypeScript + Vite
+# Frontend
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Frontend GeoService собран на `Vue 3 + TypeScript + Vite`.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+Основные зоны кода:
+
+- `src/components` — UI-компоненты страницы и карты;
+- `src/composables` — orchestration-логика карты и загрузки данных;
+- `src/map` — map/render helper-ы и геометрические преобразования;
+- `src/api` — HTTP-клиент и вызовы backend API;
+- `src/stores` — Pinia stores;
+- `src/config` — frontend feature flags и конфигурация.
+
+## Команды
+
+- `npm run dev`
+- `npm run lint`
+- `npm run typecheck`
+- `npm run format:check`
+- `npm run build`
+
+## Переменные окружения
+
+- `VITE_API_BASE_URL` — адрес backend API
+- `VITE_ENABLE_DEV_AUTH` — показывает или скрывает dev auth panel

@@ -1,48 +1,84 @@
-# Описание
-Эксперимент по Vibe Coding. Цель: Итеративно создать сложное приложение на фреймворке с которым я никогда не работал и даже не видел.
-MVP GeoService: загрузка GeoJSON, хранение и отображение геоданных на карте, базовое совместное редактирование. Backend: Python/FastAPI + PostGIS. Frontend: TypeScript/Vue + MapLibre.
+# GeoService
 
-## Требования
-Node, Python, Docker Desktop/WSL2
+GeoService — экспериментальный MVP для работы с геоданными.
 
-## Быстрый старт (Dev)
+Сейчас проект умеет:
 
-## Конфигурация (.env)
+- хранить геообъекты в PostGIS;
+- отдавать слои и объекты через FastAPI;
+- отображать данные на карте через Vue + MapLibre;
+- поддерживать базовое редактирование полигонов на клиенте.
+
+## Стек
+
+- Backend: Python, FastAPI, SQLAlchemy, Alembic, PostGIS
+- Frontend: Vue 3, TypeScript, Pinia, Vite, MapLibre
+- Infra: Docker Compose
 
 ## Структура репозитория
+
+```text
 apps/
   backend/
     app/
+      alembic/
       api/
-      services/
-      repositories/
       core/
+      db/
+      domain/
       models/
-    tests/
-    pyproject.toml
-    README.md
+      repositories/
+      schemas/
+      services/
+      tests/
   frontend/
     src/
-      ui/
-      state/
-      maplayer/
-      apiclient/
+      api/
       assets/
-      styles/
-    index.html
-    package.json
-    vite.config.ts
-infra/
-  docker/
-    postgis/
-      init/
-  docker-compose.yml
-  .env.example
+      components/
+      composables/
+      config/
+      map/
+      parsing/
+      stores/
 docs/
-  user-stories/
-  adr/
-packages/
-  shared/
-    schemas/
+  project-description.md
+  project-problems-and-solutions.md
+  project-required-improvements.md
+infra/
+scripts/
+```
 
-## Скрипты и команды
+## Быстрый старт
+
+Основной локальный сценарий завязан на Docker Compose из `infra/`.
+
+Что нужно:
+
+- Python 3.12+
+- Node 20+
+- Docker Desktop / WSL2
+
+Полезные точки входа:
+
+- frontend scripts: [package.json](C:/Repositories/geoservice/apps/frontend/package.json)
+- infra compose: [docker-compose.yml](C:/Repositories/geoservice/infra/docker-compose.yml)
+- backend app entry: [main.py](C:/Repositories/geoservice/apps/backend/app/main.py)
+
+## Конфигурация
+
+Backend-конфигурация централизована в [settings.py](C:/Repositories/geoservice/apps/backend/app/core/settings.py).
+
+Важно:
+
+- `DEV_MODE` управляет доступностью dev-login на backend;
+- `VITE_ENABLE_DEV_AUTH` управляет отображением dev auth panel на frontend;
+- `VITE_API_BASE_URL` задаёт базовый URL API для frontend.
+
+## Документация
+
+В `docs/` сейчас лежат рабочие документы по анализу проекта:
+
+- [project-description.md](C:/Repositories/geoservice/docs/project-description.md)
+- [project-problems-and-solutions.md](C:/Repositories/geoservice/docs/project-problems-and-solutions.md)
+- [project-required-improvements.md](C:/Repositories/geoservice/docs/project-required-improvements.md)

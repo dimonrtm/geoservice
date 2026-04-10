@@ -1,15 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jan  9 16:58:33 2026
-
-@author: dimon
-"""
-
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
 
-from api.auth import get_current_user, require_editor  # поправь путь импорта под свою структуру
+from api.auth import get_current_user, require_editor
 
 secure_router = APIRouter(prefix="/api/v1/secure", tags=["secure"])
 
