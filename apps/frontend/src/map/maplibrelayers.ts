@@ -324,30 +324,37 @@ export function movePolygonVertex(
   return out;
 }
 
-export function removePolygonVertex(polygon: GeoJSON.Polygon, ringIndex: number, vertexIndex: number): GeoJSON.Polygon | null{
+export function removePolygonVertex(
+  polygon: GeoJSON.Polygon,
+  ringIndex: number,
+  vertexIndex: number,
+): GeoJSON.Polygon | null {
   const nextCoords: GeoJSON.Position[][] = copyPolygon(polygon);
   const nextRing = nextCoords[ringIndex];
-  if(!nextRing){
+  if (!nextRing) {
     return null;
   }
   const uncloseRing = nextRing.slice(0, -1);
-  if(uncloseRing.length <= 3){
+  if (uncloseRing.length <= 3) {
     return null;
   }
   uncloseRing.splice(vertexIndex, 1);
   const firstPoint = uncloseRing[0];
-  if(!firstPoint){
+  if (!firstPoint) {
     return null;
   }
-  nextCoords[ringIndex] = [...uncloseRing, firstPoint.slice() as GeoJSON.Position];
-  const out: GeoJSON.Polygon = {type: "Polygon", coordinates: nextCoords};
-  if(polygon.bbox){
+  nextCoords[ringIndex] = [
+    ...uncloseRing,
+    firstPoint.slice() as GeoJSON.Position,
+  ];
+  const out: GeoJSON.Polygon = { type: "Polygon", coordinates: nextCoords };
+  if (polygon.bbox) {
     out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
   }
   return out;
 }
 
-function copyPolygon(polygon: GeoJSON.Polygon): GeoJSON.Position[][]{
+function copyPolygon(polygon: GeoJSON.Polygon): GeoJSON.Position[][] {
   return polygon.coordinates.map((ring) =>
     ring.map((point) => point.slice() as GeoJSON.Position),
   );
@@ -379,10 +386,15 @@ export function findNearestRingIndex(
   return nearestRingIndex;
 }
 
-export function insertVertexOnNearestSegment(polygon: GeoJSON.Polygon, ringIndex: number, lng: number, lat: number): GeoJSON.Polygon | null{
+export function insertVertexOnNearestSegment(
+  polygon: GeoJSON.Polygon,
+  ringIndex: number,
+  lng: number,
+  lat: number,
+): GeoJSON.Polygon | null {
   const nextCoords: GeoJSON.Position[][] = copyPolygon(polygon);
   const nextRing = nextCoords[ringIndex];
-  if(!nextRing){
+  if (!nextRing) {
     return null;
   }
   const uncloseRing = nextRing.slice(0, -1);
@@ -391,28 +403,38 @@ export function insertVertexOnNearestSegment(polygon: GeoJSON.Polygon, ringIndex
   }
   let minDistance = Number.MAX_VALUE;
   let bestJ: number = 0;
-  for(let j = 0; j < uncloseRing.length; j++){
+  for (let j = 0; j < uncloseRing.length; j++) {
     const u_j = uncloseRing[j];
     const u_j1 = uncloseRing[(j + 1) % uncloseRing.length];
     const start = toLngLat(u_j);
     const end = toLngLat(u_j1);
-    if(!start || !end){
+    if (!start || !end) {
       return null;
     }
-    const distance = getDistanceToSegment(start[0], start[1], end[0], end[1], lng, lat);
-    if(distance < minDistance){
+    const distance = getDistanceToSegment(
+      start[0],
+      start[1],
+      end[0],
+      end[1],
+      lng,
+      lat,
+    );
+    if (distance < minDistance) {
       minDistance = distance;
       bestJ = j;
     }
   }
   uncloseRing.splice(bestJ + 1, 0, [lng, lat]);
   const firstPoint = uncloseRing[0];
-  if(!firstPoint){
+  if (!firstPoint) {
     return null;
   }
-  nextCoords[ringIndex] = [...uncloseRing, firstPoint.slice() as GeoJSON.Position];
-  const out: GeoJSON.Polygon = {type: "Polygon", coordinates: nextCoords};
-  if(polygon.bbox){
+  nextCoords[ringIndex] = [
+    ...uncloseRing,
+    firstPoint.slice() as GeoJSON.Position,
+  ];
+  const out: GeoJSON.Polygon = { type: "Polygon", coordinates: nextCoords };
+  if (polygon.bbox) {
     out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
   }
   return out;
@@ -453,11 +475,19 @@ function getRingDistanceToPoint(
   return minDistance;
 }
 
-function isValidPosition(point: GeoJSON.Position | undefined): point is GeoJSON.Position {
-  return Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1]);
+function isValidPosition(
+  point: GeoJSON.Position | undefined,
+): point is GeoJSON.Position {
+  return (
+    Array.isArray(point) &&
+    Number.isFinite(point[0]) &&
+    Number.isFinite(point[1])
+  );
 }
 
-function toLngLat(point: GeoJSON.Position | undefined): [number, number] | null {
+function toLngLat(
+  point: GeoJSON.Position | undefined,
+): [number, number] | null {
   if (!isValidPosition(point)) {
     return null;
   }
@@ -468,7 +498,14 @@ function toLngLat(point: GeoJSON.Position | undefined): [number, number] | null 
   return [lng, lat];
 }
 
-function getDistanceToSegment(ax: number, ay: number, bx: number, by: number, x: number, y:number): number{
+function getDistanceToSegment(
+  ax: number,
+  ay: number,
+  bx: number,
+  by: number,
+  x: number,
+  y: number,
+): number {
   const abx = bx - ax;
   const aby = by - ay;
   const abSquared = abx * abx + aby * aby;

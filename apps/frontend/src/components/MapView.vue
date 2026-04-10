@@ -357,7 +357,7 @@ function onVertexDown(e: MapLayerMouseEvent): void {
   }
   const feature = e.features[0];
   const ringAndVertexIndexies = parsingRingAndVertexIndex(feature);
-  if(!ringAndVertexIndexies){
+  if (!ringAndVertexIndexies) {
     return;
   }
   dragging = true;
@@ -376,7 +376,7 @@ function onVertexMove(e: MapMouseEvent): void {
     return;
   }
   const session = editStore.sessionOrNull();
-  if(!session){
+  if (!session) {
     return;
   }
   const lng = e.lngLat.lng;
@@ -403,38 +403,44 @@ function onVertexUp(): void {
   map.value.dragPan.enable();
 }
 
-function onVertexDelete(e: MapLayerMouseEvent): void{
-if(!editStore.isEditing()){
-  return;
-}
-const m = map.value;
-if(!m){
-  return;
-}
-e.preventDefault();
-if(!e.features?.length || !e.features[0]){
-  return;
-}
-const feature = e.features[0];
-const ringAndVertexIndexies = parsingRingAndVertexIndex(feature);
-if(!ringAndVertexIndexies){
-  return;
-}
-const session = editStore.sessionOrNull();
-if(!session){
-  return;
-}
-const editedPolygon = removePolygonVertex(
-  session.draft.geometry,
-   ringAndVertexIndexies.ring,
-    ringAndVertexIndexies.vertexIndex);
-if(!editedPolygon){
-  return;
-}
-editStore.updateDraft({properties: session.draft.properties, geometry: editedPolygon});
+function onVertexDelete(e: MapLayerMouseEvent): void {
+  if (!editStore.isEditing()) {
+    return;
+  }
+  const m = map.value;
+  if (!m) {
+    return;
+  }
+  e.preventDefault();
+  if (!e.features?.length || !e.features[0]) {
+    return;
+  }
+  const feature = e.features[0];
+  const ringAndVertexIndexies = parsingRingAndVertexIndex(feature);
+  if (!ringAndVertexIndexies) {
+    return;
+  }
+  const session = editStore.sessionOrNull();
+  if (!session) {
+    return;
+  }
+  const editedPolygon = removePolygonVertex(
+    session.draft.geometry,
+    ringAndVertexIndexies.ring,
+    ringAndVertexIndexies.vertexIndex,
+  );
+  if (!editedPolygon) {
+    return;
+  }
+  editStore.updateDraft({
+    properties: session.draft.properties,
+    geometry: editedPolygon,
+  });
 }
 
-function parsingRingAndVertexIndex(feature: MapGeoJSONFeature): {ring: number; vertexIndex: number} | null{
+function parsingRingAndVertexIndex(
+  feature: MapGeoJSONFeature,
+): { ring: number; vertexIndex: number } | null {
   if (feature.properties["ring"] === undefined) {
     return null;
   }
@@ -446,18 +452,18 @@ function parsingRingAndVertexIndex(feature: MapGeoJSONFeature): {ring: number; v
   if (ring === null || i === null) {
     return null;
   }
-  return {ring: ring, vertexIndex: i};
+  return { ring: ring, vertexIndex: i };
 }
 
-function onOutlineInsert(e: MapLayerMouseEvent): void{
-  if(!editStore.isEditing()){
+function onOutlineInsert(e: MapLayerMouseEvent): void {
+  if (!editStore.isEditing()) {
     return;
   }
-  if(e.originalEvent.shiftKey === true){
+  if (e.originalEvent.shiftKey === true) {
     e.preventDefault();
-    const {lng, lat} = e.lngLat;
+    const { lng, lat } = e.lngLat;
     const session = editStore.sessionOrNull();
-    if(!session){
+    if (!session) {
       return;
     }
     const ringIndex = findNearestRingIndex(session.draft.geometry, lng, lat);
