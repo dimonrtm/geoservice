@@ -24,465 +24,99 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  onMounted,
-  onBeforeUnmount,
-  shallowRef,
-  watch,
-  nextTick,
-} from "vue";
-import {
-  Map,
-  NavigationControl,
-  type StyleSpecification,
-  type MapLayerMouseEvent,
-  type MapMouseEvent,
-  type MapGeoJSONFeature,
-} from "maplibre-gl";
-import type { LayerDto } from "@/api/layers";
-import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { AxiosError } from "axios";
-import {
-  ensureLayerOnMap,
-  getCurrentBbox,
-  setSourceData,
-  isValidBbox,
-  setAnyLayerVisibility,
-  formatBbox,
-  BboxClose,
-  ensureEditSource,
-  ensureEditLayer,
-  renderEditOverlay,
-  movePolygonVertex,
-  removePolygonVertex,
-  insertVertexOnNearestSegment,
-  findNearestRingIndex,
-} from "@/map/maplibrelayers";
-import type { Bbox } from "@/map/maplibrelayers";
-import { useEditStore } from "@/stores/edit";
-import { isFiniteNumber, toFiniteNumber } from "@/parsing/common";
-type Polygon = import("geojson").Polygon;
+import { useFeatureLoading } from "@/composables/map/useFeatureLoading";
+import { useLayerSelection } from "@/composables/map/useLayerSelection";
+import { useMapInstance } from "@/composables/map/useMapInstance";
+import { usePolygonEditing } from "@/composables/map/usePolygonEditing";
+
 const mapEl = ref<HTMLDivElement | null>(null);
-const map = shallowRef<Map | null>(null);
-const layers = ref<LayerDto[]>([]);
-let activeLayer = ref<LayerDto | null>(null);
-const activeLayerId = ref<string | null>(null);
-let labelText = ref("Карта загружается...");
-let layerAbortController = ref<AbortController | null>(null);
-const featuresAbortController = ref<AbortController | null>(null);
-let moveTimer: number | null = null;
-const DEBOUNCE_MS = 250;
-const isLoadingFeature = ref(false);
-const lastRequestedBbox = ref<Bbox | null>(null);
-const BBOX_EPS = 0.002;
-const MIN_ZOOM = 8;
-const editStore = useEditStore();
-let stopWatch: (() => void) | null = null;
-let dragging = false;
-let dragRing = 0;
-let dragIndex = 0;
-const style: StyleSpecification = {
-  version: 8,
-  sources: {
-    osm: {
-      type: "raster",
-      tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      tileSize: 256,
-      attribution: "© OpenStreetMap contributors",
-    },
-  },
-  layers: [
-    {
-      id: "osm",
-      type: "raster",
-      source: "osm",
-    },
-  ],
-};
+const { map, createMap, destroyMap } = useMapInstance(mapEl);
+const {
+  layers,
+  activeLayer,
+  activeLayerId,
+  loadLayers,
+  changeLayer,
+  abortLayerLoading,
+} = useLayerSelection(map);
+const {
+  labelText,
+  reloadFeatures,
+  createMoveEndHandler,
+  resetLoadedBbox,
+  stopPendingFeatureWork,
+} = useFeatureLoading(map);
+const {
+  editStore,
+  enableEditingOverlaySync,
+  disableEditingOverlaySync,
+  bindActiveLayerClick,
+  unbindActiveLayerClick,
+  resetInteractionState,
+  saveChange,
+  deleteEditingFeature,
+  cancelEditing,
+} = usePolygonEditing(map, activeLayer);
+const onMoveEnd = createMoveEndHandler(() => activeLayer.value);
 
 onMounted(async () => {
-  if (!mapEl.value) {
-    return;
-  }
-  map.value = new Map({
-    container: mapEl.value,
-    style,
-    center: [70.1902, 52.937],
-    zoom: 8,
-  });
-  map.value.addControl(new NavigationControl(), "top-right");
-  await nextTick();
-  map.value.resize();
-  map.value.once("load", async () => {
-    await nextTick();
-    map.value?.resize();
+  try {
+    const currentMap = await createMap();
+    if (!currentMap) {
+      return;
+    }
+
     labelText.value = "Карта готова. Загружаю слои...";
-    const controller = new AbortController();
-    layerAbortController.value = controller;
-    layers.value = await fetchLayers(controller.signal);
-    if (layers.value.length === 0) {
+    const loadLayersResult = await loadLayers();
+    if (loadLayersResult.status === "empty") {
       labelText.value = "Слоев нет";
       return;
     }
-    activeLayerId.value = layers.value[0]?.id ?? null;
-    activeLayer.value = layers.value[0] ?? null;
-    if (!activeLayer.value) {
-      labelText.value = "Слои загружены, но выбрать нечего";
-      return;
-    }
-    labelText.value = `Слои загружены ${layers.value.length}. Выбран ${activeLayer.value?.title}`;
-    ensureLayerOnMap(map.value, activeLayer.value);
-    for (var layer of layers.value) {
-      setAnyLayerVisibility(map.value, layer, false);
-    }
-    setAnyLayerVisibility(map.value, activeLayer.value, true);
-    await reloadFeatures(activeLayer.value);
-    map.value?.on("moveend", scheduleReload);
-    map.value?.on("click", `layer:${activeLayer.value.id}`, onLayerClick);
-    ensureEditSource(map.value);
-    ensureEditLayer(map.value);
-    map.value?.on("mousedown", "edit:vertices:point", onVertexDown);
-    map.value?.on("contextmenu", "edit:vertices:point", onVertexDelete);
-    map.value?.on("click", "edit:polygon:outline", onOutlineInsert);
-    renderEditOverlay(map.value, editStore.edit);
-    stopWatch = watch([() => editStore.edit, map], ([nextEditState, m]) => {
-      if (!m) {
-        return;
-      }
-      renderEditOverlay(m, nextEditState);
-    });
-  });
-  console.log("Карта создана");
+    labelText.value = `Слои загружены ${loadLayersResult.total}. Выбран ${loadLayersResult.layer.title}`;
+    bindActiveLayerClick(loadLayersResult.layer.id);
+    enableEditingOverlaySync();
+    await reloadFeatures(loadLayersResult.layer);
+    currentMap.on("moveend", onMoveEnd);
+  } catch {
+    labelText.value = "Не удалось инициализировать карту";
+  }
 });
 
 onBeforeUnmount(() => {
-  if (stopWatch) {
-    stopWatch();
-  }
-  stopWatch = null;
-  map.value?.off("moveend", scheduleReload);
-  map.value?.off("click", `layer:${activeLayer.value?.id}`, onLayerClick);
-  map.value?.off("mousedown", "edit:vertices:point", onVertexDown);
-  map.value?.off("contextmenu", "edit:vertices:point", onVertexDelete);
-  map.value?.off("click", "edit:polygon:outline", onOutlineInsert);
-  map.value?.off("mousemove", onVertexMove);
-  map.value?.remove();
-  map.value = null;
-  if (layerAbortController.value) {
-    layerAbortController.value?.abort();
-    layerAbortController.value = null;
-  }
-  if (featuresAbortController.value) {
-    featuresAbortController.value?.abort();
-    featuresAbortController.value = null;
-  }
-  if (moveTimer !== null) {
-    clearTimeout(moveTimer);
-    moveTimer = null;
-  }
-
-  console.log("Карта удалена");
+  map.value?.off("moveend", onMoveEnd);
+  unbindActiveLayerClick(activeLayer.value?.id);
+  disableEditingOverlaySync();
+  stopPendingFeatureWork();
+  abortLayerLoading();
+  destroyMap();
 });
-function getSourceId(layer: LayerDto): string {
-  return "src:" + layer.id;
-}
-
-async function reloadFeatures(layer: LayerDto): Promise<void> {
-  const z = map.value?.getZoom();
-  if (z && z < MIN_ZOOM) {
-    labelText.value = `Zoom ${z.toFixed(1)}: приблизтесь к ${MIN_ZOOM}`;
-    return;
-  }
-  const limit = 500;
-  isLoadingFeature.value = true;
-  labelText.value = "Загружаю объекты...";
-  featuresAbortController.value?.abort();
-  const featuresController = new AbortController();
-  featuresAbortController.value = featuresController;
-  try {
-    const bbox = getCurrentBbox(map.value);
-    if (!isValidBbox(bbox)) {
-      labelText.value = "Bbox не валиден на клиенте";
-      return;
-    }
-    if (
-      lastRequestedBbox.value &&
-      BboxClose(bbox, lastRequestedBbox.value, BBOX_EPS)
-    ) {
-      return;
-    }
-    lastRequestedBbox.value = bbox;
-    const featureCollection = await fetchLayerFeaturesByBbox({
-      layerId: layer.id,
-      bbox: bbox,
-      limit: limit,
-      signal: featuresController.signal,
-    });
-    setSourceData(map.value, getSourceId(layer), featureCollection);
-    const n = featureCollection.features.length;
-    if (n == 0) {
-      labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | пусто | limit ${limit}`;
-    } else {
-      labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${n} | limit ${limit}`;
-    }
-  } catch (err: unknown) {
-    if (err instanceof AxiosError && err.code === "ERR_CANCELED") {
-      return;
-    }
-    if (err instanceof HttpError) {
-      if (err.status === 404) {
-        labelText.value = "Слой не найден (404)";
-      } else if (err.status === 422) {
-        labelText.value = "Невалидный Bbox (422)";
-      } else {
-        labelText.value = `Ошибка загрузки. HTTP ${err.status}`;
-      }
-    } else {
-      labelText.value = "Сетевая/неизвестная ошибка";
-    }
-  } finally {
-    isLoadingFeature.value = false;
-  }
-}
-
-function scheduleReload(): void {
-  if (isLoadingFeature.value) {
-    return;
-  }
-  if (moveTimer !== null) {
-    clearTimeout(moveTimer);
-    moveTimer = null;
-  }
-
-  moveTimer = setTimeout(async () => {
-    if (!activeLayer.value) {
-      return;
-    }
-    await reloadFeatures(activeLayer.value);
-  }, DEBOUNCE_MS);
-}
 
 async function onChangeLayer(): Promise<void> {
-  const m = map.value;
-  const layerId = activeLayerId.value;
-  if (!m || !layerId) {
-    return;
-  }
-  const layer = layers.value.find((layer) => layer.id === layerId) ?? null;
-  if (!layer) {
+  const nextLayer = await changeLayer(activeLayerId.value, {
+    onCurrentLayerDeactivated: (layer) => {
+      unbindActiveLayerClick(layer.id);
+      cancelEditing();
+    },
+    onNextLayerActivated: async (layer) => {
+      bindActiveLayerClick(layer.id);
+      resetInteractionState();
+      stopPendingFeatureWork();
+      resetLoadedBbox();
+      await reloadFeatures(layer);
+    },
+  });
+  if (!nextLayer) {
     labelText.value = "Слой ненайден в списке";
-    return;
   }
-  if (activeLayer.value) {
-    setAnyLayerVisibility(m, activeLayer.value, false);
-    m.off("click", `layer:${activeLayer.value.id}`, onLayerClick);
-    editStore.cancelEditing();
-  }
-  activeLayer.value = layer;
-  ensureLayerOnMap(map.value, layer);
-  setAnyLayerVisibility(m, activeLayer.value, true);
-  m.on("click", `layer:${layer.id}`, onLayerClick);
-  m.off("mousemove", onVertexMove);
-  dragging = false;
-  featuresAbortController.value?.abort();
-  if (moveTimer !== null) {
-    clearTimeout(moveTimer);
-    moveTimer = null;
-  }
-  lastRequestedBbox.value = null;
-  await reloadFeatures(layer);
-}
-
-function onLayerClick(e: MapLayerMouseEvent): void {
-  if (editStore.edit.mode === "editing" && editStore.edit.dirty) {
-    return;
-  }
-  if (!e.features?.length || e.features?.length <= 0) {
-    return;
-  }
-  const feature = e.features[0];
-  if (!feature || !feature.properties || !feature.geometry) {
-    return;
-  }
-  const props = feature.properties as Record<string, unknown>;
-  const featureId = typeof props["__id"] === "string" ? props["__id"] : null;
-  if (!featureId) {
-    return;
-  }
-  const v = props["__version"];
-  const version = isFiniteNumber(v) ? (v as number) : null;
-  if (version === null) {
-    return;
-  }
-  if (!activeLayer.value) {
-    return;
-  }
-  if (feature.geometry.type === "Polygon") {
-    const polygon = feature.geometry as Polygon;
-    editStore.startEditing({
-      layerId: activeLayer.value.id,
-      featureId: featureId,
-      version: version,
-      properties: props,
-      geometry: polygon,
-    });
-  }
-}
-
-async function saveChange(): Promise<void> {
-  await editStore.saveEditing();
 }
 
 async function deleteFeature(): Promise<void> {
-  const deleted = await editStore.deleteEditing();
+  const deleted = await deleteEditingFeature();
   if (editStore.edit.mode === "idle" && activeLayer.value && deleted) {
-    lastRequestedBbox.value = null;
+    resetLoadedBbox();
     await reloadFeatures(activeLayer.value);
-  }
-}
-
-function onVertexDown(e: MapLayerMouseEvent): void {
-  if (!editStore.isEditing()) {
-    return;
-  }
-  const m = map.value;
-  if (!m) {
-    return;
-  }
-  e.preventDefault();
-  if (!e.features?.length || !e.features[0]) {
-    return;
-  }
-  const feature = e.features[0];
-  const ringAndVertexIndexies = parsingRingAndVertexIndex(feature);
-  if (!ringAndVertexIndexies) {
-    return;
-  }
-  dragging = true;
-  dragRing = ringAndVertexIndexies.ring;
-  dragIndex = ringAndVertexIndexies.vertexIndex;
-  m.dragPan.disable();
-  m.on("mousemove", onVertexMove);
-  m.once("mouseup", onVertexUp);
-}
-
-function onVertexMove(e: MapMouseEvent): void {
-  if (!dragging) {
-    return;
-  }
-  if (!editStore.isEditing()) {
-    return;
-  }
-  const session = editStore.sessionOrNull();
-  if (!session) {
-    return;
-  }
-  const lng = e.lngLat.lng;
-  const lat = e.lngLat.lat;
-  const nextGeometry = movePolygonVertex(
-    session.draft.geometry,
-    dragRing,
-    dragIndex,
-    lng,
-    lat,
-  );
-  editStore.updateDraft({
-    properties: session.draft.properties,
-    geometry: nextGeometry,
-  });
-}
-
-function onVertexUp(): void {
-  if (!map.value) {
-    return;
-  }
-  dragging = false;
-  map.value.off("mousemove", onVertexMove);
-  map.value.dragPan.enable();
-}
-
-function onVertexDelete(e: MapLayerMouseEvent): void {
-  if (!editStore.isEditing()) {
-    return;
-  }
-  const m = map.value;
-  if (!m) {
-    return;
-  }
-  e.preventDefault();
-  if (!e.features?.length || !e.features[0]) {
-    return;
-  }
-  const feature = e.features[0];
-  const ringAndVertexIndexies = parsingRingAndVertexIndex(feature);
-  if (!ringAndVertexIndexies) {
-    return;
-  }
-  const session = editStore.sessionOrNull();
-  if (!session) {
-    return;
-  }
-  const editedPolygon = removePolygonVertex(
-    session.draft.geometry,
-    ringAndVertexIndexies.ring,
-    ringAndVertexIndexies.vertexIndex,
-  );
-  if (!editedPolygon) {
-    return;
-  }
-  editStore.updateDraft({
-    properties: session.draft.properties,
-    geometry: editedPolygon,
-  });
-}
-
-function parsingRingAndVertexIndex(
-  feature: MapGeoJSONFeature,
-): { ring: number; vertexIndex: number } | null {
-  if (feature.properties["ring"] === undefined) {
-    return null;
-  }
-  const ring = toFiniteNumber(feature.properties["ring"]);
-  if (feature.properties["i"] === undefined) {
-    return null;
-  }
-  const i = toFiniteNumber(feature.properties["i"]);
-  if (ring === null || i === null) {
-    return null;
-  }
-  return { ring: ring, vertexIndex: i };
-}
-
-function onOutlineInsert(e: MapLayerMouseEvent): void {
-  if (!editStore.isEditing()) {
-    return;
-  }
-  if (e.originalEvent.shiftKey === true) {
-    e.preventDefault();
-    const { lng, lat } = e.lngLat;
-    const session = editStore.sessionOrNull();
-    if (!session) {
-      return;
-    }
-    const ringIndex = findNearestRingIndex(session.draft.geometry, lng, lat);
-    if (ringIndex === null) {
-      return;
-    }
-    const next = insertVertexOnNearestSegment(
-      session.draft.geometry,
-      ringIndex,
-      lng,
-      lat,
-    );
-    if (!next) {
-      return;
-    }
-    editStore.updateDraft({
-      properties: session.draft.properties,
-      geometry: next,
-    });
   }
 }
 </script>
