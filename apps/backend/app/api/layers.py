@@ -11,6 +11,7 @@ from schemas.feature_collection_out import FeatureCollectionOut
 from schemas.feature_out import FeatureOut
 from schemas.create_feature_in import CreateFeatureIn
 from schemas.patch_feature_request import PatchFeatureRequest
+from schemas.patch_feature_succes_response import PatchFeatureSuccesResponse
 from schemas.delete_feature_request import DeleteFeatureRequest
 from schemas.delete_feature_response import DeleteFeatureResponse
 from schemas.layer_list_out import LayerListOut
@@ -70,16 +71,16 @@ async def create_feature(
 @layers_router.patch(
     "/{layer_id}/features/{feature_id}",
     dependencies=[Depends(require_editor)],
-    response_model=FeatureOut,
+    response_model=PatchFeatureSuccesResponse,
 )
 async def update_feature(
     layer_id: UUID,
     feature_id: UUID,
     request: PatchFeatureRequest,
     feature_service: FeatureService = Depends(get_feature_service),
-) -> FeatureOut:
+) -> PatchFeatureSuccesResponse:
     feature = await feature_service.update_feature(layer_id, feature_id, request)
-    return feature
+    return PatchFeatureSuccesResponse(feature=feature)
 
 
 @layers_router.delete(

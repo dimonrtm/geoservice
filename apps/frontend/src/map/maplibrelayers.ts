@@ -339,7 +339,7 @@ export function removePolygonVertex(polygon: GeoJSON.Polygon, ringIndex: number,
   if(!firstPoint){
     return null;
   }
-  uncloseRing.push(firstPoint);
+  nextCoords[ringIndex] = [...uncloseRing, firstPoint.slice() as GeoJSON.Position];
   const out: GeoJSON.Polygon = {type: "Polygon", coordinates: nextCoords};
   if(polygon.bbox){
     out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
@@ -353,6 +353,32 @@ function copyPolygon(polygon: GeoJSON.Polygon): GeoJSON.Position[][]{
   );
 }
 
+export function findNearestRingIndex(
+  polygon: GeoJSON.Polygon,
+  lng: number,
+  lat: number,
+): number | null {
+  let nearestRingIndex: number | null = null;
+  let minDistance = Number.POSITIVE_INFINITY;
+
+  for (let ringIndex = 0; ringIndex < polygon.coordinates.length; ringIndex++) {
+    const ring = polygon.coordinates[ringIndex];
+    if (!ring) {
+      continue;
+    }
+    const distance = getRingDistanceToPoint(ring, lng, lat);
+    if (distance === null) {
+      continue;
+    }
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestRingIndex = ringIndex;
+    }
+  }
+
+  return nearestRingIndex;
+}
+
 export function insertVertexOnNearestSegment(polygon: GeoJSON.Polygon, ringIndex: number, lng: number, lat: number): GeoJSON.Polygon | null{
   const nextCoords: GeoJSON.Position[][] = copyPolygon(polygon);
   const nextRing = nextCoords[ringIndex];
@@ -360,15 +386,20 @@ export function insertVertexOnNearestSegment(polygon: GeoJSON.Polygon, ringIndex
     return null;
   }
   const uncloseRing = nextRing.slice(0, -1);
+  if (uncloseRing.length < 3) {
+    return null;
+  }
   let minDistance = Number.MAX_VALUE;
   let bestJ: number = 0;
   for(let j = 0; j < uncloseRing.length; j++){
     const u_j = uncloseRing[j];
     const u_j1 = uncloseRing[(j + 1) % uncloseRing.length];
-    if(!u_j || !u_j[0] || !u_j[1] || !u_j1 || !u_j1[0] || !u_j1[1]){
+    const start = toLngLat(u_j);
+    const end = toLngLat(u_j1);
+    if(!start || !end){
       return null;
     }
-    const distance = getDistanceToSegment(u_j[0], u_j[1], u_j1[0], u_j1[1], lng, lat);
+    const distance = getDistanceToSegment(start[0], start[1], end[0], end[1], lng, lat);
     if(distance < minDistance){
       minDistance = distance;
       bestJ = j;
@@ -379,7 +410,7 @@ export function insertVertexOnNearestSegment(polygon: GeoJSON.Polygon, ringIndex
   if(!firstPoint){
     return null;
   }
-  uncloseRing.push(firstPoint);
+  nextCoords[ringIndex] = [...uncloseRing, firstPoint.slice() as GeoJSON.Position];
   const out: GeoJSON.Polygon = {type: "Polygon", coordinates: nextCoords};
   if(polygon.bbox){
     out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
@@ -387,21 +418,69 @@ export function insertVertexOnNearestSegment(polygon: GeoJSON.Polygon, ringIndex
   return out;
 }
 
-function getDistanceToSegment(ax: number, ay: number, bx: number, by: number, x: number, y:number): number{
-  let result: number = 0;
-  let value: number = 0;
-  if((Math.min(ax, bx) <= x && x <= Math.max(ax, bx)) && (Math.min(ay, by) <= y && y <= Math.max(ay, by))){
-    return 0;
-  } else if(ax === bx && ay === by){
-    result = Math.sqrt(Math.pow(bx - x, 2) + Math.pow(by - y, 2));
-    return result;
-  } else{
-    value = ((x -ax) * (bx - ax) + (y - ay) * (by - ay)) / (Math.pow(bx - ax, 2) + Math.pow(by - ay, 2));
-    if (value < 0)
-       value = 0;
-    if (value > 1)
-       value = 1;
-    result = Math.sqrt(Math.pow(ax - x + (bx - ax) * value, 2) + Math.pow(ay - y + (by - ay) * value, 2));
-    return result;
+function getRingDistanceToPoint(
+  ring: GeoJSON.Position[],
+  lng: number,
+  lat: number,
+): number | null {
+  const unclosedRing = ring.slice(0, -1);
+  if (unclosedRing.length < 3) {
+    return null;
   }
+
+  let minDistance = Number.POSITIVE_INFINITY;
+  for (let j = 0; j < unclosedRing.length; j++) {
+    const start = unclosedRing[j];
+    const end = unclosedRing[(j + 1) % unclosedRing.length];
+    const startCoords = toLngLat(start);
+    const endCoords = toLngLat(end);
+    if (!startCoords || !endCoords) {
+      return null;
+    }
+    const distance = getDistanceToSegment(
+      startCoords[0],
+      startCoords[1],
+      endCoords[0],
+      endCoords[1],
+      lng,
+      lat,
+    );
+    if (distance < minDistance) {
+      minDistance = distance;
+    }
+  }
+
+  return minDistance;
+}
+
+function isValidPosition(point: GeoJSON.Position | undefined): point is GeoJSON.Position {
+  return Array.isArray(point) && Number.isFinite(point[0]) && Number.isFinite(point[1]);
+}
+
+function toLngLat(point: GeoJSON.Position | undefined): [number, number] | null {
+  if (!isValidPosition(point)) {
+    return null;
+  }
+  const [lng, lat] = point;
+  if (typeof lng !== "number" || typeof lat !== "number") {
+    return null;
+  }
+  return [lng, lat];
+}
+
+function getDistanceToSegment(ax: number, ay: number, bx: number, by: number, x: number, y:number): number{
+  const abx = bx - ax;
+  const aby = by - ay;
+  const abSquared = abx * abx + aby * aby;
+  if (abSquared === 0) {
+    return Math.hypot(x - ax, y - ay);
+  }
+
+  const apx = x - ax;
+  const apy = y - ay;
+  const projection = (apx * abx + apy * aby) / abSquared;
+  const clampedProjection = Math.max(0, Math.min(1, projection));
+  const closestX = ax + abx * clampedProjection;
+  const closestY = ay + aby * clampedProjection;
+  return Math.hypot(x - closestX, y - closestY);
 }

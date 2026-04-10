@@ -57,7 +57,8 @@ import {
   renderEditOverlay,
   movePolygonVertex,
   removePolygonVertex,
-  insertVertexOnNearestSegment
+  insertVertexOnNearestSegment,
+  findNearestRingIndex,
 } from "@/map/maplibrelayers";
 import type { Bbox } from "@/map/maplibrelayers";
 import { useEditStore } from "@/stores/edit";
@@ -453,12 +454,29 @@ function onOutlineInsert(e: MapLayerMouseEvent): void{
     return;
   }
   if(e.originalEvent.shiftKey === true){
+    e.preventDefault();
     const {lng, lat} = e.lngLat;
     const session = editStore.sessionOrNull();
     if(!session){
       return;
     }
-    const next = insertVertexOnNearestSegment(session.draft.geometry,)
+    const ringIndex = findNearestRingIndex(session.draft.geometry, lng, lat);
+    if (ringIndex === null) {
+      return;
+    }
+    const next = insertVertexOnNearestSegment(
+      session.draft.geometry,
+      ringIndex,
+      lng,
+      lat,
+    );
+    if (!next) {
+      return;
+    }
+    editStore.updateDraft({
+      properties: session.draft.properties,
+      geometry: next,
+    });
   }
 }
 </script>
