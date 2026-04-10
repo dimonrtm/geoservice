@@ -38,6 +38,7 @@ import {
   type StyleSpecification,
   type MapLayerMouseEvent,
   type MapMouseEvent,
+  type MapGeoJSONFeature,
 } from "maplibre-gl";
 import type { LayerDto } from "@/api/layers";
 import { fetchLayers, fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
@@ -55,6 +56,8 @@ import {
   ensureEditLayer,
   renderEditOverlay,
   movePolygonVertex,
+  removePolygonVertex,
+  insertVertexOnNearestSegment
 } from "@/map/maplibrelayers";
 import type { Bbox } from "@/map/maplibrelayers";
 import { useEditStore } from "@/stores/edit";
@@ -140,6 +143,8 @@ onMounted(async () => {
     ensureEditSource(map.value);
     ensureEditLayer(map.value);
     map.value?.on("mousedown", "edit:vertices:point", onVertexDown);
+    map.value?.on("contextmenu", "edit:vertices:point", onVertexDelete);
+    map.value?.on("click", "edit:polygon:outline", onOutlineInsert);
     renderEditOverlay(map.value, editStore.edit);
     stopWatch = watch([() => editStore.edit, map], ([nextEditState, m]) => {
       if (!m) {
@@ -159,6 +164,8 @@ onBeforeUnmount(() => {
   map.value?.off("moveend", scheduleReload);
   map.value?.off("click", `layer:${activeLayer.value?.id}`, onLayerClick);
   map.value?.off("mousedown", "edit:vertices:point", onVertexDown);
+  map.value?.off("contextmenu", "edit:vertices:point", onVertexDelete);
+  map.value?.off("click", "edit:polygon:outline", onOutlineInsert);
   map.value?.off("mousemove", onVertexMove);
   map.value?.remove();
   map.value = null;
@@ -270,7 +277,7 @@ async function onChangeLayer(): Promise<void> {
   if (activeLayer.value) {
     setAnyLayerVisibility(m, activeLayer.value, false);
     m.off("click", `layer:${activeLayer.value.id}`, onLayerClick);
-    editStore.edit = { mode: "idle" };
+    editStore.cancelEditing();
   }
   activeLayer.value = layer;
   ensureLayerOnMap(map.value, layer);
@@ -336,7 +343,7 @@ async function deleteFeature(): Promise<void> {
 }
 
 function onVertexDown(e: MapLayerMouseEvent): void {
-  if (editStore.edit.mode !== "editing") {
+  if (!editStore.isEditing()) {
     return;
   }
   const m = map.value;
@@ -348,20 +355,13 @@ function onVertexDown(e: MapLayerMouseEvent): void {
     return;
   }
   const feature = e.features[0];
-  if (feature.properties["ring"] === undefined) {
-    return;
-  }
-  const ring = toFiniteNumber(feature.properties["ring"]);
-  if (feature.properties["i"] === undefined) {
-    return;
-  }
-  const i = toFiniteNumber(feature.properties["i"]);
-  if (ring === null || i === null) {
+  const ringAndVertexIndexies = parsingRingAndVertexIndex(feature);
+  if(!ringAndVertexIndexies){
     return;
   }
   dragging = true;
-  dragRing = ring;
-  dragIndex = i;
+  dragRing = ringAndVertexIndexies.ring;
+  dragIndex = ringAndVertexIndexies.vertexIndex;
   m.dragPan.disable();
   m.on("mousemove", onVertexMove);
   m.once("mouseup", onVertexUp);
@@ -371,10 +371,13 @@ function onVertexMove(e: MapMouseEvent): void {
   if (!dragging) {
     return;
   }
-  if (editStore.edit.mode !== "editing") {
+  if (!editStore.isEditing()) {
     return;
   }
-  const session = editStore.edit.session;
+  const session = editStore.sessionOrNull();
+  if(!session){
+    return;
+  }
   const lng = e.lngLat.lng;
   const lat = e.lngLat.lat;
   const nextGeometry = movePolygonVertex(
@@ -397,6 +400,66 @@ function onVertexUp(): void {
   dragging = false;
   map.value.off("mousemove", onVertexMove);
   map.value.dragPan.enable();
+}
+
+function onVertexDelete(e: MapLayerMouseEvent): void{
+if(!editStore.isEditing()){
+  return;
+}
+const m = map.value;
+if(!m){
+  return;
+}
+e.preventDefault();
+if(!e.features?.length || !e.features[0]){
+  return;
+}
+const feature = e.features[0];
+const ringAndVertexIndexies = parsingRingAndVertexIndex(feature);
+if(!ringAndVertexIndexies){
+  return;
+}
+const session = editStore.sessionOrNull();
+if(!session){
+  return;
+}
+const editedPolygon = removePolygonVertex(
+  session.draft.geometry,
+   ringAndVertexIndexies.ring,
+    ringAndVertexIndexies.vertexIndex);
+if(!editedPolygon){
+  return;
+}
+editStore.updateDraft({properties: session.draft.properties, geometry: editedPolygon});
+}
+
+function parsingRingAndVertexIndex(feature: MapGeoJSONFeature): {ring: number; vertexIndex: number} | null{
+  if (feature.properties["ring"] === undefined) {
+    return null;
+  }
+  const ring = toFiniteNumber(feature.properties["ring"]);
+  if (feature.properties["i"] === undefined) {
+    return null;
+  }
+  const i = toFiniteNumber(feature.properties["i"]);
+  if (ring === null || i === null) {
+    return null;
+  }
+  return {ring: ring, vertexIndex: i};
+}
+
+function onOutlineInsert(e: MapLayerMouseEvent): void{
+  if(!editStore.isEditing()){
+    return;
+  }
+  if(e.originalEvent.shiftKey === true){
+    const {lng, lat} = e.lngLat;
+    const session = editStore.sessionOrNull();
+    if(!session){
+      return;
+    }
+    const next = insertVertexOnNearestSegment(session.draft.geometry,)
+  }
 }
 </script>
 

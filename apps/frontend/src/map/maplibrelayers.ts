@@ -308,9 +308,7 @@ export function movePolygonVertex(
   lng: number,
   lat: number,
 ): GeoJSON.Polygon {
-  const nextCoords: GeoJSON.Position[][] = polygon.coordinates.map((ring) =>
-    ring.map((point) => point.slice() as GeoJSON.Position),
-  );
+  const nextCoords: GeoJSON.Position[][] = copyPolygon(polygon);
   const nextRing = nextCoords[ring];
   if (!nextRing) {
     return polygon;
@@ -324,4 +322,86 @@ export function movePolygonVertex(
     out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
   }
   return out;
+}
+
+export function removePolygonVertex(polygon: GeoJSON.Polygon, ringIndex: number, vertexIndex: number): GeoJSON.Polygon | null{
+  const nextCoords: GeoJSON.Position[][] = copyPolygon(polygon);
+  const nextRing = nextCoords[ringIndex];
+  if(!nextRing){
+    return null;
+  }
+  const uncloseRing = nextRing.slice(0, -1);
+  if(uncloseRing.length <= 3){
+    return null;
+  }
+  uncloseRing.splice(vertexIndex, 1);
+  const firstPoint = uncloseRing[0];
+  if(!firstPoint){
+    return null;
+  }
+  uncloseRing.push(firstPoint);
+  const out: GeoJSON.Polygon = {type: "Polygon", coordinates: nextCoords};
+  if(polygon.bbox){
+    out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
+  }
+  return out;
+}
+
+function copyPolygon(polygon: GeoJSON.Polygon): GeoJSON.Position[][]{
+  return polygon.coordinates.map((ring) =>
+    ring.map((point) => point.slice() as GeoJSON.Position),
+  );
+}
+
+export function insertVertexOnNearestSegment(polygon: GeoJSON.Polygon, ringIndex: number, lng: number, lat: number): GeoJSON.Polygon | null{
+  const nextCoords: GeoJSON.Position[][] = copyPolygon(polygon);
+  const nextRing = nextCoords[ringIndex];
+  if(!nextRing){
+    return null;
+  }
+  const uncloseRing = nextRing.slice(0, -1);
+  let minDistance = Number.MAX_VALUE;
+  let bestJ: number = 0;
+  for(let j = 0; j < uncloseRing.length; j++){
+    const u_j = uncloseRing[j];
+    const u_j1 = uncloseRing[(j + 1) % uncloseRing.length];
+    if(!u_j || !u_j[0] || !u_j[1] || !u_j1 || !u_j1[0] || !u_j1[1]){
+      return null;
+    }
+    const distance = getDistanceToSegment(u_j[0], u_j[1], u_j1[0], u_j1[1], lng, lat);
+    if(distance < minDistance){
+      minDistance = distance;
+      bestJ = j;
+    }
+  }
+  uncloseRing.splice(bestJ + 1, 0, [lng, lat]);
+  const firstPoint = uncloseRing[0];
+  if(!firstPoint){
+    return null;
+  }
+  uncloseRing.push(firstPoint);
+  const out: GeoJSON.Polygon = {type: "Polygon", coordinates: nextCoords};
+  if(polygon.bbox){
+    out.bbox = polygon.bbox.slice() as GeoJSON.BBox;
+  }
+  return out;
+}
+
+function getDistanceToSegment(ax: number, ay: number, bx: number, by: number, x: number, y:number): number{
+  let result: number = 0;
+  let value: number = 0;
+  if((Math.min(ax, bx) <= x && x <= Math.max(ax, bx)) && (Math.min(ay, by) <= y && y <= Math.max(ay, by))){
+    return 0;
+  } else if(ax === bx && ay === by){
+    result = Math.sqrt(Math.pow(bx - x, 2) + Math.pow(by - y, 2));
+    return result;
+  } else{
+    value = ((x -ax) * (bx - ax) + (y - ay) * (by - ay)) / (Math.pow(bx - ax, 2) + Math.pow(by - ay, 2));
+    if (value < 0)
+       value = 0;
+    if (value > 1)
+       value = 1;
+    result = Math.sqrt(Math.pow(ax - x + (bx - ax) * value, 2) + Math.pow(ay - y + (by - ay) * value, 2));
+    return result;
+  }
 }
