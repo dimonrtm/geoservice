@@ -1,6 +1,7 @@
 from functools import lru_cache
+import json
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,15 +22,17 @@ class Settings(BaseSettings):
     access_token_ttl_min: int = Field(30, alias="ACCESS_TOKEN_TTL_MIN")
     dev_auth_enabled: bool = Field(False, alias="DEV_MODE")
 
-    cors_origins: list[str] = []
+    @property
+    def cors_origins(self) -> list[str]:
+        raw_value = self.cors_origins_raw.strip()
+        if not raw_value:
+            return []
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def build_cors_origins(cls, value: object, info) -> list[str]:
-        if isinstance(value, list) and value:
-            return value
+        if raw_value.startswith("["):
+            parsed = json.loads(raw_value)
+            if isinstance(parsed, list):
+                return [str(origin).strip() for origin in parsed if str(origin).strip()]
 
-        raw_value = info.data.get("cors_origins_raw", "")
         return [origin.strip() for origin in raw_value.split(",") if origin.strip()]
 
 
