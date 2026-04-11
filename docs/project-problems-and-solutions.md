@@ -82,24 +82,6 @@
 
 ## 3. Проблемы качества и тестирования
 
-### 3.1. CI проверяет backend, но почти не защищает frontend
-
-Факт:
-
-- `.gitlab-ci.yml` покрывает backend format/lint/test/build и smoke test;
-- frontend build/lint/typecheck в CI отсутствуют.
-
-Последствия:
-
-- фронтенд уже сломан, но пайплайн этого не страхует.
-
-Что делать:
-
-- добавить в CI как минимум:
-  - `npm run lint`
-  - `npm run typecheck`
-  - `npm run build`
-
 ## 4. Сводный приоритет проблем
 
 Самые критичные проблемы прямо сейчас:
