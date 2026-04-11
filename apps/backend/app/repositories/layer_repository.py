@@ -1,17 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan  7 12:12:19 2026
-
-@author: dimon
-"""
-
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, insert, update, delete
-from models.layer import Layer
-from domain.feature_registry import get_layer_feature_model
-from uuid import UUID
-import uuid
 import json
+import uuid
+from uuid import UUID
+
+from sqlalchemy import delete, func, insert, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from domain.feature_registry import get_layer_feature_model
+from models.layer import Layer
+from schemas.geojson import FeatureProperties
 
 
 class LayerRepository:
@@ -47,7 +43,9 @@ class LayerRepository:
         res = await self.session.execute(stmt)
         return res.scalars().one_or_none()
 
-    async def create_feature(self, layer: Layer, geometry: dict, properties: dict):
+    async def create_feature(
+        self, layer: Layer, geometry: dict[str, object], properties: FeatureProperties
+    ):
         geom_expr = self.get_geom_expr(geometry)
         model_type = get_layer_feature_model(layer)
         stmt = (
@@ -67,8 +65,8 @@ class LayerRepository:
         self,
         layer: Layer,
         feature_id: UUID,
-        geometry: dict | None,
-        properties: dict | None,
+        geometry: dict[str, object] | None,
+        properties: FeatureProperties | None,
         expected_version: int,
     ):
         if geometry:
@@ -136,6 +134,6 @@ class LayerRepository:
         res = await self.session.execute(stmt)
         return res.one_or_none()
 
-    def get_geom_expr(self, geometry: dict):
+    def get_geom_expr(self, geometry: dict[str, object]):
         geometry_str = json.dumps(geometry)
         return func.ST_SetSRID(func.ST_GeomFromGeoJSON(geometry_str), 4326)

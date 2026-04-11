@@ -1,12 +1,17 @@
 import { Map, type GeoJSONSource } from "maplibre-gl";
-import type { LayerDto, ApiFeatureCollectionOut } from "@/api/layers";
-import type { FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
+import type { LayerDto } from "@/contracts/api";
+import type {
+  ApiFeatureCollection,
+  FeatureProperties,
+  PolygonGeometry,
+} from "@/contracts/geojson";
+import type { FeatureCollection, Geometry } from "geojson";
 import { type EditSession, type EditState } from "@/stores/edit";
 
 export type Bbox = [number, number, number, number];
 export type VersionIndex = Record<string, number>;
 
-const emptyFc: FeatureCollection<Geometry, GeoJsonProperties> = {
+const emptyFc: FeatureCollection<Geometry, FeatureProperties> = {
   type: "FeatureCollection",
   features: [],
 };
@@ -147,7 +152,7 @@ export function getCurrentBbox(map: Map | null): Bbox {
 export function setSourceData(
   map: Map | null,
   sourceId: string,
-  featureCollection: ApiFeatureCollectionOut,
+  featureCollection: ApiFeatureCollection,
 ): void {
   if (!map) {
     return;
@@ -251,26 +256,26 @@ export function renderEditOverlay(map: Map | null, editState: EditState): void {
 }
 
 function toMapLibreFeatureCollection(
-  featureCollection: ApiFeatureCollectionOut,
-): GeoJSON.FeatureCollection<GeoJSON.Geometry, GeoJSON.GeoJsonProperties> {
+  featureCollection: ApiFeatureCollection,
+): FeatureCollection<Geometry, FeatureProperties> {
   return {
     type: "FeatureCollection",
     features: featureCollection.features.map((feature) => ({
       type: "Feature",
       id: feature.id,
-      geometry: feature.geometry as GeoJSON.Geometry,
+      geometry: feature.geometry,
       properties: {
         ...(feature.properties ?? {}),
         __id: feature.id,
         __version: feature.version,
-      } as GeoJSON.GeoJsonProperties,
+      },
     })),
   };
 }
 
 function buildPolygonFC(
   session: EditSession,
-): FeatureCollection<Geometry, GeoJsonProperties> {
+): FeatureCollection<Geometry, FeatureProperties> {
   return {
     type: "FeatureCollection",
     features: [
@@ -284,9 +289,10 @@ function buildPolygonFC(
 }
 
 function buildVerticesFC(
-  polygon: GeoJSON.Polygon,
-): FeatureCollection<Geometry, GeoJsonProperties> {
-  const features: GeoJSON.Feature[] = [];
+  polygon: PolygonGeometry,
+): FeatureCollection<Geometry, FeatureProperties> {
+  const features: FeatureCollection<Geometry, FeatureProperties>["features"] =
+    [];
   let ringIndex = 0;
 
   for (const ring of polygon.coordinates) {

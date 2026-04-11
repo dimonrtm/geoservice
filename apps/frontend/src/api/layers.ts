@@ -1,21 +1,17 @@
 import { http } from "@/api/http";
 import { AxiosError } from "axios";
 import {
-  isApiFeatureCollectionOut,
-  isApiFeatureOut,
+  isApiFeature,
+  isApiFeatureCollection,
   isDeleteFeatureOut,
-} from "@/parsing/features";
-export type LayerDto = {
-  id: string;
-  name: string;
-  title: string;
-  geometryType: string;
-  srid: number;
-};
-export type FeatureCollection = {
-  type: "FeatureCollection";
-  features: unknown[];
-};
+  isLayersResponse,
+  isPatchFeatureSuccessResponse,
+  type DeleteFeatureIn,
+  type DeleteFeatureOut,
+  type LayerDto,
+  type PatchFeatureIn,
+} from "@/contracts/api";
+import type { ApiFeature, ApiFeatureCollection } from "@/contracts/geojson";
 
 export class HttpError extends Error {
   status: number;
@@ -27,39 +23,12 @@ export class HttpError extends Error {
   }
 }
 
-export type ApiFeatureOut<
-  G extends GeoJSON.Geometry = GeoJSON.Geometry,
-  P extends GeoJSON.GeoJsonProperties = GeoJSON.GeoJsonProperties,
-> = GeoJSON.Feature<G, P> & {
-  id: string;
-  version: number;
-};
-
-export type ApiFeatureCollectionOut<
-  G extends GeoJSON.Geometry = GeoJSON.Geometry,
-  P extends GeoJSON.GeoJsonProperties = GeoJSON.GeoJsonProperties,
-> = Omit<GeoJSON.FeatureCollection<G, P>, "features"> & {
-  features: ApiFeatureOut<G, P>[];
-};
-
-export type PatchFeatureIn = {
-  version: number;
-  properties: Record<string, unknown>;
-  geometry: GeoJSON.Geometry;
-};
-export type DeleteFeatureIn = { version: number };
-export type DeleteFeatureOut = { status: "deleted"; featureId: string };
-
 export async function fetchLayers(signal?: AbortSignal): Promise<LayerDto[]> {
   try {
     const response = await http.get("/api/v1/layers", { signal: signal });
     const raw = response.data as unknown;
-    if (
-      raw &&
-      typeof raw === "object" &&
-      Array.isArray((raw as { layers: LayerDto[] }).layers)
-    ) {
-      return (raw as { layers: LayerDto[] }).layers as LayerDto[];
+    if (isLayersResponse(raw)) {
+      return raw.layers;
     }
     throw Error("Объект неизвестного типа");
   } catch (err: unknown) {
@@ -73,7 +42,7 @@ export async function fetchLayerFeaturesByBbox(args: {
   bbox: [number, number, number, number];
   limit: number;
   signal?: AbortSignal;
-}): Promise<ApiFeatureCollectionOut> {
+}): Promise<ApiFeatureCollection> {
   try {
     let limit = Math.min(args.limit, 5000);
     limit = Math.max(limit, 1);
@@ -83,7 +52,7 @@ export async function fetchLayerFeaturesByBbox(args: {
       signal: args.signal,
     });
     const raw = response.data as unknown;
-    if (isApiFeatureCollectionOut(raw)) {
+    if (isApiFeatureCollection(raw)) {
       return raw;
     }
     throw Error("Пришел объект неожиданного типа");
@@ -98,13 +67,13 @@ export async function patchLayerFeature(
   featureId: string,
   body: PatchFeatureIn,
   signal?: AbortSignal,
-): Promise<ApiFeatureOut> {
+): Promise<ApiFeature> {
   try {
     const url = `/api/v1/layers/${layerId}/features/${featureId}`;
     const response = await http.patch(url, body, { signal: signal });
     const raw = response.data as unknown;
-    if (isApiFeatureOut((raw as { feature: unknown }).feature)) {
-      return (raw as { feature: unknown }).feature as ApiFeatureOut;
+    if (isPatchFeatureSuccessResponse(raw)) {
+      return raw.feature;
     }
     throw new Error("Пришел объект неожиданного типа");
   } catch (err: unknown) {
@@ -136,12 +105,12 @@ export async function deleteLayerFeature(
 export async function fetchLayerFeatureById(
   layerId: string,
   featureId: string,
-): Promise<ApiFeatureOut> {
+): Promise<ApiFeature> {
   try {
     const url = `/api/v1/layers/${layerId}/features/${featureId}`;
     const response = await http.get(url);
     const raw = response.data as unknown;
-    if (isApiFeatureOut(raw)) {
+    if (isApiFeature(raw)) {
       return raw;
     }
     throw new Error("Пришел объект неизвестного типа");

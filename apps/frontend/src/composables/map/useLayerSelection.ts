@@ -1,6 +1,7 @@
 import { ref, type ShallowRef } from "vue";
 import type { Map } from "maplibre-gl";
-import { fetchLayers, type LayerDto } from "@/api/layers";
+import { fetchLayers } from "@/api/layers";
+import type { LayerDto } from "@/contracts/api";
 import { ensureLayerOnMap, setAnyLayerVisibility } from "@/map/maplibrelayers";
 
 export type LoadLayersResult =

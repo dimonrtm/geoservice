@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan  6 19:28:48 2026
-
-@author: dimon
-"""
-
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict
-from typing import Literal, Any
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from .geojson import FeatureGeometry, FeatureProperties
 
 
 class FeatureOut(BaseModel):
@@ -15,5 +11,5 @@ class FeatureOut(BaseModel):
     id: UUID
     type: Literal["Feature"] = "Feature"
     version: int
-    geometry: dict[str, Any]
-    properties: dict[str, Any]
+    geometry: FeatureGeometry
+    properties: FeatureProperties = Field(default_factory=dict)

@@ -1,19 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan  6 19:47:19 2026
-
-@author: dimon
-"""
-
 from pydantic import BaseModel, ConfigDict, model_validator, field_validator
-from typing import Any
+
+from .geojson import FeatureGeometry, FeatureProperties
 
 
 class PatchFeatureRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     version: int
-    geometry: dict[str, Any] | None
-    properties: dict[str, Any] | None
+    geometry: FeatureGeometry | None
+    properties: FeatureProperties | None
 
     @model_validator(mode="after")
     def ensure_has_changes(self):

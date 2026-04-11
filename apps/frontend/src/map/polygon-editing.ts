@@ -1,10 +1,13 @@
+import type { PolygonGeometry } from "@/contracts/geojson";
+import type { BBox, Position } from "geojson";
+
 export function movePolygonVertex(
-  polygon: GeoJSON.Polygon,
+  polygon: PolygonGeometry,
   ringIndex: number,
   vertexIndex: number,
   lng: number,
   lat: number,
-): GeoJSON.Polygon {
+): PolygonGeometry {
   const nextCoords = copyPolygon(polygon);
   const nextRing = nextCoords[ringIndex];
   if (!nextRing) {
@@ -20,10 +23,10 @@ export function movePolygonVertex(
 }
 
 export function removePolygonVertex(
-  polygon: GeoJSON.Polygon,
+  polygon: PolygonGeometry,
   ringIndex: number,
   vertexIndex: number,
-): GeoJSON.Polygon | null {
+): PolygonGeometry | null {
   const nextCoords = copyPolygon(polygon);
   const nextRing = nextCoords[ringIndex];
   if (!nextRing) {
@@ -46,7 +49,7 @@ export function removePolygonVertex(
 }
 
 export function findNearestRingIndex(
-  polygon: GeoJSON.Polygon,
+  polygon: PolygonGeometry,
   lng: number,
   lat: number,
 ): number | null {
@@ -74,11 +77,11 @@ export function findNearestRingIndex(
 }
 
 export function insertVertexOnNearestSegment(
-  polygon: GeoJSON.Polygon,
+  polygon: PolygonGeometry,
   ringIndex: number,
   lng: number,
   lat: number,
-): GeoJSON.Polygon | null {
+): PolygonGeometry | null {
   const nextCoords = copyPolygon(polygon);
   const nextRing = nextCoords[ringIndex];
   if (!nextRing) {
@@ -130,33 +133,33 @@ export function insertVertexOnNearestSegment(
 }
 
 function clonePolygonWithCoordinates(
-  polygon: GeoJSON.Polygon,
-  coordinates: GeoJSON.Position[][],
-): GeoJSON.Polygon {
-  const cloned: GeoJSON.Polygon = {
+  polygon: PolygonGeometry,
+  coordinates: Position[][],
+): PolygonGeometry {
+  const cloned: PolygonGeometry = {
     type: "Polygon",
     coordinates,
   };
 
   if (polygon.bbox) {
-    cloned.bbox = polygon.bbox.slice() as GeoJSON.BBox;
+    cloned.bbox = polygon.bbox.slice() as BBox;
   }
 
   return cloned;
 }
 
-function copyPolygon(polygon: GeoJSON.Polygon): GeoJSON.Position[][] {
+function copyPolygon(polygon: PolygonGeometry): Position[][] {
   return polygon.coordinates.map((ring) =>
     ring.map((point) => copyPosition(point)),
   );
 }
 
-function copyPosition(point: GeoJSON.Position): GeoJSON.Position {
-  return point.slice() as GeoJSON.Position;
+function copyPosition(point: Position): Position {
+  return point.slice() as Position;
 }
 
 function getRingDistanceToPoint(
-  ring: GeoJSON.Position[],
+  ring: Position[],
   lng: number,
   lat: number,
 ): number | null {
@@ -195,9 +198,7 @@ function getRingDistanceToPoint(
   return minDistance;
 }
 
-function toLngLat(
-  point: GeoJSON.Position | undefined,
-): [number, number] | null {
+function toLngLat(point: Position | undefined): [number, number] | null {
   if (!isValidPosition(point)) {
     return null;
   }
@@ -210,9 +211,7 @@ function toLngLat(
   return [lng, lat];
 }
 
-function isValidPosition(
-  point: GeoJSON.Position | undefined,
-): point is GeoJSON.Position {
+function isValidPosition(point: Position | undefined): point is Position {
   return (
     Array.isArray(point) &&
     Number.isFinite(point[0]) &&

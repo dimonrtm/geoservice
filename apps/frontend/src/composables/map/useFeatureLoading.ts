@@ -1,10 +1,7 @@
 import { ref, type ShallowRef } from "vue";
 import { AxiosError } from "axios";
-import {
-  fetchLayerFeaturesByBbox,
-  HttpError,
-  type LayerDto,
-} from "@/api/layers";
+import { fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
+import type { LayerDto } from "@/contracts/api";
 import {
   BboxClose,
   formatBbox,

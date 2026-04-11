@@ -5,7 +5,13 @@ import type {
   MapLayerMouseEvent,
   MapMouseEvent,
 } from "maplibre-gl";
-import type { LayerDto } from "@/api/layers";
+import type { LayerDto } from "@/contracts/api";
+import {
+  isFiniteNumber,
+  isRecord,
+  isPolygonGeometry,
+  toFiniteNumber,
+} from "@/contracts/geojson";
 import {
   ensureEditLayer,
   ensureEditSource,
@@ -17,10 +23,7 @@ import {
   movePolygonVertex,
   removePolygonVertex,
 } from "@/map/polygon-editing";
-import { isFiniteNumber, toFiniteNumber } from "@/parsing/common";
 import { useEditStore } from "@/stores/edit";
-
-type Polygon = import("geojson").Polygon;
 
 export function usePolygonEditing(
   map: ShallowRef<Map | null>,
@@ -120,7 +123,10 @@ export function usePolygonEditing(
       return;
     }
 
-    const props = feature.properties as Record<string, unknown>;
+    if (!isRecord(feature.properties)) {
+      return;
+    }
+    const props = feature.properties;
     const featureId = typeof props["__id"] === "string" ? props["__id"] : null;
     if (!featureId) {
       return;
@@ -132,13 +138,16 @@ export function usePolygonEditing(
       return;
     }
 
-    if (feature.geometry.type === "Polygon") {
+    if (
+      feature.geometry.type === "Polygon" &&
+      isPolygonGeometry(feature.geometry)
+    ) {
       editStore.startEditing({
         layerId: activeLayer.value.id,
         featureId,
         version,
         properties: props,
-        geometry: feature.geometry as Polygon,
+        geometry: feature.geometry,
       });
     }
   }

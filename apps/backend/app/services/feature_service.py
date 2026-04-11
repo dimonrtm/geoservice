@@ -1,5 +1,4 @@
 import json
-from typing import Any
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +14,7 @@ from schemas.delete_feature_request import DeleteFeatureRequest
 from schemas.delete_feature_response import DeleteFeatureResponse
 from schemas.feature_collection_out import FeatureCollectionOut
 from schemas.feature_out import FeatureOut
+from schemas.geojson import FeatureProperties, dump_feature_geometry
 from schemas.patch_feature_request import PatchFeatureRequest
 
 
@@ -27,7 +27,7 @@ class FeatureService:
         self,
         feature_id: UUID,
         version: int,
-        properties: dict[str, Any],
+        properties: FeatureProperties,
         geometry_json: str,
     ) -> FeatureOut:
         if not geometry_json:
@@ -79,7 +79,7 @@ class FeatureService:
                     "Тип создаваемой геометрии не соответствует типу геометрии слоя"
                 )
             row = await self.layer_repository.create_feature(
-                layer, request.geometry, request.properties
+                layer, dump_feature_geometry(request.geometry), request.properties
             )
             return self.to_feature_out(
                 feature_id=row.id,
@@ -100,7 +100,11 @@ class FeatureService:
                     "Тип обновляемой геометрии не соответствует типу геометрии слоя"
                 )
             (row, model_type) = await self.layer_repository.update_feature_if_version_matches(
-                layer, feature_id, request.geometry, request.properties, request.version
+                layer,
+                feature_id,
+                dump_feature_geometry(request.geometry) if request.geometry else None,
+                request.properties,
+                request.version,
             )
             if row is None:
                 await self.version_error_handler(feature_id, request.version, model_type)
@@ -149,7 +153,7 @@ class FeatureService:
         return limit_value
 
     def check_geometry_type_match(self, request: CreateFeatureIn, layer: Layer) -> bool:
-        geojson_type = request.geometry.get("type")
+        geojson_type = request.geometry.type
         expected = layer.geometry_type
         return geojson_type == expected
 
