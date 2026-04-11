@@ -128,6 +128,116 @@ Response `200 OK`:
 - В Sprint 1 endpoint не должен возвращать разрозненные поля вида `user_id` и `user_role`.
 - Endpoint не изменяет состояние пользователя и используется только для чтения текущей сессии.
 
+### Контракт `WS /api/v1/ws/layers/{layer_id}?token=<jwt>`
+
+Назначение:
+- Обеспечивает realtime-подписку на изменения одного слоя и доставляет события `feature_created`, `feature_updated`, `feature_deleted` второму клиенту почти в реальном времени.
+
+Подключение:
+- Protocol: `ws` или `wss`
+- Path: `/api/v1/ws/layers/{layer_id}`
+- Path params:
+  - `layer_id`: `string`
+- Query params:
+  - `token`: `string`, обязательный JWT access token
+
+Правило подключения:
+- Одно WebSocket-соединение соответствует одной подписке на один `layer_id`.
+- JWT передаётся через query parameter `token`.
+- Если токен отсутствует, невалиден или истёк, сервер отклоняет подключение.
+
+Поведение авторизации:
+- Для успешной подписки клиент должен передавать тот же access token, который получил через `POST /api/v1/auth/login`.
+- Роль `viewer` может подписываться на realtime-события чтения.
+- Роль `editor` может подписываться на realtime-события и параллельно выполнять mutate-операции через HTTP API.
+
+### Формат realtime-событий
+
+Общие поля каждого события:
+- `type`: `string`
+- `eventId`: `string`
+- `occurredAt`: `string` в формате ISO 8601
+- `layerId`: `string`
+
+#### Событие `feature_created`
+
+```json
+{
+  "type": "feature_created",
+  "eventId": "evt_01hrx3x9x9z6m2v8h3j4q1k7aa",
+  "occurredAt": "2026-04-11T18:45:12Z",
+  "layerId": "6b2e1f52-0a58-4f4d-bf7d-8d4e16a8db61",
+  "feature": {
+    "id": "3c6c5f41-4d2a-4d5a-8b58-2f7a4d59c8a1",
+    "version": 1,
+    "properties": {
+      "name": "New feature"
+    },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[10.0, 10.0], [20.0, 10.0], [20.0, 20.0], [10.0, 10.0]]]
+    }
+  }
+}
+```
+
+Правило обработки:
+- Клиент выполняет `upsert` feature в cache/source.
+
+#### Событие `feature_updated`
+
+```json
+{
+  "type": "feature_updated",
+  "eventId": "evt_01hrx3y8s8n1k3r7m2a4p9d5bb",
+  "occurredAt": "2026-04-11T18:46:03Z",
+  "layerId": "6b2e1f52-0a58-4f4d-bf7d-8d4e16a8db61",
+  "feature": {
+    "id": "3c6c5f41-4d2a-4d5a-8b58-2f7a4d59c8a1",
+    "version": 2,
+    "properties": {
+      "name": "Updated feature"
+    },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[10.0, 10.0], [25.0, 10.0], [25.0, 25.0], [10.0, 10.0]]]
+    }
+  }
+}
+```
+
+Правило обработки:
+- Клиент выполняет `upsert`, инвалидирует затронутые tiles и синхронизирует source без полной перезагрузки приложения.
+
+#### Событие `feature_deleted`
+
+```json
+{
+  "type": "feature_deleted",
+  "eventId": "evt_01hrx3z7f4j7n9q2k6p3m8c1cc",
+  "occurredAt": "2026-04-11T18:47:40Z",
+  "layerId": "6b2e1f52-0a58-4f4d-bf7d-8d4e16a8db61",
+  "featureId": "3c6c5f41-4d2a-4d5a-8b58-2f7a4d59c8a1"
+}
+```
+
+Правило обработки:
+- Клиент удаляет feature из cache/source и синхронизирует видимый слой.
+
+### Правила доставки и идемпотентности
+
+- События публикуются только после успешного завершения create/update/delete операции.
+- Повторная доставка одного и того же события не должна ломать состояние клиента.
+- Поле `eventId` используется как идентификатор события для отладки и возможной дедупликации на клиенте.
+- Источником истины для актуального состояния feature остаётся backend API.
+
+### Правила reconnect
+
+- После разрыва соединения клиент запускает reconnect с backoff.
+- После переподключения клиент повторно открывает соединение на тот же `layer_id` и повторно передаёт `token`.
+- После успешного reconnect клиент выполняет принудительную синхронизацию активного слоя через `reloadFeatures(..., force=true)`.
+- Reconnect не добавляет новые публичные event types в Sprint 1; он опирается на тот же контракт событий.
+
 ## План по дням
 
 1. День 1: зафиксировать contracts спринта 1. Описать login/WS/event payload, reconnect-поведение, out-of-scope спринта и DoD в `docs/`.
