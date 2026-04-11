@@ -1,18 +1,17 @@
-import { ref, type ShallowRef } from "vue";
+﻿import { ref, type ShallowRef } from "vue";
 import { AxiosError } from "axios";
-import { fetchLayerFeaturesByBbox, HttpError } from "@/api/layers";
+import { HttpError } from "@/api/layers";
 import type { LayerDto } from "@/contracts/api";
+import { useFeatureTileCache } from "@/composables/map/useFeatureTileCache";
+import { getTilesForViewport } from "@/map/feature-grid";
 import {
-  BboxClose,
   formatBbox,
   getCurrentBbox,
   isValidBbox,
   setSourceData,
-  type Bbox,
 } from "@/map/maplibrelayers";
 import type { Map } from "maplibre-gl";
 
-const BBOX_EPS = 0.002;
 const DEBOUNCE_MS = 250;
 const MIN_ZOOM = 8;
 const FEATURE_LIMIT = 500;
@@ -20,27 +19,23 @@ const FEATURE_LIMIT = 500;
 export function useFeatureLoading(map: ShallowRef<Map | null>) {
   const labelText = ref("Карта загружается...");
   const isLoadingFeature = ref(false);
-  const lastRequestedBbox = ref<Bbox | null>(null);
   const featuresAbortController = ref<AbortController | null>(null);
+  const tileCache = useFeatureTileCache();
   let moveTimer: ReturnType<typeof setTimeout> | null = null;
 
-  async function reloadFeatures(layer: LayerDto): Promise<void> {
+  async function reloadFeatures(
+    layer: LayerDto,
+    options: { force?: boolean } = {},
+  ): Promise<void> {
     const zoom = map.value?.getZoom();
     if (zoom !== undefined && zoom < MIN_ZOOM) {
-      labelText.value = `Zoom ${zoom.toFixed(1)}: приблизтесь к ${MIN_ZOOM}`;
+      labelText.value = `Zoom ${zoom.toFixed(1)}: приблизьтесь к ${MIN_ZOOM}`;
       return;
     }
 
     const bbox = getCurrentBbox(map.value);
     if (!isValidBbox(bbox)) {
-      labelText.value = "Bbox не валиден на клиенте";
-      return;
-    }
-
-    if (
-      lastRequestedBbox.value &&
-      BboxClose(bbox, lastRequestedBbox.value, BBOX_EPS)
-    ) {
+      labelText.value = "Bbox невалиден на клиенте";
       return;
     }
 
@@ -50,21 +45,25 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
 
     const controller = new AbortController();
     featuresAbortController.value = controller;
-    lastRequestedBbox.value = bbox;
+    const normalizedZoom = Math.floor(zoom ?? MIN_ZOOM);
+    const visibleTiles = getTilesForViewport(bbox, normalizedZoom);
 
     try {
-      const featureCollection = await fetchLayerFeaturesByBbox({
-        layerId: layer.id,
-        bbox,
-        limit: FEATURE_LIMIT,
-        signal: controller.signal,
-      });
+      const { featureCollection, fetchedTiles, requestedTiles } =
+        await tileCache.loadTiles({
+          layer,
+          tiles: visibleTiles,
+          limit: FEATURE_LIMIT,
+          signal: controller.signal,
+          force: options.force === true,
+        });
+
       setSourceData(map.value, getSourceId(layer), featureCollection);
       const count = featureCollection.features.length;
       if (count === 0) {
-        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | пусто | limit ${FEATURE_LIMIT}`;
+        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | tiles: ${requestedTiles} | empty | limit ${FEATURE_LIMIT}`;
       } else {
-        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${count} | limit ${FEATURE_LIMIT}`;
+        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${count} | tiles: ${requestedTiles} | fetched: ${fetchedTiles} | cached: ${tileCache.getReadyTileCount(layer.id)} | limit ${FEATURE_LIMIT}`;
       }
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.code === "ERR_CANCELED") {
@@ -74,12 +73,12 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
         if (err.status === 404) {
           labelText.value = "Слой не найден (404)";
         } else if (err.status === 422) {
-          labelText.value = "Невалидный Bbox (422)";
+          labelText.value = "Невалидный bbox (422)";
         } else {
           labelText.value = `Ошибка загрузки. HTTP ${err.status}`;
         }
       } else {
-        labelText.value = "Сетевая/неизвестная ошибка";
+        labelText.value = "Сетевая или неизвестная ошибка";
       }
     } finally {
       isLoadingFeature.value = false;
@@ -90,10 +89,6 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     getActiveLayer: () => LayerDto | null,
   ): () => void {
     return () => {
-      if (isLoadingFeature.value) {
-        return;
-      }
-
       if (moveTimer !== null) {
         clearTimeout(moveTimer);
       }
@@ -108,8 +103,8 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     };
   }
 
-  function resetLoadedBbox(): void {
-    lastRequestedBbox.value = null;
+  function clearLayerCache(layerId: string): void {
+    tileCache.clearLayer(layerId);
   }
 
   function stopPendingFeatureWork(): void {
@@ -125,7 +120,7 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     labelText,
     reloadFeatures,
     createMoveEndHandler,
-    resetLoadedBbox,
+    clearLayerCache,
     stopPendingFeatureWork,
   };
 }

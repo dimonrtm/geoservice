@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page">
     <div class="toolbar">
       <div class="modal">
@@ -45,7 +45,7 @@ const {
   labelText,
   reloadFeatures,
   createMoveEndHandler,
-  resetLoadedBbox,
+  clearLayerCache,
   stopPendingFeatureWork,
 } = useFeatureLoading(map);
 const {
@@ -74,7 +74,7 @@ onMounted(async () => {
       labelText.value = "Слоев нет";
       return;
     }
-    labelText.value = `Слои загружены ${loadLayersResult.total}. Выбран ${loadLayersResult.layer.title}`;
+    labelText.value = `Слои загружены: ${loadLayersResult.total}. Выбран слой: ${loadLayersResult.layer.title}`;
     bindActiveLayerClick(loadLayersResult.layer.id);
     enableEditingOverlaySync();
     await reloadFeatures(loadLayersResult.layer);
@@ -103,20 +103,19 @@ async function onChangeLayer(): Promise<void> {
       bindActiveLayerClick(layer.id);
       resetInteractionState();
       stopPendingFeatureWork();
-      resetLoadedBbox();
       await reloadFeatures(layer);
     },
   });
   if (!nextLayer) {
-    labelText.value = "Слой ненайден в списке";
+    labelText.value = "Слой не найден в списке";
   }
 }
 
 async function deleteFeature(): Promise<void> {
   const deleted = await deleteEditingFeature();
   if (editStore.edit.mode === "idle" && activeLayer.value && deleted) {
-    resetLoadedBbox();
-    await reloadFeatures(activeLayer.value);
+    clearLayerCache(activeLayer.value.id);
+    await reloadFeatures(activeLayer.value, { force: true });
   }
 }
 </script>
