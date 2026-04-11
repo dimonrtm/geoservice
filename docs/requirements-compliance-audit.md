@@ -25,6 +25,7 @@
 - production-ready login flow вместо dev-login;
 - сущность `Project`;
 - пользовательский сценарий создания feature через UI;
+- frontend-редактирование всех поддерживаемых типов геометрии, а не только полигонов;
 - аналитические геооперации;
 - integration/e2e покрытие ключевых сценариев.
 
@@ -120,6 +121,21 @@
 - Добавить UX-поток создания новой feature
 - Определить режим `create` в edit-store или отдельный create-flow
 
+### 5.1. Frontend-редактирование ограничено полигонами
+
+Статус: `Не соответствует`
+
+Доказательства в коде:
+- Логика редактирования завязана на `PolygonGeometry`: [usePolygonEditing.ts](/C:/Repositories/geoservice/apps/frontend/src/composables/map/usePolygonEditing.ts#L15)
+- Edit-store работает с draft-моделью полигона: [edit.ts](/C:/Repositories/geoservice/apps/frontend/src/stores/edit.ts#L25)
+
+Последствие:
+- Формально не выполнено новое требование о редактировании всех поддерживаемых типов геометрии на frontend
+
+Что нужно сделать:
+- Обобщить edit-store и map interaction layer под все поддерживаемые geometry types
+- Добавить отдельные interaction flows для точек, линий и мультигеометрий
+
 ### 6. Геоаналитика отсутствует
 
 Статус: `Не соответствует`
@@ -176,6 +192,7 @@
 | Загрузка feature по `bbox` | Соответствует | Реализовано |
 | Получение feature по id | Соответствует | Реализовано |
 | Create feature | Частично соответствует | API есть, UI flow не завершён |
+| Frontend-редактирование всех supported geometry types | Не соответствует | Сейчас edit-flow фактически ограничен полигонами |
 | Update/Delete feature | Соответствует | Реализовано |
 | Optimistic concurrency / `409` | Соответствует | Реализовано и обработано на frontend |
 | Realtime через WebSocket | Не соответствует | Не реализовано |
@@ -191,6 +208,7 @@
 - WebSocket realtime
 - История изменений feature
 - Production-ready login flow
+- Frontend-редактирование всех поддерживаемых типов геометрии
 
 ### Приоритет 2
 - Полноценный create-flow в UI

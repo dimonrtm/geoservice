@@ -42,12 +42,13 @@
 Задачи:
 - Добавить create-flow для новой feature на карте.
 - Поддержать режим создания в edit-store и map interaction flow.
+- Обобщить frontend-редактирование на все поддерживаемые типы геометрии, а не только на `Polygon`.
 - Скрыть или дизейблить mutate-действия для `viewer`.
 - Добавить integration/e2e тесты на create/update/delete.
 - Обновить demo-checklist и сценарии тестирования.
 
 Результат спринта:
-- `Editor` может создать, изменить и удалить объект полностью через UI;
+- `Editor` может создать, изменить и удалить объект полностью через UI для всех поддерживаемых типов геометрии;
 - `Viewer` получает корректный read-only интерфейс;
 - CRUD сценарий закрыт не только API, но и пользовательским потоком.
 
@@ -97,7 +98,7 @@
 1. WebSocket realtime
 2. Production-ready auth
 3. Integration-тесты auth + CRUD
-4. Create-flow в UI
+4. Create-flow в UI и редактирование всех supported geometry types
 5. Read-only UX для `viewer`
 6. История изменений
 7. Structured logging и request id
