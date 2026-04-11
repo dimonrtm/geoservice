@@ -1,0 +1,2 @@
+class BusinessValidationException(Exception):
+    pass

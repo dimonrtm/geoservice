@@ -1,25 +1,21 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan  6 20:03:39 2026
-
-@author: dimon
-"""
-
 import json
-from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any
-from schemas.feature_out import FeatureOut
-from schemas.feature_collection_out import FeatureCollectionOut
-from schemas.create_feature_in import CreateFeatureIn
-from schemas.patch_feature_request import PatchFeatureRequest
-from schemas.delete_feature_request import DeleteFeatureRequest
-from schemas.delete_feature_response import DeleteFeatureResponse
-from repositories.layer_repository import LayerRepository
-from models.layer import Layer
+from uuid import UUID
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from domain.exceptions.business_validation_exception import BusinessValidationException
 from domain.exceptions.layer_not_found_exception import LayerNotFoundException
 from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
 from domain.exceptions.version_mismatch_exception import VersionMismatchException
+from models.layer import Layer
+from repositories.layer_repository import LayerRepository
+from schemas.create_feature_in import CreateFeatureIn
+from schemas.delete_feature_request import DeleteFeatureRequest
+from schemas.delete_feature_response import DeleteFeatureResponse
+from schemas.feature_collection_out import FeatureCollectionOut
+from schemas.feature_out import FeatureOut
+from schemas.patch_feature_request import PatchFeatureRequest
 
 
 class FeatureService:
@@ -35,7 +31,9 @@ class FeatureService:
         geometry_json: str,
     ) -> FeatureOut:
         if not geometry_json:
-            raise ValueError(f"У Feature с идентифкатором {feature_id} пустая геометрия")
+            raise BusinessValidationException(
+                f"У Feature с идентифкатором {feature_id} пустая геометрия"
+            )
         try:
             return FeatureOut(
                 id=feature_id,
@@ -44,9 +42,9 @@ class FeatureService:
                 geometry=json.loads(geometry_json),
             )
         except (json.JSONDecodeError, TypeError) as e:
-            raise ValueError(
+            raise BusinessValidationException(
                 f"У Feature с идентификатором {feature_id} невалидный JSON геометрии: {e}"
-            )
+            ) from e
 
     def to_feature_collection_out(self, rows) -> FeatureCollectionOut:
         features = []
@@ -77,7 +75,9 @@ class FeatureService:
             if layer is None:
                 raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
             if not self.check_geometry_type_match(request, layer):
-                raise ValueError("Тип создаваемой геометрии не соответствует типу геометрии слоя")
+                raise BusinessValidationException(
+                    "Тип создаваемой геометрии не соответствует типу геометрии слоя"
+                )
             row = await self.layer_repository.create_feature(
                 layer, request.geometry, request.properties
             )
@@ -96,7 +96,9 @@ class FeatureService:
             if layer is None:
                 raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
             if request.geometry and not self.check_geometry_type_match(request, layer):
-                raise ValueError("Тип обновляемой геометрии не соответствует типу геометрии слоя")
+                raise BusinessValidationException(
+                    "Тип обновляемой геометрии не соответствует типу геометрии слоя"
+                )
             (row, model_type) = await self.layer_repository.update_feature_if_version_matches(
                 layer, feature_id, request.geometry, request.properties, request.version
             )
