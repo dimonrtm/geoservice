@@ -3,6 +3,7 @@ import uuid
 from uuid import UUID
 
 from sqlalchemy import delete, func, insert, select, update
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.feature_registry import get_layer_feature_model
@@ -24,7 +25,7 @@ class LayerRepository:
                 model_type.id.label("id"),
                 model_type.version.label("version"),
                 model_type.properties.label("properties"),
-                func.ST_AsGeoJSON(model_type.geom).label("geometry_json"),
+                func.ST_AsGeoJSON(model_type.geom).cast(postgresql.JSONB).label("geometry_data"),
             )
             .where(model_type.geom.op("&&")(envelope))
             .where(
@@ -60,7 +61,7 @@ class LayerRepository:
                 model_type.id.label("id"),
                 model_type.version.label("version"),
                 model_type.properties.label("properties"),
-                func.ST_AsGeoJSON(model_type.geom).label("geometry_json"),
+                func.ST_AsGeoJSON(model_type.geom).cast(postgresql.JSONB).label("geometry_data"),
             )
         )
         res = await self.session.execute(stmt)
@@ -99,7 +100,7 @@ class LayerRepository:
             model_type.id.label("id"),
             model_type.version.label("version"),
             model_type.properties.label("properties"),
-            func.ST_AsGeoJSON(model_type.geom).label("geometry_json"),
+            func.ST_AsGeoJSON(model_type.geom).cast(postgresql.JSONB).label("geometry_data"),
         )
         update_stmt = update_stmt
         res = await self.session.execute(update_stmt)
@@ -124,7 +125,7 @@ class LayerRepository:
             model_type.id.label("id"),
             model_type.version.label("version"),
             model_type.properties.label("properties"),
-            func.ST_AsGeoJSON(model_type.geom).label("geometry_json"),
+            func.ST_AsGeoJSON(model_type.geom).cast(postgresql.JSONB).label("geometry_data"),
         ).where(model_type.id == feature_id)
         res = await self.session.execute(stmt)
         return res.one_or_none()

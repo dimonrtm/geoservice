@@ -1,6 +1,6 @@
-import json
 from uuid import UUID
 
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.exceptions.business_validation_exception import BusinessValidationException
@@ -28,9 +28,9 @@ class FeatureService:
         feature_id: UUID,
         version: int,
         properties: FeatureProperties,
-        geometry_json: str,
+        geometry_data: dict[str, object],
     ) -> FeatureOut:
-        if not geometry_json:
+        if not geometry_data:
             raise BusinessValidationException(
                 f"У Feature с идентифкатором {feature_id} пустая геометрия"
             )
@@ -39,9 +39,9 @@ class FeatureService:
                 id=feature_id,
                 version=version,
                 properties=properties,
-                geometry=json.loads(geometry_json),
+                geometry=geometry_data,
             )
-        except (json.JSONDecodeError, TypeError) as e:
+        except (TypeError, ValidationError, ValueError) as e:
             raise BusinessValidationException(
                 f"У Feature с идентификатором {feature_id} невалидный JSON геометрии: {e}"
             ) from e
@@ -56,7 +56,7 @@ class FeatureService:
                     feature_id=row.id,
                     version=row.version,
                     properties=row.properties,
-                    geometry_json=row.geometry_json,
+                    geometry_data=row.geometry_data,
                 )
             )
         return FeatureCollectionOut(
@@ -95,7 +95,7 @@ class FeatureService:
                 feature_id=row.id,
                 version=row.version,
                 properties=row.properties,
-                geometry_json=row.geometry_json,
+                geometry_data=row.geometry_data,
             )
 
     async def update_feature(
@@ -122,7 +122,7 @@ class FeatureService:
                 feature_id=row.id,
                 version=row.version,
                 properties=row.properties,
-                geometry_json=row.geometry_json,
+                geometry_data=row.geometry_data,
             )
 
     async def delete_feature(
@@ -150,7 +150,7 @@ class FeatureService:
             feature_id=row.id,
             version=row.version,
             properties=row.properties,
-            geometry_json=row.geometry_json,
+            geometry_data=row.geometry_data,
         )
 
     def normalize_limit(self, limit_value: int | None) -> int:

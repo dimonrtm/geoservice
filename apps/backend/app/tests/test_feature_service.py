@@ -39,7 +39,10 @@ def test_get_features_from_bbox_returns_meta_with_truncation_flag() -> None:
         id=uuid4(),
         version=2,
         properties={"name": "A"},
-        geometry_json='{"type":"Polygon","coordinates":[[[10,10],[20,10],[20,20],[10,10]]]}',
+        geometry_data={
+            "type": "Polygon",
+            "coordinates": [[[10, 10], [20, 10], [20, 20], [10, 10]]],
+        },
     )
     repository = AsyncMock()
     repository.get_layer_by_id.return_value = layer
