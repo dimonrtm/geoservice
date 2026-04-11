@@ -28,6 +28,30 @@
 7. Записать явный список out-of-scope: create-flow новой feature, все geometry types на frontend, history, analytics, `Project`.
 8. Зафиксировать Definition of Done Sprint 1 и demo-сценарий приёмки.
 
+## Только Sprint-1 изменения публичных контрактов
+
+### Входят в Sprint 1
+
+- Новый endpoint `POST /api/v1/auth/login`.
+- Нормализация ответа `GET /api/v1/auth/me` под единый пользовательский контракт.
+- WebSocket endpoint `WS /api/v1/ws/layers/{layer_id}?token=<jwt>`.
+- Realtime payload'ы `feature_created`, `feature_updated`, `feature_deleted`.
+- Клиентское правило reconnect с повторной подпиской и принудительной синхронизацией активного слоя.
+
+### Не входят в Sprint 1
+
+- Изменения контрактов CRUD endpoints слоя и feature, кроме их использования в integration-тестах.
+- Новый публичный endpoint истории вида `GET /features/{id}/history`.
+- Любые аналитические endpoints.
+- Публичный контракт create-flow новой feature через UI.
+- Публичный контракт frontend-редактирования всех поддерживаемых geometry types.
+- Изменения доменной модели и API вокруг сущности `Project`.
+
+### Правило отсечения Sprint 2+
+
+- Если изменение относится к create-flow, all-geometry editing, history, analytics или `Project`, оно не включается в Sprint 1 contract baseline, даже если присутствует в общих требованиях MVP.
+- Sprint 1 меняет только auth и realtime contracts, необходимые для demo-сценария совместного редактирования и integration-проверок.
+
 ## Контракты
 
 ### `POST /api/v1/auth/login`

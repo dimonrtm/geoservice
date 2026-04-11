@@ -18,6 +18,7 @@
 - Публикацию realtime-событий делать после успешного коммита CRUD-операции в backend service-слое через отдельный publisher/connection manager.
 - В production-режиме запретить запуск backend с дефолтным `JWT_SECRET`; refresh token в спринт 1 не включать.
 - Для demo/local окружения добавить явный seed-поток предсозданных пользователей с email/password, чтобы login был воспроизводим через `docker-compose`.
+- В Sprint 1 не менять публичные контракты history, analytics, `Project`, create-flow новой feature и all-geometry editing на frontend; эти темы остаются за пределами sprint baseline.
 
 ## План по дням
 
