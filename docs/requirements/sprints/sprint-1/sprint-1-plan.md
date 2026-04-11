@@ -82,6 +82,52 @@ Response `200 OK`:
 - JWT используется дальше как `Authorization: Bearer <access_token>`.
 - Контракт login не зависит от `DEV_MODE`; `dev-login` остаётся отдельным dev-only endpoint.
 
+### Контракт `GET /api/v1/auth/me`
+
+Назначение:
+- Возвращает текущего авторизованного пользователя по переданному JWT и используется frontend для восстановления сессии после перезагрузки приложения.
+
+Request:
+- Method: `GET`
+- Path: `/api/v1/auth/me`
+- Headers:
+  - `Authorization: Bearer <access_token>`
+
+Response `200 OK`:
+- `user`: `object`
+- `user.id`: `string`
+- `user.email`: `string`
+- `user.role`: `"viewer" | "editor"`
+
+Пример response body:
+
+```json
+{
+  "user": {
+    "id": "3c6c5f41-4d2a-4d5a-8b58-2f7a4d59c8a1",
+    "email": "editor@example.com",
+    "role": "editor"
+  }
+}
+```
+
+Ошибки:
+- `401 Unauthorized` при отсутствии токена
+- `401 Unauthorized` при невалидном или протухшем токене
+
+Пример `401 Unauthorized`:
+
+```json
+{
+  "detail": "Invalid or expired token"
+}
+```
+
+Правила контракта:
+- Ответ `GET /api/v1/auth/me` должен быть нормализован под тот же объект `user`, что и `POST /api/v1/auth/login`.
+- В Sprint 1 endpoint не должен возвращать разрозненные поля вида `user_id` и `user_role`.
+- Endpoint не изменяет состояние пользователя и используется только для чтения текущей сессии.
+
 ## План по дням
 
 1. День 1: зафиксировать contracts спринта 1. Описать login/WS/event payload, reconnect-поведение, out-of-scope спринта и DoD в `docs/`.
