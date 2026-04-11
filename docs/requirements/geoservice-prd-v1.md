@@ -216,6 +216,13 @@ MVP строится на стеке `Vue + MapLibre` для frontend и `FastAP
 
 - GeoJSON — основной формат обмена.
 - `SRID=4326`.
+- Хранение геоданных в MVP допускает multi-table модель по типам геометрии.
+- Текущая целевая storage-модель:
+  - `feature_points`
+  - `feature_polygons`
+  - `feature_multipoints`
+  - `feature_multilines`
+  - `feature_multipolygons`
 - Координаты:
   - `lon ∈ [-180, 180]`
   - `lat ∈ [-90, 90]`

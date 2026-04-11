@@ -3,9 +3,9 @@
 Дата проверки: 2026-04-11
 
 Основание для сверки:
-- `docs/geoservice-requirements.md`
-- `docs/geoservice-prd-v1.md`
-- `docs/user-stories-and-test-cases.md`
+- `docs/requirements/geoservice-requirements.md`
+- `docs/requirements/geoservice-prd-v1.md`
+- `docs/requirements/user-stories-and-test-cases.md`
 
 ## Итог
 
@@ -17,7 +17,8 @@
 - CRUD для feature на уровне API;
 - optimistic concurrency с обработкой `409`;
 - health-check и CI для backend/frontend;
-- tile/grid cache и cursor-based подзагрузка данных карты.
+- tile/grid cache и cursor-based подзагрузка данных карты;
+- запуск локального окружения через `Docker Compose`.
 
 Что пока не реализовано или реализовано не полностью:
 - realtime через WebSocket;
@@ -27,7 +28,10 @@
 - пользовательский сценарий создания feature через UI;
 - frontend-редактирование всех поддерживаемых типов геометрии, а не только полигонов;
 - аналитические геооперации;
-- integration/e2e покрытие ключевых сценариев.
+- integration/e2e покрытие ключевых сценариев;
+- типизированные error-body для всех обязательных случаев;
+- structured logging и `request id`;
+- целевая frontend-структура `features/shared/map/api/auth`.
 
 ## Ключевые расхождения
 
@@ -148,7 +152,7 @@
 - Реализовать минимум 1-2 аналитические операции из требований
 - Добавить тесты и UI/демо-сценарий их использования
 
-### 7. Покрытие тестами уже лучше, но пока уже требований
+### 7. Покрытие тестами уже лучше, но пока ниже требований
 
 Статус: `Частично соответствует`
 
@@ -182,6 +186,56 @@
 Что нужно сделать:
 - Скрывать или дизейблить mutate-действия для `viewer`
 
+### 9. Типизированные error-body покрыты не полностью
+
+Статус: `Частично соответствует`
+
+Доказательства в коде:
+- `409` уже возвращает типизированный конфликт `VERSION_MISMATCH`: [patch_feature_conflict_response.py](/C:/Repositories/geoservice/apps/backend/app/schemas/patch_feature_conflict_response.py#L9)
+- Общие `422` и `404` сейчас возвращаются как `{ "error": "..." }` без обязательного typed error body: [exception_handlers.py](/C:/Repositories/geoservice/apps/backend/app/api/exception_handlers.py#L11)
+- В `schemas/` нет отдельных схем под `UNSUPPORTED_GEOMETRY`, `INVALID_BBOX`, `VERSION_REQUIRED`
+
+Последствие:
+- Формально закрыт только сценарий `VERSION_MISMATCH`
+- Остальные обязательные error contracts из требований и PRD не зафиксированы на уровне API
+
+Что нужно сделать:
+- Добавить типизированные error-body для обязательных случаев
+- Отделить ошибки валидации геометрии, bbox и отсутствующей версии в явные контракты
+
+### 10. Наблюдаемость из требований не реализована
+
+Статус: `Не соответствует`
+
+Доказательства в коде:
+- В backend не найден middleware или util-слой для `request id`
+- Не найден structured logging для входящих запросов, realtime-событий и ошибок
+- В API-слое и lifespan нет явной инициализации логирования: [main.py](/C:/Repositories/geoservice/apps/backend/app/main.py#L1)
+
+Последствие:
+- Не выполнены нефункциональные требования по сопровождению и разбору инцидентов
+- Труднее трассировать ошибки, особенно после добавления realtime
+
+Что нужно сделать:
+- Добавить `request id`
+- Внедрить structured logging для HTTP и ключевых доменных операций
+
+### 11. Архитектурное требование по frontend-подсистемам соблюдено частично
+
+Статус: `Частично соответствует`
+
+Доказательства в коде:
+- Во frontend есть `map`, `api`, `stores`, `components`, `composables`, `config`: `apps/frontend/src`
+- Но отсутствуют целевые подсистемы `features` и `shared`, явно требуемые в `geoservice-requirements.md` и PRD
+
+Последствие:
+- Формальное архитектурное требование по frontend-структуре закрыто не полностью
+- При дальнейшем росте карты и auth-flow есть риск смешения orchestration и UI-логики
+
+Что нужно сделать:
+- Зафиксировать целевую frontend-структуру или адаптировать требования
+- При необходимости начать вынос модулей в `features/` и `shared/`
+
 ## Матрица соответствия
 
 | Требование | Статус | Комментарий |
@@ -198,27 +252,34 @@
 | Realtime через WebSocket | Не соответствует | Не реализовано |
 | История изменений | Не соответствует | Не реализовано |
 | Мини-аналитика | Не соответствует | Не реализовано |
+| Типизированные error-body | Частично соответствует | Полноценно закрыт только `VERSION_MISMATCH` |
+| Docker Compose запуск | Соответствует | Compose-конфигурация есть |
 | Health-check | Соответствует | Реализовано |
 | CI format/lint/test/build | Соответствует | Реализовано |
+| Frontend-архитектура `features/shared/map/api/auth` | Частично соответствует | Есть `map/api`, но нет целевых `features/shared` подсистем |
+| Structured logging и `request id` | Не соответствует | Не найдено в backend |
 | `Project` как сущность | Не соответствует | В коде отсутствует |
 
 ## Приоритеты доработки
 
 ### Приоритет 1
 - WebSocket realtime
-- История изменений feature
 - Production-ready login flow
-- Frontend-редактирование всех поддерживаемых типов геометрии
+- Integration-тесты auth + protected CRUD
+- Фиксация контрактов ошибок и Sprint 1 API/WS contracts
 
 ### Приоритет 2
 - Полноценный create-flow в UI
+- Frontend-редактирование всех поддерживаемых типов геометрии
 - Ролевой UX для `viewer`
-- Integration/e2e тесты ключевых сценариев
+- История изменений feature
 
 ### Приоритет 3
+- Structured logging и `request id`
 - Геоаналитика
-- Возврат к вопросу о сущности `Project` и её месту в MVP
+- Возврат к вопросу о сущности `Project`
+- Архитектурная нормализация frontend-структуры под требования
 
 ## Вывод
 
-Текущее состояние проекта уже достаточно хорошее для технического MVP ядра карты и CRUD-редактирования. Однако по формальным требованиям продукт ещё нельзя считать полностью соответствующим спецификации из-за отсутствия realtime, истории изменений, production-auth и завершённого пользовательского сценария создания объектов.
+Текущее состояние проекта уже достаточно хорошее для технического MVP ядра карты и CRUD-редактирования. Однако после повторной сверки с `geoservice-requirements.md` и `geoservice-prd-v1.md` видно, что исходный аудит был неполным: кроме realtime, history, production-auth и create-flow, в нём также нужно учитывать пробелы по typed error contracts, observability и frontend-архитектуре.

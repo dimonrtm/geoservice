@@ -183,13 +183,20 @@
 ## 9. Требования к хранению данных и БД
 
 - Геометрия должна храниться в PostGIS.
-- Таблица `features` должна содержать поля:
+- Для хранения feature допускается отдельная таблица на каждый поддерживаемый тип геометрии.
+- Текущая целевая storage-модель для MVP:
+  - `feature_points`
+  - `feature_polygons`
+  - `feature_multipoints`
+  - `feature_multilines`
+  - `feature_multipolygons`
+- Каждая feature-таблица должна содержать поля:
   - `id`
-  - `layer_id`
   - `geom`
-  - `props`
+  - `props` или `properties`
   - `revision` или `version`
   - `updated_at`
+- Привязка feature к слою может определяться через конфигурацию слоя или storage mapping, а не только через `layer_id` в единой таблице.
 - На геометрию должен быть индекс `GiST`.
 - Для карты должна использоваться bbox-фильтрация как базовый способ выборки.
 
