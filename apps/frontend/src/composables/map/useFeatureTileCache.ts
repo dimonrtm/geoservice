@@ -1,5 +1,5 @@
 import { fetchLayerFeaturesByBbox } from "@/api/layers";
-import type { LayerDto } from "@/contracts/api";
+import type { ApiFeatureCollectionResponse, LayerDto } from "@/contracts/api";
 import type { ApiFeature, ApiFeatureCollection } from "@/contracts/geojson";
 import type {
   FeatureIndex,
@@ -156,6 +156,25 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     return readyCount;
   }
 
+  function getVisibleTruncatedTileCount(
+    layerId: string,
+    tileKeys: TileKey[],
+  ): number {
+    const cache = layerCaches.get(layerId);
+    if (!cache) {
+      return 0;
+    }
+
+    let truncatedCount = 0;
+    for (const tileKey of tileKeys) {
+      const entry = cache.tiles.get(tileKey);
+      if (entry?.data?.meta.truncated === true) {
+        truncatedCount++;
+      }
+    }
+    return truncatedCount;
+  }
+
   return {
     loadTiles,
     clearLayer,
@@ -165,6 +184,7 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     removeFeature,
     buildVisibleFeatureCollection,
     getReadyTileCount,
+    getVisibleTruncatedTileCount,
   };
 
   function getLayerCache(layerId: string): LayerTileCache {
@@ -242,6 +262,7 @@ async function loadSingleTile(
           bbox: args.tile.bbox,
           loadedAt: args.now(),
           featureIds,
+          meta: featureCollection.meta,
         },
       });
     } catch (error: unknown) {
@@ -295,7 +316,7 @@ function buildFeatureCollection(
 
 function persistTileFeatures(
   featureIndex: FeatureIndex,
-  featureCollection: ApiFeatureCollection,
+  featureCollection: ApiFeatureCollectionResponse,
 ): string[] {
   const featureIds = new Set<string>();
   for (const feature of featureCollection.features) {

@@ -1,3 +1,4 @@
+import type { FeatureCollectionMeta } from "@/contracts/api";
 import type { ApiFeature } from "@/contracts/geojson";
 
 export type MapBbox = [number, number, number, number];
@@ -18,6 +19,7 @@ export type CachedTile = {
   bbox: MapBbox;
   loadedAt: number;
   featureIds: string[];
+  meta: FeatureCollectionMeta;
 };
 
 export type TileLoadState = "idle" | "loading" | "ready" | "error";

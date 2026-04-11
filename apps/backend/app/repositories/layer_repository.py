@@ -33,10 +33,15 @@ class LayerRepository:
                     envelope,
                 )
             )
-            .limit(limit_value)
+            .order_by(model_type.id.asc())
+            .limit(limit_value + 1)
         )
         res = await self.session.execute(stmt)
-        return res.all()
+        rows = res.all()
+        truncated = len(rows) > limit_value
+        if truncated:
+            rows = rows[:limit_value]
+        return (rows, truncated)
 
     async def get_layer_by_id(self, layer_id: UUID) -> Layer:
         stmt = select(Layer).where(Layer.id == layer_id)

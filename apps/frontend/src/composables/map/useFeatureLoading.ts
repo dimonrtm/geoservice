@@ -60,10 +60,14 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
 
       setSourceData(map.value, getSourceId(layer), featureCollection);
       const count = featureCollection.features.length;
+      const truncatedTiles = tileCache.getVisibleTruncatedTileCount(
+        layer.id,
+        visibleTiles.map((tile) => tile.key),
+      );
       if (count === 0) {
-        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | tiles: ${requestedTiles} | empty | limit ${FEATURE_LIMIT}`;
+        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | tiles: ${requestedTiles} | truncated: ${truncatedTiles} | empty | limit ${FEATURE_LIMIT}`;
       } else {
-        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${count} | tiles: ${requestedTiles} | fetched: ${fetchedTiles} | cached: ${tileCache.getReadyTileCount(layer.id)} | limit ${FEATURE_LIMIT}`;
+        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${count} | tiles: ${requestedTiles} | fetched: ${fetchedTiles} | cached: ${tileCache.getReadyTileCount(layer.id)} | truncated: ${truncatedTiles} | limit ${FEATURE_LIMIT}`;
       }
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.code === "ERR_CANCELED") {

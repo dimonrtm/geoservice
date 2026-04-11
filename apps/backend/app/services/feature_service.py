@@ -12,7 +12,7 @@ from repositories.layer_repository import LayerRepository
 from schemas.create_feature_in import CreateFeatureIn
 from schemas.delete_feature_request import DeleteFeatureRequest
 from schemas.delete_feature_response import DeleteFeatureResponse
-from schemas.feature_collection_out import FeatureCollectionOut
+from schemas.feature_collection_out import FeatureCollectionMetaOut, FeatureCollectionOut
 from schemas.feature_out import FeatureOut
 from schemas.geojson import FeatureProperties, dump_feature_geometry
 from schemas.patch_feature_request import PatchFeatureRequest
@@ -46,7 +46,9 @@ class FeatureService:
                 f"У Feature с идентификатором {feature_id} невалидный JSON геометрии: {e}"
             ) from e
 
-    def to_feature_collection_out(self, rows) -> FeatureCollectionOut:
+    def to_feature_collection_out(
+        self, rows, bbox, limit_value: int, truncated: bool
+    ) -> FeatureCollectionOut:
         features = []
         for row in rows:
             features.append(
@@ -57,7 +59,15 @@ class FeatureService:
                     geometry_json=row.geometry_json,
                 )
             )
-        return FeatureCollectionOut(features=features)
+        return FeatureCollectionOut(
+            features=features,
+            meta=FeatureCollectionMetaOut(
+                bbox=(bbox.min_lon, bbox.min_lat, bbox.max_lon, bbox.max_lat),
+                limit=limit_value,
+                returned=len(features),
+                truncated=truncated,
+            ),
+        )
 
     async def get_features_from_bbox(
         self, layer_id: UUID, bbox, limit_value: int | None
@@ -66,8 +76,8 @@ class FeatureService:
         layer = await self.layer_repository.get_layer_by_id(layer_id)
         if layer is None:
             raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
-        rows = await self.layer_repository.list_features_bbox(layer, bbox, limit_value)
-        return self.to_feature_collection_out(rows)
+        rows, truncated = await self.layer_repository.list_features_bbox(layer, bbox, limit_value)
+        return self.to_feature_collection_out(rows, bbox, limit_value, truncated)
 
     async def create_feature(self, layer_id: UUID, request: CreateFeatureIn) -> FeatureOut:
         async with self.session.begin():

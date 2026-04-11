@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFeatureTileCache } from "@/composables/map/useFeatureTileCache";
-import type { LayerDto } from "@/contracts/api";
-import type { ApiFeatureCollection } from "@/contracts/geojson";
+import type { ApiFeatureCollectionResponse, LayerDto } from "@/contracts/api";
 import type { TileDescriptor } from "@/contracts/map-cache";
 
 const fetchLayerFeaturesByBbox = vi.fn();
@@ -18,13 +17,7 @@ describe("feature tile cache", () => {
 
   it("deduplicates features aggregated from multiple tiles", async () => {
     const cache = useFeatureTileCache();
-    const layer: LayerDto = {
-      id: "layer-1",
-      name: "Layer 1",
-      title: "Layer 1",
-      geometryType: "Polygon",
-      srid: 4326,
-    };
+    const layer = makeLayer();
     const tiles: TileDescriptor[] = [
       {
         key: "13:1:1",
@@ -63,13 +56,7 @@ describe("feature tile cache", () => {
 
   it("reuses ready tiles without a second request", async () => {
     const cache = useFeatureTileCache();
-    const layer: LayerDto = {
-      id: "layer-1",
-      name: "Layer 1",
-      title: "Layer 1",
-      geometryType: "Polygon",
-      srid: 4326,
-    };
+    const layer = makeLayer();
     const tile: TileDescriptor = {
       key: "13:1:1",
       bbox: [70, 52, 70.05, 52.05],
@@ -168,9 +155,31 @@ describe("feature tile cache", () => {
       reloaded.featureCollection.features.map((feature) => feature.id).sort(),
     ).toEqual(["patched", "shared"]);
   });
+
+  it("tracks truncated tiles for completeness checks", async () => {
+    const cache = useFeatureTileCache();
+    const layer = makeLayer();
+    const tiles = [makeTile("13:1:1"), makeTile("13:1:2", 2)];
+
+    fetchLayerFeaturesByBbox
+      .mockResolvedValueOnce(makeFeatureCollection(["a"], { truncated: true }))
+      .mockResolvedValueOnce(makeFeatureCollection(["b"]));
+
+    await cache.loadTiles({ layer, tiles, limit: 500 });
+
+    expect(
+      cache.getVisibleTruncatedTileCount(
+        layer.id,
+        tiles.map((tile) => tile.key),
+      ),
+    ).toBe(1);
+  });
 });
 
-function makeFeatureCollection(ids: string[]): ApiFeatureCollection {
+function makeFeatureCollection(
+  ids: string[],
+  options: { truncated?: boolean; limit?: number } = {},
+): ApiFeatureCollectionResponse {
   return {
     type: "FeatureCollection",
     features: ids.map((id) => ({
@@ -190,6 +199,13 @@ function makeFeatureCollection(ids: string[]): ApiFeatureCollection {
         ],
       },
     })),
+    meta: {
+      bbox: [10, 10, 20, 20],
+      limit: options.limit ?? 500,
+      returned: ids.length,
+      truncated: options.truncated ?? false,
+      sort: "id:asc",
+    },
   };
 }
 

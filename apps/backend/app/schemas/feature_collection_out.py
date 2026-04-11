@@ -10,7 +10,17 @@ from typing import Literal
 from .feature_out import FeatureOut
 
 
+class FeatureCollectionMetaOut(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    bbox: tuple[float, float, float, float]
+    limit: int
+    returned: int
+    truncated: bool
+    sort: Literal["id:asc"] = "id:asc"
+
+
 class FeatureCollectionOut(BaseModel):
     model_config = ConfigDict(extra="forbid")
     type: Literal["FeatureCollection"] = "FeatureCollection"
     features: list[FeatureOut]
+    meta: FeatureCollectionMetaOut

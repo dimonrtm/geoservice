@@ -21,6 +21,14 @@ export type LayersResponse = {
   layers: LayerDto[];
 };
 
+export type FeatureCollectionMeta = {
+  bbox: [number, number, number, number];
+  limit: number;
+  returned: number;
+  truncated: boolean;
+  sort: "id:asc";
+};
+
 export type PatchFeatureIn<G extends FeatureGeometry = FeatureGeometry> = {
   version: number;
   properties: FeatureProperties;
@@ -55,6 +63,10 @@ export type VersionMismatchBody = {
   message: string;
 };
 
+export type ApiFeatureCollectionResponse = ApiFeatureCollection & {
+  meta: FeatureCollectionMeta;
+};
+
 export function isLayersResponse(raw: unknown): raw is LayersResponse {
   return (
     isRecord(raw) &&
@@ -83,6 +95,20 @@ export function isApiFeatureCollection(
     Array.isArray(raw.features) &&
     raw.features.every((feature) => isApiFeature(feature))
   );
+}
+
+export function isApiFeatureCollectionResponse(
+  raw: unknown,
+): raw is ApiFeatureCollectionResponse {
+  if (!isRecord(raw)) {
+    return false;
+  }
+  const candidate: Record<string, unknown> = raw;
+  const meta = candidate["meta"];
+  if (!isApiFeatureCollection(candidate)) {
+    return false;
+  }
+  return isFeatureCollectionMeta(meta);
 }
 
 export function isDeleteFeatureOut(raw: unknown): raw is DeleteFeatureOut {
@@ -121,4 +147,17 @@ function isLayerDto(raw: unknown): raw is LayerDto {
 
 function isFeatureProperties(raw: unknown): raw is FeatureProperties {
   return isRecord(raw);
+}
+
+function isFeatureCollectionMeta(raw: unknown): raw is FeatureCollectionMeta {
+  return (
+    isRecord(raw) &&
+    Array.isArray(raw.bbox) &&
+    raw.bbox.length === 4 &&
+    raw.bbox.every((value) => isFiniteNumber(value)) &&
+    isFiniteNumber(raw.limit) &&
+    isFiniteNumber(raw.returned) &&
+    typeof raw.truncated === "boolean" &&
+    raw.sort === "id:asc"
+  );
 }
