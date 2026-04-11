@@ -27,6 +27,7 @@ export type FeatureCollectionMeta = {
   returned: number;
   truncated: boolean;
   sort: "id:asc";
+  next_cursor: string | null;
 };
 
 export type PatchFeatureIn<G extends FeatureGeometry = FeatureGeometry> = {
@@ -158,6 +159,7 @@ function isFeatureCollectionMeta(raw: unknown): raw is FeatureCollectionMeta {
     isFiniteNumber(raw.limit) &&
     isFiniteNumber(raw.returned) &&
     typeof raw.truncated === "boolean" &&
-    raw.sort === "id:asc"
+    raw.sort === "id:asc" &&
+    (raw.next_cursor === null || isString(raw.next_cursor))
   );
 }

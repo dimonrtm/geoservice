@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+﻿import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFeatureTileCache } from "@/composables/map/useFeatureTileCache";
 import type { ApiFeatureCollectionResponse, LayerDto } from "@/contracts/api";
@@ -52,6 +52,37 @@ describe("feature tile cache", () => {
       result.featureCollection.features.map((feature) => feature.id).sort(),
     ).toEqual(["a", "b", "shared"]);
     expect(cache.getReadyTileCount(layer.id)).toBe(2);
+  });
+
+  it("autoloads additional pages for truncated tiles", async () => {
+    const cache = useFeatureTileCache();
+    const layer = makeLayer();
+    const tile = makeTile("13:1:1");
+
+    fetchLayerFeaturesByBbox
+      .mockResolvedValueOnce(
+        makeFeatureCollection(["a"], {
+          truncated: true,
+          nextCursor: "cursor-1",
+        }),
+      )
+      .mockResolvedValueOnce(makeFeatureCollection(["b"]));
+
+    const result = await cache.loadTiles({ layer, tiles: [tile], limit: 1 });
+
+    expect(fetchLayerFeaturesByBbox).toHaveBeenCalledTimes(2);
+    expect(fetchLayerFeaturesByBbox).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ afterId: null }),
+    );
+    expect(fetchLayerFeaturesByBbox).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ afterId: "cursor-1" }),
+    );
+    expect(
+      result.featureCollection.features.map((feature) => feature.id),
+    ).toEqual(["a", "b"]);
+    expect(cache.getVisibleTruncatedTileCount(layer.id, [tile.key])).toBe(0);
   });
 
   it("reuses ready tiles without a second request", async () => {
@@ -162,23 +193,33 @@ describe("feature tile cache", () => {
     const tiles = [makeTile("13:1:1"), makeTile("13:1:2", 2)];
 
     fetchLayerFeaturesByBbox
-      .mockResolvedValueOnce(makeFeatureCollection(["a"], { truncated: true }))
+      .mockResolvedValueOnce(
+        makeFeatureCollection(["a"], {
+          truncated: true,
+          nextCursor: "cursor-a",
+        }),
+      )
+      .mockResolvedValueOnce(makeFeatureCollection(["a-2"]))
       .mockResolvedValueOnce(makeFeatureCollection(["b"]));
 
-    await cache.loadTiles({ layer, tiles, limit: 500 });
+    await cache.loadTiles({ layer, tiles, limit: 1 });
 
     expect(
       cache.getVisibleTruncatedTileCount(
         layer.id,
         tiles.map((tile) => tile.key),
       ),
-    ).toBe(1);
+    ).toBe(0);
   });
 });
 
 function makeFeatureCollection(
   ids: string[],
-  options: { truncated?: boolean; limit?: number } = {},
+  options: {
+    truncated?: boolean;
+    limit?: number;
+    nextCursor?: string | null;
+  } = {},
 ): ApiFeatureCollectionResponse {
   return {
     type: "FeatureCollection",
@@ -205,6 +246,7 @@ function makeFeatureCollection(
       returned: ids.length,
       truncated: options.truncated ?? false,
       sort: "id:asc",
+      next_cursor: options.nextCursor ?? null,
     },
   };
 }

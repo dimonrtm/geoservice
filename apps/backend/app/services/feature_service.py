@@ -47,7 +47,12 @@ class FeatureService:
             ) from e
 
     def to_feature_collection_out(
-        self, rows, bbox, limit_value: int, truncated: bool
+        self,
+        rows,
+        bbox,
+        limit_value: int,
+        truncated: bool,
+        next_cursor: str | None,
     ) -> FeatureCollectionOut:
         features = []
         for row in rows:
@@ -66,18 +71,25 @@ class FeatureService:
                 limit=limit_value,
                 returned=len(features),
                 truncated=truncated,
+                next_cursor=next_cursor,
             ),
         )
 
     async def get_features_from_bbox(
-        self, layer_id: UUID, bbox, limit_value: int | None
+        self,
+        layer_id: UUID,
+        bbox,
+        limit_value: int | None,
+        after_id: UUID | None = None,
     ) -> FeatureCollectionOut:
         limit_value = self.normalize_limit(limit_value)
         layer = await self.layer_repository.get_layer_by_id(layer_id)
         if layer is None:
             raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
-        rows, truncated = await self.layer_repository.list_features_bbox(layer, bbox, limit_value)
-        return self.to_feature_collection_out(rows, bbox, limit_value, truncated)
+        rows, truncated, next_cursor = await self.layer_repository.list_features_bbox(
+            layer, bbox, limit_value, after_id
+        )
+        return self.to_feature_collection_out(rows, bbox, limit_value, truncated, next_cursor)
 
     async def create_feature(self, layer_id: UUID, request: CreateFeatureIn) -> FeatureOut:
         async with self.session.begin():

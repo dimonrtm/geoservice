@@ -38,12 +38,13 @@ async def get_layer_features_from_bbox(
     layer_id: UUID,
     bbox: str,
     limit: int | None = None,
+    after_id: UUID | None = None,
     feature_service: FeatureService = Depends(get_feature_service),
     user=Depends(get_current_user),
 ) -> FeatureCollectionOut:
     if user.get("role") in ("viewer", "editor"):
         bb = parse_bbox(bbox)
-        return await feature_service.get_features_from_bbox(layer_id, bb, limit)
+        return await feature_service.get_features_from_bbox(layer_id, bb, limit, after_id)
     else:
         raise HTTPException(
             status_code=403,

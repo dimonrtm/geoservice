@@ -15,7 +15,9 @@ class LayerRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def list_features_bbox(self, layer: Layer, bbox, limit_value: int):
+    async def list_features_bbox(
+        self, layer: Layer, bbox, limit_value: int, after_id: UUID | None = None
+    ):
         model_type = get_layer_feature_model(layer)
         envelope = func.ST_MakeEnvelope(
             bbox.min_lon, bbox.min_lat, bbox.max_lon, bbox.max_lat, 4326
@@ -34,15 +36,17 @@ class LayerRepository:
                     envelope,
                 )
             )
-            .order_by(model_type.id.asc())
-            .limit(limit_value + 1)
         )
+        if after_id is not None:
+            stmt = stmt.where(model_type.id > after_id)
+        stmt = stmt.order_by(model_type.id.asc()).limit(limit_value + 1)
         res = await self.session.execute(stmt)
         rows = res.all()
         truncated = len(rows) > limit_value
         if truncated:
             rows = rows[:limit_value]
-        return (rows, truncated)
+        next_cursor = str(rows[-1].id) if truncated and rows else None
+        return (rows, truncated, next_cursor)
 
     async def get_layer_by_id(self, layer_id: UUID) -> Layer:
         stmt = select(Layer).where(Layer.id == layer_id)

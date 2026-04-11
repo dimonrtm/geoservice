@@ -1,4 +1,4 @@
-import { fetchLayerFeaturesByBbox } from "@/api/layers";
+﻿import { fetchLayerFeaturesByBbox } from "@/api/layers";
 import type { ApiFeatureCollectionResponse, LayerDto } from "@/contracts/api";
 import type { ApiFeature, ApiFeatureCollection } from "@/contracts/geojson";
 import type {
@@ -168,7 +168,7 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     let truncatedCount = 0;
     for (const tileKey of tileKeys) {
       const entry = cache.tiles.get(tileKey);
-      if (entry?.data?.meta.truncated === true) {
+      if (entry?.data && entry.data.fullyLoaded === false) {
         truncatedCount++;
       }
     }
@@ -213,7 +213,12 @@ function shouldFetchTile(
   }
 
   const entry = cache.tiles.get(tileKey);
-  return !entry || entry.state !== "ready" || isExpired(entry, ttlMs, now);
+  return (
+    !entry ||
+    entry.state !== "ready" ||
+    entry.data?.fullyLoaded === false ||
+    isExpired(entry, ttlMs, now)
+  );
 }
 
 function isExpired(
@@ -247,22 +252,52 @@ async function loadSingleTile(
 
   const request = (async () => {
     try {
-      const featureCollection = await fetchLayerFeaturesByBbox({
-        layerId: args.layer.id,
-        bbox: args.tile.bbox,
-        limit: args.limit,
-        signal: args.signal,
-      });
+      const featureIds = new Set<string>();
+      const seenCursors = new Set<string>();
+      let totalReturned = 0;
+      let afterId: string | null = null;
+      let lastMeta: ApiFeatureCollectionResponse["meta"] | null = null;
 
-      const featureIds = persistTileFeatures(cache.features, featureCollection);
+      while (true) {
+        const featureCollection = await fetchLayerFeaturesByBbox({
+          layerId: args.layer.id,
+          bbox: args.tile.bbox,
+          limit: args.limit,
+          afterId,
+          signal: args.signal,
+        });
+
+        totalReturned += featureCollection.features.length;
+        persistTileFeatures(cache.features, featureCollection, featureIds);
+        lastMeta = featureCollection.meta;
+
+        const nextCursor = featureCollection.meta.next_cursor;
+        if (!nextCursor) {
+          break;
+        }
+        if (seenCursors.has(nextCursor)) {
+          throw new Error(`Cursor loop detected for tile ${args.tile.key}`);
+        }
+        seenCursors.add(nextCursor);
+        afterId = nextCursor;
+      }
+
       cache.tiles.set(args.tile.key, {
         state: "ready",
         data: {
           key: args.tile.key,
           bbox: args.tile.bbox,
           loadedAt: args.now(),
-          featureIds,
-          meta: featureCollection.meta,
+          featureIds: [...featureIds],
+          meta: {
+            bbox: lastMeta?.bbox ?? args.tile.bbox,
+            limit: lastMeta?.limit ?? args.limit,
+            returned: totalReturned,
+            truncated: false,
+            sort: lastMeta?.sort ?? "id:asc",
+            next_cursor: null,
+          },
+          fullyLoaded: true,
         },
       });
     } catch (error: unknown) {
@@ -317,11 +352,10 @@ function buildFeatureCollection(
 function persistTileFeatures(
   featureIndex: FeatureIndex,
   featureCollection: ApiFeatureCollectionResponse,
-): string[] {
-  const featureIds = new Set<string>();
+  featureIds: Set<string>,
+): void {
   for (const feature of featureCollection.features) {
     featureIndex.set(feature.id, feature);
     featureIds.add(feature.id);
   }
-  return [...featureIds];
 }

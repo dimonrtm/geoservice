@@ -20,6 +20,7 @@ export type CachedTile = {
   loadedAt: number;
   featureIds: string[];
   meta: FeatureCollectionMeta;
+  fullyLoaded: boolean;
 };
 
 export type TileLoadState = "idle" | "loading" | "ready" | "error";

@@ -17,6 +17,7 @@ class FeatureCollectionMetaOut(BaseModel):
     returned: int
     truncated: bool
     sort: Literal["id:asc"] = "id:asc"
+    next_cursor: str | None = None
 
 
 class FeatureCollectionOut(BaseModel):

@@ -68,7 +68,7 @@ def test_get_features_from_bbox_returns_meta_with_truncation_flag() -> None:
     )
     repository = AsyncMock()
     repository.get_layer_by_id.return_value = layer
-    repository.list_features_bbox.return_value = ([row], True)
+    repository.list_features_bbox.return_value = ([row], True, str(row.id))
     service = FeatureService(session=None, layer_repository=repository)
 
     result = asyncio.run(service.get_features_from_bbox(layer_id, bbox, 500))
@@ -78,7 +78,27 @@ def test_get_features_from_bbox_returns_meta_with_truncation_flag() -> None:
     assert result.meta.returned == 1
     assert result.meta.truncated is True
     assert result.meta.sort == "id:asc"
+    assert result.meta.next_cursor == str(row.id)
     assert len(result.features) == 1
+
+
+def test_get_features_from_bbox_passes_after_id_to_repository() -> None:
+    layer_id = uuid4()
+    after_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    bbox = Bbox(min_lon=10.0, min_lat=20.0, max_lon=30.0, max_lat=40.0)
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.list_features_bbox.return_value = ([], False, None)
+    service = FeatureService(session=None, layer_repository=repository)
+
+    asyncio.run(service.get_features_from_bbox(layer_id, bbox, 250, after_id))
+
+    repository.list_features_bbox.assert_awaited_once_with(layer, bbox, 250, after_id)
 
 
 def test_create_feature_returns_geometry_and_properties_from_request() -> None:

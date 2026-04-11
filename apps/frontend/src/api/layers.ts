@@ -43,6 +43,7 @@ export async function fetchLayerFeaturesByBbox(args: {
   layerId: string;
   bbox: [number, number, number, number];
   limit: number;
+  afterId?: string | null;
   signal?: AbortSignal;
 }): Promise<ApiFeatureCollectionResponse> {
   try {
@@ -50,7 +51,11 @@ export async function fetchLayerFeaturesByBbox(args: {
     limit = Math.max(limit, 1);
     const url = `/api/v1/layers/${args.layerId}/features`;
     const response = await http.get(url, {
-      params: { bbox: args.bbox.join(","), limit },
+      params: {
+        bbox: args.bbox.join(","),
+        limit,
+        ...(args.afterId ? { after_id: args.afterId } : {}),
+      },
       signal: args.signal,
     });
     const raw = response.data as unknown;
