@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from repositories.user_repository import UserRepository
 from schemas.dev_login_in import DevLoginIn
 from models.user import User
+from uuid import UUID
 
 
 class AuthService:
@@ -24,3 +25,6 @@ class AuthService:
                     email=body.email, role=body.role, password_hash=None
                 )
             return user
+
+    async def get_user_by_id(self, user_id: UUID) -> User | None:
+        return await self.user_repository.get_by_id(user_id)

@@ -8,6 +8,7 @@ Created on Thu Jan  8 23:25:15 2026
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.user import User, UserRole
 from sqlalchemy import select, insert
+from uuid import UUID
 
 
 class UserRepository:
@@ -17,6 +18,11 @@ class UserRepository:
 
     async def get_by_email(self, email: str) -> User | None:
         stmt = select(User).where(User.email == email)
+        res = await self.session.execute(stmt)
+        return res.scalars().one_or_none()
+
+    async def get_by_id(self, user_id: UUID) -> User | None:
+        stmt = select(User).where(User.id == user_id)
         res = await self.session.execute(stmt)
         return res.scalars().one_or_none()
 

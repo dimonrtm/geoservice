@@ -5,8 +5,12 @@ Created on Thu Jan  8 22:52:16 2026
 @author: dimon
 """
 
+from uuid import UUID
+
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from schemas.auth_me_out import AuthMeOut
+from schemas.auth_user_out import AuthUserOut
 from schemas.dev_login_in import DevLoginIn
 from services.auth_service import AuthService
 from .deps import get_auth_service
@@ -38,7 +42,7 @@ def decode_token(token: str) -> dict:
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Не валидный или устаревший токен",
+            detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -79,6 +83,31 @@ if settings.dev_auth_enabled:
         return {"access_token": token, "token_type": "bearer"}
 
 
-@auth_router.get("/me")
-async def me(user=Depends(get_current_user)):
-    return {"user_id": user["sub"], "user_role": user["role"]}
+@auth_router.get("/me", response_model=AuthMeOut)
+async def me(
+    user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
+) -> AuthMeOut:
+    try:
+        user_id = UUID(user["sub"])
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from exc
+
+    current_user = await auth_service.get_user_by_id(user_id)
+    if current_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    return AuthMeOut(
+        user=AuthUserOut(
+            id=str(current_user.id),
+            email=current_user.email,
+            role=current_user.role.value,
+        )
+    )
