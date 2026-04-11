@@ -47,6 +47,7 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     const controller = new AbortController();
     featuresAbortController.value = controller;
     const visibleTiles = getVisibleTiles();
+    const visibleTileKeys = visibleTiles.map((tile) => tile.key);
 
     try {
       const { featureCollection, fetchedTiles, requestedTiles } =
@@ -56,19 +57,25 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
           limit: FEATURE_LIMIT,
           signal: controller.signal,
           force: options.force === true,
+          onBackgroundChange: () => {
+            if (
+              controller.signal.aborted ||
+              featuresAbortController.value !== controller
+            ) {
+              return;
+            }
+            syncSourceForTileKeys(layer, visibleTileKeys);
+            updateLoadedLabel(layer, bbox, visibleTileKeys, requestedTiles, {
+              fetchedTiles,
+              background: true,
+            });
+          },
         });
 
       setSourceData(map.value, getSourceId(layer), featureCollection);
-      const count = featureCollection.features.length;
-      const truncatedTiles = tileCache.getVisibleTruncatedTileCount(
-        layer.id,
-        visibleTiles.map((tile) => tile.key),
-      );
-      if (count === 0) {
-        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | tiles: ${requestedTiles} | truncated: ${truncatedTiles} | empty | limit ${FEATURE_LIMIT}`;
-      } else {
-        labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${count} | tiles: ${requestedTiles} | fetched: ${fetchedTiles} | cached: ${tileCache.getReadyTileCount(layer.id)} | truncated: ${truncatedTiles} | limit ${FEATURE_LIMIT}`;
-      }
+      updateLoadedLabel(layer, bbox, visibleTileKeys, requestedTiles, {
+        fetchedTiles,
+      });
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.code === "ERR_CANCELED") {
         return;
@@ -172,11 +179,50 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
 
   function syncVisibleSource(layer: LayerDto): void {
     const visibleTileKeys = getVisibleTiles().map((tile) => tile.key);
+    syncSourceForTileKeys(layer, visibleTileKeys);
+  }
+
+  function syncSourceForTileKeys(layer: LayerDto, tileKeys: string[]): void {
     const featureCollection = tileCache.buildVisibleFeatureCollection(
       layer.id,
-      visibleTileKeys,
+      tileKeys,
     );
     setSourceData(map.value, getSourceId(layer), featureCollection);
+  }
+
+  function updateLoadedLabel(
+    layer: LayerDto,
+    bbox: [number, number, number, number],
+    tileKeys: string[],
+    requestedTiles: number,
+    options: { fetchedTiles?: number; background?: boolean } = {},
+  ): void {
+    const featureCollection = tileCache.buildVisibleFeatureCollection(
+      layer.id,
+      tileKeys,
+    );
+    const featureCount = featureCollection.features.length;
+    const truncatedTiles = tileCache.getVisibleTruncatedTileCount(
+      layer.id,
+      tileKeys,
+    );
+    const backgroundStatus =
+      truncatedTiles > 0
+        ? ` | background: ${truncatedTiles} pending`
+        : options.background
+          ? " | background: synced"
+          : "";
+
+    if (featureCount === 0) {
+      labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | tiles: ${requestedTiles} | truncated: ${truncatedTiles}${backgroundStatus} | empty | limit ${FEATURE_LIMIT}`;
+      return;
+    }
+
+    const fetchedChunk =
+      options.fetchedTiles !== undefined
+        ? ` | fetched: ${options.fetchedTiles}`
+        : "";
+    labelText.value = `Layer: ${layer.title} | bbox: ${formatBbox(bbox)} | features: ${featureCount} | tiles: ${requestedTiles}${fetchedChunk} | cached: ${tileCache.getReadyTileCount(layer.id)} | truncated: ${truncatedTiles}${backgroundStatus} | limit ${FEATURE_LIMIT}`;
   }
 }
 

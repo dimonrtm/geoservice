@@ -9,10 +9,15 @@ import type {
   TileKey,
 } from "@/contracts/map-cache";
 
+type TileLoadHandle = {
+  initial: Promise<void>;
+  completion: Promise<boolean>;
+};
+
 type LayerTileCache = {
   features: FeatureIndex;
   tiles: TileIndex;
-  inflight: Map<TileKey, Promise<void>>;
+  inflight: Map<TileKey, TileLoadHandle>;
 };
 
 type LoadTilesArgs = {
@@ -21,6 +26,7 @@ type LoadTilesArgs = {
   limit: number;
   signal?: AbortSignal;
   force?: boolean;
+  onBackgroundChange?: () => void;
 };
 
 type FeatureTileCacheOptions = {
@@ -50,18 +56,29 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     const tilesToFetch = args.tiles.filter((tile) =>
       shouldFetchTile(cache, tile.key, args.force === true, ttlMs, now),
     );
-
-    await Promise.all(
-      tilesToFetch.map((tile) =>
-        loadSingleTile(cache, {
-          layer: args.layer,
-          tile,
-          limit: args.limit,
-          signal: args.signal,
-          now,
-        }),
-      ),
+    const loadHandles = tilesToFetch.map((tile) =>
+      loadSingleTile(cache, {
+        layer: args.layer,
+        tile,
+        limit: args.limit,
+        signal: args.signal,
+        now,
+      }),
     );
+
+    await Promise.all(loadHandles.map((handle) => handle.initial));
+
+    for (const handle of loadHandles) {
+      void handle.completion
+        .then((didBackgroundWork) => {
+          if (didBackgroundWork) {
+            args.onBackgroundChange?.();
+          }
+        })
+        .catch(() => {
+          // Background page loading is best-effort; cache state already stores the failure.
+        });
+    }
 
     return {
       featureCollection: buildFeatureCollection(cache, tileKeys),
@@ -193,7 +210,7 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
       cache = {
         features: new Map<string, ApiFeature>(),
         tiles: new Map<TileKey, TileEntry>(),
-        inflight: new Map<TileKey, Promise<void>>(),
+        inflight: new Map<TileKey, TileLoadHandle>(),
       };
       layerCaches.set(layerId, cache);
     }
@@ -210,6 +227,9 @@ function shouldFetchTile(
 ): boolean {
   if (force) {
     return true;
+  }
+  if (cache.inflight.has(tileKey)) {
+    return false;
   }
 
   const entry = cache.tiles.get(tileKey);
@@ -232,7 +252,7 @@ function isExpired(
   return now() - entry.data.loadedAt >= ttlMs;
 }
 
-async function loadSingleTile(
+function loadSingleTile(
   cache: LayerTileCache,
   args: {
     layer: LayerDto;
@@ -241,79 +261,136 @@ async function loadSingleTile(
     signal?: AbortSignal;
     now: () => number;
   },
-): Promise<void> {
+): TileLoadHandle {
   const existingRequest = cache.inflight.get(args.tile.key);
   if (existingRequest) {
-    await existingRequest;
-    return;
+    return existingRequest;
   }
 
   cache.tiles.set(args.tile.key, { state: "loading", data: null });
 
-  const request = (async () => {
+  let resolveInitial!: () => void;
+  let rejectInitial!: (reason?: unknown) => void;
+  let initialSettled = false;
+
+  const initial = new Promise<void>((resolve, reject) => {
+    resolveInitial = () => {
+      initialSettled = true;
+      resolve();
+    };
+    rejectInitial = (reason?: unknown) => {
+      initialSettled = true;
+      reject(reason);
+    };
+  });
+
+  const completion = (async () => {
+    let didBackgroundWork = false;
+    let currentEntry: TileEntry | null = null;
+
     try {
       const featureIds = new Set<string>();
       const seenCursors = new Set<string>();
       let totalReturned = 0;
-      let afterId: string | null = null;
-      let lastMeta: ApiFeatureCollectionResponse["meta"] | null = null;
 
-      while (true) {
-        const featureCollection = await fetchLayerFeaturesByBbox({
-          layerId: args.layer.id,
-          bbox: args.tile.bbox,
-          limit: args.limit,
-          afterId,
-          signal: args.signal,
-        });
+      const firstPage = await fetchLayerFeaturesByBbox({
+        layerId: args.layer.id,
+        bbox: args.tile.bbox,
+        limit: args.limit,
+        afterId: null,
+        signal: args.signal,
+      });
 
-        totalReturned += featureCollection.features.length;
-        persistTileFeatures(cache.features, featureCollection, featureIds);
-        lastMeta = featureCollection.meta;
+      totalReturned += firstPage.features.length;
+      persistTileFeatures(cache.features, firstPage, featureIds);
 
-        const nextCursor = featureCollection.meta.next_cursor;
-        if (!nextCursor) {
-          break;
-        }
-        if (seenCursors.has(nextCursor)) {
-          throw new Error(`Cursor loop detected for tile ${args.tile.key}`);
-        }
-        seenCursors.add(nextCursor);
-        afterId = nextCursor;
-      }
-
-      cache.tiles.set(args.tile.key, {
+      currentEntry = {
         state: "ready",
         data: {
           key: args.tile.key,
           bbox: args.tile.bbox,
           loadedAt: args.now(),
           featureIds: [...featureIds],
-          meta: {
-            bbox: lastMeta?.bbox ?? args.tile.bbox,
-            limit: lastMeta?.limit ?? args.limit,
-            returned: totalReturned,
-            truncated: false,
-            sort: lastMeta?.sort ?? "id:asc",
-            next_cursor: null,
-          },
-          fullyLoaded: true,
+          meta: firstPage.meta,
+          fullyLoaded: firstPage.meta.next_cursor === null,
         },
-      });
+      };
+      cache.tiles.set(args.tile.key, currentEntry);
+      resolveInitial();
+
+      let nextCursor = firstPage.meta.next_cursor;
+      let currentMeta = firstPage.meta;
+
+      while (nextCursor) {
+        if (seenCursors.has(nextCursor)) {
+          throw new Error(`Cursor loop detected for tile ${args.tile.key}`);
+        }
+        seenCursors.add(nextCursor);
+        didBackgroundWork = true;
+
+        const page = await fetchLayerFeaturesByBbox({
+          layerId: args.layer.id,
+          bbox: args.tile.bbox,
+          limit: args.limit,
+          afterId: nextCursor,
+          signal: args.signal,
+        });
+
+        totalReturned += page.features.length;
+        persistTileFeatures(cache.features, page, featureIds);
+        currentMeta = page.meta;
+        nextCursor = page.meta.next_cursor;
+
+        currentEntry = {
+          state: "ready",
+          data: {
+            key: args.tile.key,
+            bbox: args.tile.bbox,
+            loadedAt: args.now(),
+            featureIds: [...featureIds],
+            meta: {
+              bbox: currentMeta.bbox,
+              limit: currentMeta.limit,
+              returned: totalReturned,
+              truncated: nextCursor !== null,
+              sort: currentMeta.sort,
+              next_cursor: nextCursor,
+            },
+            fullyLoaded: nextCursor === null,
+          },
+        };
+        cache.tiles.set(args.tile.key, currentEntry);
+      }
+
+      return didBackgroundWork;
     } catch (error: unknown) {
-      cache.tiles.set(args.tile.key, {
-        state: "error",
-        data: null,
-        error: error instanceof Error ? error.message : "Tile load failed",
-      });
+      if (!initialSettled) {
+        rejectInitial(error);
+      }
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Tile load failed";
+      if (currentEntry?.data) {
+        cache.tiles.set(args.tile.key, {
+          ...currentEntry,
+          error: errorMessage,
+        });
+      } else {
+        cache.tiles.set(args.tile.key, {
+          state: "error",
+          data: null,
+          error: errorMessage,
+        });
+      }
       throw error;
     } finally {
       cache.inflight.delete(args.tile.key);
     }
   })();
 
-  cache.inflight.set(args.tile.key, request);
-  await request;
+  const handle: TileLoadHandle = { initial, completion };
+  cache.inflight.set(args.tile.key, handle);
+  return handle;
 }
 
 function buildFeatureCollection(

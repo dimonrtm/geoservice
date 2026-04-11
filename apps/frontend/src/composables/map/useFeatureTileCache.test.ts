@@ -54,10 +54,12 @@ describe("feature tile cache", () => {
     expect(cache.getReadyTileCount(layer.id)).toBe(2);
   });
 
-  it("autoloads additional pages for truncated tiles", async () => {
+  it("returns the first page immediately and completes the tile in background", async () => {
     const cache = useFeatureTileCache();
     const layer = makeLayer();
     const tile = makeTile("13:1:1");
+    const onBackgroundChange = vi.fn();
+    const deferredPage = createDeferred<ApiFeatureCollectionResponse>();
 
     fetchLayerFeaturesByBbox
       .mockResolvedValueOnce(
@@ -66,9 +68,14 @@ describe("feature tile cache", () => {
           nextCursor: "cursor-1",
         }),
       )
-      .mockResolvedValueOnce(makeFeatureCollection(["b"]));
+      .mockReturnValueOnce(deferredPage.promise);
 
-    const result = await cache.loadTiles({ layer, tiles: [tile], limit: 1 });
+    const result = await cache.loadTiles({
+      layer,
+      tiles: [tile],
+      limit: 1,
+      onBackgroundChange,
+    });
 
     expect(fetchLayerFeaturesByBbox).toHaveBeenCalledTimes(2);
     expect(fetchLayerFeaturesByBbox).toHaveBeenNthCalledWith(
@@ -81,7 +88,18 @@ describe("feature tile cache", () => {
     );
     expect(
       result.featureCollection.features.map((feature) => feature.id),
-    ).toEqual(["a", "b"]);
+    ).toEqual(["a"]);
+    expect(cache.getVisibleTruncatedTileCount(layer.id, [tile.key])).toBe(1);
+    expect(onBackgroundChange).not.toHaveBeenCalled();
+
+    deferredPage.resolve(makeFeatureCollection(["b"]));
+
+    await vi.waitFor(() => {
+      expect(onBackgroundChange).toHaveBeenCalledTimes(1);
+    });
+
+    const merged = cache.buildVisibleFeatureCollection(layer.id, [tile.key]);
+    expect(merged.features.map((feature) => feature.id)).toEqual(["a", "b"]);
     expect(cache.getVisibleTruncatedTileCount(layer.id, [tile.key])).toBe(0);
   });
 
@@ -187,10 +205,11 @@ describe("feature tile cache", () => {
     ).toEqual(["patched", "shared"]);
   });
 
-  it("tracks truncated tiles for completeness checks", async () => {
+  it("keeps truncated count while background pages are still loading", async () => {
     const cache = useFeatureTileCache();
     const layer = makeLayer();
-    const tiles = [makeTile("13:1:1"), makeTile("13:1:2", 2)];
+    const tile = makeTile("13:1:1");
+    const deferredPage = createDeferred<ApiFeatureCollectionResponse>();
 
     fetchLayerFeaturesByBbox
       .mockResolvedValueOnce(
@@ -199,17 +218,17 @@ describe("feature tile cache", () => {
           nextCursor: "cursor-a",
         }),
       )
-      .mockResolvedValueOnce(makeFeatureCollection(["a-2"]))
-      .mockResolvedValueOnce(makeFeatureCollection(["b"]));
+      .mockReturnValueOnce(deferredPage.promise);
 
-    await cache.loadTiles({ layer, tiles, limit: 1 });
+    await cache.loadTiles({ layer, tiles: [tile], limit: 1 });
 
-    expect(
-      cache.getVisibleTruncatedTileCount(
-        layer.id,
-        tiles.map((tile) => tile.key),
-      ),
-    ).toBe(0);
+    expect(cache.getVisibleTruncatedTileCount(layer.id, [tile.key])).toBe(1);
+
+    deferredPage.resolve(makeFeatureCollection(["a-2"]));
+
+    await vi.waitFor(() => {
+      expect(cache.getVisibleTruncatedTileCount(layer.id, [tile.key])).toBe(0);
+    });
   });
 });
 
@@ -270,4 +289,14 @@ function makeTile(key: string, y = 1): TileDescriptor {
     y,
     step: 0.05,
   };
+}
+
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
 }
