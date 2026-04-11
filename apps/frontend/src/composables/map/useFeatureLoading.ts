@@ -2,6 +2,7 @@
 import { AxiosError } from "axios";
 import { HttpError } from "@/api/layers";
 import type { LayerDto } from "@/contracts/api";
+import type { ApiFeature } from "@/contracts/geojson";
 import { useFeatureTileCache } from "@/composables/map/useFeatureTileCache";
 import { getTilesForViewport } from "@/map/feature-grid";
 import {
@@ -45,8 +46,7 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
 
     const controller = new AbortController();
     featuresAbortController.value = controller;
-    const normalizedZoom = Math.floor(zoom ?? MIN_ZOOM);
-    const visibleTiles = getTilesForViewport(bbox, normalizedZoom);
+    const visibleTiles = getVisibleTiles();
 
     try {
       const { featureCollection, fetchedTiles, requestedTiles } =
@@ -107,6 +107,36 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     tileCache.clearLayer(layerId);
   }
 
+  async function applyPatchedFeature(
+    layer: LayerDto,
+    feature: ApiFeature,
+  ): Promise<void> {
+    tileCache.upsertFeature(layer.id, feature);
+    tileCache.invalidateFeature(layer.id, feature.id);
+    tileCache.invalidateTiles(
+      layer.id,
+      getVisibleTiles().map((tile) => tile.key),
+    );
+    await reloadFeatures(layer);
+  }
+
+  async function applyCreatedFeature(
+    layer: LayerDto,
+    feature: ApiFeature,
+  ): Promise<void> {
+    tileCache.upsertFeature(layer.id, feature);
+    tileCache.invalidateTiles(
+      layer.id,
+      getVisibleTiles().map((tile) => tile.key),
+    );
+    await reloadFeatures(layer);
+  }
+
+  function applyDeletedFeature(layer: LayerDto, featureId: string): void {
+    tileCache.removeFeature(layer.id, featureId);
+    syncVisibleSource(layer);
+  }
+
   function stopPendingFeatureWork(): void {
     featuresAbortController.value?.abort();
     featuresAbortController.value = null;
@@ -121,8 +151,29 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     reloadFeatures,
     createMoveEndHandler,
     clearLayerCache,
+    applyPatchedFeature,
+    applyCreatedFeature,
+    applyDeletedFeature,
     stopPendingFeatureWork,
   };
+
+  function getVisibleTiles() {
+    const zoom = Math.floor(map.value?.getZoom() ?? MIN_ZOOM);
+    const bbox = getCurrentBbox(map.value);
+    if (!isValidBbox(bbox)) {
+      return [];
+    }
+    return getTilesForViewport(bbox, zoom);
+  }
+
+  function syncVisibleSource(layer: LayerDto): void {
+    const visibleTileKeys = getVisibleTiles().map((tile) => tile.key);
+    const featureCollection = tileCache.buildVisibleFeatureCollection(
+      layer.id,
+      visibleTileKeys,
+    );
+    setSourceData(map.value, getSourceId(layer), featureCollection);
+  }
 }
 
 function getSourceId(layer: LayerDto): string {

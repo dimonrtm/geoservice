@@ -27,6 +27,11 @@ export type PatchFeatureIn<G extends FeatureGeometry = FeatureGeometry> = {
   geometry: G;
 };
 
+export type CreateFeatureIn<G extends FeatureGeometry = FeatureGeometry> = {
+  properties: FeatureProperties;
+  geometry: G;
+};
+
 export type DeleteFeatureIn = {
   version: number;
 };

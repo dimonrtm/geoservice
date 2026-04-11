@@ -11,7 +11,7 @@
       </div>
 
       <div class="actions">
-        <button type="button" @click="saveChange">Сохранить</button>
+        <button type="button" @click="saveFeature">Сохранить</button>
         <button type="button" @click="deleteFeature">Удалить</button>
       </div>
     </div>
@@ -45,11 +45,11 @@ const {
   labelText,
   reloadFeatures,
   createMoveEndHandler,
-  clearLayerCache,
+  applyPatchedFeature,
+  applyDeletedFeature,
   stopPendingFeatureWork,
 } = useFeatureLoading(map);
 const {
-  editStore,
   enableEditingOverlaySync,
   disableEditingOverlaySync,
   bindActiveLayerClick,
@@ -112,10 +112,16 @@ async function onChangeLayer(): Promise<void> {
 }
 
 async function deleteFeature(): Promise<void> {
-  const deleted = await deleteEditingFeature();
-  if (editStore.edit.mode === "idle" && activeLayer.value && deleted) {
-    clearLayerCache(activeLayer.value.id);
-    await reloadFeatures(activeLayer.value, { force: true });
+  const deletedFeatureId = await deleteEditingFeature();
+  if (activeLayer.value && deletedFeatureId) {
+    applyDeletedFeature(activeLayer.value, deletedFeatureId);
+  }
+}
+
+async function saveFeature(): Promise<void> {
+  const savedFeature = await saveChange();
+  if (activeLayer.value && savedFeature) {
+    await applyPatchedFeature(activeLayer.value, savedFeature);
   }
 }
 </script>

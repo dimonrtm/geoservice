@@ -11,6 +11,8 @@ import {
   isRecord,
   isPolygonGeometry,
   toFiniteNumber,
+  type ApiFeature,
+  type PolygonGeometry,
 } from "@/contracts/geojson";
 import {
   ensureEditLayer,
@@ -98,11 +100,11 @@ export function usePolygonEditing(
     currentMap.dragPan.enable();
   }
 
-  async function saveChange(): Promise<void> {
-    await editStore.saveEditing();
+  async function saveChange(): Promise<ApiFeature<PolygonGeometry> | null> {
+    return await editStore.saveEditing();
   }
 
-  async function deleteEditingFeature(): Promise<boolean> {
+  async function deleteEditingFeature(): Promise<string | null> {
     return await editStore.deleteEditing();
   }
 

@@ -34,4 +34,15 @@ describe("feature grid", () => {
       "13:5004:2843",
     ]);
   });
+
+  it("clamps viewport to valid world bounds", () => {
+    const tiles = getTilesForViewport([-190, -95, -179.7, -89.7], 10);
+
+    expect(tiles.length).toBeGreaterThan(0);
+    expect(tiles[0]?.bbox[0]).toBeGreaterThanOrEqual(-180);
+    expect(tiles[0]?.bbox[1]).toBeGreaterThanOrEqual(-90);
+    const lastTile = tiles[tiles.length - 1];
+    expect(lastTile?.bbox[2]).toBeLessThanOrEqual(180);
+    expect(lastTile?.bbox[3]).toBeLessThanOrEqual(90);
+  });
 });

@@ -11,6 +11,7 @@ import {
   type VersionMismatchBody,
 } from "@/contracts/api";
 import {
+  type ApiFeature,
   clonePolygonGeometry,
   isPolygonGeometry,
   isRecord,
@@ -114,9 +115,9 @@ export const useEditStore = defineStore("edit", {
         this.edit = { mode: "idle" };
       }
     },
-    async saveEditing(): Promise<void> {
+    async saveEditing(): Promise<ApiFeature<PolygonGeometry> | null> {
       if (this.edit.mode !== "editing" || this.edit.dirty === false) {
-        return;
+        return null;
       }
 
       const session = this.edit.session;
@@ -137,45 +138,54 @@ export const useEditStore = defineStore("edit", {
             code: "GEOM_NOT_POLYGON",
             message: "Сервер вернул геометрию неожиданного типа",
           };
-          return;
+          return null;
         }
+
+        const polygonFeature: ApiFeature<PolygonGeometry> = {
+          ...feature,
+          geometry: feature.geometry,
+        };
 
         this.edit = {
           ...this.edit,
           session: {
             ...session,
-            version: feature.version,
+            version: polygonFeature.version,
             draft: {
-              properties: cloneProperties(feature.properties),
-              geometry: clonePolygonGeometry(feature.geometry),
+              properties: cloneProperties(polygonFeature.properties),
+              geometry: clonePolygonGeometry(polygonFeature.geometry),
             },
           },
           dirty: false,
           lastError: undefined,
         };
+        return polygonFeature;
       } catch (err: unknown) {
         if (err instanceof HttpError) {
           await this.handleHttpError(err);
+          return null;
         }
+        throw err;
       }
     },
-    async deleteEditing(): Promise<boolean> {
+    async deleteEditing(): Promise<string | null> {
       if (this.edit.mode !== "editing") {
-        return false;
+        return null;
       }
 
       try {
+        const deletedFeatureId = this.edit.session.featureId;
         await deleteLayerFeature(
           this.edit.session.layerId,
           this.edit.session.featureId,
           { version: this.edit.session.version },
         );
         this.edit = { mode: "idle" };
-        return true;
+        return deletedFeatureId;
       } catch (err: unknown) {
         if (err instanceof HttpError) {
           await this.handleHttpError(err);
-          return this.edit.mode === "idle";
+          return null;
         }
         throw err;
       }

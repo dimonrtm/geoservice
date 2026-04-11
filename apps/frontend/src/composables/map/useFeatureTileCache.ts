@@ -23,12 +23,21 @@ type LoadTilesArgs = {
   force?: boolean;
 };
 
+type FeatureTileCacheOptions = {
+  ttlMs?: number;
+  now?: () => number;
+};
+
+const DEFAULT_TILE_TTL_MS = 5 * 60 * 1000;
+
 const emptyFeatureCollection: ApiFeatureCollection = {
   type: "FeatureCollection",
   features: [],
 };
 
-export function useFeatureTileCache() {
+export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
+  const ttlMs = options.ttlMs ?? DEFAULT_TILE_TTL_MS;
+  const now = options.now ?? Date.now;
   const layerCaches = new Map<string, LayerTileCache>();
 
   async function loadTiles(args: LoadTilesArgs): Promise<{
@@ -39,7 +48,7 @@ export function useFeatureTileCache() {
     const cache = getLayerCache(args.layer.id);
     const tileKeys = args.tiles.map((tile) => tile.key);
     const tilesToFetch = args.tiles.filter((tile) =>
-      shouldFetchTile(cache, tile.key, args.force === true),
+      shouldFetchTile(cache, tile.key, args.force === true, ttlMs, now),
     );
 
     await Promise.all(
@@ -49,6 +58,7 @@ export function useFeatureTileCache() {
           tile,
           limit: args.limit,
           signal: args.signal,
+          now,
         }),
       ),
     );
@@ -62,6 +72,73 @@ export function useFeatureTileCache() {
 
   function clearLayer(layerId: string): void {
     layerCaches.delete(layerId);
+  }
+
+  function invalidateTiles(layerId: string, tileKeys: TileKey[]): void {
+    const cache = layerCaches.get(layerId);
+    if (!cache) {
+      return;
+    }
+
+    for (const tileKey of tileKeys) {
+      cache.tiles.delete(tileKey);
+    }
+  }
+
+  function invalidateFeature(layerId: string, featureId: string): void {
+    const cache = layerCaches.get(layerId);
+    if (!cache) {
+      return;
+    }
+
+    for (const [tileKey, entry] of cache.tiles.entries()) {
+      if (!entry.data?.featureIds.includes(featureId)) {
+        continue;
+      }
+      cache.tiles.delete(tileKey);
+    }
+  }
+
+  function upsertFeature(layerId: string, feature: ApiFeature): void {
+    const cache = getLayerCache(layerId);
+    cache.features.set(feature.id, feature);
+  }
+
+  function removeFeature(layerId: string, featureId: string): void {
+    const cache = layerCaches.get(layerId);
+    if (!cache) {
+      return;
+    }
+
+    cache.features.delete(featureId);
+    for (const [tileKey, entry] of cache.tiles.entries()) {
+      if (!entry.data) {
+        continue;
+      }
+
+      const nextFeatureIds = entry.data.featureIds.filter(
+        (id) => id !== featureId,
+      );
+      if (nextFeatureIds.length === entry.data.featureIds.length) {
+        continue;
+      }
+
+      cache.tiles.set(tileKey, {
+        ...entry,
+        data: {
+          ...entry.data,
+          featureIds: nextFeatureIds,
+        },
+      });
+    }
+  }
+
+  function buildVisibleFeatureCollection(
+    layerId: string,
+    tileKeys: TileKey[],
+  ): ApiFeatureCollection {
+    const cache = getLayerCache(layerId);
+    return buildFeatureCollection(cache, tileKeys);
   }
 
   function getReadyTileCount(layerId: string): number {
@@ -82,6 +159,11 @@ export function useFeatureTileCache() {
   return {
     loadTiles,
     clearLayer,
+    invalidateTiles,
+    invalidateFeature,
+    upsertFeature,
+    removeFeature,
+    buildVisibleFeatureCollection,
     getReadyTileCount,
   };
 
@@ -103,13 +185,26 @@ function shouldFetchTile(
   cache: LayerTileCache,
   tileKey: TileKey,
   force: boolean,
+  ttlMs: number,
+  now: () => number,
 ): boolean {
   if (force) {
     return true;
   }
 
   const entry = cache.tiles.get(tileKey);
-  return !entry || entry.state !== "ready";
+  return !entry || entry.state !== "ready" || isExpired(entry, ttlMs, now);
+}
+
+function isExpired(
+  entry: TileEntry,
+  ttlMs: number,
+  now: () => number,
+): boolean {
+  if (!entry.data) {
+    return true;
+  }
+  return now() - entry.data.loadedAt >= ttlMs;
 }
 
 async function loadSingleTile(
@@ -119,6 +214,7 @@ async function loadSingleTile(
     tile: TileDescriptor;
     limit: number;
     signal?: AbortSignal;
+    now: () => number;
   },
 ): Promise<void> {
   const existingRequest = cache.inflight.get(args.tile.key);
@@ -144,7 +240,7 @@ async function loadSingleTile(
         data: {
           key: args.tile.key,
           bbox: args.tile.bbox,
-          loadedAt: Date.now(),
+          loadedAt: args.now(),
           featureIds,
         },
       });

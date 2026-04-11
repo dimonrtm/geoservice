@@ -1,6 +1,7 @@
 import { http } from "@/api/http";
 import { AxiosError } from "axios";
 import {
+  type CreateFeatureIn,
   isApiFeature,
   isApiFeatureCollection,
   isDeleteFeatureOut,
@@ -56,6 +57,25 @@ export async function fetchLayerFeaturesByBbox(args: {
       return raw;
     }
     throw Error("Пришел объект неожиданного типа");
+  } catch (err: unknown) {
+    throwHttpErrorIfAxiosError(err);
+    throw err;
+  }
+}
+
+export async function createLayerFeature(
+  layerId: string,
+  body: CreateFeatureIn,
+  signal?: AbortSignal,
+): Promise<ApiFeature> {
+  try {
+    const url = `/api/v1/layers/${layerId}/features`;
+    const response = await http.post(url, body, { signal });
+    const raw = response.data as unknown;
+    if (isApiFeature(raw)) {
+      return raw;
+    }
+    throw new Error("Unexpected feature payload");
   } catch (err: unknown) {
     throwHttpErrorIfAxiosError(err);
     throw err;
