@@ -20,6 +20,68 @@
 - Для demo/local окружения добавить явный seed-поток предсозданных пользователей с email/password, чтобы login был воспроизводим через `docker-compose`.
 - В Sprint 1 не менять публичные контракты history, analytics, `Project`, create-flow новой feature и all-geometry editing на frontend; эти темы остаются за пределами sprint baseline.
 
+### Контракт `POST /api/v1/auth/login`
+
+Назначение:
+- Выполняет production-ready login по `email + password` и возвращает JWT для дальнейшего доступа к защищённым endpoint'ам.
+
+Request:
+- Method: `POST`
+- Path: `/api/v1/auth/login`
+- Headers:
+  - `Content-Type: application/json`
+- Body:
+  - `email`: `string`, обязательное поле
+  - `password`: `string`, обязательное поле
+
+Пример request body:
+
+```json
+{
+  "email": "editor@example.com",
+  "password": "editor-password"
+}
+```
+
+Response `200 OK`:
+- `access_token`: `string`
+- `token_type`: `string`, фиксированное значение `bearer`
+- `user`: `object`
+- `user.id`: `string`
+- `user.email`: `string`
+- `user.role`: `"viewer" | "editor"`
+
+Пример response body:
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": "3c6c5f41-4d2a-4d5a-8b58-2f7a4d59c8a1",
+    "email": "editor@example.com",
+    "role": "editor"
+  }
+}
+```
+
+Ошибки:
+- `401 Unauthorized` при неверных credentials
+- `422 Unprocessable Entity` при невалидном JSON или отсутствии обязательных полей
+
+Пример `401 Unauthorized`:
+
+```json
+{
+  "detail": "Invalid email or password"
+}
+```
+
+Правила контракта:
+- Endpoint не возвращает refresh token в Sprint 1.
+- JWT используется дальше как `Authorization: Bearer <access_token>`.
+- Контракт login не зависит от `DEV_MODE`; `dev-login` остаётся отдельным dev-only endpoint.
+
 ## План по дням
 
 1. День 1: зафиксировать contracts спринта 1. Описать login/WS/event payload, reconnect-поведение, out-of-scope спринта и DoD в `docs/`.

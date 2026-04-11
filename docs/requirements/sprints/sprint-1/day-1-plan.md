@@ -56,15 +56,65 @@
 
 ### `POST /api/v1/auth/login`
 
-- Request body:
-  - `email`
-  - `password`
-- Response body:
-  - `access_token`
-  - `token_type`
-  - `user { id, email, role }`
-- Ошибки:
-  - `401 Unauthorized` при неверных credentials
+Назначение:
+- Выполняет production-ready login по `email + password` и возвращает JWT для дальнейшего доступа к защищённым endpoint'ам.
+
+Request:
+- Method: `POST`
+- Path: `/api/v1/auth/login`
+- Headers:
+  - `Content-Type: application/json`
+- Body:
+  - `email`: `string`, обязательное поле
+  - `password`: `string`, обязательное поле
+
+Пример request body:
+
+```json
+{
+  "email": "editor@example.com",
+  "password": "editor-password"
+}
+```
+
+Response `200 OK`:
+- `access_token`: `string`
+- `token_type`: `string`, фиксированное значение `bearer`
+- `user`: `object`
+- `user.id`: `string`
+- `user.email`: `string`
+- `user.role`: `"viewer" | "editor"`
+
+Пример response body:
+
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token_type": "bearer",
+  "user": {
+    "id": "3c6c5f41-4d2a-4d5a-8b58-2f7a4d59c8a1",
+    "email": "editor@example.com",
+    "role": "editor"
+  }
+}
+```
+
+Ошибки:
+- `401 Unauthorized` при неверных credentials
+- `422 Unprocessable Entity` при невалидном JSON или отсутствии обязательных полей
+
+Пример `401 Unauthorized`:
+
+```json
+{
+  "detail": "Invalid email or password"
+}
+```
+
+Правила контракта:
+- Endpoint не возвращает refresh token в Sprint 1.
+- JWT используется дальше как `Authorization: Bearer <access_token>`.
+- Контракт login не зависит от `DEV_MODE`; `dev-login` остаётся отдельным dev-only endpoint.
 
 ### `GET /api/v1/auth/me`
 
