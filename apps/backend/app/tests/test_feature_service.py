@@ -1,13 +1,38 @@
-import asyncio
+﻿import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
 
-from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
 from domain.bbox import Bbox
+from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
+from schemas.create_feature_in import CreateFeatureIn
+from schemas.patch_feature_request import PatchFeatureRequest
 from services.feature_service import FeatureService
+
+
+class DummyTransaction:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        return False
+
+
+class DummySession:
+    def begin(self):
+        return DummyTransaction()
+
+
+POLYGON_GEOMETRY = {
+    "type": "Polygon",
+    "coordinates": [[(10.0, 10.0), (20.0, 10.0), (20.0, 20.0), (10.0, 10.0)]],
+}
+UPDATED_POLYGON_GEOMETRY = {
+    "type": "Polygon",
+    "coordinates": [[(10.0, 10.0), (25.0, 10.0), (25.0, 25.0), (10.0, 10.0)]],
+}
 
 
 def test_get_feature_raises_feature_not_found_when_repository_returns_none() -> None:
@@ -39,10 +64,7 @@ def test_get_features_from_bbox_returns_meta_with_truncation_flag() -> None:
         id=uuid4(),
         version=2,
         properties={"name": "A"},
-        geometry_data={
-            "type": "Polygon",
-            "coordinates": [[[10, 10], [20, 10], [20, 20], [10, 10]]],
-        },
+        geometry_data=POLYGON_GEOMETRY,
     )
     repository = AsyncMock()
     repository.get_layer_by_id.return_value = layer
@@ -57,3 +79,56 @@ def test_get_features_from_bbox_returns_meta_with_truncation_flag() -> None:
     assert result.meta.truncated is True
     assert result.meta.sort == "id:asc"
     assert len(result.features) == 1
+
+
+def test_create_feature_returns_geometry_and_properties_from_request() -> None:
+    layer_id = uuid4()
+    created_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.create_feature.return_value = SimpleNamespace(id=created_id, version=1)
+    service = FeatureService(session=DummySession(), layer_repository=repository)
+    request = CreateFeatureIn(geometry=POLYGON_GEOMETRY, properties={"name": "Created"})
+
+    result = asyncio.run(service.create_feature(layer_id, request))
+
+    assert result.id == created_id
+    assert result.version == 1
+    assert result.properties == {"name": "Created"}
+    assert result.geometry.model_dump(mode="python") == POLYGON_GEOMETRY
+
+
+def test_update_feature_uses_current_feature_for_missing_geometry() -> None:
+    layer_id = uuid4()
+    feature_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.get_feature.return_value = SimpleNamespace(
+        id=feature_id,
+        version=2,
+        properties={"name": "Before"},
+        geometry_data=UPDATED_POLYGON_GEOMETRY,
+    )
+    repository.update_feature_if_version_matches.return_value = (
+        SimpleNamespace(id=feature_id, version=3),
+        object,
+    )
+    service = FeatureService(session=DummySession(), layer_repository=repository)
+    request = PatchFeatureRequest(version=2, geometry=None, properties={"name": "After"})
+
+    result = asyncio.run(service.update_feature(layer_id, feature_id, request))
+
+    assert result.id == feature_id
+    assert result.version == 3
+    assert result.properties == {"name": "After"}
+    assert result.geometry.model_dump(mode="python") == UPDATED_POLYGON_GEOMETRY

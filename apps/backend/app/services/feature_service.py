@@ -1,11 +1,11 @@
-from uuid import UUID
+﻿from uuid import UUID
 
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.exceptions.business_validation_exception import BusinessValidationException
-from domain.exceptions.layer_not_found_exception import LayerNotFoundException
 from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
+from domain.exceptions.layer_not_found_exception import LayerNotFoundException
 from domain.exceptions.version_mismatch_exception import VersionMismatchException
 from models.layer import Layer
 from repositories.layer_repository import LayerRepository
@@ -32,7 +32,7 @@ class FeatureService:
     ) -> FeatureOut:
         if not geometry_data:
             raise BusinessValidationException(
-                f"У Feature с идентифкатором {feature_id} пустая геометрия"
+                f"У Feature с идентификатором {feature_id} пустая геометрия"
             )
         try:
             return FeatureOut(
@@ -43,7 +43,7 @@ class FeatureService:
             )
         except (TypeError, ValidationError, ValueError) as e:
             raise BusinessValidationException(
-                f"У Feature с идентификатором {feature_id} невалидный JSON геометрии: {e}"
+                f"У Feature с идентификатором {feature_id} невалидная геометрия: {e}"
             ) from e
 
     def to_feature_collection_out(
@@ -91,11 +91,11 @@ class FeatureService:
             row = await self.layer_repository.create_feature(
                 layer, dump_feature_geometry(request.geometry), request.properties
             )
-            return self.to_feature_out(
-                feature_id=row.id,
+            return FeatureOut(
+                id=row.id,
                 version=row.version,
-                properties=row.properties,
-                geometry_data=row.geometry_data,
+                properties=request.properties,
+                geometry=request.geometry,
             )
 
     async def update_feature(
@@ -109,6 +109,11 @@ class FeatureService:
                 raise BusinessValidationException(
                     "Тип обновляемой геометрии не соответствует типу геометрии слоя"
                 )
+
+            current_feature = None
+            if request.geometry is None or request.properties is None:
+                current_feature = await self.get_feature(layer_id, feature_id)
+
             (row, model_type) = await self.layer_repository.update_feature_if_version_matches(
                 layer,
                 feature_id,
@@ -118,11 +123,21 @@ class FeatureService:
             )
             if row is None:
                 await self.version_error_handler(feature_id, request.version, model_type)
-            return self.to_feature_out(
-                feature_id=row.id,
+
+            geometry = request.geometry or (current_feature.geometry if current_feature else None)
+            properties = request.properties or (
+                current_feature.properties if current_feature else None
+            )
+            if geometry is None or properties is None:
+                raise BusinessValidationException(
+                    f"Не удалось собрать актуальное состояние feature {feature_id} после update"
+                )
+
+            return FeatureOut(
+                id=row.id,
                 version=row.version,
-                properties=row.properties,
-                geometry_data=row.geometry_data,
+                properties=properties,
+                geometry=geometry,
             )
 
     async def delete_feature(
@@ -173,10 +188,12 @@ class FeatureService:
         current = await self.layer_repository.get_current_version(model_type, feature_id)
         if current is None:
             raise FeatureNotFoundException(f"Feature с идентификатором {feature_id} не найдена")
-        else:
-            raise VersionMismatchException(
-                feature_id=feature_id,
-                request_version=expected_version,
-                current_version=current.version,
-                message=f"Ожидалась версия {current.version}, а получили {expected_version}. Перезагрузите фичу и отредактируйте ее снова",
-            )
+        raise VersionMismatchException(
+            feature_id=feature_id,
+            request_version=expected_version,
+            current_version=current.version,
+            message=(
+                f"Ожидалась версия {current.version}, а получили {expected_version}. "
+                "Перезагрузите фичу и отредактируйте ее снова"
+            ),
+        )

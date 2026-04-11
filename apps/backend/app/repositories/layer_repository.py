@@ -60,8 +60,6 @@ class LayerRepository:
             .returning(
                 model_type.id.label("id"),
                 model_type.version.label("version"),
-                model_type.properties.label("properties"),
-                func.ST_AsGeoJSON(model_type.geom).cast(postgresql.JSONB).label("geometry_data"),
             )
         )
         res = await self.session.execute(stmt)
@@ -99,8 +97,6 @@ class LayerRepository:
         update_stmt = update_stmt.returning(
             model_type.id.label("id"),
             model_type.version.label("version"),
-            model_type.properties.label("properties"),
-            func.ST_AsGeoJSON(model_type.geom).cast(postgresql.JSONB).label("geometry_data"),
         )
         update_stmt = update_stmt
         res = await self.session.execute(update_stmt)
