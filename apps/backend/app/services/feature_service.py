@@ -130,6 +130,8 @@ class FeatureService:
         if layer is None:
             raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
         row = await self.layer_repository.get_feature(layer, feature_id)
+        if row is None:
+            raise FeatureNotFoundException(f"Feature с идентификатором {feature_id} не найдена")
         return self.to_feature_out(
             feature_id=row.id,
             version=row.version,
