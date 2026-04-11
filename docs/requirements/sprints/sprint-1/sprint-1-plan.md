@@ -274,6 +274,32 @@ Response `200 OK`:
   - конфликт версии по-прежнему даёт `409` и не теряет данные
   - CI остаётся зелёным без добавления e2e-браузерного контура в этом спринте
 
+## Demo-сценарий приёмки Sprint 1
+
+1. Пользователь A входит в систему через `POST /api/v1/auth/login` и открывает нужный слой.
+2. Пользователь B входит в систему через `POST /api/v1/auth/login` и открывает тот же слой.
+3. Оба клиента устанавливают realtime-подписку через `WS /api/v1/ws/layers/{layer_id}?token=<jwt>`.
+4. Пользователь A изменяет существующую feature и успешно сохраняет её через HTTP API.
+5. Пользователь B получает событие `feature_updated` почти сразу, без ручной перезагрузки приложения.
+6. Пользователь B начинает редактирование на устаревшей версии feature и пытается сохранить изменения.
+7. Backend возвращает `409 VERSION_MISMATCH`.
+8. Клиент B перезагружает актуальное состояние feature и позволяет повторить редактирование уже с актуальной версией.
+9. Integration-проверки на auth, protected CRUD и realtime остаются зелёными.
+
+## Definition of Done Sprint 1
+
+- Реализован `POST /api/v1/auth/login` с контрактом, зафиксированным в этом плане.
+- `GET /api/v1/auth/me` нормализован и возвращает единый объект `user { id, email, role }`.
+- `POST /api/v1/auth/dev-login` остаётся доступным только в `DEV_MODE=true` и не используется как основной production-login flow.
+- Реализован `WS /api/v1/ws/layers/{layer_id}?token=<jwt>` для подписки на один слой.
+- Backend публикует события `feature_created`, `feature_updated`, `feature_deleted` только после успешного завершения mutate-операций.
+- Frontend принимает realtime-события, обновляет cache/source и не требует полной перезагрузки приложения для демонстрационного сценария.
+- После разрыва соединения клиент может переподключиться, повторно подписаться на активный слой и выполнить повторную синхронизацию.
+- Есть integration-тесты на login success/fail, `401`, `403`, protected CRUD и базовый realtime-сценарий двух клиентов.
+- Demo/local окружение позволяет войти по `email + password` без зависимости от `dev-login`.
+- CI остаётся зелёным после добавления auth и realtime изменений.
+- В Sprint 1 не добавлены публичные контракты history, analytics, `Project`, create-flow новой feature и all-geometry editing на frontend.
+
 ## Assumptions
 
 - Зафиксирован целевой auth-flow: `email + password`, без внешнего SSO.
