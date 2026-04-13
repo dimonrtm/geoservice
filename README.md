@@ -43,8 +43,10 @@ apps/
       stores/
 docs/
   project-description.md
-  project-problems-and-solutions.md
-  project-required-improvements.md
+  requirements/
+    action-plan.md
+    requirements-compliance-audit.md
+    sprints/
 infra/
 scripts/
 ```
@@ -65,6 +67,40 @@ scripts/
 - infra compose: [docker-compose.yml](C:/Repositories/geoservice/infra/docker-compose.yml)
 - backend app entry: [main.py](C:/Repositories/geoservice/apps/backend/app/main.py)
 
+### Demo login через Docker Compose
+
+Backend при старте теперь делает:
+
+1. `alembic upgrade head`
+2. idempotent seed demo-пользователей
+3. запуск `uvicorn`
+
+Запуск:
+
+```bash
+cd infra
+docker compose --profile dev up --build
+```
+
+Demo credentials:
+
+- `editor@example.com` / `editor-password`
+- `viewer@example.com` / `viewer-password`
+
+Проверка login flow:
+
+```bash
+curl -X POST http://localhost:8000/api/v1/auth/login -H "Content-Type: application/json" -d "{\"email\":\"editor@example.com\",\"password\":\"editor-password\"}"
+```
+
+После получения `access_token` можно проверить сессию:
+
+```bash
+curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <access_token>"
+```
+
+Повторный запуск backend не должен создавать дубликаты demo-пользователей: seed приводит записи к ожидаемому baseline по роли и паролю и не требует `dev-login` для локального demo-сценария.
+
 ## Конфигурация
 
 Backend-конфигурация централизована в [settings.py](C:/Repositories/geoservice/apps/backend/app/core/settings.py).
@@ -77,8 +113,9 @@ Backend-конфигурация централизована в [settings.py](C
 
 ## Документация
 
-В `docs/` сейчас лежат рабочие документы по анализу проекта:
+В `docs/` сейчас лежат рабочие документы по анализу проекта и планированию:
 
 - [project-description.md](C:/Repositories/geoservice/docs/project-description.md)
-- [project-problems-and-solutions.md](C:/Repositories/geoservice/docs/project-problems-and-solutions.md)
-- [project-required-improvements.md](C:/Repositories/geoservice/docs/project-required-improvements.md)
+- [action-plan.md](C:/Repositories/geoservice/docs/requirements/action-plan.md)
+- [requirements-compliance-audit.md](C:/Repositories/geoservice/docs/requirements/requirements-compliance-audit.md)
+- [sprint-1-plan.md](C:/Repositories/geoservice/docs/requirements/sprints/sprint-1/sprint-1-plan.md)
