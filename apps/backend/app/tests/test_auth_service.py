@@ -36,7 +36,7 @@ def test_authenticate_user_raises_401_for_unknown_email() -> None:
         asyncio.run(service.authenticate_user("missing@example.com", "editor-password"))
 
     assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Invalid email or password"
+    assert exc_info.value.detail == "Неверная электронная почта или пароль"
 
 
 def test_authenticate_user_raises_401_for_wrong_password() -> None:
@@ -54,7 +54,7 @@ def test_authenticate_user_raises_401_for_wrong_password() -> None:
         asyncio.run(service.authenticate_user("editor@example.com", "wrong-password"))
 
     assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Invalid email or password"
+    assert exc_info.value.detail == "Неверная электронная почта или пароль"
 
 
 def test_authenticate_user_raises_401_when_password_hash_is_none() -> None:
@@ -72,4 +72,4 @@ def test_authenticate_user_raises_401_when_password_hash_is_none() -> None:
         asyncio.run(service.authenticate_user("viewer@example.com", "viewer-password"))
 
     assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Invalid email or password"
+    assert exc_info.value.detail == "Неверная электронная почта или пароль"

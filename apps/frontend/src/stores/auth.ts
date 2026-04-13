@@ -1,32 +1,112 @@
 import { defineStore } from "pinia";
+import axios from "axios";
 
-type Role = "viewer" | "editor";
+import { fetchMe, login, type AuthUser } from "@/api/auth";
+
+const ACCESS_TOKEN_KEY = "access_token";
+const AUTH_USER_KEY = "auth_user";
+
+type AuthState = {
+  token: string | null;
+  user: AuthUser | null;
+  isReady: boolean;
+  isRestoring: boolean;
+  sessionError: string | null;
+};
+
+function readStoredToken(): string | null {
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+function readStoredUser(): AuthUser | null {
+  const rawValue = localStorage.getItem(AUTH_USER_KEY);
+  if (!rawValue) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawValue) as AuthUser;
+  } catch {
+    localStorage.removeItem(AUTH_USER_KEY);
+    return null;
+  }
+}
 
 export const useAuthStore = defineStore(
   "auth",
 
   {
-    state: () => ({
-      token: localStorage.getItem("access_token") as string | null,
-      role: localStorage.getItem("role") as Role | null,
-      email: localStorage.getItem("email") as string | null,
+    state: (): AuthState => ({
+      token: readStoredToken(),
+      user: readStoredUser(),
+      isReady: false,
+      isRestoring: false,
+      sessionError: null,
     }),
+    getters: {
+      isAuthenticated: (state) => Boolean(state.token && state.user),
+    },
     actions: {
-      setAuth(token: string, email: string, role: Role) {
+      setAuth(token: string, user: AuthUser) {
         this.token = token;
-        this.email = email;
-        this.role = role;
-        localStorage.setItem("access_token", token);
-        localStorage.setItem("email", email);
-        localStorage.setItem("role", role);
+        this.user = user;
+        this.sessionError = null;
+        localStorage.setItem(ACCESS_TOKEN_KEY, token);
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+      },
+      setUser(user: AuthUser | null) {
+        this.user = user;
+        if (user) {
+          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+          return;
+        }
+        localStorage.removeItem(AUTH_USER_KEY);
+      },
+      async loginWithPassword(email: string, password: string) {
+        const result = await login(email, password);
+        this.setAuth(result.access_token, result.user);
+        this.isReady = true;
+        this.isRestoring = false;
+        return result;
+      },
+      async restoreSession() {
+        this.sessionError = null;
+        this.isRestoring = true;
+
+        if (!this.token) {
+          this.setUser(null);
+          this.isReady = true;
+          this.isRestoring = false;
+          return;
+        }
+
+        try {
+          const result = await fetchMe();
+          this.setUser(result.user);
+        } catch (error: unknown) {
+          if (axios.isAxiosError(error)) {
+            const status = error.response?.status;
+            if (status === 401) {
+              this.logout();
+              return;
+            }
+          }
+
+          this.sessionError =
+            "Сейчас не удалось восстановить сессию. Попробуйте ещё раз.";
+        } finally {
+          this.isReady = true;
+          this.isRestoring = false;
+        }
       },
       logout() {
         this.token = null;
-        this.email = null;
-        this.role = null;
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("email");
-        localStorage.removeItem("role");
+        this.user = null;
+        this.sessionError = null;
+        this.isReady = true;
+        this.isRestoring = false;
+        localStorage.removeItem(ACCESS_TOKEN_KEY);
+        localStorage.removeItem(AUTH_USER_KEY);
       },
     },
   },

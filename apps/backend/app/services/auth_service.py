@@ -34,7 +34,7 @@ class AuthService:
         if user is None or not verify_password(password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
+                detail="Неверная электронная почта или пароль",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return user

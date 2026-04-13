@@ -1,23 +1,32 @@
 import { http } from "@/api/http";
-import { useAuthStore } from "@/stores/auth";
 
-export async function devLogin(email: string, role: "viewer" | "editor") {
-  const auth = useAuthStore();
-  const response = await http.post("/api/v1/auth/dev-login", { email, role });
-  auth.setAuth(
-    response.data.access_token,
-    response.data.email ?? email,
-    response.data.role ?? role,
-  );
-  return response;
+export type AuthRole = "viewer" | "editor";
+
+export type AuthUser = {
+  id: string;
+  email: string;
+  role: AuthRole;
+};
+
+export type AuthLoginResponse = {
+  access_token: string;
+  token_type: string;
+  user: AuthUser;
+};
+
+export type AuthMeResponse = {
+  user: AuthUser;
+};
+
+export async function login(email: string, password: string) {
+  const response = await http.post<AuthLoginResponse>("/api/v1/auth/login", {
+    email,
+    password,
+  });
+  return response.data;
 }
 
-export async function secureGetRequest() {
-  const response = await http.get("/api/v1/secure/ping");
-  return response;
-}
-
-export async function securePostRequest() {
-  const response = await http.post("/api/v1/secure/ping");
-  return response;
+export async function fetchMe() {
+  const response = await http.get<AuthMeResponse>("/api/v1/auth/me");
+  return response.data;
 }

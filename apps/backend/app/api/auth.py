@@ -5,21 +5,22 @@ Created on Thu Jan  8 22:52:16 2026
 @author: dimon
 """
 
+from datetime import datetime, timedelta, timezone
+from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError, jwt
+
+from .deps import get_auth_service
+from core.settings import settings
 from schemas.auth_login_in import AuthLoginIn
 from schemas.auth_me_out import AuthMeOut
 from schemas.auth_success_out import AuthSuccessOut
 from schemas.auth_user_out import AuthUserOut
 from schemas.dev_login_in import DevLoginIn
 from services.auth_service import AuthService
-from .deps import get_auth_service
-from typing import Any
-from datetime import datetime, timezone, timedelta
-from jose import jwt, JWTError
-from core.settings import settings
 
 
 bearer = HTTPBearer(auto_error=False)
@@ -41,36 +42,37 @@ def decode_token(token: str) -> dict:
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_alg])
         return payload
-    except JWTError:
+    except JWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Токен недействителен или срок его действия истёк",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from exc
 
 
 def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer)) -> dict:
     if cred is None or not cred.credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is missing",
+            detail="Токен отсутствует",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     payload = decode_token(cred.credentials)
 
-    # жёстко требуем поля, иначе 401 (иначе потом будет странная логика)
     if "sub" not in payload or "role" not in payload:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token payload",
+            detail="Некорректное содержимое токена",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     return payload
 
 
 def require_editor(user: dict = Depends(get_current_user)) -> dict:
     if user.get("role") != "editor":
-        raise HTTPException(status_code=403, detail="Требуется роль editor")
+        raise HTTPException(status_code=403, detail="Требуется роль редактора")
     return user
 
 
@@ -111,7 +113,7 @@ async def me(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Токен недействителен или срок его действия истёк",
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
 
@@ -119,7 +121,7 @@ async def me(
     if current_user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Токен недействителен или срок его действия истёк",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
