@@ -5,11 +5,14 @@ Created on Fri Jan  9 10:39:38 2026
 @author: dimon
 """
 
+from uuid import UUID
+
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from models.user import User
 from repositories.user_repository import UserRepository
 from schemas.dev_login_in import DevLoginIn
-from models.user import User
-from uuid import UUID
+from services.password_service import verify_password
 
 
 class AuthService:
@@ -25,6 +28,16 @@ class AuthService:
                     email=body.email, role=body.role, password_hash=None
                 )
             return user
+
+    async def authenticate_user(self, email: str, password: str) -> User:
+        user = await self.user_repository.get_by_email(email)
+        if user is None or not verify_password(password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return user
 
     async def get_user_by_id(self, user_id: UUID) -> User | None:
         return await self.user_repository.get_by_id(user_id)

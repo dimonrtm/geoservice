@@ -9,7 +9,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from schemas.auth_login_in import AuthLoginIn
 from schemas.auth_me_out import AuthMeOut
+from schemas.auth_success_out import AuthSuccessOut
 from schemas.auth_user_out import AuthUserOut
 from schemas.dev_login_in import DevLoginIn
 from services.auth_service import AuthService
@@ -81,6 +83,23 @@ if settings.dev_auth_enabled:
         user = await auth_service.get_dev_user(body)
         token = create_access_token(str(user.id), user.role.value)
         return {"access_token": token, "token_type": "bearer"}
+
+
+@auth_router.post("/login", response_model=AuthSuccessOut)
+async def login(
+    body: AuthLoginIn, auth_service: AuthService = Depends(get_auth_service)
+) -> AuthSuccessOut:
+    user = await auth_service.authenticate_user(body.email, body.password)
+    token = create_access_token(str(user.id), user.role.value)
+    return AuthSuccessOut(
+        access_token=token,
+        token_type="bearer",
+        user=AuthUserOut(
+            id=str(user.id),
+            email=user.email,
+            role=user.role.value,
+        ),
+    )
 
 
 @auth_router.get("/me", response_model=AuthMeOut)
