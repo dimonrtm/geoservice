@@ -1,0 +1,126 @@
+from types import SimpleNamespace
+from uuid import uuid4
+
+import pytest
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
+
+from api.auth import create_access_token
+from api.deps import get_auth_service, get_layer_service
+from api.ws_layers import ws_layers_router
+from services.realtime_connection_manager import WebSocketConnectionManager
+
+
+def create_test_app(
+    auth_service: object,
+    layer_service: object,
+    connection_manager: WebSocketConnectionManager | None = None,
+) -> FastAPI:
+    app = FastAPI()
+    app.state.websocket_connection_manager = connection_manager or WebSocketConnectionManager()
+    app.include_router(ws_layers_router)
+    app.dependency_overrides[get_auth_service] = lambda: auth_service
+    app.dependency_overrides[get_layer_service] = lambda: layer_service
+    return app
+
+
+@pytest.mark.parametrize("role", ["viewer", "editor"])
+def test_ws_layer_subscription_accepts_authorized_users(role: str) -> None:
+    layer_id = uuid4()
+    user_id = uuid4()
+    token = create_access_token(str(user_id), role)
+
+    async def get_user_by_id(_user_id):
+        return SimpleNamespace(
+            id=user_id,
+            email=f"{role}@example.com",
+            role=SimpleNamespace(value=role),
+        )
+
+    async def get_layer_by_id(_layer_id):
+        return SimpleNamespace(id=layer_id)
+
+    auth_service = SimpleNamespace(get_user_by_id=get_user_by_id)
+    layer_service = SimpleNamespace(get_layer_by_id=get_layer_by_id)
+    connection_manager = WebSocketConnectionManager()
+    app = create_test_app(auth_service, layer_service, connection_manager)
+
+    with TestClient(app) as client:
+        with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}?token={token}") as websocket:
+            assert websocket.receive_json() == {"type": "connected", "layerId": str(layer_id)}
+            assert connection_manager.get_connection_count(layer_id) == 1
+
+    assert connection_manager.get_connection_count(layer_id) == 0
+
+
+def test_ws_layer_subscription_rejects_missing_token() -> None:
+    layer_id = uuid4()
+
+    async def get_user_by_id(_user_id):
+        return None
+
+    async def get_layer_by_id(_layer_id):
+        return SimpleNamespace(id=layer_id)
+
+    app = create_test_app(
+        SimpleNamespace(get_user_by_id=get_user_by_id),
+        SimpleNamespace(get_layer_by_id=get_layer_by_id),
+    )
+
+    with TestClient(app) as client:
+        with pytest.raises(WebSocketDisconnect) as exc_info:
+            with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}"):
+                pass
+
+    assert exc_info.value.code == 1008
+
+
+def test_ws_layer_subscription_rejects_invalid_token() -> None:
+    layer_id = uuid4()
+
+    async def get_user_by_id(_user_id):
+        return None
+
+    async def get_layer_by_id(_layer_id):
+        return SimpleNamespace(id=layer_id)
+
+    app = create_test_app(
+        SimpleNamespace(get_user_by_id=get_user_by_id),
+        SimpleNamespace(get_layer_by_id=get_layer_by_id),
+    )
+
+    with TestClient(app) as client:
+        with pytest.raises(WebSocketDisconnect) as exc_info:
+            with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}?token=broken-token"):
+                pass
+
+    assert exc_info.value.code == 1008
+
+
+def test_ws_layer_subscription_rejects_unknown_layer() -> None:
+    layer_id = uuid4()
+    user_id = uuid4()
+    token = create_access_token(str(user_id), "viewer")
+
+    async def get_user_by_id(_user_id):
+        return SimpleNamespace(
+            id=user_id,
+            email="viewer@example.com",
+            role=SimpleNamespace(value="viewer"),
+        )
+
+    async def get_layer_by_id(_layer_id):
+        return None
+
+    app = create_test_app(
+        SimpleNamespace(get_user_by_id=get_user_by_id),
+        SimpleNamespace(get_layer_by_id=get_layer_by_id),
+    )
+
+    with TestClient(app) as client:
+        with pytest.raises(WebSocketDisconnect) as exc_info:
+            with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}?token={token}"):
+                pass
+
+    assert exc_info.value.code == 1008

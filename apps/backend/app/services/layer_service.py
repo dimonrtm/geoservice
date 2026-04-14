@@ -10,6 +10,7 @@ from schemas.layer_list_out import LayerListOut
 from sqlalchemy.ext.asyncio import AsyncSession
 from repositories.layer_repository import LayerRepository
 from models.layer import Layer
+from uuid import UUID
 
 
 class LayerService:
@@ -29,3 +30,6 @@ class LayerService:
     async def get_layers(self) -> LayerListOut:
         layers = await self.layer_repository.get_layers()
         return LayerListOut(layers=[self.to_layer_out(layer) for layer in layers])
+
+    async def get_layer_by_id(self, layer_id: UUID) -> Layer | None:
+        return await self.layer_repository.get_layer_by_id(layer_id)

@@ -5,12 +5,13 @@ Created on Fri Jan  9 12:15:56 2026
 @author: dimon
 """
 
-from fastapi import Depends
+from fastapi import Depends, WebSocket
 from db.session import get_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.auth_service import AuthService
 from services.feature_service import FeatureService
 from services.layer_service import LayerService
+from services.realtime_connection_manager import WebSocketConnectionManager
 from repositories.user_repository import UserRepository
 from repositories.layer_repository import LayerRepository
 
@@ -25,3 +26,7 @@ def get_feature_service(session: AsyncSession = Depends(get_session)) -> Feature
 
 def get_layer_service(session: AsyncSession = Depends(get_session)) -> LayerService:
     return LayerService(session, LayerRepository(session))
+
+
+def get_websocket_connection_manager(websocket: WebSocket) -> WebSocketConnectionManager:
+    return websocket.app.state.websocket_connection_manager
