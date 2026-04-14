@@ -7,7 +7,9 @@ import pytest
 
 from domain.bbox import Bbox
 from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
+from domain.exceptions.version_mismatch_exception import VersionMismatchException
 from schemas.create_feature_in import CreateFeatureIn
+from schemas.delete_feature_request import DeleteFeatureRequest
 from schemas.patch_feature_request import PatchFeatureRequest
 from services.feature_service import FeatureService
 
@@ -123,6 +125,57 @@ def test_create_feature_returns_geometry_and_properties_from_request() -> None:
     assert result.geometry.model_dump(mode="python") == POLYGON_GEOMETRY
 
 
+def test_create_feature_publishes_created_event_after_success() -> None:
+    layer_id = uuid4()
+    created_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.create_feature.return_value = SimpleNamespace(id=created_id, version=1)
+    publisher = AsyncMock()
+    service = FeatureService(
+        session=DummySession(),
+        layer_repository=repository,
+        realtime_publisher=publisher,
+    )
+    request = CreateFeatureIn(geometry=POLYGON_GEOMETRY, properties={"name": "Created"})
+
+    result = asyncio.run(service.create_feature(layer_id, request))
+
+    assert result.id == created_id
+    publisher.publish_feature_created.assert_awaited_once_with(layer_id, result)
+
+
+def test_create_feature_does_not_fail_when_realtime_publish_raises() -> None:
+    layer_id = uuid4()
+    created_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.create_feature.return_value = SimpleNamespace(id=created_id, version=1)
+    publisher = AsyncMock()
+    publisher.publish_feature_created.side_effect = RuntimeError("socket down")
+    service = FeatureService(
+        session=DummySession(),
+        layer_repository=repository,
+        realtime_publisher=publisher,
+    )
+    request = CreateFeatureIn(geometry=POLYGON_GEOMETRY, properties={"name": "Created"})
+
+    result = asyncio.run(service.create_feature(layer_id, request))
+
+    assert result.id == created_id
+    publisher.publish_feature_created.assert_awaited_once()
+
+
 def test_update_feature_uses_current_feature_for_missing_geometry() -> None:
     layer_id = uuid4()
     feature_id = uuid4()
@@ -152,3 +205,95 @@ def test_update_feature_uses_current_feature_for_missing_geometry() -> None:
     assert result.version == 3
     assert result.properties == {"name": "After"}
     assert result.geometry.model_dump(mode="python") == UPDATED_POLYGON_GEOMETRY
+
+
+def test_update_feature_publishes_updated_event_after_success() -> None:
+    layer_id = uuid4()
+    feature_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.get_feature.return_value = SimpleNamespace(
+        id=feature_id,
+        version=2,
+        properties={"name": "Before"},
+        geometry_data=UPDATED_POLYGON_GEOMETRY,
+    )
+    repository.update_feature_if_version_matches.return_value = (
+        SimpleNamespace(id=feature_id, version=3),
+        object,
+    )
+    publisher = AsyncMock()
+    service = FeatureService(
+        session=DummySession(),
+        layer_repository=repository,
+        realtime_publisher=publisher,
+    )
+    request = PatchFeatureRequest(version=2, geometry=None, properties={"name": "After"})
+
+    result = asyncio.run(service.update_feature(layer_id, feature_id, request))
+
+    assert result.id == feature_id
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+
+
+def test_delete_feature_publishes_deleted_event_after_success() -> None:
+    layer_id = uuid4()
+    feature_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.delete_feature_if_version_matches.return_value = (True, object)
+    publisher = AsyncMock()
+    service = FeatureService(
+        session=DummySession(),
+        layer_repository=repository,
+        realtime_publisher=publisher,
+    )
+
+    result = asyncio.run(
+        service.delete_feature(layer_id, feature_id, DeleteFeatureRequest(version=3))
+    )
+
+    assert result.featureId == feature_id
+    publisher.publish_feature_deleted.assert_awaited_once_with(layer_id, feature_id)
+
+
+def test_update_feature_does_not_publish_event_on_version_mismatch() -> None:
+    layer_id = uuid4()
+    feature_id = uuid4()
+    layer = SimpleNamespace(
+        id=layer_id,
+        geometry_type="Polygon",
+        storage_table="polygon_features",
+    )
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = layer
+    repository.get_feature.return_value = SimpleNamespace(
+        id=feature_id,
+        version=2,
+        properties={"name": "Before"},
+        geometry_data=UPDATED_POLYGON_GEOMETRY,
+    )
+    repository.update_feature_if_version_matches.return_value = (None, object)
+    repository.get_current_version.return_value = SimpleNamespace(version=5)
+    publisher = AsyncMock()
+    service = FeatureService(
+        session=DummySession(),
+        layer_repository=repository,
+        realtime_publisher=publisher,
+    )
+    request = PatchFeatureRequest(version=2, geometry=None, properties={"name": "After"})
+
+    with pytest.raises(VersionMismatchException):
+        asyncio.run(service.update_feature(layer_id, feature_id, request))
+
+    publisher.publish_feature_updated.assert_not_awaited()

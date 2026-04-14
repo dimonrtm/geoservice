@@ -16,12 +16,19 @@ from schemas.feature_collection_out import FeatureCollectionMetaOut, FeatureColl
 from schemas.feature_out import FeatureOut
 from schemas.geojson import FeatureProperties, dump_feature_geometry
 from schemas.patch_feature_request import PatchFeatureRequest
+from services.feature_realtime_publisher import FeatureRealtimePublisher
 
 
 class FeatureService:
-    def __init__(self, session: AsyncSession, layer_repository: LayerRepository):
+    def __init__(
+        self,
+        session: AsyncSession,
+        layer_repository: LayerRepository,
+        realtime_publisher: FeatureRealtimePublisher | None = None,
+    ):
         self.session = session
         self.layer_repository = layer_repository
+        self.realtime_publisher = realtime_publisher
 
     def to_feature_out(
         self,
@@ -92,6 +99,7 @@ class FeatureService:
         return self.to_feature_collection_out(rows, bbox, limit_value, truncated, next_cursor)
 
     async def create_feature(self, layer_id: UUID, request: CreateFeatureIn) -> FeatureOut:
+        feature: FeatureOut
         async with self.session.begin():
             layer = await self.layer_repository.get_layer_by_id(layer_id)
             if layer is None:
@@ -103,16 +111,19 @@ class FeatureService:
             row = await self.layer_repository.create_feature(
                 layer, dump_feature_geometry(request.geometry), request.properties
             )
-            return FeatureOut(
+            feature = FeatureOut(
                 id=row.id,
                 version=row.version,
                 properties=request.properties,
                 geometry=request.geometry,
             )
+        await self.publish_feature_created(layer_id, feature)
+        return feature
 
     async def update_feature(
         self, layer_id: UUID, feature_id: UUID, request: PatchFeatureRequest
     ) -> FeatureOut:
+        feature: FeatureOut
         async with self.session.begin():
             layer = await self.layer_repository.get_layer_by_id(layer_id)
             if layer is None:
@@ -145,16 +156,19 @@ class FeatureService:
                     f"Не удалось собрать актуальное состояние feature {feature_id} после update"
                 )
 
-            return FeatureOut(
+            feature = FeatureOut(
                 id=row.id,
                 version=row.version,
                 properties=properties,
                 geometry=geometry,
             )
+        await self.publish_feature_updated(layer_id, feature)
+        return feature
 
     async def delete_feature(
         self, layer_id: UUID, feature_id: UUID, request: DeleteFeatureRequest
     ) -> DeleteFeatureResponse:
+        response: DeleteFeatureResponse
         async with self.session.begin():
             layer = await self.layer_repository.get_layer_by_id(layer_id)
             if layer is None:
@@ -164,7 +178,9 @@ class FeatureService:
             )
             if not deleted:
                 await self.version_error_handler(feature_id, request.version, model_type)
-            return DeleteFeatureResponse(featureId=feature_id)
+            response = DeleteFeatureResponse(featureId=feature_id)
+        await self.publish_feature_deleted(layer_id, feature_id)
+        return response
 
     async def get_feature(self, layer_id: UUID, feature_id: UUID) -> FeatureOut:
         layer = await self.layer_repository.get_layer_by_id(layer_id)
@@ -209,3 +225,27 @@ class FeatureService:
                 "Перезагрузите фичу и отредактируйте ее снова"
             ),
         )
+
+    async def publish_feature_created(self, layer_id: UUID, feature: FeatureOut) -> None:
+        if self.realtime_publisher is None:
+            return
+        try:
+            await self.realtime_publisher.publish_feature_created(layer_id, feature)
+        except Exception:
+            return
+
+    async def publish_feature_updated(self, layer_id: UUID, feature: FeatureOut) -> None:
+        if self.realtime_publisher is None:
+            return
+        try:
+            await self.realtime_publisher.publish_feature_updated(layer_id, feature)
+        except Exception:
+            return
+
+    async def publish_feature_deleted(self, layer_id: UUID, feature_id: UUID) -> None:
+        if self.realtime_publisher is None:
+            return
+        try:
+            await self.realtime_publisher.publish_feature_deleted(layer_id, feature_id)
+        except Exception:
+            return
