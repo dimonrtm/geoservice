@@ -3,7 +3,9 @@
     <div class="loginCard">
       <div class="eyebrow">Геосервис</div>
       <h1 class="title">Вход</h1>
-      <p class="subtitle">Введите электронную почту и пароль, чтобы открыть карту.</p>
+      <p class="subtitle">
+        Введите электронную почту и пароль, чтобы открыть карту.
+      </p>
 
       <form class="form" @submit.prevent="onSubmit">
         <label class="field">
@@ -67,10 +69,12 @@ async function onSubmit() {
       if (status === 401 && detail) {
         errorMessage.value = detail;
       } else {
-        errorMessage.value = "Сейчас не удалось выполнить вход. Попробуйте ещё раз.";
+        errorMessage.value =
+          "Сейчас не удалось выполнить вход. Попробуйте ещё раз.";
       }
     } else {
-      errorMessage.value = "Сейчас не удалось выполнить вход. Попробуйте ещё раз.";
+      errorMessage.value =
+        "Сейчас не удалось выполнить вход. Попробуйте ещё раз.";
     }
   } finally {
     isSubmitting.value = false;

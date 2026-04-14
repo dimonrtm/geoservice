@@ -30,7 +30,9 @@ onMounted(() => {
     <div v-if="!auth.isReady" class="statusScreen">
       <div class="statusCard">
         <div class="statusTitle">Восстановление сессии</div>
-        <div class="statusText">Проверяем текущий вход перед загрузкой карты.</div>
+        <div class="statusText">
+          Проверяем текущий вход перед загрузкой карты.
+        </div>
       </div>
     </div>
 
@@ -39,7 +41,11 @@ onMounted(() => {
         <div class="statusTitle">Не удалось восстановить сессию</div>
         <div class="statusText">{{ auth.sessionError }}</div>
         <div class="statusActions">
-          <button class="btn btnPrimary" type="button" @click="auth.restoreSession">
+          <button
+            class="btn btnPrimary"
+            type="button"
+            @click="auth.restoreSession"
+          >
             Повторить
           </button>
           <button class="btn btnSecondary" type="button" @click="auth.logout">
