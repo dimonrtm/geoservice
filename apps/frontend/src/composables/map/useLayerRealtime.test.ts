@@ -72,6 +72,18 @@ function flushPromises(): Promise<void> {
   return Promise.resolve();
 }
 
+function getSocketAt(index: number): FakeWebSocket {
+  const socket = FakeWebSocket.instances[index];
+  if (!socket) {
+    throw new Error(`Expected FakeWebSocket instance at index ${index}`);
+  }
+  return socket;
+}
+
+function getLastSocket(): FakeWebSocket {
+  return getSocketAt(FakeWebSocket.instances.length - 1);
+}
+
 describe("useLayerRealtime", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -95,7 +107,7 @@ describe("useLayerRealtime", () => {
 
     await realtime.connectToLayer("layer-1", "token-1");
 
-    const socket = FakeWebSocket.instances[0];
+    const socket = getSocketAt(0);
     expect(socket.url).toContain("/api/v1/ws/layers/layer-1");
     expect(socket.url).toContain("token=token-1");
 
@@ -159,7 +171,7 @@ describe("useLayerRealtime", () => {
     });
 
     await realtime.connectToLayer("layer-1", "token-1");
-    const firstSocket = FakeWebSocket.instances[0];
+    const firstSocket = getSocketAt(0);
     firstSocket.emitOpen();
     firstSocket.emitMessage({ type: "connected", layerId: "layer-1" });
     await flushPromises();
@@ -171,7 +183,7 @@ describe("useLayerRealtime", () => {
 
     await vi.advanceTimersByTimeAsync(500);
 
-    const secondSocket = FakeWebSocket.instances[1];
+    const secondSocket = getSocketAt(1);
     secondSocket.emitOpen();
     secondSocket.emitMessage({ type: "connected", layerId: "layer-1" });
     await flushPromises();
@@ -187,7 +199,7 @@ describe("useLayerRealtime", () => {
     const realtime = useLayerRealtime();
 
     await realtime.connectToLayer("layer-1", "token-1");
-    const socket = FakeWebSocket.instances[0];
+    const socket = getSocketAt(0);
     socket.emitOpen();
     socket.emitMessage({ type: "connected", layerId: "layer-1" });
 
@@ -204,20 +216,20 @@ describe("useLayerRealtime", () => {
     const realtime = useLayerRealtime();
 
     await realtime.connectToLayer("layer-1", "token-1");
-    FakeWebSocket.instances[0].emitOpen();
-    FakeWebSocket.instances[0].emitMessage({
+    const socket = getSocketAt(0);
+    socket.emitOpen();
+    socket.emitMessage({
       type: "connected",
       layerId: "layer-1",
     });
 
     for (const delay of REALTIME_RECONNECT_DELAYS_MS) {
-      const currentSocket = FakeWebSocket.instances.at(-1);
-      currentSocket?.emitClose(1006);
+      getLastSocket().emitClose(1006);
       await vi.advanceTimersByTimeAsync(delay);
-      FakeWebSocket.instances.at(-1)?.emitOpen();
+      getLastSocket().emitOpen();
     }
 
-    FakeWebSocket.instances.at(-1)?.emitClose(1006);
+    getLastSocket().emitClose(1006);
     await vi.runAllTimersAsync();
 
     expect(realtime.hasStoppedReconnect.value).toBe(true);
@@ -230,7 +242,7 @@ describe("useLayerRealtime", () => {
     const realtime = useLayerRealtime();
 
     await realtime.connectToLayer("layer-1", "token-1");
-    const socket = FakeWebSocket.instances[0];
+    const socket = getSocketAt(0);
     socket.emitOpen();
     socket.emitClose(1008);
     await vi.runAllTimersAsync();

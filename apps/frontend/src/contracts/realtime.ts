@@ -75,7 +75,7 @@ function hasBaseFeatureRealtimeFields(raw: unknown): raw is {
   eventId: string;
   occurredAt: string;
   layerId: string;
-} {
+} & Record<string, unknown> {
   return (
     isRecord(raw) &&
     isString(raw.eventId) &&
