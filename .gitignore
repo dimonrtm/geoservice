@@ -65,5 +65,8 @@ artifacts/
 # Windows device-name artifact
 nul
 
+# Local git worktrees
+.worktrees/
+
 #Python
 *.pyc
