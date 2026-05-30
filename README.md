@@ -116,6 +116,7 @@ Backend-конфигурация централизована в [settings.py](C
 В `docs/` сейчас лежат рабочие документы по анализу проекта и планированию:
 
 - [project-description.md](C:/Repositories/geoservice/docs/project-description.md)
+- [agent-memory](docs/agent-memory/README.md)
 - [action-plan.md](C:/Repositories/geoservice/docs/requirements/action-plan.md)
 - [requirements-compliance-audit.md](C:/Repositories/geoservice/docs/requirements/requirements-compliance-audit.md)
 - [sprint-1-plan.md](C:/Repositories/geoservice/docs/requirements/sprints/sprint-1/sprint-1-plan.md)
