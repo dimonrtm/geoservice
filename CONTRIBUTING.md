@@ -57,3 +57,15 @@ type: короткое описание
 ## Перед merge в main
 - Ветка должна быть синхронизирована с `origin/main`.
 - История должна быть читаемой (без мусорных коммитов).
+
+## Knowledge Wiki
+
+- Wiki-контент ведем на русском языке.
+- Пути, команды, API, типы, идентификаторы, имена файлов, имена пакетов и код не переводим.
+- Все wiki-ноды должны иметь frontmatter.
+- Для связей используем Obsidian wikilinks: `[[Code_wiki/index]]`.
+- Сырые материалы кладем в `RAW_inputs/`, обработанные знания - в `Vision_wiki/` и `Code_wiki/`.
+- После полного завершения реализации плана или крупной задачи агент вызывает `/ingest repository-change`.
+- Pre-commit не запускает и не проверяет repository-change ingest.
+- `repository-change ingest` пишет только knowledge-документацию и не меняет код, конфигурацию, миграции или тесты.
+- Post-ingest correction разрешен только для конфликтов из `Vision_wiki/decisions/followups/index.md`, связанных с `Code_wiki`.

@@ -117,6 +117,14 @@ Backend-конфигурация централизована в [settings.py](C
 
 - [project-description.md](C:/Repositories/geoservice/docs/project-description.md)
 - [agent-memory](docs/agent-memory/README.md)
+- [project knowledge wiki](C:/Repositories/geoservice/index.md)
+- [knowledge pipeline runbook](C:/Repositories/geoservice/docs/knowledge-pipeline/README.md)
 - [action-plan.md](C:/Repositories/geoservice/docs/requirements/action-plan.md)
 - [requirements-compliance-audit.md](C:/Repositories/geoservice/docs/requirements/requirements-compliance-audit.md)
 - [sprint-1-plan.md](C:/Repositories/geoservice/docs/requirements/sprints/sprint-1/sprint-1-plan.md)
+
+## Project Knowledge Wiki
+
+Knowledge wiki lives in `RAW_inputs/`, `Vision_wiki/`, `Code_wiki/`, `memory/`, and `Общие_принципы/`. Human-readable wiki content is written in Russian. Obsidian graph configuration is stored in `.obsidian/`.
+
+Use `/ingest repository-snapshot` to add already existing unchanged repository knowledge to `Code_wiki`. After the full implementation plan or a major repository task is complete, the agent should run `/ingest repository-change` before the final report. Pre-commit does not run or check repository-change ingest.

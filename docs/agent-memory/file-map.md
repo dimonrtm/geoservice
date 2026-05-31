@@ -7,6 +7,18 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - agent memory protocol workflow: `AGENTS.md`, `docs/agent-memory/protocol.md`
 - agent memory quick file lookup: `docs/agent-memory/file-map.md`
 - agent memory design spec: `docs/superpowers/specs/2026-05-30-agent-memory-design.md`
+- implementation plans language rule: `docs/agent-memory/patterns/2026-05-30-russian-implementation-plans.md`, `docs/superpowers/plans/`
+- project knowledge wiki pipeline: `index.md`, `RAW_inputs/`, `Vision_wiki/`, `Code_wiki/`, `memory/`, `Общие_принципы/`, `docs/knowledge-pipeline/README.md`, `.agents/skills/source-command-*/`
+- wiki checks: `scripts/lint-wiki.py`, `scripts/check-memory-needed.py`
+- repository-change ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `Code_wiki/состояние_проекта/repository_change_ingest.md`
+- repository-snapshot ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `Code_wiki/состояние_проекта/repository_snapshot.md`
+- RAW_inputs batch ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `docs/knowledge-pipeline/README.md`, `RAW_inputs/index.md`
+- Release 1 RAW requirements ingest: `RAW_inputs/documents/спринт 1.odt`, `Vision_wiki/chats/2026-05-30-release-1-document.md`, `Vision_wiki/concepts/first_release_mvp.md`, `Vision_wiki/solution/USM.md`, `Vision_wiki/solution/roadmap.md`, `Vision_wiki/solution/nfr.md`, `Vision_wiki/solution/architecture_vision.md`, `Code_wiki/архитектура/api_contract_first_release_requirements.md`
+- initial GeoService discover context: `Vision_wiki/chats/2026-05-31-initial-discover.md`, `Vision_wiki/concepts/about_project.md`, `Vision_wiki/entities/stakeholders/dmitry_popov.md`, `memory/project-state.md`
+- GeoService discover Ф1 why-now research goals: `Vision_wiki/chats/2026-05-31-phase-f1-why-now.md`, `Vision_wiki/concepts/about_project.md`, `Vision_wiki/concepts/product_vision_board.md`, `Vision_wiki/concepts/lean_canvas.md`, `Vision_wiki/decisions/risk_assumption_log.md`
+- Code_wiki repository snapshot inventory: `Code_wiki/архитектура/backend.md`, `Code_wiki/архитектура/frontend.md`, `Code_wiki/архитектура/api_and_realtime.md`, `Code_wiki/архитектура/data_model.md`, `Code_wiki/dev_setup/local_development.md`, `Code_wiki/deployment/docker_compose.md`, `Code_wiki/сборка/ci_and_quality.md`, `Code_wiki/правила_и_стиль/testing_strategy.md`, `Code_wiki/глоссарий/technical_terms.md`
+- Obsidian wiki graph config: `.obsidian/app.json`, `.obsidian/appearance.json`, `.obsidian/core-plugins.json`, `.obsidian/graph.json`, `.obsidian/templates.json`
+- discover startup mode and wiki filling phases: `.agents/skills/source-command-discover/SKILL.md`, `Общие_принципы/Вопросы стейкхолдеру.md`, `Общие_принципы/Фазы наполнения wiki.md`, `Vision_wiki/solution/USM.md`, `Vision_wiki/solution/roadmap.md`, `Vision_wiki/solution/nfr.md`, `Vision_wiki/solution/architecture_vision.md`
 
 ## Project Documentation
 

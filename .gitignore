@@ -70,3 +70,18 @@ nul
 
 #Python
 *.pyc
+__pycache__/
+.venv/
+venv/
+
+# Local wiki / agent state
+.obsidian/workspace*.json
+.obsidian/cache/
+.obsidian/plugins/*/data.json
+.claude/local/
+memory/local/
+.tmp-tests/
+tmp_tests_manual/
+tmp_tests_py/
+*.tmp
+*.bak

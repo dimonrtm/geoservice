@@ -1,0 +1,61 @@
+---
+title: API And Realtime Contracts
+type: api-endpoint
+status: active
+created: 2026-05-30
+updated: 2026-05-30
+source: repository-snapshot:2026-05-30
+tags: [api, websocket, realtime, auth]
+---
+
+# API And Realtime Contracts
+
+Backend публикует REST API под `/api/v1` и WebSocket endpoint для layer realtime.
+
+## Auth API
+
+- `POST /api/v1/auth/login` принимает email/password и возвращает `access_token`, `token_type` и user DTO.
+- `GET /api/v1/auth/me` возвращает текущего пользователя по Bearer token.
+- `POST /api/v1/auth/dev-login` доступен только при `DEV_MODE=true`.
+
+Frontend хранит token в `localStorage`, добавляет `Authorization: Bearer ...` в axios interceptor и вызывает logout при HTTP 401.
+
+## Layers And Features API
+
+- `GET /api/v1/layers` возвращает список layers.
+- `GET /api/v1/layers/{layer_id}/features?bbox=...&limit=...&after_id=...` возвращает GeoJSON FeatureCollection и `meta`.
+- `GET /api/v1/layers/{layer_id}/features/{feature_id}` возвращает одну feature.
+- `POST /api/v1/layers/{layer_id}/features` создает feature, требует `editor`.
+- `PATCH /api/v1/layers/{layer_id}/features/{feature_id}` обновляет feature по optimistic `version`, требует `editor`.
+- `DELETE /api/v1/layers/{layer_id}/features/{feature_id}` удаляет feature по optimistic `version`, требует `editor`.
+
+`bbox` валидируется как четыре числа с диапазонами долготы/широты. `limit` нормализуется backend-ом в диапазон `1..5000`; frontend обычно запрашивает `500`.
+
+## Ошибки
+
+- Domain validation возвращает 422 с `{"error": "..."}`.
+- Missing layer/feature возвращает 404.
+- Version conflict возвращает 409 с телом `VERSION_MISMATCH`, `featureId`, `requestVersion`, `currentVersion`, `message`.
+
+## WebSocket Realtime
+
+Endpoint: `GET /api/v1/ws/layers/{layer_id}?token=...`.
+
+Server-side:
+
+- token проверяется через тот же JWT decode и перечитывание user из БД;
+- роли `viewer` и `editor` допускаются к подписке;
+- подписки группируются по `layer_id` в `WebSocketConnectionManager`;
+- feature create/update/delete публикуют события `feature_created`, `feature_updated`, `feature_deleted`.
+
+Client-side:
+
+- `useLayerRealtime` строит `ws://` или `wss://` из `VITE_API_BASE_URL`;
+- событие `connected` переводит badge в connected-state;
+- при reconnect frontend вызывает forced reload активного слоя, чтобы синхронизировать состояние после разрыва.
+
+## Связанные Ноды
+
+- [[backend]]
+- [[frontend]]
+- [[data_model]]

@@ -46,6 +46,23 @@ Do not store:
 
 After significant work, add or update a memory entry yourself. Significant work means the result is likely to help the next agent understand what happened, why it matters, and which files are involved.
 
+Memory is required, not optional, when work changes durable process rules or repository operating knowledge:
+
+- implementation plans or specs in `docs/superpowers/plans/` and `docs/superpowers/specs/`;
+- agent instructions in `AGENTS.md`;
+- contribution/process rules in `CONTRIBUTING.md`;
+- project knowledge pipeline docs in `docs/knowledge-pipeline/`;
+- repo-local command or skill docs in `.agents/skills/`;
+- stable decisions made during planning, including language rules and workflow boundaries.
+
+Before finishing work in those areas, run:
+
+```powershell
+python scripts/check-memory-needed.py --check
+```
+
+If the check warns, add or update a focused memory entry under `docs/agent-memory/` and update `docs/agent-memory/file-map.md` when a durable topic-to-file relationship changed.
+
 Use these folders:
 
 - `docs/agent-memory/sessions/` for summaries of significant completed work;
