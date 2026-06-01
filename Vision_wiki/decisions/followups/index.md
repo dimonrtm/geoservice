@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-05-31
+updated: 2026-06-01
 source: null
 tags: [followups, conflicts]
 ---
@@ -22,6 +22,10 @@ tags: [followups, conflicts]
 | FU-2026-05-31-001 | open | Product discovery | [[../../concepts/about_project]], [[../../chats/2026-05-31-initial-discover]], [[../../chats/2026-05-31-phase-f1-why-now]] | Ф1 завершена. Пройти Ф2-Ф3: уточнить пользователей и боль, альтернативы и контекст использования; затем проверить точный тип продукта. |
 | FU-2026-05-31-002 | open | Product discovery | [[../../chats/2026-05-31-phase-f1-why-now]], [[../../decisions/risk_assumption_log]] | На Ф2-Ф4 заменить критерий первого релиза "все типа работает" на проверяемый demo-script и acceptance criteria. |
 | FU-2026-05-31-003 | open | Product discovery | [[../../concepts/product_vision_board]], [[../../concepts/lean_canvas]] | Уточнить приоритет результата: demo, portfolio, применение в реальной работе или основа будущего продукта. |
+| FU-2026-06-01-001 | open | Product discovery | [[../../entities/personas/collaborative_editing_archetypes]], [[../../chats/2026-06-01-phase-f2-collaborative-editing-research]] | Выбрать один primary scenario GeoService или явно оставить несколько сценариев для сравнения; после этого завершить Ф2 с конкретной персоной и JTBD. |
+| FU-2026-06-01-002 | open | Research verification | [[../../entities/competitors/collaborative_editing_alternatives]], [[../../chats/2026-06-01-phase-f2-collaborative-editing-research]] | Добавить доступные URL или исходный список источников вместо непрозрачных citation-маркеров `turn...`, прежде чем считать vendor-specific утверждения независимо проверенными. |
+| FU-2026-06-01-003 | open | Product scope | [[../../concepts/collaborative_editing_models]], [[../../decisions/risk_assumption_log]] | На Ф4 решить, какие research-capabilities относятся к Release 1, а какие остаются Later; не расширять scope автоматически. |
+| FU-2026-06-01-004 | open | Knowledge pipeline | `RAW_inputs/documents/Ф2.md`, `scripts/lint-wiki.py` | Отдельной implementation/docs-задачей решить конфликт правил: `/ingest` запрещает менять RAW inputs, но `lint-wiki.py` требует YAML frontmatter от Markdown-файлов внутри `RAW_inputs/`. |
 
 ## Правило Post-Ingest Correction
 

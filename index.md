@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-05-30
+updated: 2026-06-01
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -16,7 +16,7 @@ tags: [knowledge, index, geoservice]
 
 - Название: GeoService
 - Репозиторий: `C:\Repositories\geoservice`
-- Стадия: experimental MVP
+- Стадия: идея / прототип
 - Кратко: GeoService хранит геообъекты в PostGIS, отдает их через FastAPI и отображает/редактирует карты через Vue и MapLibre.
 
 ## Области Знаний
@@ -33,10 +33,15 @@ tags: [knowledge, index, geoservice]
 - 2026-05-30: Создана стартовая project knowledge wiki и ручной pipeline `/discover`, `/ingest`, `/sync-vision`, `/lint-wiki`.
 - 2026-05-30: Выполнен `/ingest repository-snapshot`; техническая карта текущего репозитория добавлена в [[Code_wiki/index]].
 - 2026-05-30: Выполнен `/sync-vision`; индексы и [[memory/project-state]] синхронизированы после repository snapshot.
+- 2026-05-30: Обработан RAW source `RAW_inputs/documents/спринт 1.odt`; заполнены Release 1 solution-ноды и desired API contract.
+- 2026-05-31: Первый `/discover` и фаза Ф1 уточнили pet-project контекст, исследовательскую мотивацию и отсутствие подтвержденной внешней пользовательской боли.
+- 2026-06-01: Выполнен `/sync-vision`; корневой индекс и [[memory/project-state]] синхронизированы после Release 1 ingest и Ф1 discovery.
 
 ## Открытые Вопросы
 
-- Продуктовые артефакты [[Vision_wiki/solution/USM]], [[Vision_wiki/solution/roadmap]], [[Vision_wiki/solution/nfr]] и [[Vision_wiki/solution/architecture_vision]] пока являются стартовыми draft-нодами и требуют discovery или RAW sources.
+- Нужно пройти discovery-фазы Ф2-Ф3: уточнить пользователей и боль, альтернативы и контекст использования.
+- Нужно превратить критерий первого релиза "все типа работает" в проверяемый demo-script и acceptance criteria.
+- Нужно уточнить приоритет результата: demo, portfolio, применение в реальной работе или основа будущего продукта.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 

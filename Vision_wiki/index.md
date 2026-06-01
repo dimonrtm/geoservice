@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-05-31
+updated: 2026-06-01
 source: null
 tags: [vision-wiki, product]
 ---
@@ -42,6 +42,10 @@ tags: [vision-wiki, product]
 - [[chats/2026-05-30-release-1-document]] - summary source-документа `спринт 1.odt`.
 - [[chats/2026-05-31-initial-discover]] - ответы первого `/discover`.
 - [[chats/2026-05-31-phase-f1-why-now]] - результаты Ф1: исследовательская мотивация и why-now.
+- [[chats/2026-06-01-phase-f2-collaborative-editing-research]] - research для Ф2-Ф3 по сценариям и альтернативам collaborative editing.
+- [[concepts/collaborative_editing_models]] - четыре модели collaborative editing геометрии и гипотезы для GeoService.
+- [[entities/personas/collaborative_editing_archetypes]] - семь модельных архетипов пользователей; primary user пока не выбран.
+- [[entities/competitors/collaborative_editing_alternatives]] - research-карта альтернатив для будущей Ф3.
 
 ## Открытые Вопросы
 

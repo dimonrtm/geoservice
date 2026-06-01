@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-05-31
+updated: 2026-06-01
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -26,3 +26,4 @@ tags: [raw-inputs, source-of-truth]
 | Дата | Файл | Источник | Обработан |
 |---|---|---|---|
 | 2026-05-30 | `RAW_inputs/documents/спринт 1.odt` | Release 1 planning/requirements document; актуальность и трактовка подтверждены 2026-05-31 | Да: [[../Vision_wiki/chats/2026-05-30-release-1-document]], [[../Vision_wiki/concepts/first_release_mvp]], [[../Vision_wiki/solution/USM]], [[../Code_wiki/архитектура/api_contract_first_release_requirements]] |
+| 2026-06-01 | `RAW_inputs/documents/Ф2.md` | Research-обзор веб-ГИС collaborative editing для подготовки Ф2-Ф3 | Да: [[../Vision_wiki/chats/2026-06-01-phase-f2-collaborative-editing-research]], [[../Vision_wiki/concepts/collaborative_editing_models]], [[../Vision_wiki/entities/personas/collaborative_editing_archetypes]], [[../Vision_wiki/entities/competitors/collaborative_editing_alternatives]] |
