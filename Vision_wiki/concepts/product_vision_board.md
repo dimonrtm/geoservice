@@ -3,8 +3,8 @@ title: Product Vision Board GeoService
 type: concept
 status: draft
 created: 2026-05-31
-updated: 2026-05-31
-source: Vision_wiki/chats/2026-05-31-phase-f1-why-now.md
+updated: 2026-06-02
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md"
 tags: [product-vision-board, discovery, research]
 ---
 
@@ -17,12 +17,12 @@ tags: [product-vision-board, discovery, research]
 ## Target Group
 
 - Подтверждено: разработчик проекта как исследователь и первый пользователь.
-- Гипотеза: команды, которым требуется совместное редактирование геометрии в геоинформационных системах.
+- Гипотеза Ф2: primary research-persona - `Utility GIS editor`, работающий с authoritative network layer. Кадастровый сценарий отложен как более сложный для реализации.
 
 ## Needs
 
 - Подтверждено: практическое исследование различных методов совместного редактирования геометрии.
-- Гипотеза: надежное совместное изменение геометрии без потери чужих правок.
+- Гипотеза: контролируемое совместное изменение utility network без silent overwrite и без неверного состояния сети после параллельных правок.
 
 ## Product
 
@@ -39,5 +39,9 @@ tags: [product-vision-board, discovery, research]
 
 - [[about_project]]
 - [[lean_canvas]]
+- [[jtbd]]
 - [[../chats/2026-05-31-phase-f1-why-now]]
+- [[../chats/2026-06-02-phase-f2-users-and-pain]]
+- [[../entities/personas/authoritative_gis_editing_candidates]]
+- [[../entities/personas/utility_gis_editor]]
 - [[../solution/USM]]

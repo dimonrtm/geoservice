@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-01
+updated: 2026-06-02
 source: null
 tags: [vision-wiki, product]
 ---
@@ -44,8 +44,12 @@ tags: [vision-wiki, product]
 - [[chats/2026-05-31-phase-f1-why-now]] - результаты Ф1: исследовательская мотивация и why-now.
 - [[chats/2026-06-01-phase-f2-collaborative-editing-research]] - research для Ф2-Ф3 по сценариям и альтернативам collaborative editing.
 - [[concepts/collaborative_editing_models]] - четыре модели collaborative editing геометрии и гипотезы для GeoService.
-- [[entities/personas/collaborative_editing_archetypes]] - семь модельных архетипов пользователей; primary user пока не выбран.
+- [[entities/personas/collaborative_editing_archetypes]] - семь модельных архетипов пользователей и история выбора primary scenario.
 - [[entities/competitors/collaborative_editing_alternatives]] - research-карта альтернатив для будущей Ф3.
+- [[chats/2026-06-02-phase-f2-users-and-pain]] - ответы Ф2: primary research-persona `Utility GIS editor`, utility workflow и synthetic validation.
+- [[entities/personas/authoritative_gis_editing_candidates]] - история выбора между `Utility GIS editor` и кадастровым инженером.
+- [[entities/personas/utility_gis_editor]] - primary research-persona GeoService для utility authoritative editing.
+- [[concepts/jtbd]] - primary JTBD `Utility GIS editor` и deferred кадастровый JTBD.
 
 ## Открытые Вопросы
 

@@ -33,8 +33,8 @@ Self-hosted MapStore + GeoServer показывает дополнительны
 
 ## Неясно
 
-- Какая модель соответствует primary user GeoService?
-- Нужен ли Release 1 только для demo live-layer сценария или для проверки более сложной модели?
+- Primary research-persona `Utility GIS editor` соответствует модели изолированных версий и контролируемой публикации authoritative state.
+- Неясно, должен ли Release 1 оставаться только demo live-layer сценарием или проверять часть более сложной модели: решение относится к Ф4.
 
 ## Источники
 

@@ -3,7 +3,7 @@ title: User Story Map
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-05-31
+updated: 2026-06-02
 source: RAW_inputs/documents/спринт 1.odt
 tags: [solution, usm, release-1]
 ---
@@ -43,8 +43,21 @@ User Story Map для Release 1 MVP по источнику `RAW_inputs/document
 | Release 1 P1 | SYNC GeoJSON import, upload UI, import summary | После import данные видны через bbox; ошибки import ограничены и валидируются. |
 | Later | Projects/Layers persistence, CRDT/OT, offline, locks, rich ACL, topology validation, large imports | Возвращаться после подтверждения Release 1 MVP и новых требований. |
 
+## Discovery Ф2: Provisional JTBD
+
+Этот раздел не расширяет scope Release 1. Он фиксирует primary research-scenario `Utility GIS editor` и deferred кадастровый сценарий перед Ф4.
+
+| Persona-Кандидат | Job | Статус |
+|---|---|---|
+| `Utility GIS editor` | Изолировать изменения инженерной сети, увидеть конфликт с authoritative state и контролируемо опубликовать результат после review | primary hypothesis |
+| Кадастровый инженер | Сохранить lineage участков, разобрать конфликт и опубликовать согласованное кадастровое изменение | deferred hypothesis |
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
+- `RAW_inputs/documents/Ф2.md`
 - [[../concepts/first_release_mvp]]
+- [[../concepts/jtbd]]
+- [[../entities/personas/utility_gis_editor]]
+- [[../chats/2026-06-02-phase-f2-users-and-pain]]
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]

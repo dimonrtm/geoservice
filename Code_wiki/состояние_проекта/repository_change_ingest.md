@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-05-31
-source: "git status/diff, 2026-05-30; 2026-05-31"
+updated: 2026-06-02
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,50 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-02 - `/discover --phase Ф2`: выбран `Utility GIS editor`
+
+**Источник:** второй проход ответов пользователя на `/discover --phase Ф2`, `RAW_inputs/documents/Ф2.md`, `git status --short`, `git diff --stat`.
+
+**Кратко:** Ф2 завершена на уровне research-гипотез. Primary research-persona GeoService - `Utility GIS editor`; кадастровый сценарий отложен как более сложный для реализации. Детализирован work order workflow замены трансформатора и переподключения линии, где главный риск - неверное состояние сети.
+
+**Затронутые области:**
+
+- `Vision_wiki/entities/personas/utility_gis_editor.md` - отдельная primary persona-нода с workflow, болями, desired outcome и synthetic validation.
+- `Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md`, `Vision_wiki/concepts/jtbd.md` - закрытие Ф2 и primary JTBD.
+- `Vision_wiki/concepts/product_vision_board.md`, `lean_canvas.md`, `Vision_wiki/decisions/risk_assumption_log.md`, `Vision_wiki/solution/USM.md` - синхронизация utility authoritative editing гипотез без расширения Release 1.
+- `Vision_wiki/decisions/followups/index.md`, `Vision_wiki/index.md`, `index.md`, `memory/project-state.md`, `docs/agent-memory/` - закрытый выбор primary scenario, synthetic pilot, навигация и долговременная память.
+
+**Что помнить дальше:**
+
+- Все утверждения о `Utility GIS editor` являются research-гипотезами на основе документации существующих продуктов; реальных заказчиков и пользователей GeoService для интервью пока нет.
+- Synthetic pilot должен проверить topology, `attribute vs attribute`, `geometry/association`, `edit after reconcile`.
+- Branch versioning, `Conflicts view`, reviewer workflow и topology validation не входят в Release 1 автоматически: это решение относится к Ф4.
+- Следующая discovery-фаза - Ф3 для сравнения альтернатив в контексте utility authoritative editing.
+
+**Проверка:** `python scripts/lint-wiki.py --root .` через bundled Python - ожидаемый `missing_frontmatter` для неизменяемого `RAW_inputs/documents/Ф2.md`, уже зафиксированный в `FU-2026-06-01-004`; `python -m unittest discover -s scripts\tests` - 8 tests OK; `python scripts/check-memory-needed.py --check` - passed; `git diff --check` и `git diff --cached --check` - без ошибок.
+
+### 2026-06-02 - `/discover --phase Ф2`: authoritative editing persona-кандидаты
+
+**Источник:** ответы пользователя на `/discover --phase Ф2`, `RAW_inputs/documents/Ф2.md`, `git status --short`, `git diff --stat`.
+
+**Кратко:** discovery Ф2 сузил исследование GeoService до двух модельных authoritative editing сценариев: `Utility GIS editor` и кадастровый инженер. Единственный primary scenario еще не выбран; внешняя пользовательская боль остается гипотезой до synthetic pilot или проверки на реальном рабочем контексте.
+
+**Затронутые области:**
+
+- `Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md` - сводка ответов Ф2 и границы подтвержденного знания.
+- `Vision_wiki/entities/personas/authoritative_gis_editing_candidates.md`, `Vision_wiki/concepts/jtbd.md` - два persona-кандидата и provisional JTBD.
+- `Vision_wiki/concepts/product_vision_board.md`, `lean_canvas.md`, `Vision_wiki/decisions/risk_assumption_log.md`, `Vision_wiki/solution/USM.md` - продуктовые гипотезы authoritative editing без расширения Release 1.
+- `Vision_wiki/decisions/followups/index.md`, `Vision_wiki/index.md`, `index.md`, `memory/project-state.md`, `docs/agent-memory/` - очередь вопросов, навигация, live state и долговременная память.
+
+**Что помнить дальше:**
+
+- Нужно выбрать один primary scenario или явно зафиксировать сравнительное исследование двух сценариев.
+- Детали пользовательских болей пока взяты из research `RAW_inputs/documents/Ф2.md`, а не из интервью с реальным пользователем.
+- Scope Release 1 не расширяется автоматически до branch/workspace mode, reviewer workflow или topology validation: это решение относится к Ф4.
+- Пользовательские изменения `.obsidian/` и форматирование Markdown-таблиц не являются частью этого repository-change ingest.
+
+**Проверка:** `python scripts/lint-wiki.py --root .` через bundled Python - ожидаемый `missing_frontmatter` для неизменяемого `RAW_inputs/documents/Ф2.md`, уже зафиксированный в `FU-2026-06-01-004`; `python -m unittest discover -s scripts\tests` - 8 tests OK; `python scripts/check-memory-needed.py --check` - passed; `git diff --check` - без ошибок.
 
 ### 2026-05-31 - `/discover --phase Ф1`: исследовательские цели
 

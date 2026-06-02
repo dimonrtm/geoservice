@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-01
+updated: 2026-06-02
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -36,12 +36,20 @@ tags: [knowledge, index, geoservice]
 - 2026-05-30: Обработан RAW source `RAW_inputs/documents/спринт 1.odt`; заполнены Release 1 solution-ноды и desired API contract.
 - 2026-05-31: Первый `/discover` и фаза Ф1 уточнили pet-project контекст, исследовательскую мотивацию и отсутствие подтвержденной внешней пользовательской боли.
 - 2026-06-01: Выполнен `/sync-vision`; корневой индекс и [[memory/project-state]] синхронизированы после Release 1 ingest и Ф1 discovery.
+- 2026-06-01: Обработан research RAW source `RAW_inputs/documents/Ф2.md`; добавлены модели collaborative editing, пользовательские архетипы и карта альтернатив для подготовки Ф2-Ф3.
+- 2026-06-02: Выполнен `/sync-vision`; корневой индекс и [[memory/project-state]] синхронизированы после ingest исследования Ф2.
+- 2026-06-02: `/discover --phase Ф2` сузил исследование до двух модельных authoritative editing сценариев: `Utility GIS editor` и кадастровый инженер.
+- 2026-06-02: Выполнен повторный `/sync-vision`; индексы и [[memory/project-state]] синхронизированы после discovery Ф2.
+- 2026-06-02: Второй проход `/discover --phase Ф2` выбрал `Utility GIS editor` как primary research-persona; кадастровый сценарий отложен.
 
 ## Открытые Вопросы
 
-- Нужно пройти discovery-фазы Ф2-Ф3: уточнить пользователей и боль, альтернативы и контекст использования.
+- Для `Utility GIS editor` нужно проверить модельные боли на synthetic utility dataset и, если возможно, на реальном рабочем контексте.
+- На Ф3 нужно сравнить альтернативы в контексте utility authoritative editing.
+- Нужно восстановить доступные URL для vendor-specific утверждений из research по collaborative editing.
 - Нужно превратить критерий первого релиза "все типа работает" в проверяемый demo-script и acceptance criteria.
 - Нужно уточнить приоритет результата: demo, portfolio, применение в реальной работе или основа будущего продукта.
+- Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 

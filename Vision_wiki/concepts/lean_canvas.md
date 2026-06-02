@@ -3,8 +3,8 @@ title: Lean Canvas GeoService
 type: concept
 status: draft
 created: 2026-05-31
-updated: 2026-05-31
-source: Vision_wiki/chats/2026-05-31-phase-f1-why-now.md
+updated: 2026-06-02
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md"
 tags: [lean-canvas, discovery, research]
 ---
 
@@ -13,12 +13,12 @@ tags: [lean-canvas, discovery, research]
 ## Problem
 
 - Подтверждено: требуется исследовать возможности реализации алгоритмов совместного редактирования геометрии.
-- Гипотеза: геоинформационным системам нужен надежный способ совместного редактирования геометрии без потери изменений.
+- Гипотеза Ф2: utility-организациям нужен контролируемый способ совместного изменения authoritative network layer без silent overwrite и неверного состояния сети.
 
 ## Customer Segments
 
 - Подтверждено: разработчик проекта как исследователь и первый пользователь.
-- Гипотеза: команды разработки и пользователи геоинформационных систем.
+- Гипотеза Ф2: primary research-persona - `Utility GIS editor`. Кадастровый инженер остается deferred research-сценарием.
 
 ## Unique Value Proposition
 
