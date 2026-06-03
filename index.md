@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-02
+updated: 2026-06-03
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -41,12 +41,14 @@ tags: [knowledge, index, geoservice]
 - 2026-06-02: `/discover --phase Ф2` сузил исследование до двух модельных authoritative editing сценариев: `Utility GIS editor` и кадастровый инженер.
 - 2026-06-02: Выполнен повторный `/sync-vision`; индексы и [[memory/project-state]] синхронизированы после discovery Ф2.
 - 2026-06-02: Второй проход `/discover --phase Ф2` выбрал `Utility GIS editor` как primary research-persona; кадастровый сценарий отложен.
+- 2026-06-03: Выполнен `/sync-vision`; подтверждены отсутствие новых RAW inputs, 8 открытых follow-up'ов, отсутствие stale-нод и ожидаемый lint-конфликт `FU-2026-06-01-004`.
+- 2026-06-03: Обработан RAW source `RAW_inputs/documents/03.06.2026deep-research-report.md`; Ф3 сравнила альтернативы для `Utility GIS editor`, baseline - `ArcGIS Enterprise + Utility Network`, niche GeoService - conflict/review explainability.
 
 ## Открытые Вопросы
 
-- Для `Utility GIS editor` нужно проверить модельные боли на synthetic utility dataset и, если возможно, на реальном рабочем контексте.
-- На Ф3 нужно сравнить альтернативы в контексте utility authoritative editing.
-- Нужно восстановить доступные URL для vendor-specific утверждений из research по collaborative editing.
+- Для `Utility GIS editor` нужно проверить модельные боли на synthetic utility dataset: главный сценарий `geometry/association conflict` с dirty areas, network consequence, reviewer decision и authoritative post.
+- На Ф4 нужно решить, остается ли GeoService focused conflict/review layer или проверяет более широкий branch/versioning workflow.
+- Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно превратить критерий первого релиза "все типа работает" в проверяемый demo-script и acceptance criteria.
 - Нужно уточнить приоритет результата: demo, portfolio, применение в реальной работе или основа будущего продукта.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.

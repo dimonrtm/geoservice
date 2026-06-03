@@ -3,8 +3,8 @@ title: Product Vision Board GeoService
 type: concept
 status: draft
 created: 2026-05-31
-updated: 2026-06-02
-source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md"
+updated: 2026-06-03
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md"
 tags: [product-vision-board, discovery, research]
 ---
 
@@ -23,10 +23,11 @@ tags: [product-vision-board, discovery, research]
 
 - Подтверждено: практическое исследование различных методов совместного редактирования геометрии.
 - Гипотеза: контролируемое совместное изменение utility network без silent overwrite и без неверного состояния сети после параллельных правок.
+- Гипотеза Ф3: наиболее узкая зона ценности - объяснение сложного utility conflict, review decision и доказуемость authoritative post, а не замена полноценной GIS-платформы.
 
 ## Product
 
-Текущий draft первого релиза описывает demo-платформу для работы с геоданными и проверки базового сценария совместного редактирования. Детали решения уточняются после фаз Ф2-Ф3.
+Текущий draft первого релиза описывает demo-платформу для работы с геоданными и проверки базового сценария совместного редактирования. После Ф3 наиболее перспективное positioning-направление - focused conflict/review layer поверх utility authoritative editing; окончательный scope относится к Ф4.
 
 ## Business Goals
 
@@ -42,6 +43,7 @@ tags: [product-vision-board, discovery, research]
 - [[jtbd]]
 - [[../chats/2026-05-31-phase-f1-why-now]]
 - [[../chats/2026-06-02-phase-f2-users-and-pain]]
+- [[../chats/2026-06-03-phase-f3-alternatives]]
 - [[../entities/personas/authoritative_gis_editing_candidates]]
 - [[../entities/personas/utility_gis_editor]]
 - [[../solution/USM]]

@@ -3,8 +3,8 @@ title: Lean Canvas GeoService
 type: concept
 status: draft
 created: 2026-05-31
-updated: 2026-06-02
-source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md"
+updated: 2026-06-03
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md"
 tags: [lean-canvas, discovery, research]
 ---
 
@@ -22,12 +22,13 @@ tags: [lean-canvas, discovery, research]
 
 ## Unique Value Proposition
 
-- Пока не определено. Требуется пройти Ф2-Ф3.
+- Гипотеза Ф3: GeoService не конкурирует как новая mature GIS platform, а показывает conflict/review layer, который делает сложный utility conflict когнитивно проще для reviewer'а и помогает доказать безопасность authoritative post.
 
 ## Solution
 
 - Текущий technical demo draft описан в [[../solution/USM]].
-- Не фиксировать окончательное решение до завершения Ф2-Ф3.
+- Не фиксировать окончательный scope до Ф4.
+- Demo-кандидат после Ф3: `geometry/association conflict` с dirty areas, network consequence, reviewer decision и итоговым authoritative state.
 
 ## Channels
 
@@ -51,4 +52,4 @@ tags: [lean-canvas, discovery, research]
 
 ## Unfair Advantage
 
-- Пока не определено.
+- Гипотеза Ф3: focused demo, self-hosted/local mode, open-source posture и AI-first объяснение конфликта для reviewer'а. Это преимущество работает только в узкой нише explainability/review productivity, а не в замене ArcGIS Enterprise.
