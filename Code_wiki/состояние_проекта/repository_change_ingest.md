@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-02
-source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02"
+updated: 2026-06-04
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,30 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-04 - `/discover --phase Ф4`: demo-scope для `Utility GIS editor`
+
+**Источник:** ответы пользователя на `/discover --phase Ф4`, `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md`, `git status --short`, `git diff --stat`.
+
+**Кратко:** Ф4 зафиксировала scope GeoService как demo focused conflict/review layer для `Utility GIS editor`. Главный результат - demo; главный сигнал ценности - `review стал проще`; primary scenario - `geometry/association conflict`; `edit after reconcile` перенесен в Next/Later. GeoService показывает собственную optimistic conflict + review model, а не full branch versioning platform.
+
+**Затронутые области:**
+
+- `Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md` - сводка решений Ф4, walking skeleton и synthetic dataset.
+- `Vision_wiki/solution/USM.md`, `roadmap.md`, `architecture_vision.md`, `Vision_wiki/concepts/first_release_mvp.md` - demo-scope, walking skeleton, architecture boundary и explicit non-goals.
+- `Vision_wiki/concepts/product_vision_board.md`, `lean_canvas.md`, `Vision_wiki/decisions/risk_assumption_log.md` - demo priority, focused conflict/review positioning и mitigated risks.
+- `Vision_wiki/decisions/followups/index.md` - закрыты `FU-2026-05-31-002`, `FU-2026-05-31-003`, `FU-2026-06-01-003`; `FU-2026-06-02-001` оставлен open как подготовка synthetic utility dataset.
+- `RAW_inputs/index.md`, `Vision_wiki/index.md`, `index.md`, `memory/project-state.md`, `docs/agent-memory/` - навигация, live state и долговременная память.
+
+**Что помнить дальше:**
+
+- В MVP входят conflict explanation и reviewer decision.
+- Явно не входят full branch versioning, topology engine, offline sync, CRDT/OT, rich ACL и production utility network model.
+- Технологические рамки сохраняются: FastAPI, PostGIS, Vue/MapLibre, WebSocket, `version`/`409`.
+- Synthetic dataset Ф4: 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, 2 edit versions + `Default`, 4 conflict-сценария.
+- Scope creep сигнал: появление новых незапланированных на релиз фич.
+
+**Проверка:** `python scripts/lint-wiki.py --root .` через bundled Python - ожидаемые `missing_frontmatter` для неизменяемых RAW Markdown files `RAW_inputs/documents/Ф2.md`, `RAW_inputs/documents/03.06.2026deep-research-report.md`, `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md`, конфликт зафиксирован в `FU-2026-06-01-004`; `python scripts/check-memory-needed.py --check` - passed; `git diff --check` - без ошибок.
 
 ### 2026-06-02 - `/discover --phase Ф2`: выбран `Utility GIS editor`
 

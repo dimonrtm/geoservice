@@ -3,8 +3,8 @@ title: User Story Map
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-02
-source: RAW_inputs/documents/спринт 1.odt
+updated: 2026-06-04
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md"
 tags: [solution, usm, release-1]
 ---
 
@@ -52,6 +52,68 @@ User Story Map для Release 1 MVP по источнику `RAW_inputs/document
 | `Utility GIS editor` | Изолировать изменения инженерной сети, увидеть конфликт с authoritative state и контролируемо опубликовать результат после review | primary hypothesis |
 | Кадастровый инженер | Сохранить lineage участков, разобрать конфликт и опубликовать согласованное кадастровое изменение | deferred hypothesis |
 
+## Discovery Ф4: Demo Scope
+
+Ф4 фиксирует текущий scope как demo, а не production replacement для `ArcGIS Enterprise + Utility Network`. Главный пользовательский сигнал: `review стал проще`.
+
+### MVP / Demo
+
+| Элемент | Статус | Примечания |
+|---|---|---|
+| `geometry/association conflict` | required | Primary demo-сценарий с dirty areas, network consequence, reviewer decision и publication в authoritative state. |
+| Conflict explanation | required | Пользователь и reviewer должны понимать base value, edit version value, current `Default` и сетевое последствие. |
+| Reviewer decision | required | `Reviewer` принимает approve/reject/resolution decision перед publication. |
+| Optimistic conflict + review model | required | Достаточно собственной модели, не требуется full branch versioning. |
+| `edit after reconcile` | Next/Later | Сильный второй сценарий, но не MVP текущей Ф4. |
+
+### Ф4 Walking Skeleton
+
+| Шаг | Минимальное Поведение | Статус |
+|---|---|---|
+| Login | `Editor` или `Reviewer` входит в систему | required |
+| Work order | `Editor` получает назначенную задачу | required |
+| Working version | Для задачи создается рабочая версия от `Default` | required |
+| Network edit | `Editor` меняет объект сети и/или association | required |
+| Change set | Система сохраняет old/new values без изменения authoritative state | required |
+| Validation | Система валидирует сетевую правку в рамках demo-правил | required |
+| Compare | Система сравнивает working version с authoritative state | required |
+| Conflict explanation | Система показывает конфликт или отсутствие конфликта | required |
+| Review | `Reviewer` подтверждает решение | required |
+| Publish | Изменения публикуются в `Default` / authoritative layer | required |
+| Final state | Пользователь видит итоговое authoritative state | required |
+
+Skeleton должен доказать не "мы умеем рисовать объект на карте", а "мы умеем безопасно довести сетевую правку до authoritative state без silent overwrite".
+
+### Synthetic Utility Dataset
+
+| Объект | Количество |
+|---|---:|
+| Service area / AOI | 1 |
+| Subnetwork / feeder | 1 |
+| Junctions | 7 |
+| Line segments | 6 |
+| Devices | 6 |
+| Associations | 8-10 |
+| Work orders | 2 |
+| Users | 3 |
+| Edit versions + `Default` | 2 edit versions + `Default` |
+| Conflict-сценарии | 4 |
+
+Оценка размера: 20-25 записей сетевых объектов плюс служебные записи.
+
+### Явно Не Входит
+
+- Full branch versioning.
+- Topology engine.
+- Offline sync.
+- CRDT/OT.
+- Rich ACL.
+- Production utility network model.
+
+### Acceptance Criteria
+
+Детальные критерии находятся в `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md`. Главный критерий: ни одна параллельная правка инженерной сети не теряется молча.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
@@ -60,4 +122,5 @@ User Story Map для Release 1 MVP по источнику `RAW_inputs/document
 - [[../concepts/jtbd]]
 - [[../entities/personas/utility_gis_editor]]
 - [[../chats/2026-06-02-phase-f2-users-and-pain]]
+- [[../chats/2026-06-04-phase-f4-solution-scope]]
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]

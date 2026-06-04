@@ -3,8 +3,8 @@ title: Architecture Vision
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-05-31
-source: RAW_inputs/documents/спринт 1.odt
+updated: 2026-06-04
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md"
 tags: [solution, architecture, release-1]
 ---
 
@@ -42,7 +42,22 @@ tags: [solution, architecture, release-1]
 | Две роли `Viewer`/`Editor` | Rich ACL на уровне объектов/полей | Простая модель прав закрывает Release 1 demo. |
 | SYNC GeoJSON import <=20MB | Async import pipeline и большие форматы | Достаточно для demo data; большие форматы отложены. |
 
+## Ф4 Architecture Boundary
+
+Ф4 сохраняет технологические рамки: FastAPI, PostGIS, Vue/MapLibre, WebSocket и `version`/`409`. Для demo вводятся роли `Editor` и `Reviewer`.
+
+| Capability | Ф4 Подход | Не Делать В Текущей Фазе |
+|---|---|---|
+| Working version | Модель рабочей версии / edit version поверх `Default` для demo-flow | Full branch versioning platform |
+| Conflict handling | Optimistic conflict + review model, explicit reviewer decision, no silent overwrite | CRDT/OT, locks как основной механизм |
+| Validation | Demo validation достаточная для synthetic utility dataset | Production topology engine |
+| Publication | Controlled publish в `Default` / authoritative layer после validation, compare и review | Production utility network source of truth |
+| UX | Conflict explanation и reviewer decision screen | Rich enterprise workflow/ACL |
+
+Главный архитектурный тест: сетевая правка проходит от working version до authoritative state без silent overwrite и с понятным review decision.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
+- `Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md`
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]

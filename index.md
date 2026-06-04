@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-03
+updated: 2026-06-04
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -43,14 +43,13 @@ tags: [knowledge, index, geoservice]
 - 2026-06-02: Второй проход `/discover --phase Ф2` выбрал `Utility GIS editor` как primary research-persona; кадастровый сценарий отложен.
 - 2026-06-03: Выполнен `/sync-vision`; подтверждены отсутствие новых RAW inputs, 8 открытых follow-up'ов, отсутствие stale-нод и ожидаемый lint-конфликт `FU-2026-06-01-004`.
 - 2026-06-03: Обработан RAW source `RAW_inputs/documents/03.06.2026deep-research-report.md`; Ф3 сравнила альтернативы для `Utility GIS editor`, baseline - `ArcGIS Enterprise + Utility Network`, niche GeoService - conflict/review explainability.
+- 2026-06-04: Выполнен `/sync-vision`; подтверждены актуальность индексов после Ф3, отсутствие новых необработанных RAW inputs, 7 открытых follow-up'ов, отсутствие stale-нод и ожидаемый lint-конфликт `FU-2026-06-01-004`.
+- 2026-06-04: `/discover --phase Ф4` зафиксировал demo-scope: focused conflict/review layer для `Utility GIS editor`, primary scenario `geometry/association conflict`, роли `Editor`/`Reviewer`, synthetic utility dataset и explicit non-goals.
 
 ## Открытые Вопросы
 
-- Для `Utility GIS editor` нужно проверить модельные боли на synthetic utility dataset: главный сценарий `geometry/association conflict` с dirty areas, network consequence, reviewer decision и authoritative post.
-- На Ф4 нужно решить, остается ли GeoService focused conflict/review layer или проверяет более широкий branch/versioning workflow.
+- Для `Utility GIS editor` нужно реализовать/подготовить synthetic utility dataset Ф4: 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, 2 edit versions + `Default`, 4 conflict-сценария.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
-- Нужно превратить критерий первого релиза "все типа работает" в проверяемый demo-script и acceptance criteria.
-- Нужно уточнить приоритет результата: demo, portfolio, применение в реальной работе или основа будущего продукта.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
