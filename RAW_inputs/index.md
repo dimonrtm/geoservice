@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-04
+updated: 2026-06-05
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -29,3 +29,4 @@ tags: [raw-inputs, source-of-truth]
 | 2026-06-01 | `RAW_inputs/documents/Ф2.md` | Research-обзор веб-ГИС collaborative editing для подготовки Ф2-Ф3 | Да: [[../Vision_wiki/chats/2026-06-01-phase-f2-collaborative-editing-research]], [[../Vision_wiki/concepts/collaborative_editing_models]], [[../Vision_wiki/entities/personas/collaborative_editing_archetypes]], [[../Vision_wiki/entities/competitors/collaborative_editing_alternatives]] |
 | 2026-06-03 | `RAW_inputs/documents/03.06.2026deep-research-report.md` | Deep research comparison для Ф3: альтернативы GeoService в сценарии `Utility GIS editor` | Да: [[../Vision_wiki/chats/2026-06-03-phase-f3-alternatives]], [[../Vision_wiki/entities/competitors/collaborative_editing_alternatives]], [[../Vision_wiki/concepts/lean_canvas]], [[../Vision_wiki/decisions/risk_assumption_log]] |
 | 2026-06-04 | `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md` | Acceptance criteria для Ф4 walking skeleton `Utility GIS editor` | Да: [[../Vision_wiki/chats/2026-06-04-phase-f4-solution-scope]], [[../Vision_wiki/solution/USM]], [[../Vision_wiki/solution/roadmap]], [[../Vision_wiki/decisions/risk_assumption_log]] |
+| 2026-06-05 | `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md` | Детализация Ф4: end-to-end walking skeleton и минимальный `synthetic_utility_feeder_01` dataset | Да: [[../Vision_wiki/chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]], [[../Vision_wiki/solution/USM]], [[../Vision_wiki/solution/architecture_vision]], [[../Vision_wiki/decisions/risk_assumption_log]] |

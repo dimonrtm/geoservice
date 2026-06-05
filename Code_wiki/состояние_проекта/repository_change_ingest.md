@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-04
-source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04"
+updated: 2026-06-05
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,30 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-05 - Ф5 rollout и актуализация knowledge wiki
+
+**Источник:** ответы пользователя на `/discover --phase Ф5`, `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`, `git status --short`, `git diff --stat`.
+
+**Кратко:** после Ф4 demo-scope обработан source с детальным walking skeleton/dataset и выполнен `/sync-vision`; затем Ф5 зафиксировала rollout GeoService как local Docker Compose demo для разработчика и владельца pet-проекта. Ценность первого rollout - `learning value` и демонстрация, что pipeline сетевой правки стал проще. Главный rollout-риск - непонятный UI conflict review.
+
+**Затронутые области:**
+
+- `Vision_wiki/chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset.md` - source summary для desired technical skeleton и `synthetic_utility_feeder_01`.
+- `Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md` - ответы Ф5 по rollout, audience, value, integrations и support package.
+- `Vision_wiki/decisions/constraints.md` - constraints demo: local Docker Compose, synthetic data, integration boundaries и promise boundaries.
+- `Vision_wiki/concepts/lean_canvas.md`, `Vision_wiki/solution/roadmap.md`, `Vision_wiki/decisions/risk_assumption_log.md` - local demo rollout, `learning value`, UI conflict review risk и roadmap для demo support package.
+- `Vision_wiki/decisions/followups/index.md` - добавлены `FU-2026-06-05-001` для local demo support package и `FU-2026-06-05-002` для conflict review UX.
+- `index.md`, `Vision_wiki/index.md`, `RAW_inputs/index.md`, `memory/project-state.md`, `docs/agent-memory/` - навигация, live state и долговременная память.
+
+**Что помнить дальше:**
+
+- Первый rollout не является коммерческим go-to-market: decision maker - владелец pet-проекта, audience - developer.
+- В первый показ приоритетнее `Editor flow`; `Reviewer` нужен как роль, но polish reviewer decision flow может идти Next.
+- Нужны `PostGIS seed`, `auth`, README, seed/reset script, demo сценарий и troubleshooting.
+- Не обещать замену `ArcGIS Enterprise + Utility Network`, production branch versioning, topology/trace engine, real utility data, hosted/SaaS rollout, enterprise ACL/compliance/audit guarantees, offline sync, external GIS integrations и доказанный commercial ROI.
+
+**Проверка:** `python scripts/lint-wiki.py --root .` через bundled Python - ожидаемые `missing_frontmatter` для RAW Markdown files `RAW_inputs/documents/Ф2.md`, `RAW_inputs/documents/03.06.2026deep-research-report.md`, `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md`, `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`; конфликт зафиксирован в `FU-2026-06-01-004`; `python scripts/check-memory-needed.py --check` - passed; `git diff --check` - passed.
 
 ### 2026-06-04 - `/discover --phase Ф4`: demo-scope для `Utility GIS editor`
 

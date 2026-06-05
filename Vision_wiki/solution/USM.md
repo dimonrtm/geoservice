@@ -3,8 +3,8 @@ title: User Story Map
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-04
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md"
+updated: 2026-06-05
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md"
 tags: [solution, usm, release-1]
 ---
 
@@ -81,8 +81,20 @@ User Story Map для Release 1 MVP по источнику `RAW_inputs/document
 | Review | `Reviewer` подтверждает решение | required |
 | Publish | Изменения публикуются в `Default` / authoritative layer | required |
 | Final state | Пользователь видит итоговое authoritative state | required |
+| Audit trail | Цепочка login/work order/version/edit/validation/reconcile/review/post видна в audit log | required |
 
 Skeleton должен доказать не "мы умеем рисовать объект на карте", а "мы умеем безопасно довести сетевую правку до authoritative state без silent overwrite".
+
+Минимальный успешный тест из уточняющего RAW source:
+
+1. `Editor A` входит, открывает `WO-001` и создает `V-WO-001-ALEXEY`.
+2. `Editor A` меняет `D-002 Switch` и association.
+3. `Editor B` меняет тот же объект или связанную `L-003` и публикует в `Default`.
+4. `Editor A` запускает reconcile.
+5. Система показывает конфликт через `Base`, `Mine`, `Default`.
+6. Конфликт явно разрешается.
+7. `Reviewer` смотрит diff, approve'ит и post'ит результат в `Default`.
+8. Read-only пользователь видит authoritative state, а audit log показывает всю цепочку.
 
 ### Synthetic Utility Dataset
 
@@ -100,6 +112,10 @@ Skeleton должен доказать не "мы умеем рисовать о
 | Conflict-сценарии | 4 |
 
 Оценка размера: 20-25 записей сетевых объектов плюс служебные записи.
+
+Рекомендуемый конкретный dataset: `synthetic_utility_feeder_01` - маленький electric feeder с `J-001..J-007`, `L-001..L-006`, `D-001..D-006`, `A-001..A-010`, `WO-001`, `WO-002`, `alexey.editor`, `bolat.editor`, `marina.reviewer`, `Default`, `V-WO-001-ALEXEY`, `V-WO-002-BOLAT`.
+
+Conflict library для demo: `Update/Update`, `Geometry/Geometry`, `Update/Delete`, `Association conflict`.
 
 ### Явно Не Входит
 
@@ -123,4 +139,5 @@ Skeleton должен доказать не "мы умеем рисовать о
 - [[../entities/personas/utility_gis_editor]]
 - [[../chats/2026-06-02-phase-f2-users-and-pain]]
 - [[../chats/2026-06-04-phase-f4-solution-scope]]
+- [[../chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]]
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]

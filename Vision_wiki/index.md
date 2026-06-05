@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-04
+updated: 2026-06-05
 source: null
 tags: [vision-wiki, product]
 ---
@@ -52,6 +52,9 @@ tags: [vision-wiki, product]
 - [[concepts/jtbd]] - primary JTBD `Utility GIS editor` и deferred кадастровый JTBD.
 - [[chats/2026-06-03-phase-f3-alternatives]] - deep research summary Ф3: альтернативы, blockers, demo-сценарий и URL follow-up'ы.
 - [[chats/2026-06-04-phase-f4-solution-scope]] - ответы Ф4: demo-scope, walking skeleton, synthetic utility dataset и non-goals.
+- [[chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]] - детализация Ф4 walking skeleton и минимального `synthetic_utility_feeder_01` dataset.
+- [[chats/2026-06-05-phase-f5-business-rollout]] - ответы Ф5: local Docker Compose rollout, developer demo, learning value и rollout constraints.
+- [[decisions/constraints]] - ограничения demo после Ф5: synthetic data, local runtime, integration boundaries и promise boundaries.
 
 ## Открытые Вопросы
 

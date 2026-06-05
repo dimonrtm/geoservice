@@ -3,8 +3,8 @@ title: Architecture Vision
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-04
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md"
+updated: 2026-06-05
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md"
 tags: [solution, architecture, release-1]
 ---
 
@@ -56,8 +56,55 @@ tags: [solution, architecture, release-1]
 
 Главный архитектурный тест: сетевая правка проходит от working version до authoritative state без silent overwrite и с понятным review decision.
 
+## Ф4 Desired Technical Skeleton
+
+Источник `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md` фиксирует desired technical shape для demo, а не текущее состояние реализации.
+
+### Минимальная Предметная Модель
+
+| Сущность | Назначение |
+|---|---|
+| `User`, `Role` | login/RBAC и separation of duties между editor/reviewer. |
+| `WorkOrder` | контекст назначенной сетевой правки. |
+| `NetworkVersion` | isolated edit version от `Default`. |
+| `NetworkFeature`, `NetworkAssociation` | объекты сети и связи между ними. |
+| `ChangeSet` | old/new values без немедленной записи в authoritative state. |
+| `ValidationIssue` | результат demo topology validation. |
+| `Conflict`, `ConflictResolution` | reconcile outcome и явное решение конфликта. |
+| `AuthoritativeSnapshot` | состояние `Default`, с которым сравнивается рабочая версия. |
+| `AuditLog` | доказательство цепочки edit -> review -> post. |
+
+### Desired API Surface
+
+```http
+POST /auth/login
+GET  /work-orders/assigned-to-me
+POST /work-orders/{workOrderId}/versions
+GET  /versions/{versionId}/features
+PATCH /versions/{versionId}/features/{featureId}
+POST /versions/{versionId}/associations
+POST /versions/{versionId}/validate
+POST /versions/{versionId}/reconcile
+POST /conflicts/{conflictId}/resolve
+POST /versions/{versionId}/submit-review
+POST /versions/{versionId}/approve
+POST /versions/{versionId}/post
+GET  /authoritative/features/{featureId}
+```
+
+### Storage И Frontend
+
+Working version можно хранить как change-set (`base_version_id`, `feature_id`, `operation`, `old_value`, `new_value`, `changed_by`, `changed_at`), а не как полную копию сети.
+
+Минимальные backend tables: `users`, `roles`, `work_orders`, `network_features_default`, `network_associations_default`, `network_versions`, `network_feature_changes`, `network_association_changes`, `validation_issues`, `reconcile_runs`, `conflicts`, `conflict_resolutions`, `audit_log`.
+
+Минимальные frontend screens: `Login`, `My work orders`, `Map editor`, `Reconcile/conflict view`, `Review/post result`.
+
+Минимальные validation rules: device не orphan, line имеет `from_junction`/`to_junction`, transformer соединяет `10kV` и `0.4kV`, normally-open tie switch не создает активную петлю без разрешения, post запрещен при unresolved validation issues.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
 - `Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md`
+- `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]

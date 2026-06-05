@@ -3,8 +3,8 @@ title: Roadmap
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-04
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md"
+updated: 2026-06-05
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md"
 tags: [solution, roadmap, release-1]
 ---
 
@@ -45,15 +45,29 @@ Roadmap извлечен из 14-дневного Release 1 source document. О�
 
 | Горизонт | Scope | Критерий Готовности |
 |---|---|---|
-| Now | Demo focused conflict/review layer для `Utility GIS editor`: work order, working version, change set, demo validation, compare with `Default`, conflict explanation, reviewer decision, publish to authoritative layer | Walking skeleton доказывает безопасную публикацию сетевой правки без silent overwrite; `Reviewer` видит объяснение конфликта и принимает решение |
-| Next | Второй сценарий `edit after reconcile`, расширение synthetic conflict library, compact audit/review UX, улучшение demo-script | Сценарий воспроизводится без закрытых данных и не требует production topology engine |
+| Now | Demo focused conflict/review layer для `Utility GIS editor`: work order, working version, change set, demo validation, compare with `Default`, conflict explanation, reviewer decision, publish to authoritative layer | Walking skeleton доказывает безопасную публикацию сетевой правки без silent overwrite; `Reviewer` видит объяснение конфликта и принимает решение; dataset `synthetic_utility_feeder_01` воспроизводит `Update/Update`, `Geometry/Geometry`, `Update/Delete`, `Association conflict` |
+| Next | Второй сценарий `edit after reconcile`, расширение synthetic conflict library, compact audit/review UX, улучшение demo-script | Сценарий воспроизводится без закрытых данных, использует audit trail и не требует production topology engine |
 | Later | Full branch versioning, topology engine, offline sync, CRDT/OT, rich ACL, production utility network model | Возвращаться только после подтверждения ценности focused demo |
 
 Scope creep сигнал: появление новых незапланированных на релиз фич.
+
+## Ф5 Rollout Roadmap
+
+Этот раздел фиксирует внедрение первого demo, а не коммерческий go-to-market.
+
+| Горизонт | Scope | Критерий Готовности |
+|---|---|---|
+| Now | Локальное developer demo через Docker Compose: `Editor flow`, `PostGIS seed`, `auth`, synthetic dataset, README, seed/reset script, demo сценарий, troubleshooting | Разработчик может локально запустить demo и увидеть, что pipeline сетевой правки стал проще и понятнее |
+| Next | `Reviewer` decision flow, polish conflict review UI, уточнение роли `import GeoJSON` в walking skeleton | Conflict review UI не вызывает когнитивного провала и поддерживает Ф4 promise |
+| Later | Hosted demo, CI demo data reset, external GIS integrations, `ArcGIS`/`QGIS` export, production deployment story | Возвращаться только после стабильного local demo |
+
+Главный rollout-риск Ф5: непонятный UI conflict review.
 
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
 - `Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md`
+- `Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md`
+- `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - [[USM]]
 - [[../concepts/first_release_mvp]]

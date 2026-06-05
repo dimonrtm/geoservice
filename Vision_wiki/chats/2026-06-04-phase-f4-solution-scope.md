@@ -3,8 +3,8 @@ title: Ф4 Решение И Scope Для Utility GIS Editor Demo
 type: session
 status: draft
 created: 2026-06-04
-updated: 2026-06-04
-source: "user answers to /discover --phase Ф4, 2026-06-04; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md"
+updated: 2026-06-05
+source: "user answers to /discover --phase Ф4, 2026-06-04; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md"
 tags: [discovery, phase-f4, scope, utility-network, demo]
 ---
 
@@ -70,6 +70,14 @@ Skeleton должен доказать не "мы умеем рисовать о
 
 `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md` фиксирует детальные acceptance criteria для walking skeleton. Главный критерий: ни одна параллельная правка инженерной сети не теряется молча.
 
+## Walking Skeleton And Dataset Source
+
+`RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md` детализирует end-to-end поток до authoritative state, минимальные сущности/API/screens и concrete dataset `synthetic_utility_feeder_01`.
+
+Ключевое уточнение: skeleton должен проверять жизненный цикл `draft -> validate -> reconcile -> review -> post -> authoritative`, а не только сохранение объекта на карте. Для demo достаточно change-set модели поверх `Default`, но должны быть видимы `Base`, `Mine`, `Default`, явное conflict resolution, reviewer approve и audit trail.
+
+Минимальный dataset рекомендуется строить как electric feeder с `J-001..J-007`, `L-001..L-006`, `D-001..D-006`, `A-001..A-010`, двумя work orders и тремя пользователями: `alexey.editor`, `bolat.editor`, `marina.reviewer`.
+
 ## Открытые Места
 
 - Нужно выбрать compact subset acceptance criteria для Release 1 demo, чтобы не превратить Ф4 scope в production branch/versioning platform.
@@ -84,3 +92,4 @@ Skeleton должен доказать не "мы умеем рисовать о
 - [[../decisions/followups/index]]
 - [[../entities/personas/utility_gis_editor]]
 - [[../chats/2026-06-03-phase-f3-alternatives]]
+- [[2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]]
