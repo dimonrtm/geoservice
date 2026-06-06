@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-05
+updated: 2026-06-06
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -48,13 +48,17 @@ tags: [knowledge, index, geoservice]
 - 2026-06-05: Обработан RAW source `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`; уточнены end-to-end walking skeleton, desired technical skeleton и конкретный dataset `synthetic_utility_feeder_01`.
 - 2026-06-05: Выполнен `/sync-vision`; индексы актуальны после latest ingest, новых необработанных RAW inputs нет, открытых follow-up'ов 4, stale-нод не обнаружено.
 - 2026-06-05: `/discover --phase Ф5` зафиксировал local Docker Compose rollout для developer demo: decision maker - владелец pet-проекта, ценность - `learning value`, главный rollout-риск - непонятный UI conflict review.
+- 2026-06-06: Выполнен `/sync-vision`; индексы синхронизированы после Ф5 и repository-change ingest, новых необработанных RAW inputs нет, открытых follow-up'ов 6, stale-нод не обнаружено.
+- 2026-06-06: `/discover --phase Ф6` зафиксировал NFR local demo: Chrome, reference hardware с 16 GB RAM, startup/reset за несколько минут, JWT, separation of duties, audit persistence и минимальную observability.
+- 2026-06-06: Обработан RAW source `RAW_inputs/documents/utility_gis_editor_target_times.md`; добавлены draft P95 acceptance targets и performance benchmark follow-up.
 
 ## Открытые Вопросы
 
 - Для `Utility GIS editor` нужно реализовать/подготовить `synthetic_utility_feeder_01`: 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, `Default` + 2 edit versions, 4 conflict-сценария.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
-- Нужно подготовить local demo support package: README, seed/reset script, demo сценарий, troubleshooting и решить место `import GeoJSON` в walking skeleton.
+- Нужно подготовить local demo support package: README, seed/reset/`full-clean` scripts, demo сценарий, troubleshooting, observability minimum и `import GeoJSON`.
+- Нужно проверить draft P95 targets на `synthetic_utility_feeder_01` в Chrome на reference hardware.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 

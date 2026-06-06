@@ -3,8 +3,8 @@ title: Roadmap
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-05
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md"
+updated: 2026-06-06
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md"
 tags: [solution, roadmap, release-1]
 ---
 
@@ -57,8 +57,8 @@ Scope creep сигнал: появление новых незапланиров
 
 | Горизонт | Scope | Критерий Готовности |
 |---|---|---|
-| Now | Локальное developer demo через Docker Compose: `Editor flow`, `PostGIS seed`, `auth`, synthetic dataset, README, seed/reset script, demo сценарий, troubleshooting | Разработчик может локально запустить demo и увидеть, что pipeline сетевой правки стал проще и понятнее |
-| Next | `Reviewer` decision flow, polish conflict review UI, уточнение роли `import GeoJSON` в walking skeleton | Conflict review UI не вызывает когнитивного провала и поддерживает Ф4 promise |
+| Now | Локальное developer demo через Docker Compose: `Editor flow`, `PostGIS seed`, JWT `auth`, `import GeoJSON`, synthetic dataset, README, seed/reset/`full-clean` scripts, demo сценарий, troubleshooting и observability minimum | Разработчик может локально запустить demo и увидеть, что pipeline сетевой правки стал проще и понятнее |
+| Next | `Reviewer` decision flow и polish conflict review UI | Conflict review UI не вызывает когнитивного провала и поддерживает Ф4 promise |
 | Later | Hosted demo, CI demo data reset, external GIS integrations, `ArcGIS`/`QGIS` export, production deployment story | Возвращаться только после стабильного local demo |
 
 Главный rollout-риск Ф5: непонятный UI conflict review.
@@ -68,6 +68,7 @@ Scope creep сигнал: появление новых незапланиров
 - `RAW_inputs/documents/спринт 1.odt`
 - `Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md`
 - `Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md`
+- `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - [[USM]]
 - [[../concepts/first_release_mvp]]

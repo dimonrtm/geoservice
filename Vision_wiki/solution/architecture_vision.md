@@ -3,8 +3,8 @@ title: Architecture Vision
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-05
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md"
+updated: 2026-06-06
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md"
 tags: [solution, architecture, release-1]
 ---
 
@@ -102,9 +102,21 @@ Working version можно хранить как change-set (`base_version_id`, 
 
 Минимальные validation rules: device не orphan, line имеет `from_junction`/`to_junction`, transformer соединяет `10kV` и `0.4kV`, normally-open tie switch не создает активную петлю без разрешения, post запрещен при unresolved validation issues.
 
+## Ф6 Operational Boundary
+
+- Auth использует JWT Bearer token.
+- `Editor` и `Reviewer` являются взаимоисключающими ролями для separation of duties.
+- `audit_log` переживает restart и обычный reset; `full-clean` удаляет и demo data, и audit.
+- Обычный reset восстанавливает `synthetic_utility_feeder_01`, не уничтожая audit history.
+- Healthcheck, container logs, correlation ID и понятные UI errors входят в минимальную observability.
+- Первый target browser - Chrome.
+- `import GeoJSON` входит в первый walking skeleton.
+- Backup/restore и SLA не входят в local demo.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
 - `Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md`
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
+- `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]

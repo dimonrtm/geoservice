@@ -3,8 +3,8 @@ title: Constraints
 type: decision
 status: draft
 created: 2026-06-05
-updated: 2026-06-05
-source: "Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md"
+updated: 2026-06-06
+source: "Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md"
 tags: [constraints, rollout, demo, discovery]
 ---
 
@@ -26,11 +26,29 @@ tags: [constraints, rollout, demo, discovery]
 | Roles | В первом demo нужны `Editor` и `Reviewer`. |
 | Required setup | README, seed/reset script, demo сценарий, troubleshooting. |
 
+## Ф6 Runtime Constraints
+
+| Область | Ограничение |
+|---|---|
+| Deadline | Жесткой даты готовности нет. |
+| Technology choice | Технологии обсуждаемы; текущий стек не является безусловно фиксированным. |
+| Reference hardware | Asus TUF Gaming 2022, AMD Ryzen 7 5000 series, 16 GB RAM. |
+| Browser | Chrome на первом этапе. |
+| Startup | Несколько минут. |
+| Restart | Сохраняет текущее demo state. |
+| Reset | За несколько минут восстанавливает seed и сохраняет audit. |
+| Full clean | Отдельно удаляет demo data и audit. |
+| Realtime | WebSocket delivery за 1-2 секунды. |
+| Auth | JWT Bearer token. |
+| Separation of duties | `Editor` и `Reviewer` не совмещаются одним пользователем. |
+| Observability | Healthcheck, container logs, correlation ID, понятные UI errors. |
+| SLA/backup | Не требуются для local demo. |
+
 ## Integration Constraints
 
 | Статус | Интеграции |
 |---|---|
-| Нужны для demo | `PostGIS seed`, `auth`, `import GeoJSON`. |
+| Нужны для demo | `PostGIS seed`, JWT `auth`, `import GeoJSON`. |
 | Не нужны для demo | External GIS, `ArcGIS`/`QGIS` export, CI demo data reset. |
 
 ## Promise Boundaries
@@ -49,6 +67,8 @@ tags: [constraints, rollout, demo, discovery]
 ## Связи
 
 - [[../chats/2026-06-05-phase-f5-business-rollout]]
+- [[../chats/2026-06-06-phase-f6-constraints-and-nfr]]
 - [[../solution/roadmap]]
+- [[../solution/nfr]]
 - [[risk_assumption_log]]
 - [[followups/index]]

@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-05
+updated: 2026-06-06
 source: null
 tags: [project-state, geoservice]
 ---
@@ -18,30 +18,32 @@ GeoService - исследовательский pet-проект на стади
 
 ## Состояние Pipeline
 
-- Последний `/discover`: 2026-06-05, Ф5 business/rollout; выбран local Docker Compose demo для разработчика, decision maker - владелец pet-проекта, ценность - `learning value`, главный rollout-риск - непонятный UI conflict review.
-- Последний `/ingest`: 2026-06-05, batch RAW ingest `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`; уточнен end-to-end walking skeleton и concrete dataset `synthetic_utility_feeder_01`.
-- Последний `/sync-vision`: 2026-06-05 16:57 +05:00, подтверждены актуальность индексов после ingest walking skeleton/dataset, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
-- Последний `/lint-wiki`: 2026-06-05, найдены ожидаемые `missing_frontmatter` для `RAW_inputs/documents/Ф2.md`, `RAW_inputs/documents/03.06.2026deep-research-report.md`, `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md` и `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`; RAW sources оставлены неизменными по правилу `/ingest`, открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/discover`: 2026-06-06, Ф6 constraints/NFR; зафиксированы reference hardware, Chrome, startup/reset за несколько минут, JWT, несовместимые роли `Editor`/`Reviewer`, audit persistence, observability minimum и включение `import GeoJSON`.
+- Последний `/ingest`: 2026-06-06, batch RAW ingest `RAW_inputs/documents/utility_gis_editor_target_times.md`; добавлены draft P95 targets для map/edit/validation/reconcile/conflict/post и benchmark follow-up.
+- Последний `/sync-vision`: 2026-06-06 10:21 +05:00, подтверждены актуальность индексов после Ф5 и repository-change ingest, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
+- Последний `/lint-wiki`: 2026-06-06, найдены ожидаемые `missing_frontmatter` для `RAW_inputs/documents/Ф2.md`, `RAW_inputs/documents/03.06.2026deep-research-report.md`, `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md` и `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`; RAW sources оставлены неизменными по правилу `/ingest`, открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний repository-change ingest: 2026-06-05, зафиксированы latest RAW ingest walking skeleton/dataset, `/sync-vision` и Ф5 rollout: local Docker Compose developer demo, `learning value`, constraints и conflict review UI risk.
+- Последний repository-change ingest: 2026-06-06, зафиксирована Ф6: local demo NFR, JWT roles, audit/reset contract, observability minimum и включение `import GeoJSON`.
 
 ## Изменения С Прошлого `/sync-vision`
 
-- После прошлого `/sync-vision` пройден `/discover --phase Ф4`: приоритет результата - demo; главный сигнал - `review стал проще`; текущий scope - focused conflict/review layer, а full branch versioning/topology/offline/CRDT/rich ACL/production utility network model явно не входят.
-- Обработаны RAW sources `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md` и `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md` для Ф4 walking skeleton, acceptance criteria и dataset; исходные RAW файлы не редактировались.
-- `Vision_wiki/index.md`, `RAW_inputs/index.md`, follow-up queue и solution-ноды уже отражают latest ingest; текущий `/sync-vision` обновил корневое состояние и подтвердил отсутствие новых необработанных источников.
-- Подтвержден unresolved process conflict: `lint-wiki.py` требует YAML frontmatter от неизменяемых RAW Markdown.
-- Корневой `index.md` обновлен строкой текущего `/sync-vision` от 2026-06-05.
-- После sync пройден `/discover --phase Ф5`: rollout - локальное demo; audience - developer; первый flow - `Editor`; нужны README, seed/reset script, demo сценарий и troubleshooting; external GIS и `ArcGIS`/`QGIS` export не входят.
+- Пройден `/discover --phase Ф5`: rollout - local Docker Compose demo; audience - developer; decision maker - владелец pet-проекта; первый flow - `Editor`; ценность - `learning value`.
+- Добавлены Ф5 chat-нода и `Vision_wiki/decisions/constraints.md`; обновлены Lean Canvas, roadmap, Risk And Assumption Log и follow-up queue.
+- Добавлены `FU-2026-06-05-001` для local demo support package и `FU-2026-06-05-002` для проверки UI conflict review.
+- Выполнен `/ingest repository-change`, который зафиксировал Ф5 rollout и актуальное состояние knowledge wiki в `Code_wiki/состояние_проекта/repository_change_ingest.md`.
+- Подтвержден unresolved process conflict: `lint-wiki.py` требует YAML frontmatter от четырех неизменяемых RAW Markdown files.
+- Корневой `index.md` обновлен строкой текущего `/sync-vision` от 2026-06-06.
+- После sync пройден `/discover --phase Ф6`: обычный restart сохраняет данные, обычный reset восстанавливает seed и сохраняет audit, а отдельный `full-clean` очищает demo data и audit.
+- Обработан RAW source с performance targets; NFR теперь содержит измеримые draft P95 thresholds, которые требуют проверки на reference hardware.
 
-## Состояние Wiki На 2026-06-05
+## Состояние Wiki На 2026-06-06
 
-- Необработанные RAW inputs: не обнаружены.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф4 chat-нода, source summary-нода 2026-06-05, Ф5 rollout chat-нода, constraints-нода и обновленные USM, roadmap, architecture vision, Lean Canvas, Risk And Assumption Log и follow-up queue.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: нет.
+- Необработанные RAW inputs: не обнаружены после ingest `utility_gis_editor_target_times.md`.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф5 rollout chat-нода, constraints-нода и Ф6 NFR chat-нода; обновлены NFR, architecture vision, roadmap, Risk And Assumption Log и follow-up queue.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: нет; обновлен существующий журнал `repository_change_ingest.md`.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на четырех RAW Markdown files, включая `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`.
-- Открытые follow-up'ы: 6.
+- Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на пяти RAW Markdown files, включая `RAW_inputs/documents/utility_gis_editor_target_times.md`.
+- Открытые follow-up'ы: 7.
 
 ## Открытые Вопросы
 
@@ -54,4 +56,6 @@ GeoService - исследовательский pet-проект на стади
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.
 - Нужно отдельной implementation/docs-задачей согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset script, demo сценарий, troubleshooting, `PostGIS seed`, `auth`.
+- Нужно реализовать audit/reset contract: audit переживает restart и обычный reset; `full-clean` удаляет всё; обязательны healthcheck, logs, correlation ID и понятные UI errors.
+- Нужно выполнить repeatable benchmark P50/P95 для draft performance targets на reference hardware.
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.

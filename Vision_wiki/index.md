@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-05
+updated: 2026-06-06
 source: null
 tags: [vision-wiki, product]
 ---
@@ -55,6 +55,8 @@ tags: [vision-wiki, product]
 - [[chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]] - детализация Ф4 walking skeleton и минимального `synthetic_utility_feeder_01` dataset.
 - [[chats/2026-06-05-phase-f5-business-rollout]] - ответы Ф5: local Docker Compose rollout, developer demo, learning value и rollout constraints.
 - [[decisions/constraints]] - ограничения demo после Ф5: synthetic data, local runtime, integration boundaries и promise boundaries.
+- [[chats/2026-06-06-phase-f6-constraints-and-nfr]] - ответы Ф6: reference hardware, Chrome, startup/reset, JWT roles, audit persistence, observability и `import GeoJSON`.
+- [[chats/2026-06-06-utility-gis-editor-target-times]] - draft P95 acceptance targets для map, edit, validation, reconcile, conflict view и post.
 
 ## Открытые Вопросы
 

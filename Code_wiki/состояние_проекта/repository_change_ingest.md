@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-05
-source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05"
+updated: 2026-06-06
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,32 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-06 - Ф6 constraints и NFR local demo
+
+**Источник:** ответы пользователя на `/discover --phase Ф6`, подтверждение audit/reset approach, `git status --short`, `git diff --stat`.
+
+**Кратко:** Ф6 зафиксировала эксплуатационные рамки local Docker Compose demo: reference hardware с 16 GB RAM, Chrome, startup/reset за несколько минут, JWT, separation of duties для `Editor`/`Reviewer`, WebSocket delivery за 1-2 секунды и observability minimum. Новые числовые latency targets для map load/save/validation/reconcile/post не вводились.
+
+**Затронутые области:**
+
+- `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md` - ответы Ф6 и решение по audit/reset.
+- `Vision_wiki/solution/nfr.md`, `Vision_wiki/decisions/constraints.md`, `Vision_wiki/solution/architecture_vision.md` - runtime, security, availability, observability и audit requirements.
+- `Vision_wiki/solution/roadmap.md` - `import GeoJSON`, reset/`full-clean` и observability перенесены в Now.
+- `Vision_wiki/decisions/risk_assumption_log.md` - reference hardware assumption и риск неявной reset semantics.
+- `Vision_wiki/decisions/followups/index.md` - уточнен open follow-up local demo support package.
+- `index.md`, `Vision_wiki/index.md`, `memory/project-state.md`, `docs/agent-memory/` - навигация, live state и долговременная память.
+
+**Что помнить дальше:**
+
+- Обычный restart сохраняет demo state.
+- Обычный reset восстанавливает `synthetic_utility_feeder_01` и сохраняет `audit_log`.
+- Отдельный `full-clean` удаляет demo data и audit.
+- Audit фиксирует actor/role/action/time/target/context/before-after/result и ключевые события edit -> validate -> reconcile -> review -> post.
+- `import GeoJSON` входит в первый walking skeleton.
+- Для local demo не требуются SLA, backup/restore и production compliance guarantees.
+
+**Проверка:** `python scripts/lint-wiki.py --root .` через bundled Python - ожидаемые 4 `missing_frontmatter` для неизменяемых RAW Markdown files, зафиксированные в `FU-2026-06-01-004`; `python scripts/check-memory-needed.py --check` - passed; `git diff --check` - passed.
 
 ### 2026-06-05 - Ф5 rollout и актуализация knowledge wiki
 
