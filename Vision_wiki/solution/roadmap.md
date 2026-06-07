@@ -3,8 +3,8 @@ title: Roadmap
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-06
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md"
+updated: 2026-06-07
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md"
 tags: [solution, roadmap, release-1]
 ---
 
@@ -63,6 +63,16 @@ Scope creep сигнал: появление новых незапланиров
 
 Главный rollout-риск Ф5: непонятный UI conflict review.
 
+## Ф7 Validation Roadmap
+
+| Порядок | Эксперимент | Критерий |
+|---:|---|---|
+| 1 | Workflow prototype | 3-5 представителей роли понимают Save/Post, edit version/`Default` и момент authoritative state. |
+| 2 | Validation trap test | Обнаружено >=80% подготовленных ошибок; 100% critical errors блокируют post. |
+| 3 | Two-editors conflict drill | 100% подготовленных conflicts обнаружены; silent overwrite невозможен; stale post сохраняет edits и требует reconcile. |
+| 4 | Manual baseline | 10-20 work orders low/medium/high измерены по времени, errors, returns, rework и touch count. |
+| 5 | Product evaluation | 200 started work orders, `Safe Authoritative Post Rate >=95%`, 7-дневное окно и абсолютный veto safety blockers. |
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
@@ -70,5 +80,6 @@ Scope creep сигнал: появление новых незапланиров
 - `Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md`
 - `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
+- `Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md`
 - [[USM]]
 - [[../concepts/first_release_mvp]]

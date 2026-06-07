@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-04
+updated: 2026-06-07
 source: null
 tags: [code-wiki, technical-knowledge]
 ---
@@ -36,4 +36,4 @@ tags: [code-wiki, technical-knowledge]
 - [[deployment/docker_compose]] - Dockerfile targets и Compose services.
 - [[сборка/ci_and_quality]] - CI jobs, build/test/lint gates и wiki checks.
 - [[правила_и_стиль/testing_strategy]] - backend/frontend/pipeline тестовая стратегия.
-- [[глоссарий/technical_terms]] - термины текущей технической модели GeoService.
+- [[глоссарий/technical_terms]] - термины текущей технической модели и desired vocabulary utility demo.

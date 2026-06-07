@@ -3,8 +3,8 @@ title: NFR
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-06
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md"
+updated: 2026-06-07
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md"
 tags: [solution, nfr, release-1, demo]
 ---
 
@@ -38,6 +38,8 @@ NFR для Release 1 по `RAW_inputs/documents/спринт 1.odt`.
 | Отказ post при stale `Default` | <= 5 сек |
 
 Эти пороги являются draft SLO для малого synthetic dataset и требуют benchmark на reference hardware. Ручное разрешение конфликтов не входит во время reconcile; измеряется время до показа списка конфликтов.
+
+Ф7 разделяет targets по критичности. Обязательны single edit save, small AOI validation, reconcile без conflicts, показ conflicts, conflict diff, post и stale-post rejection. Initial map load, jump to AOI, batch save и full refresh могут временно нарушать target без автоматического провала demo. Benchmark выполняется 30 повторов.
 
 ## Security
 

@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-06
+updated: 2026-06-07
 source: null
 tags: [project-state, geoservice]
 ---
@@ -18,32 +18,33 @@ GeoService - исследовательский pet-проект на стади
 
 ## Состояние Pipeline
 
-- Последний `/discover`: 2026-06-06, Ф6 constraints/NFR; зафиксированы reference hardware, Chrome, startup/reset за несколько минут, JWT, несовместимые роли `Editor`/`Reviewer`, audit persistence, observability minimum и включение `import GeoJSON`.
-- Последний `/ingest`: 2026-06-06, batch RAW ingest `RAW_inputs/documents/utility_gis_editor_target_times.md`; добавлены draft P95 targets для map/edit/validation/reconcile/conflict/post и benchmark follow-up.
-- Последний `/sync-vision`: 2026-06-06 10:21 +05:00, подтверждены актуальность индексов после Ф5 и repository-change ingest, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
-- Последний `/lint-wiki`: 2026-06-06, найдены ожидаемые `missing_frontmatter` для `RAW_inputs/documents/Ф2.md`, `RAW_inputs/documents/03.06.2026deep-research-report.md`, `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md` и `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`; RAW sources оставлены неизменными по правилу `/ingest`, открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/discover`: 2026-06-07, Ф7 metrics/risks; зафиксированы `Safe Authoritative Post Rate >=95%` на 200 work orders, 7-дневное correction window, safety blockers, manual baseline и минимальные эксперименты.
+- Последний `/ingest`: 2026-06-07, batch RAW ingest `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md`; добавлены domain concept, source summary и desired utility vocabulary без расширения demo-scope.
+- Последний `/sync-vision`: 2026-06-07 10:58 +05:00, подтверждены актуальность индексов после Ф6 и двух RAW ingest, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
+- Последний `/lint-wiki`: 2026-06-07, найдены ожидаемые `missing_frontmatter` для 11 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний repository-change ingest: 2026-06-06, зафиксирована Ф6: local demo NFR, JWT roles, audit/reset contract, observability minimum и включение `import GeoJSON`.
+- Последний repository-change ingest: 2026-06-07, зафиксирована Ф7: North Star, safety gates, manual baseline, performance classification и validation experiments.
 
 ## Изменения С Прошлого `/sync-vision`
 
-- Пройден `/discover --phase Ф5`: rollout - local Docker Compose demo; audience - developer; decision maker - владелец pet-проекта; первый flow - `Editor`; ценность - `learning value`.
-- Добавлены Ф5 chat-нода и `Vision_wiki/decisions/constraints.md`; обновлены Lean Canvas, roadmap, Risk And Assumption Log и follow-up queue.
-- Добавлены `FU-2026-06-05-001` для local demo support package и `FU-2026-06-05-002` для проверки UI conflict review.
-- Выполнен `/ingest repository-change`, который зафиксировал Ф5 rollout и актуальное состояние knowledge wiki в `Code_wiki/состояние_проекта/repository_change_ingest.md`.
-- Подтвержден unresolved process conflict: `lint-wiki.py` требует YAML frontmatter от четырех неизменяемых RAW Markdown files.
-- Корневой `index.md` обновлен строкой текущего `/sync-vision` от 2026-06-06.
-- После sync пройден `/discover --phase Ф6`: обычный restart сохраняет данные, обычный reset восстанавливает seed и сохраняет audit, а отдельный `full-clean` очищает demo data и audit.
-- Обработан RAW source с performance targets; NFR теперь содержит измеримые draft P95 thresholds, которые требуют проверки на reference hardware.
+- Пройден `/discover --phase Ф6`: зафиксированы reference hardware, Chrome, JWT, separation of duties, audit/reset contract, observability minimum и включение `import GeoJSON`.
+- Обработаны два новых RAW source: `utility_gis_editor_target_times.md` и `utility_gis_editor_domain_dictionary.md`.
+- Добавлены draft P95 targets и `FU-2026-06-06-001` для repeatable benchmark.
+- Созданы summary словаря домена и concept `utility_gis_editing_domain`; `technical_terms.md` дополнен desired utility demo vocabulary.
+- Новых concept/decision/entity/solution нод с прошлого sync: concept - 1, decision - 0, entity - 0, solution - 0.
+- Известный process conflict `FU-2026-06-01-004` теперь проявляется на 11 неизменяемых RAW Markdown files.
+- Пройдена Ф7: создан `Vision_wiki/concepts/metrics.md`, приняты North Star/guardrails, risk register и порядок workflow -> validation -> conflict experiments.
+- Пять новых RAW sources Ф7 использованы для метрик, post-problem taxonomy, manual baseline и risky assumptions.
 
-## Состояние Wiki На 2026-06-06
+## Состояние Wiki На 2026-06-07
 
-- Необработанные RAW inputs: не обнаружены после ingest `utility_gis_editor_target_times.md`.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф5 rollout chat-нода, constraints-нода и Ф6 NFR chat-нода; обновлены NFR, architecture vision, roadmap, Risk And Assumption Log и follow-up queue.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: нет; обновлен существующий журнал `repository_change_ingest.md`.
+- Необработанные RAW inputs: не обнаружены; пять новых Ф7 sources связаны с metrics/discovery нодами.
+- Новые RAW inputs с прошлого `/sync-vision`: 7, все обработаны или использованы в Ф7.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф6 chat-нода, performance targets summary, domain dictionary summary и concept `utility_gis_editing_domain`.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: нет; `technical_terms.md` дополнен desired utility demo vocabulary.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на пяти RAW Markdown files, включая `RAW_inputs/documents/utility_gis_editor_target_times.md`.
-- Открытые follow-up'ы: 7.
+- Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на 11 RAW Markdown files.
+- Открытые follow-up'ы: 9.
 
 ## Открытые Вопросы
 
@@ -59,3 +60,4 @@ GeoService - исследовательский pet-проект на стади
 - Нужно реализовать audit/reset contract: audit переживает restart и обычный reset; `full-clean` удаляет всё; обязательны healthcheck, logs, correlation ID и понятные UI errors.
 - Нужно выполнить repeatable benchmark P50/P95 для draft performance targets на reference hardware.
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.
+- Нужно снять manual baseline на 10-20 work orders и затем провести 200-work-order product evaluation с 7-дневным correction window.

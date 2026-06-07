@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-06
+updated: 2026-06-07
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -31,3 +31,9 @@ tags: [raw-inputs, source-of-truth]
 | 2026-06-04 | `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md` | Acceptance criteria для Ф4 walking skeleton `Utility GIS editor` | Да: [[../Vision_wiki/chats/2026-06-04-phase-f4-solution-scope]], [[../Vision_wiki/solution/USM]], [[../Vision_wiki/solution/roadmap]], [[../Vision_wiki/decisions/risk_assumption_log]] |
 | 2026-06-05 | `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md` | Детализация Ф4: end-to-end walking skeleton и минимальный `synthetic_utility_feeder_01` dataset | Да: [[../Vision_wiki/chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]], [[../Vision_wiki/solution/USM]], [[../Vision_wiki/solution/architecture_vision]], [[../Vision_wiki/decisions/risk_assumption_log]] |
 | 2026-06-06 | `RAW_inputs/documents/utility_gis_editor_target_times.md` | Draft P95 acceptance targets для map/edit/validation/reconcile/conflict/post на малом utility demo dataset | Да: [[../Vision_wiki/chats/2026-06-06-utility-gis-editor-target-times]], [[../Vision_wiki/solution/nfr]], [[../Vision_wiki/decisions/risk_assumption_log]] |
+| 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md` | Словарь домена `Utility GIS editing`: роли, network objects, versions, validation, conflicts, audit и canonical workflow | Да: [[../Vision_wiki/chats/2026-06-07-utility-gis-editor-domain-dictionary]], [[../Vision_wiki/concepts/utility_gis_editing_domain]], [[../Code_wiki/глоссарий/technical_terms]] |
+| 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_metrics.md` | North Star и secondary metrics для safe authoritative editing | Да: [[../Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks]], [[../Vision_wiki/concepts/metrics]] |
+| 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_post_problems.md` | Определение post-проблемы и 7-дневного correction window | Да: [[../Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks]], [[../Vision_wiki/concepts/metrics]] |
+| 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_manual_baseline_algorithm.md` | Алгоритм измерения ручного baseline на 10-20 work orders | Да: [[../Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks]], [[../Vision_wiki/concepts/metrics]] |
+| 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_risky_assumptions.md` | Три рискованных допущения и порядок их проверки | Да: [[../Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks]], [[../Vision_wiki/decisions/risk_assumption_log]] |
+| 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_minimal_experiments.md` | Минимальные workflow, validation и conflict experiments | Да: [[../Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |

@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-06
+updated: 2026-06-07
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -51,6 +51,9 @@ tags: [knowledge, index, geoservice]
 - 2026-06-06: Выполнен `/sync-vision`; индексы синхронизированы после Ф5 и repository-change ingest, новых необработанных RAW inputs нет, открытых follow-up'ов 6, stale-нод не обнаружено.
 - 2026-06-06: `/discover --phase Ф6` зафиксировал NFR local demo: Chrome, reference hardware с 16 GB RAM, startup/reset за несколько минут, JWT, separation of duties, audit persistence и минимальную observability.
 - 2026-06-06: Обработан RAW source `RAW_inputs/documents/utility_gis_editor_target_times.md`; добавлены draft P95 acceptance targets и performance benchmark follow-up.
+- 2026-06-07: Обработан RAW source `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md`; добавлены канонический словарь `Utility GIS editing`, source summary и desired technical vocabulary без расширения demo-scope.
+- 2026-06-07: Выполнен `/sync-vision`; индексы актуальны после Ф6 и двух RAW ingest, необработанных RAW inputs и stale-нод нет, открыты 7 follow-up'ов.
+- 2026-06-07: `/discover --phase Ф7` зафиксировал `Safe Authoritative Post Rate >=95%` на 200 work orders, safety blockers, manual baseline, 30 benchmark runs и порядок минимальных экспериментов.
 
 ## Открытые Вопросы
 
@@ -59,6 +62,7 @@ tags: [knowledge, index, geoservice]
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset/`full-clean` scripts, demo сценарий, troubleshooting, observability minimum и `import GeoJSON`.
 - Нужно проверить draft P95 targets на `synthetic_utility_feeder_01` в Chrome на reference hardware.
+- Нужно снять manual baseline на 10-20 work orders и провести product evaluation на 200 started work orders с 7-дневным correction window.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 

@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-06
-source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06"
+updated: 2026-06-07
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06; 2026-06-07"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,32 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-07 - Ф7 metrics, risks и validation experiments
+
+**Источник:** ответы пользователя на `/discover --phase Ф7`, пять RAW sources по metrics/post problems/manual baseline/risky assumptions/minimal experiments, `git status --short`, `git diff --stat`.
+
+**Кратко:** Ф7 превратила demo-scope и NFR в измерительный контракт. North Star - `Safe Authoritative Post Rate >=95%` на 200 started work orders с 7-дневным correction window. Silent overwrite, пропущенный safety-critical conflict и Critical/High review error имеют абсолютный veto независимо от aggregate. Определены secondary metrics, обязательные P95, manual baseline и порядок минимальных экспериментов.
+
+**Затронутые области:**
+
+- `Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md` - решения Ф7 и принятый risk register.
+- `Vision_wiki/concepts/metrics.md` - North Star, secondary metrics, guardrails, baseline и evidence.
+- `Vision_wiki/decisions/risk_assumption_log.md` - workflow/validation/conflict assumptions и risks статистической валидности/evidence scope.
+- `Vision_wiki/solution/nfr.md`, `Vision_wiki/solution/roadmap.md` - обязательные performance gates и последовательность экспериментов.
+- `Vision_wiki/decisions/followups/index.md` - 200-work-order evaluation, manual baseline, UX test и 30-run benchmark.
+- `RAW_inputs/index.md`, `Vision_wiki/index.md`, `index.md`, `memory/project-state.md`, `docs/agent-memory/` - источники, навигация, live state и долговременная память.
+
+**Что помнить дальше:**
+
+- 95% на 200 work orders означает минимум 190 safe posts, но safety blocker проваливает проверку при любом aggregate.
+- Manual baseline снимается отдельно на 10-20 work orders low/medium/high.
+- Порядок проверки: workflow acceptance -> validation trap test -> two-editors conflict drill -> baseline -> product evaluation.
+- Performance benchmark выполняется 30 повторов; не все latency targets являются blockers.
+- Reports в Git и structured audit в PostgreSQL входят в desired evidence; immutable object storage требует отдельного scope-решения.
+- Метрики и эксперименты пока являются принятым контрактом проверки, а не реализованной instrumentation или доказанным результатом.
+
+**Проверка:** `scripts/lint-wiki.py --root .` через bundled Python - ожидаемые 11 `missing_frontmatter` для неизменяемых RAW Markdown files, зафиксированные в `FU-2026-06-01-004`; `scripts/check-memory-needed.py --check` - passed; `git diff --check` - passed.
 
 ### 2026-06-06 - Ф6 constraints и NFR local demo
 

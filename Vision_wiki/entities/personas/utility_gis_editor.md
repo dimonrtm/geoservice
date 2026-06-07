@@ -3,8 +3,8 @@ title: Utility GIS Editor
 type: entity
 status: draft
 created: 2026-06-02
-updated: 2026-06-02
-source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md"
+updated: 2026-06-07
+source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md"
 tags: [persona, discovery, phase-f2, utility-network, authoritative-editing, research]
 ---
 
@@ -63,9 +63,18 @@ Primary research-persona GeoService после `/discover --phase Ф2`. Это �
 
 Сценарий можно проверить без закрытых данных на synthetic utility-наборе: линии, устройства, associations, несколько dirty areas и конфликты `attribute vs attribute`, `geometry/association`, `edit after reconcile`.
 
+## Канонический Язык
+
+- Сохранение правки в `Edit version` не равно публикации в `Default`.
+- Общий объект сети называется `Network feature`; непространственная связь - `Association`.
+- Безопасный outcome включает validation, reconcile, conflict resolution, review, post и audit trail.
+- Полный словарь и границы текущего demo описаны в [[../../concepts/utility_gis_editing_domain]].
+
 ## Связи
 
 - [[../../chats/2026-06-02-phase-f2-users-and-pain]]
+- [[../../chats/2026-06-07-utility-gis-editor-domain-dictionary]]
+- [[../../concepts/utility_gis_editing_domain]]
 - [[../../concepts/jtbd]]
 - [[../../concepts/collaborative_editing_models]]
 - [[../../solution/USM]]
