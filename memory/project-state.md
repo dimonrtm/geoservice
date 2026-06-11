@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-07
+updated: 2026-06-11
 source: null
 tags: [project-state, geoservice]
 ---
@@ -18,33 +18,35 @@ GeoService - исследовательский pet-проект на стади
 
 ## Состояние Pipeline
 
-- Последний `/discover`: 2026-06-07, Ф7 metrics/risks; зафиксированы `Safe Authoritative Post Rate >=95%` на 200 work orders, 7-дневное correction window, safety blockers, manual baseline и минимальные эксперименты.
-- Последний `/ingest`: 2026-06-07, batch RAW ingest `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md`; добавлены domain concept, source summary и desired utility vocabulary без расширения demo-scope.
-- Последний `/sync-vision`: 2026-06-07 10:58 +05:00, подтверждены актуальность индексов после Ф6 и двух RAW ingest, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
-- Последний `/lint-wiki`: 2026-06-07, найдены ожидаемые `missing_frontmatter` для 11 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/discover`: 2026-06-11, Ф8 closeout; Release 1 пересобран вокруг полного `Utility GIS editor` workflow, generic GIS оставлен внутренним foundation.
+- Последний `/ingest`: 2026-06-11, repository-change по планированию нового Release 1; зафиксированы code compliance matrix и план из 7 двухнедельных спринтов.
+- Последний `/sync-vision`: 2026-06-11 17:59 +05:00, подтверждены актуальность индексов после Ф7 и repository-change ingest, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
+- Последний `/lint-wiki`: 2026-06-11, найдены ожидаемые `missing_frontmatter` для 11 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний repository-change ingest: 2026-06-07, зафиксирована Ф7: North Star, safety gates, manual baseline, performance classification и validation experiments.
+- Последний repository-change ingest: 2026-06-11, зафиксированы новый Release 1, code compliance matrix и крупноуровневый план из 7 спринтов.
 
 ## Изменения С Прошлого `/sync-vision`
 
-- Пройден `/discover --phase Ф6`: зафиксированы reference hardware, Chrome, JWT, separation of duties, audit/reset contract, observability minimum и включение `import GeoJSON`.
-- Обработаны два новых RAW source: `utility_gis_editor_target_times.md` и `utility_gis_editor_domain_dictionary.md`.
-- Добавлены draft P95 targets и `FU-2026-06-06-001` для repeatable benchmark.
-- Созданы summary словаря домена и concept `utility_gis_editing_domain`; `technical_terms.md` дополнен desired utility demo vocabulary.
-- Новых concept/decision/entity/solution нод с прошлого sync: concept - 1, decision - 0, entity - 0, solution - 0.
-- Известный process conflict `FU-2026-06-01-004` теперь проявляется на 11 неизменяемых RAW Markdown files.
 - Пройдена Ф7: создан `Vision_wiki/concepts/metrics.md`, приняты North Star/guardrails, risk register и порядок workflow -> validation -> conflict experiments.
-- Пять новых RAW sources Ф7 использованы для метрик, post-problem taxonomy, manual baseline и risky assumptions.
+- Пять RAW sources Ф7 использованы для метрик, post-problem taxonomy, manual baseline и risky assumptions.
+- Обновлены `nfr.md`, `roadmap.md`, `risk_assumption_log.md` и follow-up queue; открыты measurement pipeline и manual baseline follow-up'ы.
+- Выполнен repository-change ingest по результатам Ф7.
+- Новых concept/decision/entity/solution нод с прошлого sync: concept - 1, decision - 0, entity - 0, solution - 0.
+- Известный process conflict `FU-2026-06-01-004` по 11 неизменяемым RAW Markdown files остается актуальным.
+- Ф8 приняла новый Release 1: work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit.
+- Добавлены решение `release_1_utility_workflow`, design spec и follow-up'ы на code compliance matrix и синхронизацию старых requirements.
+- Составлена code compliance matrix; `FU-2026-06-11-001` закрыт.
+- Реализация разбита на 7 двухнедельных спринтов крупного уровня: foundation, editing, validation, reconcile, review/post, audit/demo operations, acceptance/hardening. Детальная техническая декомпозиция выполняется отдельно перед каждым спринтом.
 
-## Состояние Wiki На 2026-06-07
+## Состояние Wiki На 2026-06-11
 
-- Необработанные RAW inputs: не обнаружены; пять новых Ф7 sources связаны с metrics/discovery нодами.
-- Новые RAW inputs с прошлого `/sync-vision`: 7, все обработаны или использованы в Ф7.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф6 chat-нода, performance targets summary, domain dictionary summary и concept `utility_gis_editing_domain`.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: нет; `technical_terms.md` дополнен desired utility demo vocabulary.
+- Необработанные RAW inputs: не обнаружены; все 12 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: 5, все использованы в Ф7.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф7 chat-нода и concept `metrics`.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: нет; обновлен журнал `repository_change_ingest.md`.
 - Stale-ноды: не обнаружены.
 - Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на 11 RAW Markdown files.
-- Открытые follow-up'ы: 9.
+- Открытые follow-up'ы: 10.
 
 ## Открытые Вопросы
 
@@ -61,3 +63,5 @@ GeoService - исследовательский pet-проект на стади
 - Нужно выполнить repeatable benchmark P50/P95 для draft performance targets на reference hardware.
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.
 - Нужно снять manual baseline на 10-20 work orders и затем провести 200-work-order product evaluation с 7-дневным correction window.
+- Нужно выполнить Спринт 1: utility schema, роли/seed, assigned work orders, edit version и frontend shell.
+- Нужно синхронизировать старые generic requirements/API docs с активным utility workflow.

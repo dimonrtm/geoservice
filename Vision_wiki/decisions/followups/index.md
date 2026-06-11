@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-07
+updated: 2026-06-11
 source: null
 tags: [followups, conflicts]
 ---
@@ -32,6 +32,8 @@ tags: [followups, conflicts]
 | FU-2026-06-06-001 | open     | Performance validation | [[../../chats/2026-06-06-utility-gis-editor-target-times]], [[../../chats/2026-06-07-phase-f7-metrics-and-risks]], [[../../solution/nfr]], [[../../concepts/metrics]] | Подготовить benchmark на reference hardware: 30 повторов, P50/P95 и обязательные gates для save, small validation, reconcile, conflict list/diff, post и stale-post rejection. |
 | FU-2026-06-07-001 | open     | Product metrics       | [[../../chats/2026-06-07-phase-f7-metrics-and-risks]], [[../../concepts/metrics]], [[../../decisions/risk_assumption_log]] | Подготовить measurement pipeline и выполнить 200 started work orders с 7-дневным correction window; цель `Safe Authoritative Post Rate >=95%`, safety blockers имеют абсолютный veto. |
 | FU-2026-06-07-002 | open     | Manual baseline       | [[../../chats/2026-06-07-phase-f7-metrics-and-risks]], [[../../concepts/metrics]] | Снять ручной baseline на 10-20 work orders low/medium/high: time to safe post, review/reconcile time, return/rework/error rates и manual touch count. |
+| FU-2026-06-11-001 | resolved | Release 1 compliance  | [[../../decisions/release_1_utility_workflow]], [[../../chats/2026-06-11-phase-f8-release-1-closeout]], `docs/superpowers/specs/2026-06-11-release-1-utility-workflow-design.md`, `docs/requirements/release-1-utility-code-compliance.md` | Code compliance matrix составлена 2026-06-11: foundation, missing capabilities, superseded scope, migration rules и риски отражены в отдельном документе. |
+| FU-2026-06-11-002 | open     | Documentation         | [[../../decisions/release_1_utility_workflow]], `docs/requirements/geoservice-prd-v1.md`, `docs/requirements/geoservice-requirements.md`, `docs/requirements/action-plan.md`, [[../../../Code_wiki/архитектура/api_contract_first_release_requirements]] | Отдельной docs-задачей пометить старые generic Release 1 requirements superseded и синхронизировать публичные requirements/API docs с utility workflow. |
 
 ## Правило Post-Ingest Correction
 

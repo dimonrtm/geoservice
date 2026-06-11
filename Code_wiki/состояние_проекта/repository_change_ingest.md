@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-07
-source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06; 2026-06-07"
+updated: 2026-06-11
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06; 2026-06-07; 2026-06-11"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,55 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-11 - Code compliance matrix и крупноуровневый sprint plan нового Release 1
+
+**Источник:** одобренный design нового Release 1, анализ текущего backend/frontend/infra/tests, `docs/requirements/release-1-utility-code-compliance.md`, `docs/superpowers/plans/2026-06-11-release-1-utility-workflow-sprints.md`, `git status --short`, `git diff --stat`.
+
+**Кратко:** выполнена сверка текущего кода с полным utility workflow и подготовлен крупноуровневый план на 7 двухнедельных спринтов. План фиксирует цели, основные продуктовые блоки, ожидаемые результаты и критерии завершения. Техническая декомпозиция должна выполняться отдельно перед началом каждого спринта.
+
+**Затронутые области:**
+
+- `docs/requirements/release-1-utility-code-compliance.md` - статусы `ready`/`adapt`/`missing`/`superseded`, риски и migration rules.
+- `docs/superpowers/plans/2026-06-11-release-1-utility-workflow-sprints.md` - 7 двухнедельных спринтов крупного уровня.
+- `Vision_wiki/decisions/followups/index.md` - compliance follow-up закрыт.
+- `memory/project-state.md`, `index.md`, `docs/agent-memory/` - live state и навигация.
+
+**Что помнить дальше:**
+
+- Реализация начинается со Спринта 1: state contracts, utility tables, `reviewer`, synthetic seed, work orders/edit versions и frontend shell.
+- Utility authoritative tables отделяются от legacy feature tables.
+- Legacy mutate API не удаляется, но utility frontend его не вызывает.
+- Только approving Reviewer запускает post.
+- Детальные задачи, файлы, миграции, тесты и команды определяются при планировании конкретного спринта.
+
+**Проверка:** план содержит 7 спринтов с целью, крупными блоками, результатом и критерием завершения; `scripts/check-memory-needed.py --check` пройден; wiki lint показывает только 11 известных `missing_frontmatter` в неизменяемых RAW Markdown из `FU-2026-06-01-004`; `git diff --check` пройден.
+
+### 2026-06-11 - Ф8 и новый Release 1 Utility GIS workflow
+
+**Источник:** ответы пользователя на `/discover --phase Ф8`, подтвержденный design `docs/superpowers/specs/2026-06-11-release-1-utility-workflow-design.md`, `git status --short`, `git diff --stat`.
+
+**Кратко:** старый generic GIS Release 1 заменен полным `Utility GIS editor` workflow до authoritative post и audit. Существующие JWT, PostGIS, MapLibre, bbox, Feature CRUD, `version`/`409` и WebSocket признаны внутренним foundation. Активный публичный contract требует `WorkOrder`, `EditVersion`, feature/association change set, validation, reconcile, conflict resolution, separation of duties, review, transactional post и append-only audit.
+
+**Затронутые области:**
+
+- `docs/superpowers/specs/2026-06-11-release-1-utility-workflow-design.md` - подтвержденный design нового Release 1.
+- `Vision_wiki/decisions/release_1_utility_workflow.md` - активное product/architecture решение.
+- `Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow.md` - разрешенный конфликт старого и нового scope.
+- `Vision_wiki/chats/2026-06-11-phase-f8-release-1-closeout.md` - closeout Ф8.
+- `Vision_wiki/concepts/first_release_mvp.md`, `Vision_wiki/solution/USM.md`, `architecture_vision.md`, `nfr.md`, `roadmap.md` - синхронизированный active scope.
+- `Vision_wiki/decisions/followups/index.md` - code compliance matrix и docs synchronization.
+
+**Что помнить дальше:**
+
+- Release 1 готов только после полного пути work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit.
+- Generic GIS не является отдельным пользовательским сценарием.
+- `edit after reconcile` теперь обязательный stale-`Default` guard.
+- Protective failures должны сохранять edits.
+- Следующая работа начинается с implementation plan и code compliance matrix.
+- Старые `docs/requirements/*` и `Code_wiki/архитектура/api_contract_first_release_requirements.md` остаются историческими до отдельной docs-задачи.
+
+**Проверка:** `scripts/lint-wiki.py --root .` через bundled Python - только 11 ожидаемых `missing_frontmatter` для неизменяемых RAW Markdown files из `FU-2026-06-01-004`; `scripts/check-memory-needed.py --check` - passed; `git diff --check` - passed.
 
 ### 2026-06-07 - Ф7 metrics, risks и validation experiments
 

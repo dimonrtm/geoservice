@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-07
+updated: 2026-06-11
 source: null
 tags: [vision-wiki, product]
 ---
@@ -61,6 +61,9 @@ tags: [vision-wiki, product]
 - [[concepts/utility_gis_editing_domain]] - канонический язык ролей, сетевых объектов, edit version, validation, reconcile, conflict и post.
 - [[chats/2026-06-07-phase-f7-metrics-and-risks]] - ответы Ф7: North Star, safety gates, baseline, evidence и risk register.
 - [[concepts/metrics]] - измерительный контракт `Safe Authoritative Post Rate`, secondary metrics и guardrails.
+- [[chats/2026-06-11-phase-f8-release-1-closeout]] - Ф8: пересборка Release 1 вокруг полного `Utility GIS editor` workflow.
+- [[decisions/release_1_utility_workflow]] - активное решение: generic GIS остается foundation, Release 1 заканчивается authoritative post и audit.
+- [[decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] - разрешение конфликта между старым generic scope и новым utility workflow.
 
 ## Открытые Вопросы
 

@@ -3,21 +3,31 @@ title: NFR
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-07
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md"
+updated: 2026-06-11
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; user answers to /discover --phase Ф8, 2026-06-11"
 tags: [solution, nfr, release-1, demo]
 ---
 
 # NFR
 
-NFR для Release 1 по `RAW_inputs/documents/спринт 1.odt`.
+NFR нового Release 1. Старые generic map/CRUD ограничения применяются как foundation, если не конфликтуют с utility workflow.
+
+## Ф8 Safety Invariants
+
+- Post выполняется одной database transaction.
+- Validation, unresolved conflicts, missing approval и stale `Default` блокируют post.
+- Protective failure сохраняет change set.
+- `Editor` не может approve собственную `EditVersion`.
+- Любое изменение после validation/reconcile/approval инвалидирует последующие результаты.
+- Post нельзя выполнить повторно.
+- WebSocket events публикуются только после успешного commit.
 
 ## Performance
 
 - Realtime updates должны доходить до других клиентов через WebSocket в течение 1-2 секунд.
 - Bbox loading обязателен для карты; запросы без валидного bbox не должны становиться неограниченной загрузкой данных.
 - `limit` для bbox endpoint: default 500, max 5000.
-- GeoJSON import в Release 1 только SYNC и только до 20MB.
+- Если GeoJSON import используется для подготовки demo data, он остается SYNC и ограничивается 20MB; это не acceptance criterion utility workflow.
 - Целевой demo dataset: `synthetic_utility_feeder_01` с 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, `Default` + 2 edit versions и 4 conflict-сценариями.
 
 ### Utility Demo P95 Targets
@@ -46,8 +56,8 @@ NFR для Release 1 по `RAW_inputs/documents/спринт 1.odt`.
 - Все API endpoints требуют валидный Bearer token.
 - `401 Unauthorized`: token отсутствует или невалиден.
 - `403 Forbidden`: `Viewer` пытается выполнить `POST`/`PATCH`/`DELETE`.
-- Роли Release 1: `Viewer` только читает, `Editor` читает, создает, редактирует и удаляет.
-- Для utility demo используются отдельные роли `Editor` и `Reviewer`; совмещение этих ролей одним пользователем запрещено.
+- Активные роли Release 1: `Editor` и `Reviewer`; совмещение этих ролей одним пользователем запрещено.
+- Legacy `Viewer` может оставаться compatibility role для read-only foundation, но не является участником основного Release 1 workflow.
 - CORS должен ограничиваться нужными origins; refresh token отложен.
 
 ## Availability
@@ -85,7 +95,7 @@ NFR для Release 1 по `RAW_inputs/documents/спринт 1.odt`.
 - Все изменения БД идут через миграции, не руками в production.
 - Зависимости backend направлены внутрь: `api -> services -> repositories -> db/models`.
 - Documentation DoD: run docs, API endpoints, WebSocket protocol, ограничения MVP.
-- `import GeoJSON` входит в первый walking skeleton.
+- `import GeoJSON` не является acceptance criterion основного workflow; он может использоваться внутренне для подготовки synthetic seed.
 
 ## Источники
 
@@ -93,3 +103,5 @@ NFR для Release 1 по `RAW_inputs/documents/спринт 1.odt`.
 - `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
 - `RAW_inputs/documents/utility_gis_editor_target_times.md`
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]
+- [[../decisions/release_1_utility_workflow]]
+- [[../chats/2026-06-11-phase-f8-release-1-closeout]]

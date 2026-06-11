@@ -3,14 +3,20 @@ title: Architecture Vision
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-06
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md"
+updated: 2026-06-11
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; user answers to /discover --phase Ф8, 2026-06-11"
 tags: [solution, architecture, release-1]
 ---
 
 # Architecture Vision
 
-Высокоуровневое видение Release 1 MVP по `RAW_inputs/documents/спринт 1.odt`. Детальные текущие факты реализации остаются в `Code_wiki/архитектура/`.
+Высокоуровневое видение нового Release 1 после Ф8. Детальные текущие факты реализации остаются в `Code_wiki/архитектура/`.
+
+## Ф8 Architecture Authority
+
+Публичная архитектура Release 1 строится вокруг `WorkOrder`, `EditVersion`, change set, validation, reconcile, conflict resolution, review, transactional post и audit. Generic layers/bbox/Feature CRUD, object `version`/`409` и layer WebSocket сохраняются как внутренний foundation и compatibility surface.
+
+Полный контракт: [[../decisions/release_1_utility_workflow]] и [design spec](../../docs/superpowers/specs/2026-06-11-release-1-utility-workflow-design.md).
 
 ## Системы И Границы
 
@@ -30,7 +36,7 @@ tags: [solution, architecture, release-1]
 | Feature edit | Editor UI | Backend service/repository | `PATCH` с `version`; success increments version, mismatch returns `409`. |
 | Delete | Editor UI | Backend service/repository | `DELETE` требует `version`; mismatch не удаляет объект. |
 | Realtime broadcast | Backend after create/update/delete | WebSocket subscribers | События слоя доставляются другим клиентам за 1-2 секунды. |
-| GeoJSON import | Editor upload | Backend/PostGIS | SYNC import `FeatureCollection <=20MB`, summary response, данные видны через bbox. |
+| GeoJSON import | Internal/demo preparation | Backend/PostGIS | Optional foundation для подготовки synthetic data, не основной пользовательский workflow. |
 
 ## Ключевые Компромиссы
 
@@ -39,8 +45,8 @@ tags: [solution, architecture, release-1]
 | Optimistic concurrency через `version` и `409` | CRDT/OT или locks | Дешевле и достаточно для 2-недельного MVP; silent overwrite запрещен. |
 | WebSocket pub/sub по layer | Полный collaborative state engine | Release 1 нужен broadcast изменений, не сложный merge. |
 | Bbox loading вместо тайлов/cache/offline | Tile pipeline или offline cache | Быстрее получить end-to-end map loading и ограничить объем данных через `limit`. |
-| Две роли `Viewer`/`Editor` | Rich ACL на уровне объектов/полей | Простая модель прав закрывает Release 1 demo. |
-| SYNC GeoJSON import <=20MB | Async import pipeline и большие форматы | Достаточно для demo data; большие форматы отложены. |
+| Роли `Editor`/`Reviewer` с separation of duties | Rich ACL на уровне объектов/полей | Простая модель закрывает utility review/post workflow. |
+| Optional SYNC GeoJSON import <=20MB | Async import pipeline и большие форматы | Может готовить demo data, но не является acceptance criterion Release 1. |
 
 ## Ф4 Architecture Boundary
 
@@ -120,3 +126,5 @@ Working version можно хранить как change-set (`base_version_id`, 
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]
+- [[../decisions/release_1_utility_workflow]]
+- [[../chats/2026-06-11-phase-f8-release-1-closeout]]

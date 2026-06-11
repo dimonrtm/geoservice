@@ -3,16 +3,79 @@ title: User Story Map
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-05
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md"
+updated: 2026-06-11
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; user answers to /discover --phase Ф8, 2026-06-11"
 tags: [solution, usm, release-1]
 ---
 
 # User Story Map
 
-User Story Map для Release 1 MVP по источнику `RAW_inputs/documents/спринт 1.odt`.
+User Story Map нового Release 1 после решения Ф8. Старый generic GIS scope сохранен только как технический foundation.
 
-## Backbone
+## Release 1 Backbone
+
+| Активность | Пользовательская Цель | Критерий |
+|---|---|---|
+| Login | Войти как `Editor` или `Reviewer` | JWT защищает workflow API; роли не совмещаются. |
+| Work order | Получить назначенную utility-задачу и AOI | `Editor` видит `WO-001` в `My Work Orders`. |
+| Edit version | Изолировать изменения от `Default` | Version создана от зафиксированных base revisions. |
+| Network edit | Изменить feature и association | Change set сохраняется без изменения authoritative state. |
+| Validation | Проверить demo network rules | Critical issue блокирует дальнейший safe path. |
+| Reconcile | Сравнить `Base / Mine / Default` | Изменение `Default` обнаруживается. |
+| Conflict resolution | Явно разрешить конфликт | Unresolved conflict блокирует review/post. |
+| Submit review | Передать неизмененный reconciled change set | Version переходит в reviewer queue. |
+| Review | Принять approve/reject decision | Reviewer comment обязателен; Editor не approve'ит себя. |
+| Post | Опубликовать в authoritative `Default` | Post атомарен и запрещен при stale `Default`. |
+| Audit verification | Доказать путь изменения | Видна цепочка work order -> edit -> validation -> reconcile -> review -> post. |
+
+## Release 1 Walking Skeleton
+
+1. `alexey.editor` открывает `WO-001`.
+2. Создает `V-WO-001-ALEXEY`.
+3. Меняет `D-002` и association.
+4. Validation подтверждает допустимость локального change set.
+5. `bolat.editor` через второй work order изменяет пересекающийся объект в `Default`.
+6. Reconcile обнаруживает подготовленный conflict.
+7. `alexey.editor` сравнивает `Base / Mine / Default` и выбирает resolution.
+8. Повторная validation/reconcile завершается без blockers.
+9. Version отправляется на review.
+10. `marina.reviewer` проверяет diff/evidence и approve'ит.
+11. Post одной транзакцией обновляет `Default`.
+12. Authoritative map и audit показывают итог.
+
+## Release 1 Scope
+
+| Область | Статус |
+|---|---|
+| Полный workflow до post | required |
+| Feature и association changes | required |
+| Demo validation | required |
+| Prepared conflict и explicit resolution | required |
+| Reviewer approve/reject | required |
+| Transactional post и stale guard | required |
+| Audit trail | required |
+| Docker Compose demo и synthetic seed | required |
+| Generic layers/bbox/CRUD/WebSocket | internal foundation |
+| Full branch versioning/topology/trace | out |
+| Offline/CRDT/OT/rich ACL | out |
+| External GIS/real utility data | out |
+
+## Acceptance Criteria
+
+- Полный workflow воспроизводится одним demo script.
+- Ни одна параллельная правка не теряется молча.
+- Validation, unresolved conflicts, missing review и stale `Default` блокируют post.
+- Protective failure сохраняет edits.
+- Editor и Reviewer разделены.
+- Post нельзя выполнить повторно.
+- Audit содержит полную workflow chain.
+- Обычный reset сохраняет audit; `full-clean` удаляет всё.
+
+## Technical Foundation
+
+Старые generic capabilities не являются самостоятельным Release 1 scope:
+
+### Сохраненные Возможности
 
 | Активность | Пользовательская Цель | Примечания |
 |---|---|---|
@@ -23,19 +86,19 @@ User Story Map для Release 1 MVP по источнику `RAW_inputs/document
 | Удалять Feature | Удалять объект только при актуальной версии | `DELETE` также проверяет `version`; при mismatch возвращает `409`. |
 | Импортировать demo data | Быстро добавить небольшой GeoJSON для демо | SYNC import до 20MB, только `FeatureCollection`, geometry type должен совпадать со слоем. |
 
-## Walking Skeleton
+### Compatibility Walking Skeleton
 
 | Шаг | Минимальное Поведение | Статус |
 |---|---|---|
-| Login | `Viewer`/`Editor` получает token, endpoints без token возвращают `401` | required |
-| Layers discovery | `GET /api/v1/layers` возвращает минимум points/polygons/lines | required |
-| Bbox loading | Карта запрашивает `GET /api/v1/layers/{layerId}/features?bbox=...&limit=...` и рисует FeatureCollection | required |
-| Single-user edit | `Editor` создает/меняет/удаляет Feature, получает обновленную Feature с `version` | required |
-| Two-tabs conflict | Клиент A сохраняет `V -> V+1`, клиент B с `V` получает `409 VERSION_MISMATCH` | required |
-| Realtime update | Другие клиенты получают create/update/delete через WebSocket за 1-2 секунды | required |
-| GeoJSON import | `Editor` загружает `FeatureCollection <=20MB`, получает summary и видит данные через bbox | candidate |
+| Login | `Viewer`/`Editor` получает token, endpoints без token возвращают `401` | foundation |
+| Layers discovery | `GET /api/v1/layers` возвращает минимум points/polygons/lines | foundation |
+| Bbox loading | Карта запрашивает `GET /api/v1/layers/{layerId}/features?bbox=...&limit=...` и рисует FeatureCollection | foundation |
+| Single-user edit | `Editor` создает/меняет/удаляет Feature, получает обновленную Feature с `version` | foundation |
+| Two-tabs conflict | Клиент A сохраняет `V -> V+1`, клиент B с `V` получает `409 VERSION_MISMATCH` | foundation |
+| Realtime update | Другие клиенты получают create/update/delete через WebSocket за 1-2 секунды | foundation |
+| GeoJSON import | `Editor` загружает `FeatureCollection <=20MB`, получает summary и видит данные через bbox | optional foundation |
 
-## Releases
+### Историческое Разбиение Старого Release 1
 
 | Release | Scope | Критерий Готовности |
 |---|---|---|
@@ -43,18 +106,18 @@ User Story Map для Release 1 MVP по источнику `RAW_inputs/document
 | Release 1 P1 | SYNC GeoJSON import, upload UI, import summary | После import данные видны через bbox; ошибки import ограничены и валидируются. |
 | Later | Projects/Layers persistence, CRDT/OT, offline, locks, rich ACL, topology validation, large imports | Возвращаться после подтверждения Release 1 MVP и новых требований. |
 
-## Discovery Ф2: Provisional JTBD
+## История Discovery: Ф2
 
-Этот раздел не расширяет scope Release 1. Он фиксирует primary research-scenario `Utility GIS editor` и deferred кадастровый сценарий перед Ф4.
+Этот раздел фиксирует историю выбора primary scenario. После Ф8 `Utility GIS editor` уже является scope Release 1, а не только research hypothesis.
 
-| Persona-Кандидат | Job | Статус |
-|---|---|---|
-| `Utility GIS editor` | Изолировать изменения инженерной сети, увидеть конфликт с authoritative state и контролируемо опубликовать результат после review | primary hypothesis |
-| Кадастровый инженер | Сохранить lineage участков, разобрать конфликт и опубликовать согласованное кадастровое изменение | deferred hypothesis |
+| Persona-Кандидат     | Job                                                                                                                               | Статус              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `Utility GIS editor` | Изолировать изменения инженерной сети, увидеть конфликт с authoritative state и контролируемо опубликовать результат после review | selected Release 1 |
+| Кадастровый инженер  | Сохранить lineage участков, разобрать конфликт и опубликовать согласованное кадастровое изменение                                 | deferred hypothesis |
 
-## Discovery Ф4: Demo Scope
+## Детали Dataset И Conflict Library
 
-Ф4 фиксирует текущий scope как demo, а не production replacement для `ArcGIS Enterprise + Utility Network`. Главный пользовательский сигнал: `review стал проще`.
+Release 1 остается demo, а не production replacement для `ArcGIS Enterprise + Utility Network`.
 
 ### MVP / Demo
 
@@ -64,7 +127,7 @@ User Story Map для Release 1 MVP по источнику `RAW_inputs/document
 | Conflict explanation | required | Пользователь и reviewer должны понимать base value, edit version value, current `Default` и сетевое последствие. |
 | Reviewer decision | required | `Reviewer` принимает approve/reject/resolution decision перед publication. |
 | Optimistic conflict + review model | required | Достаточно собственной модели, не требуется full branch versioning. |
-| `edit after reconcile` | Next/Later | Сильный второй сценарий, но не MVP текущей Ф4. |
+| `edit after reconcile` | required guard | Изменение `Default` после reconcile блокирует post, сохраняет edits и требует нового reconcile. |
 
 ### Ф4 Walking Skeleton
 
@@ -141,3 +204,6 @@ Conflict library для demo: `Update/Update`, `Geometry/Geometry`, `Update/Dele
 - [[../chats/2026-06-04-phase-f4-solution-scope]]
 - [[../chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]]
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]
+- [[../decisions/release_1_utility_workflow]]
+- [[../chats/2026-06-11-phase-f8-release-1-closeout]]
+- [Design spec](../../docs/superpowers/specs/2026-06-11-release-1-utility-workflow-design.md)

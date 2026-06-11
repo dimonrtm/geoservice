@@ -3,14 +3,26 @@ title: Roadmap
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-07
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md"
+updated: 2026-06-11
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; user answers to /discover --phase Ф8, 2026-06-11"
 tags: [solution, roadmap, release-1]
 ---
 
 # Roadmap
 
-Roadmap извлечен из 14-дневного Release 1 source document. Он отражает план источника, а не факт завершения работ.
+Активный roadmap нового Release 1 после Ф8. Старый 14-дневный generic plan ниже сохраняется как исторический foundation, а не текущая продуктовая последовательность.
+
+## Ф8 Release 1 Delivery Order
+
+| Порядок | Vertical Capability | Проверяемый Результат |
+|---:|---|---|
+| 1 | Code compliance matrix и utility schema | Ясно, что переиспользуется, добавляется и superseded. |
+| 2 | Synthetic seed, roles, work orders и edit versions | `Editor` открывает назначенный work order и workspace. |
+| 3 | Feature/association change set и validation | Изменения не затрагивают `Default`; critical issue блокирует workflow. |
+| 4 | Reconcile, prepared conflict и resolution | Видны `Base / Mine / Default`; unresolved conflict блокирует review. |
+| 5 | Reviewer queue, approve/reject и transactional post | Separation of duties соблюдена; safe post меняет `Default`. |
+| 6 | Audit, reset/`full-clean`, demo UX и tests | Полный workflow воспроизводим и доказуем. |
+| 7 | UX test, conflict drill и benchmark | Проверены comprehension и обязательные safety/performance gates. |
 
 ## Now
 
@@ -83,3 +95,5 @@ Scope creep сигнал: появление новых незапланиров
 - `Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md`
 - [[USM]]
 - [[../concepts/first_release_mvp]]
+- [[../decisions/release_1_utility_workflow]]
+- [[../chats/2026-06-11-phase-f8-release-1-closeout]]
