@@ -1,18 +1,18 @@
 ---
 title: Utility GIS Editor
 type: entity
-status: draft
+status: active
 created: 2026-06-02
-updated: 2026-06-07
-source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md"
-tags: [persona, discovery, phase-f2, utility-network, authoritative-editing, research]
+updated: 2026-06-12
+source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_answers.md"
+tags: [persona, discovery, phase-f2, utility-network, authoritative-editing, research, synthetic-evidence]
 ---
 
 # Utility GIS Editor
 
 ## Статус
 
-Primary research-persona GeoService после `/discover --phase Ф2`. Это модельная персона на основе документации существующих продуктов, а не подтвержденный реальный пользователь приложения.
+Primary design-persona GeoService. Синтетическая репетиция интервью принята владельцем проекта как подтверждение связности сценария для проектирования. Персона не подтверждена интервью или наблюдением реального пользователя.
 
 ## Роль
 
@@ -20,6 +20,12 @@ Primary research-persona GeoService после `/discover --phase Ф2`. Это �
 - Контекст: регулярная эксплуатационная работа utility-организации с authoritative network layer.
 - Частота-гипотеза: ежедневно или еженедельно; для активной организации базовая гипотеза - ежедневно.
 - Финальный контроль перед публикацией: reviewer.
+
+## Уровень Evidence
+
+- Подтверждено для проектирования: отдельная edit version, проверки connectivity/topology/trace, reconcile, review, post и сохранение lineage образуют связный workflow.
+- Поддержано синтетическим сценарием: основной расход времени связан с разрозненными исходными материалами и повторным поднятием контекста.
+- Не подтверждено внешне: частота задач, длительность 2-4 часа, конкретное распределение ролей и распространенность используемых инструментов.
 
 ## Рабочая Задача
 
@@ -42,6 +48,9 @@ Primary research-persona GeoService после `/discover --phase Ф2`. Это �
 - Другой редактор публикует изменения в `Default` до reconcile текущей версии.
 - Один пользователь меняет геометрию или associations, а другой - атрибуты или статус того же объекта.
 - После reconcile другой пользователь снова меняет `Default`, поэтому перед post требуется повторная сверка.
+- Контекст изменения разорван между work order, PDF, фотографиями, Excel, справочниками и сообщениями.
+- После возврата reviewer приходится восстанавливать контекст и повторять validation, trace и reconcile.
+- Визуально корректная карта может скрывать ошибочную association и неверный trace.
 
 ## Приоритет Ущерба
 
@@ -74,6 +83,7 @@ Primary research-persona GeoService после `/discover --phase Ф2`. Это �
 
 - [[../../chats/2026-06-02-phase-f2-users-and-pain]]
 - [[../../chats/2026-06-07-utility-gis-editor-domain-dictionary]]
+- [[../../chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]]
 - [[../../concepts/utility_gis_editing_domain]]
 - [[../../concepts/jtbd]]
 - [[../../concepts/collaborative_editing_models]]

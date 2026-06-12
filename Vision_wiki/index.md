@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-11
+updated: 2026-06-12
 source: null
 tags: [vision-wiki, product]
 ---
@@ -64,6 +64,8 @@ tags: [vision-wiki, product]
 - [[chats/2026-06-11-phase-f8-release-1-closeout]] - Ф8: пересборка Release 1 вокруг полного `Utility GIS editor` workflow.
 - [[decisions/release_1_utility_workflow]] - активное решение: generic GIS остается foundation, Release 1 заканчивается authoritative post и audit.
 - [[decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] - разрешение конфликта между старым generic scope и новым utility workflow.
+- [[chats/2026-06-12-utility-gis-editor-user-interview-checklist]] - чек-лист 30-минутного интервью с реальным GIS-редактором о фактическом workflow и боли.
+- [[chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]] - синтетическая репетиция принята как подтверждение design-сценария и зоны ценности единого evidence context.
 
 ## Открытые Вопросы
 

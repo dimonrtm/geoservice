@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-11
+updated: 2026-06-12
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -57,6 +57,9 @@ tags: [knowledge, index, geoservice]
 - 2026-06-11: Выполнен `/sync-vision`; индексы актуальны после Ф7 и repository-change ingest, новых необработанных RAW inputs и stale-нод нет, открыты 9 follow-up'ов.
 - 2026-06-11: `/discover --phase Ф8` пересобрал Release 1 вокруг полного `Utility GIS editor` workflow; старый generic GIS сохранен только как технический foundation.
 - 2026-06-11: Подготовлены code compliance matrix и план реализации нового Release 1 на 7 двухнедельных спринтов.
+- 2026-06-12: Спринт 1 разложен на 14 календарных дней; контракты Дня 1 зафиксировали acceptance AC-01..AC-07, доменную модель, API и вертикальный backlog S1-01..S1-10 в `docs/sprint_1`.
+- 2026-06-12: Выполнен `/sync-vision`; индексы и [[memory/project-state]] синхронизированы после Ф8 и планирования Спринта 1, новых RAW inputs и stale-нод нет, открыты 10 follow-up'ов.
+- 2026-06-12: Обработана синтетическая репетиция интервью `Utility GIS editor`; primary persona и JTBD приняты для design, добавлен акцент на единый evidence context, внешний user validation отложен.
 
 ## Открытые Вопросы
 

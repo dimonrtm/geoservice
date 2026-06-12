@@ -14,41 +14,39 @@ tags: [project-state, geoservice]
 
 ## Кратко
 
-GeoService - исследовательский pet-проект на стадии идея / прототип. Цель: изучить алгоритмы совместного редактирования геометрии и проверить AI-first разработку сложной геоинформационной системы. Текущий Release 1 draft описывает хранение геоданных, API-доступ, отображение карты и базовое совместное редактирование.
+GeoService - исследовательский pet-проект на стадии идея / прототип. Цель: изучить алгоритмы совместного редактирования геометрии и проверить AI-first разработку сложной геоинформационной системы. Текущий Release 1 строится вокруг полного `Utility GIS editor` workflow от назначенного work order и изолированной edit version до validation, reconcile, review, authoritative post и audit.
 
 ## Состояние Pipeline
 
-- Последний `/discover`: 2026-06-11, Ф8 closeout; Release 1 пересобран вокруг полного `Utility GIS editor` workflow, generic GIS оставлен внутренним foundation.
-- Последний `/ingest`: 2026-06-12, repository-change по контрактам Дня 1 Спринта 1; зафиксированы acceptance, domain model, API, вертикальный backlog и структура `docs/sprint_1`.
-- Последний `/sync-vision`: 2026-06-11 17:59 +05:00, подтверждены актуальность индексов после Ф7 и repository-change ingest, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
-- Последний `/lint-wiki`: 2026-06-12, найдены ожидаемые `missing_frontmatter` для 11 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/discover`: 2026-06-12, подготовлено 30-минутное интервью с реальным `Utility GIS editor` для проверки фактического workflow и пользовательской боли на последнем реальном work order.
+- Последний `/ingest`: 2026-06-12, обработан `RAW_inputs/meetings/utility_gis_editor_answers.md` как синтетическая репетиция; persona и JTBD приняты для design, но external user validation не заявляется.
+- Последний `/sync-vision`: 2026-06-12 15:14 +05:00, индексы и live state синхронизированы после Ф8, code compliance, планирования Release 1 и контрактов Дня 1 Спринта 1; новых необработанных RAW inputs и stale-нод нет.
+- Последний `/lint-wiki`: 2026-06-12, найдены ожидаемые `missing_frontmatter` для 12 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний repository-change ingest: 2026-06-12, зафиксированы контракты Дня 1 и единая папка документов Спринта 1.
 
 ## Изменения С Прошлого `/sync-vision`
 
-- Пройдена Ф7: создан `Vision_wiki/concepts/metrics.md`, приняты North Star/guardrails, risk register и порядок workflow -> validation -> conflict experiments.
-- Пять RAW sources Ф7 использованы для метрик, post-problem taxonomy, manual baseline и risky assumptions.
-- Обновлены `nfr.md`, `roadmap.md`, `risk_assumption_log.md` и follow-up queue; открыты measurement pipeline и manual baseline follow-up'ы.
-- Выполнен repository-change ingest по результатам Ф7.
-- Новых concept/decision/entity/solution нод с прошлого sync: concept - 1, decision - 0, entity - 0, solution - 0.
-- Известный process conflict `FU-2026-06-01-004` по 11 неизменяемым RAW Markdown files остается актуальным.
 - Ф8 приняла новый Release 1: work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit.
-- Добавлены решение `release_1_utility_workflow`, design spec и follow-up'ы на code compliance matrix и синхронизацию старых requirements.
+- Добавлены Ф8 chat-нода, решение `release_1_utility_workflow`, resolved conflict старого и нового scope, design spec и follow-up'ы на code compliance matrix и синхронизацию старых requirements.
 - Составлена code compliance matrix; `FU-2026-06-11-001` закрыт.
 - Реализация разбита на 7 двухнедельных спринтов крупного уровня: foundation, editing, validation, reconcile, review/post, audit/demo operations, acceptance/hardening. Детальная техническая декомпозиция выполняется отдельно перед каждым спринтом.
 - Спринт 1 разложен на 14 календарных дней: будние дни интенсивные, выходные облегченные для интеграции, документации и резерва; итоговый путь - login -> assigned work order -> create/open edit version -> workspace.
 - День 1 является контрактным: AC-01..AC-07, сущности и инварианты, endpoints/DTO/errors и backlog S1-01..S1-10 согласованы; документы находятся в `docs/sprint_1`.
 - `AOI` принят как серверная граница данных workspace, `Feeder` - как агрегат `NetworkFeature` и внутрефидерных `NetworkAssociation`; пользовательский текст и application logs должны быть на русском языке.
+- Новых RAW inputs с прошлого sync нет; все 12 источников остаются отражены в `RAW_inputs/index.md`.
+- Новых concept/decision/entity/solution нод с прошлого sync: concept - 0, decision - 2, entity - 0, solution - 0.
+- Известный process conflict `FU-2026-06-01-004` по 12 неизменяемым RAW Markdown files остается актуальным.
+- Синтетическая репетиция поддержала utility workflow и выявила дополнительную зону ценности: единый evidence context для work order, документов, changes, validation/trace, conflicts и review.
 
-## Состояние Wiki На 2026-06-11
+## Состояние Wiki На 2026-06-12
 
-- Необработанные RAW inputs: не обнаружены; все 12 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs с прошлого `/sync-vision`: 5, все использованы в Ф7.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф7 chat-нода и concept `metrics`.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: нет; обновлен журнал `repository_change_ingest.md`.
+- Необработанные RAW inputs: не обнаружены; все 13 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: 1, синтетическая репетиция интервью обработана.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф8 chat-нода, active decision `release_1_utility_workflow` и resolved conflict старого generic scope с utility workflow.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: отдельных нод нет; обновлены `Code_wiki/index.md` и журнал `repository_change_ingest.md`, добавлены связанные compliance и Sprint 1 документы.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на 11 RAW Markdown files.
+- Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на 12 RAW Markdown files.
 - Открытые follow-up'ы: 10.
 
 ## Открытые Вопросы
@@ -57,6 +55,7 @@ GeoService - исследовательский pet-проект на стади
 
 Ключевые открытые вопросы:
 
+- Реальных пользователей пока нет; внешний workflow/conflict UX test по `Vision_wiki/chats/2026-06-12-utility-gis-editor-user-interview-checklist.md` отложен до появления доступа к представителям роли.
 - Нужно отдельным запросом решить, что делать с пустыми/неполными dev/infra helper files, найденными repository snapshot.
 - Для `Utility GIS editor` нужно реализовать/подготовить `synthetic_utility_feeder_01`: 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, `Default` + 2 edit versions, 4 conflict-сценария.
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.

@@ -3,8 +3,8 @@ title: Risk And Assumption Log
 type: risk
 status: active
 created: 2026-05-31
-updated: 2026-06-07
-source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md"
+updated: 2026-06-12
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; RAW_inputs/meetings/utility_gis_editor_answers.md"
 tags: [risk, assumption, discovery]
 ---
 
@@ -18,17 +18,18 @@ tags: [risk, assumption, discovery]
 | AS-2026-05-31-002 | hypothesis | GeoService может стать основой demo, portfolio, применения в работе или будущего продукта. | Уточнить приоритет результата и критерий готовности первого релиза. |
 | AS-2026-05-31-003 | hypothesis | AI-first разработка подходит для создания сложной геоинформационной системы. | Фиксировать ограничения, качество реализации и стоимость исправлений по мере развития проекта. |
 | AS-2026-06-01-001 | hypothesis | Для проверки GeoService достаточно выбрать один primary scenario collaborative editing и воспроизвести канонические конфликты на synthetic dataset. | Для `Utility GIS editor` подготовить synthetic utility dataset и проверить topology, `attribute vs attribute`, `geometry/association`, `edit after reconcile`. |
-| AS-2026-06-02-001 | hypothesis | Наиболее релевантный primary scenario GeoService - authoritative editing для `Utility GIS editor`. | Проверить модельную боль на synthetic utility dataset и, если возможно, на реальном рабочем контексте. |
-| AS-2026-06-03-001 | hypothesis | Узкая зона ценности GeoService - conflict explanation и review productivity, а не замена `ArcGIS Enterprise + Utility Network`. | На Ф4 сформулировать demo-script вокруг `geometry/association conflict`, dirty areas, reviewer decision и authoritative post. |
+| AS-2026-06-02-001 | accepted-for-design | Наиболее релевантный primary scenario GeoService - authoritative editing для `Utility GIS editor`. | Синтетическая репетиция подтвердила связность сценария; внешнюю validation выполнить при появлении доступа к представителям роли. |
+| AS-2026-06-03-001 | accepted-for-design | Узкая зона ценности GeoService - conflict explanation, единый evidence context и review productivity, а не замена `ArcGIS Enterprise + Utility Network`. | Demo должен связать work order, changes, validation/trace, conflicts, reviewer remarks и authoritative post. |
 | AS-2026-06-04-001 | accepted-for-demo | Ф4 scope GeoService - demo focused conflict/review layer, где главный сигнал ценности: `review стал проще`. | Проверить через walking skeleton: work order -> working version -> change set -> validation -> compare with `Default` -> conflict explanation -> reviewer decision -> publish. |
 | AS-2026-06-05-001 | accepted-for-demo | Минимальный non-toy dataset для demo - `synthetic_utility_feeder_01`: 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, `Default` + 2 edit versions и 4 conflict-сценария. | Реализовать dataset так, чтобы он проверял topology, associations, invalid state, parallel editing, conflict detection, review, post и audit trail. |
 | AS-2026-06-05-002 | accepted-for-demo | Первый rollout GeoService - local Docker Compose demo для разработчика и владельца pet-проекта; ценность - `learning value` и доказательство, что pipeline стал проще. | Проверить через README/demo script: developer запускает локально `Editor flow` на synthetic dataset без external GIS. |
 | AS-2026-06-06-001 | accepted-for-demo | Для первого demo достаточно Chrome и reference hardware Asus TUF Gaming 2022, AMD Ryzen 7 5000 series, 16 GB RAM; startup/reset могут занимать несколько минут. | Запустить end-to-end demo на reference hardware и записать фактические времена startup, reset и ключевых операций. |
 | AS-2026-06-06-002 | hypothesis | P95 targets из `utility_gis_editor_target_times.md` достижимы на малом `synthetic_utility_feeder_01`: map <=5 сек, save <=2/5 сек, validation <=15 сек, reconcile <=10/20 сек, diff <=5 сек, post <=15 сек. | Выполнить repeatable benchmark в Chrome на reference hardware и сравнить P50/P95 с draft thresholds. |
 | AS-2026-06-07-001 | accepted-for-demo | Успех Ф7 измеряется сочетанием demo quality, `learning value` и проверки AI-first разработки; North Star - `Safe Authoritative Post Rate >=95%` на 200 начатых work orders. | Провести 200 end-to-end work orders и 7-дневное наблюдение; минимум 190 должны завершиться safe post, при этом safety blockers недопустимы независимо от aggregate. |
-| AS-2026-06-07-002 | hypothesis | `Utility GIS editor` принимает branch-like workflow и понимает Save, edit version, validation, reconcile, Post и authoritative state. | Провести workflow-test с 3-5 представителями роли; провал понимания требует изменения UX или модели workflow. |
+| AS-2026-06-07-002 | supported-by-synthetic | `Utility GIS editor` принимает branch-like workflow и понимает Save, edit version, validation, reconcile, Post и authoritative state. | Синтетическая репетиция поддерживает модель; провести workflow-test с 3-5 представителями роли, когда они станут доступны. |
 | AS-2026-06-07-003 | hypothesis | Demo validation защищает сеть от критических topology/connectivity/association ошибок. | Validation trap test: обнаружить >=80% подготовленных ошибок и заблокировать post для 100% critical cases. |
 | AS-2026-06-07-004 | hypothesis | Conflict resolution предотвращает silent overwrite и stale post. | Two-editors conflict drill: обнаружить 100% подготовленных conflicts, показать Mine/Default diff и сохранить edits при stale post. |
+| AS-2026-06-12-001 | accepted-for-design | Значимая часть труда редактора уходит на сбор разрозненного evidence и повторное восстановление контекста после замечаний. | В demo связать work order, документы, измененные объекты, validation/trace, conflicts и review comments; измерить manual touch count. |
 
 ## Риски
 
@@ -46,6 +47,7 @@ tags: [risk, assumption, discovery]
 | RK-2026-06-07-001 | open      | Aggregate `Safe Authoritative Post Rate` может скрыть редкие safety-critical failures.                                          | Формально высокий процент будет достигнут при наличии silent overwrite, пропущенного critical conflict или Critical/High review error.                | Safety blockers имеют абсолютный veto и не компенсируются aggregate rate.                                                                                                             |
 | RK-2026-06-07-002 | open      | 200 synthetic work orders могут быть статистически зависимыми или слишком простыми.                                             | Результат не докажет переносимость на реальные topology/trace risks.                                                                                  | Стратифицировать work orders по сложности и conflict type, хранить seed/run identifiers и отдельно снять manual baseline на 10-20 типовых задачах.                                    |
 | RK-2026-06-07-003 | open      | Evidence storage может преждевременно расширить local demo до object-storage platform.                                          | Scope уйдет от проверки safe post к инфраструктуре хранения тяжелых доказательств.                                                                    | В demo хранить reports в Git и structured audit в PostgreSQL; immutable object storage вводить отдельным scope-решением.                                                              |
+| RK-2026-06-12-001 | open | Синтетическая репетиция может воспроизводить уже заложенные assumptions и создавать ложную уверенность в product validation. | Реальный workflow, частота боли и готовность пользователей к модели могут отличаться от design-сценария. | Маркировать evidence как synthetic, не публиковать claims о реальных пользователях и провести внешнюю validation при появлении доступа к представителям роли. |
 
 ## Связи
 
@@ -59,6 +61,7 @@ tags: [risk, assumption, discovery]
 - [[../chats/2026-06-06-phase-f6-constraints-and-nfr]]
 - [[../chats/2026-06-06-utility-gis-editor-target-times]]
 - [[../chats/2026-06-07-phase-f7-metrics-and-risks]]
+- [[../chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]]
 - [[../concepts/metrics]]
 - [[../concepts/jtbd]]
 - [[../concepts/product_vision_board]]
