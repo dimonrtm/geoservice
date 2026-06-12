@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-11
+updated: 2026-06-12
 source: null
 tags: [code-wiki, technical-knowledge]
 ---
@@ -40,3 +40,4 @@ tags: [code-wiki, technical-knowledge]
 - [[../Vision_wiki/decisions/release_1_utility_workflow]] - активный desired contract нового Release 1; текущий код требует отдельной compliance matrix.
 - [Code compliance matrix](../docs/requirements/release-1-utility-code-compliance.md) - фактические foundation/gap/superseded статусы перед реализацией.
 - [Крупноуровневый план по спринтам](../docs/superpowers/plans/2026-06-11-release-1-utility-workflow-sprints.md) - семь двухнедельных продуктовых инкрементов нового Release 1.
+- [Календарный план Спринта 1](../docs/superpowers/specs/2026-06-12-sprint-1-utility-workflow-calendar-design.md) - 14 календарных дней с облегченными выходными, контрольными точками и критерием завершения.

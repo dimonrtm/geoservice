@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-11
-source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06; 2026-06-07; 2026-06-11"
+updated: 2026-06-12
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06; 2026-06-07; 2026-06-11; 2026-06-12"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,27 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-12 - Календарный план Спринта 1 Utility Workflow
+
+**Источник:** подтвержденное пользователем разбиение Спринта 1, `docs/superpowers/specs/2026-06-12-sprint-1-utility-workflow-calendar-design.md`, `git status --short`, `git diff --stat`.
+
+**Кратко:** Спринт 1 разложен на 14 календарных дней. Принят ритм из двух пятидневных интенсивных блоков и двух облегченных выходных блоков для интеграции, документации, проверки и резерва. План использует вертикальный подход и заканчивается воспроизводимым путем `login -> assigned work order -> create/open edit version -> workspace`.
+
+**Затронутые области:**
+
+- `docs/superpowers/specs/2026-06-12-sprint-1-utility-workflow-calendar-design.md` - scope, план по дням, контрольные точки и критерии завершения.
+- `docs/agent-memory/decisions/2026-06-12-sprint-1-calendar-plan.md` - долговременная память о формате спринта.
+- `docs/agent-memory/file-map.md`, `memory/project-state.md` - навигация и live state.
+
+**Что помнить дальше:**
+
+- Выходные не используются как полноценные feature-дни.
+- `Reviewer` входит в ролевую основу и seed, но reviewer workflow не входит в Спринт 1.
+- Editing, validation, reconcile, review и post остаются за границей Спринта 1.
+- Детальный implementation plan должен сохранить контрольные точки дней 5, 9, 12 и 14.
+
+**Проверка:** документ не содержит `TBD`/`TODO`; scope согласован с активным Release 1 design и планом семи спринтов; `scripts/check-memory-needed.py --check` пройден; `git diff --check` пройден; wiki lint повторяет 11 известных `missing_frontmatter` в неизменяемых RAW Markdown из `FU-2026-06-01-004`.
 
 ### 2026-06-11 - Code compliance matrix и крупноуровневый sprint plan нового Release 1
 

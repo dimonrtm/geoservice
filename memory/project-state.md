@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-11
+updated: 2026-06-12
 source: null
 tags: [project-state, geoservice]
 ---
@@ -19,11 +19,11 @@ GeoService - исследовательский pet-проект на стади
 ## Состояние Pipeline
 
 - Последний `/discover`: 2026-06-11, Ф8 closeout; Release 1 пересобран вокруг полного `Utility GIS editor` workflow, generic GIS оставлен внутренним foundation.
-- Последний `/ingest`: 2026-06-11, repository-change по планированию нового Release 1; зафиксированы code compliance matrix и план из 7 двухнедельных спринтов.
+- Последний `/ingest`: 2026-06-12, repository-change по календарному плану Спринта 1; зафиксированы 14 календарных дней и облегченные выходные.
 - Последний `/sync-vision`: 2026-06-11 17:59 +05:00, подтверждены актуальность индексов после Ф7 и repository-change ingest, отсутствие новых необработанных RAW inputs и отсутствие stale-нод.
-- Последний `/lint-wiki`: 2026-06-11, найдены ожидаемые `missing_frontmatter` для 11 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/lint-wiki`: 2026-06-12, найдены ожидаемые `missing_frontmatter` для 11 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний repository-change ingest: 2026-06-11, зафиксированы новый Release 1, code compliance matrix и крупноуровневый план из 7 спринтов.
+- Последний repository-change ingest: 2026-06-12, зафиксирован подтвержденный календарный план Спринта 1.
 
 ## Изменения С Прошлого `/sync-vision`
 
@@ -37,6 +37,7 @@ GeoService - исследовательский pet-проект на стади
 - Добавлены решение `release_1_utility_workflow`, design spec и follow-up'ы на code compliance matrix и синхронизацию старых requirements.
 - Составлена code compliance matrix; `FU-2026-06-11-001` закрыт.
 - Реализация разбита на 7 двухнедельных спринтов крупного уровня: foundation, editing, validation, reconcile, review/post, audit/demo operations, acceptance/hardening. Детальная техническая декомпозиция выполняется отдельно перед каждым спринтом.
+- Спринт 1 разложен на 14 календарных дней: будние дни интенсивные, выходные облегченные для интеграции, документации и резерва; итоговый путь - login -> assigned work order -> create/open edit version -> workspace.
 
 ## Состояние Wiki На 2026-06-11
 
