@@ -2,7 +2,7 @@
 
 ## Summary
 
-Целевой файл плана: `docs/requirements/sprints/sprint-1/day-6-plan.md`.
+Целевой файл плана: `docs/sprint_1/legacy-generic-plan/day-6-plan.md`.
 
 Day 6 должен подготовить backend realtime-ядро без публикации CRUD-событий: добавить WebSocket endpoint для подписки на один слой, JWT-аутентификацию сокета, in-memory connection manager по `layer_id` и lifecycle-хуки на connect/disconnect. Вне Day 6 остаются сами `feature_created|updated|deleted` публикации, frontend WebSocket client и integration-сценарий двух клиентов.
 

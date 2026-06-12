@@ -113,7 +113,7 @@
 
 ### Contract checks
 
-- схемы login/auth согласованы с уже зафиксированными в [sprint-1-plan.md](/C:/Repositories/geoservice/docs/requirements/sprints/sprint-1/sprint-1-plan.md) контрактами;
+- схемы login/auth согласованы с уже зафиксированными в [sprint-1-plan.md](sprint-1-plan.md) контрактами;
 - Day 2 не добавляет новых публичных auth endpoint'ов.
 
 ## Definition of Done для Дня 2

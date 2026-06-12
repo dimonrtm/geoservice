@@ -16,15 +16,40 @@ Pre-commit не запускает и не проверяет этот проц�
 
 ## Записи
 
+### 2026-06-12 - Контракты Дня 1 И Папка Спринта 1
+
+**Источник:** подтвержденные пользователем acceptance, domain model, API и backlog Дня 1, `docs/sprint_1/`, `git status --short`, `git diff --stat`.
+
+**Кратко:** День 1 зафиксирован как контрактный день без production-кода. Созданы четыре связанных артефакта: acceptance AC-01..AC-07, доменная модель, исполнимый API-контракт и вертикальный backlog S1-01..S1-10. Все документы Спринта 1 собраны в `docs/sprint_1`, а старые generic-планы отделены в `legacy-generic-plan`.
+
+**Затронутые области:**
+
+- `docs/sprint_1/2026-06-12-sprint-1-day-1-acceptance-design.md` - happy path и защитные сценарии.
+- `docs/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md` - `WorkOrder`, `AOI`, `Feeder`, network aggregate, `Default` и `EditVersion`.
+- `docs/sprint_1/2026-06-12-sprint-1-day-1-api-contract-design.md` - endpoints, DTO, authorization и ошибки.
+- `docs/sprint_1/2026-06-12-sprint-1-day-1-vertical-backlog-design.md` - вертикальная последовательность реализации.
+- `docs/sprint_1/legacy-generic-plan/` - исторические планы прежнего generic GIS scope.
+- `docs/agent-memory/decisions/2026-06-12-sprint-1-day-1-contracts.md` - долговременная память о решениях.
+
+**Что помнить дальше:**
+
+- `AOI` является серверной границей данных workspace; geometry пересекающего feature не обрезается.
+- `Feeder` агрегирует свои `NetworkFeature` и внутрефидерные `NetworkAssociation`.
+- Создание `EditVersion` атомарно фиксирует `baseRevision`, повторное открытие не создает дубль.
+- Весь пользовательский текст и project-owned application logs пишутся на русском языке; API paths, JSON keys, error `code`, типы и идентификаторы остаются на английском.
+- Спринт 1 заканчивается read-only workspace и не включает editing, validation, reconcile, review или post.
+
+**Проверка:** четыре актуальных документа не содержат `TBD`/`TODO`; AC, состояния, endpoints и HTTP/error codes согласованы; старые ссылки на прежние расположения файлов не найдены; `scripts/check-memory-needed.py --check` и `git diff --check` пройдены; wiki lint повторяет только 11 известных `missing_frontmatter` в неизменяемых RAW Markdown из `FU-2026-06-01-004`.
+
 ### 2026-06-12 - Календарный план Спринта 1 Utility Workflow
 
-**Источник:** подтвержденное пользователем разбиение Спринта 1, `docs/superpowers/specs/2026-06-12-sprint-1-utility-workflow-calendar-design.md`, `git status --short`, `git diff --stat`.
+**Источник:** подтвержденное пользователем разбиение Спринта 1, `docs/sprint_1/2026-06-12-sprint-1-utility-workflow-calendar-design.md`, `git status --short`, `git diff --stat`.
 
 **Кратко:** Спринт 1 разложен на 14 календарных дней. Принят ритм из двух пятидневных интенсивных блоков и двух облегченных выходных блоков для интеграции, документации, проверки и резерва. План использует вертикальный подход и заканчивается воспроизводимым путем `login -> assigned work order -> create/open edit version -> workspace`.
 
 **Затронутые области:**
 
-- `docs/superpowers/specs/2026-06-12-sprint-1-utility-workflow-calendar-design.md` - scope, план по дням, контрольные точки и критерии завершения.
+- `docs/sprint_1/2026-06-12-sprint-1-utility-workflow-calendar-design.md` - scope, план по дням, контрольные точки и критерии завершения.
 - `docs/agent-memory/decisions/2026-06-12-sprint-1-calendar-plan.md` - долговременная память о формате спринта.
 - `docs/agent-memory/file-map.md`, `memory/project-state.md` - навигация и live state.
 

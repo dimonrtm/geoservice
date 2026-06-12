@@ -5,7 +5,7 @@ Type: decision
 Tags: release-1, sprint-1, utility-workflow, planning
 Related files:
 
-- `docs/superpowers/specs/2026-06-12-sprint-1-utility-workflow-calendar-design.md`
+- `docs/sprint_1/2026-06-12-sprint-1-utility-workflow-calendar-design.md`
 - `docs/superpowers/plans/2026-06-11-release-1-utility-workflow-sprints.md`
 
 ## Summary

@@ -2,7 +2,7 @@
 
 ## Summary
 
-Целевой файл плана: `docs/requirements/sprints/sprint-1/day-7-plan.md`.
+Целевой файл плана: `docs/sprint_1/legacy-generic-plan/day-7-plan.md`.
 
 Day 7 должен встроить публикацию realtime-событий в backend CRUD-поток для feature без изменения публичных HTTP endpoint'ов. Основа уже подготовлена в Day 6: есть `WS /api/v1/ws/layers/{layer_id}?token=<jwt>`, in-memory connection manager, JWT-аутентификация сокета и handshake `connected`. Вне Day 7 остаются frontend WebSocket client, reconnect-логика на клиенте и integration-сценарий двух реальных клиентов.
 
