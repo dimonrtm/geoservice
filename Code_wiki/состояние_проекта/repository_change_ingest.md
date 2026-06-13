@@ -3,8 +3,8 @@ title: Repository Change Ingest
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-12
-source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06; 2026-06-07; 2026-06-11; 2026-06-12"
+updated: 2026-06-13
+source: "git status/diff, 2026-05-30; 2026-05-31; 2026-06-02; 2026-06-04; 2026-06-05; 2026-06-06; 2026-06-07; 2026-06-11; 2026-06-12; 2026-06-13"
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -15,6 +15,155 @@ tags: [repository-change, code-wiki, ingest]
 Pre-commit не запускает и не проверяет этот процесс. Ответственность за запись лежит на агенте.
 
 ## Записи
+
+### 2026-06-13 - Реализация Ролей И Доступа Дня 2
+
+**Источник:** завершённый implementation plan
+`docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md`,
+`git status --short`, `git diff --stat`, backend/frontend test suites и
+Docker/Compose smoke.
+
+**Кратко:** legacy `Viewer` удалён из активной DB/API/frontend модели.
+Реализованы взаимоисключающие `Editor`/`Reviewer`, DB-backed HTTP и WebSocket
+auth с проверкой `is_active`, структурированные auth errors, стабильный seed
+трёх demo users и отдельный Reviewer placeholder без editor workspace.
+
+**Затронутые области:**
+
+- `apps/backend/app/models/user.py`, migration `b82a5f2d91c3` и auth/realtime
+  dependencies;
+- существующая seed-цепочка
+  `seed_demo_users.py -> run_demo_user_seed() -> DemoUserSeedService`;
+- `apps/frontend/src/api/auth.ts`, role helper, `ReviewerHome.vue`, `App.vue`;
+- backend/frontend tests и test-only env bootstrap в `tests/conftest.py`;
+- `README.md`, `Code_wiki/dev_setup/local_development.md`,
+  `Code_wiki/deployment/docker_compose.md`,
+  `Code_wiki/сборка/ci_and_quality.md`,
+  `Code_wiki/архитектура/backend.md`,
+  `Code_wiki/архитектура/api_and_realtime.md`.
+
+**Что помнить дальше:**
+
+- JWT содержит роль, но source of truth для активной сессии — текущий `User`
+  из БД; legacy/unsupported token roles отклоняются.
+- HTTP role guards `require_editor` и `require_reviewer` взаимоисключающие;
+  read-only realtime доступен обеим ролям.
+- Migration удаляет строки с role `viewer` и известные legacy demo accounts,
+  меняет CHECK на `editor/reviewer` и добавляет `is_active`.
+- Stable demo UUID заканчиваются на `0001`, `0002`, `0003`; эти ID предназначены
+  для будущих связей `WorkOrder`.
+- Reviewer queue, approve/reject, `post`, audit и assignment guard остаются
+  вне scope Дня 2.
+- `.github/workflows/ci.yml`, Dockerfile и Compose-файлы не менялись.
+- Работа выполнена без worktree, `git add`, `git commit` и изменения
+  пользовательского staging.
+
+**Проверка:** backend `63 passed`, Black и Ruff прошли; frontend `29 passed`,
+format/lint/typecheck/build прошли; backend/frontend `prod` images собраны;
+base Compose CI smoke, upgrade существующего volume, изолированный clean
+install, `dev` и `prod` profiles прошли. Рабочие сервисы оставлены healthy на
+`8000`, `5173` и `8080`.
+
+### 2026-06-13 - План Реализации Ролей И Доступа Дня 2
+
+**Источник:** утвержденный design
+`docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-design.md`, анализ
+текущих backend/frontend auth files и implementation plan
+`docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md`.
+
+**Кратко:** подготовлен TDD-план перехода с legacy `Viewer`/`Editor` на
+`Editor`/`Reviewer`. План состоит из шести инкрементов: persisted role model и
+миграция, DB-backed HTTP auth и guards, стабильный demo seed, realtime policy,
+frontend role boundary, документация и end-to-end verification.
+
+**Затронутые области:**
+
+- `docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md`
+  - исполнимые задачи, точные файлы, код, команды и ожидаемые результаты.
+- `docs/agent-memory/sessions/2026-06-13-sprint-1-day-2-roles-access-plan.md`
+  - долговременный контекст планирования.
+- `docs/sprint_1/README.md`, `docs/agent-memory/file-map.md` - навигация.
+
+**Что помнить дальше:**
+
+- По прямому указанию пользователя реализация выполняется в текущей ветке и
+  текущей рабочей копии без worktree.
+- Агент не должен выполнять `git add`, `git commit`, менять Git index или
+  затрагивать уже существующие staged-изменения пользователя.
+- Текущий `user_role` реализован как `VARCHAR + CHECK`, а не native PostgreSQL
+  enum.
+- Текущий `get_current_user` доверяет JWT; план переводит его на async
+  повторную загрузку пользователя из БД и проверку `is_active`.
+- Стабильные demo IDs задаются seed'ом для будущих `WorkOrder`.
+- Demo users создаются расширением существующей цепочки
+  `seed_demo_users.py -> run_demo_user_seed() -> DemoUserSeedService`;
+  отдельный seed script или новый seed-механизм создавать нельзя.
+- Все существующие jobs `.github/workflows/ci.yml` должны пройти без удаления
+  или ослабления проверок: backend format/lint/test/prod build, Compose smoke
+  и frontend format/lint/typecheck/test/build.
+- Deployment regression включает backend targets `dev`/`prod`, frontend
+  target `prod`, base Compose `postgis + backend` и локальные profiles `dev`
+  и `prod`.
+- Перед изменениями создаётся legacy volume с текущей схемой и demo users;
+  после изменений миграция и обновлённый seed проверяются поверх этого volume,
+  затем отдельно выполняется clean-install smoke.
+- Отдельного CD workflow в репозитории нет; новый delivery pipeline не входит
+  в scope этой задачи.
+- Assignment guard и `WORK_ORDER_NOT_ASSIGNED` отложены до S1-05, потому что
+  сущность `WorkOrder` еще отсутствует.
+- Reviewer queue, approve/reject, `post` и audit storage не входят в День 2.
+
+**Проверка:** выполнены placeholder scan, spec coverage и type consistency;
+из плана удалены исполняемые шаги `git add`/`git commit` и требование
+worktree; seed-раздел сверён с существующими `seed_demo_users.py`,
+`run_demo_user_seed()` и `DemoUserSeedService`; команды
+`docker compose ... config --quiet` прошли для base, merged override, `dev` и
+`prod` profiles. Код и тесты приложения не изменялись и не запускались.
+
+### 2026-06-13 - Роли И Доступ Дня 2 Спринта 1
+
+**Источник:** подтвержденный пользователем design ролей и доступа,
+`docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-design.md`,
+`git status --short`, `git diff --stat`. Пользовательские изменения
+`.obsidian/` не относятся к этой задаче и не учитывались.
+
+**Кратко:** для Utility Workflow принята строгая взаимоисключающая модель
+`Editor`/`Reviewer`. Legacy `Viewer` удаляется из целевой DB/API/frontend
+модели и demo seed без преобразования в `Reviewer`. Зафиксированы два demo
+editors и отдельный reviewer, общая reviewer queue, approve/reject и
+последующий `post` со стороны `Reviewer`.
+
+**Затронутые области:**
+
+- `docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-design.md` - role
+  matrix, guards, миграция, seed, контракты и проверки.
+- `docs/sprint_1/README.md` - навигация по артефактам Спринта 1.
+- `docs/agent-memory/decisions/2026-06-13-sprint-1-day-2-roles-access.md` -
+  долговременная память о решениях.
+- `docs/agent-memory/file-map.md` - быстрый поиск артефакта Дня 2.
+
+**Что помнить дальше:**
+
+- Целевой `UserRole` содержит только `editor` и `reviewer`; одна роль на
+  пользователя структурно обеспечивает separation of duties.
+- Миграция удаляет только подтвержденные legacy demo users `Viewer`; при
+  неизвестных значимых FK-связях она должна завершиться ошибкой.
+- Demo seed содержит `alexey.editor`, `bolat.editor` и `marina.reviewer`.
+- `Editor` видит только назначенные work orders; доступ к существующему чужому
+  `WorkOrder` возвращает `403 WORK_ORDER_NOT_ASSIGNED`.
+- Reviewer queue общая, без назначения конкретного reviewer; реализация queue,
+  approve/reject и `post` не входит в День 2.
+- Фактический код пока остается на legacy `viewer/editor`; следующий этап
+  требует отдельного implementation plan.
+
+**Риски:** различение `WORK_ORDER_NOT_ASSIGNED` и `WORK_ORDER_NOT_FOUND`
+раскрывает существование чужого идентификатора. Это принято для local demo, но
+должно быть пересмотрено перед production. Удаление `Viewer` требует явной
+проверки FK и audit-ссылок.
+
+**Проверка:** design не содержит незаполненных `TBD`/`TODO`; memory-check и
+`git diff --check` пройдены. Реализация и тесты приложения не запускались,
+поскольку задача ограничена design.
 
 ### 2026-06-12 - Контракты Дня 1 И Папка Спринта 1
 

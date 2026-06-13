@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-12
+updated: 2026-06-13
 source: null
 tags: [followups, conflicts]
 ---
@@ -34,6 +34,7 @@ tags: [followups, conflicts]
 | FU-2026-06-07-002 | open     | Manual baseline       | [[../../chats/2026-06-07-phase-f7-metrics-and-risks]], [[../../concepts/metrics]] | Снять ручной baseline на 10-20 work orders low/medium/high: time to safe post, review/reconcile time, return/rework/error rates и manual touch count. |
 | FU-2026-06-11-001 | resolved | Release 1 compliance  | [[../../decisions/release_1_utility_workflow]], [[../../chats/2026-06-11-phase-f8-release-1-closeout]], `docs/superpowers/specs/2026-06-11-release-1-utility-workflow-design.md`, `docs/requirements/release-1-utility-code-compliance.md` | Code compliance matrix составлена 2026-06-11: foundation, missing capabilities, superseded scope, migration rules и риски отражены в отдельном документе. |
 | FU-2026-06-11-002 | open     | Documentation         | [[../../decisions/release_1_utility_workflow]], `docs/requirements/geoservice-prd-v1.md`, `docs/requirements/geoservice-requirements.md`, `docs/requirements/action-plan.md`, [[../../../Code_wiki/архитектура/api_contract_first_release_requirements]] | Отдельной docs-задачей пометить старые generic Release 1 requirements superseded и синхронизировать публичные requirements/API docs с utility workflow. |
+| FU-2026-06-13-001 | resolved | Code_wiki             | [[../../../Code_wiki/архитектура/backend]], [[../../../Code_wiki/архитектура/api_and_realtime]], `apps/backend/app/api/auth.py`, `apps/backend/app/api/websocket_auth.py` | После repository-change ingest snapshot-ноды синхронизированы с реализованными `Editor`/`Reviewer`, DB-backed active-user auth и structured auth errors. |
 
 ## Правило Post-Ingest Correction
 

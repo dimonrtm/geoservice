@@ -22,8 +22,8 @@ class DummyWebSocket:
 def build_user_context() -> WebSocketUserContext:
     return WebSocketUserContext(
         user_id=uuid4(),
-        email="viewer@example.com",
-        role="viewer",
+        email="marina.reviewer@example.local",
+        role="reviewer",
     )
 
 

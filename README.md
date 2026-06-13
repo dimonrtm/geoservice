@@ -84,13 +84,18 @@ docker compose --profile dev up --build
 
 Demo credentials:
 
-- `editor@example.com` / `editor-password`
-- `viewer@example.com` / `viewer-password`
+- `alexey.editor@example.local` / `alexey-editor-password`
+- `bolat.editor@example.local` / `bolat-editor-password`
+- `marina.reviewer@example.local` / `marina-reviewer-password`
+
+`Editor` видит существующую основу карты и editor workspace. `Reviewer` видит
+отдельную страницу роли без editor workspace; reviewer queue будет добавлена
+в следующем спринте. Legacy credentials `viewer@example.com` удалены.
 
 Проверка login flow:
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/auth/login -H "Content-Type: application/json" -d "{\"email\":\"editor@example.com\",\"password\":\"editor-password\"}"
+curl -X POST http://localhost:8000/api/v1/auth/login -H "Content-Type: application/json" -d "{\"email\":\"alexey.editor@example.local\",\"password\":\"alexey-editor-password\"}"
 ```
 
 После получения `access_token` можно проверить сессию:
@@ -99,7 +104,10 @@ curl -X POST http://localhost:8000/api/v1/auth/login -H "Content-Type: applicati
 curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <access_token>"
 ```
 
-Повторный запуск backend не должен создавать дубликаты demo-пользователей: seed приводит записи к ожидаемому baseline по роли и паролю и не требует `dev-login` для локального demo-сценария.
+Повторный запуск backend не должен создавать дубликаты demo-пользователей:
+существующий `seed_demo_users.py` приводит записи к ожидаемому baseline по
+стабильному ID, роли, паролю и active status и не требует `dev-login` для
+локального demo-сценария.
 
 ## Конфигурация
 

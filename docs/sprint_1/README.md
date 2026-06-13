@@ -9,6 +9,8 @@
 - [Доменная модель Дня 1](2026-06-12-sprint-1-day-1-domain-model-design.md)
 - [API-контракт Дня 1](2026-06-12-sprint-1-day-1-api-contract-design.md)
 - [Вертикальный backlog Дня 1](2026-06-12-sprint-1-day-1-vertical-backlog-design.md)
+- [Роли и доступ Дня 2](2026-06-13-sprint-1-day-2-roles-access-design.md)
+- [План реализации ролей и доступа Дня 2](2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md)
 
 ## Исторические Материалы
 

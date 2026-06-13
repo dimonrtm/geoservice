@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from uuid import uuid4
 
+from domain.exceptions.auth_api_error import AuthApiError
 from domain.exceptions.business_validation_exception import BusinessValidationException
 from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
 from domain.exceptions.layer_not_found_exception import LayerNotFoundException
@@ -10,6 +12,19 @@ from schemas.patch_feature_conflict_response import PatchFeatureConflictResponse
 
 
 def install_exception_handlers(app: FastAPI) -> None:
+    @app.exception_handler(AuthApiError)
+    async def auth_api_error(request: Request, error: AuthApiError):
+        correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
+        return JSONResponse(
+            status_code=error.status_code,
+            content={
+                "code": error.code,
+                "message": error.message,
+                "correlationId": correlation_id,
+                "details": {},
+            },
+        )
+
     @app.exception_handler(FeatureNotFoundException)
     async def feature_not_found(_: Request, e: FeatureNotFoundException):
         return JSONResponse(status_code=404, content={"error": str(e)})

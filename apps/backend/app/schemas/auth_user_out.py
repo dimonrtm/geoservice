@@ -8,4 +8,4 @@ class AuthUserOut(BaseModel):
 
     id: str
     email: str
-    role: Literal["viewer", "editor"]
+    role: Literal["editor", "reviewer"]

@@ -5,7 +5,7 @@ Created on Sat Jan 10 17:32:50 2026
 @author: dimon
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import Response
 from schemas.feature_collection_out import FeatureCollectionOut
 from schemas.feature_out import FeatureOut
@@ -40,16 +40,9 @@ async def get_layer_features_from_bbox(
     limit: int | None = None,
     after_id: UUID | None = None,
     feature_service: FeatureService = Depends(get_feature_service),
-    user=Depends(get_current_user),
 ) -> FeatureCollectionOut:
-    if user.get("role") in ("viewer", "editor"):
-        bb = parse_bbox(bbox)
-        return await feature_service.get_features_from_bbox(layer_id, bb, limit, after_id)
-    else:
-        raise HTTPException(
-            status_code=403,
-            detail="Отправлять запросы на чтение могут только пользователи с ролями 'viewer' или 'editor'",
-        )
+    bb = parse_bbox(bbox)
+    return await feature_service.get_features_from_bbox(layer_id, bb, limit, after_id)
 
 
 @layers_router.post(

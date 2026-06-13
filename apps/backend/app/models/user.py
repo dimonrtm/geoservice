@@ -9,7 +9,7 @@ from .base import Base
 from uuid import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy import String, DateTime, func
+from sqlalchemy import Boolean, String, DateTime, func
 import uuid
 import enum
 from sqlalchemy import Enum as SAEnum
@@ -17,15 +17,15 @@ from datetime import datetime
 
 
 class UserRole(str, enum.Enum):
-    VIEWER = "viewer"
     EDITOR = "editor"
+    REVIEWER = "reviewer"
 
 
 class User(Base):
     __tablename__ = "users"
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
-    password_hash: Mapped[str] = mapped_column(String(1024), nullable=True)
+    password_hash: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     role: Mapped[UserRole] = mapped_column(
         SAEnum(
             UserRole,
@@ -37,6 +37,12 @@ class User(Base):
             length=16,
         ),
         nullable=False,
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default="true",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

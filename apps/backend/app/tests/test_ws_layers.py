@@ -25,7 +25,7 @@ def create_test_app(
     return app
 
 
-@pytest.mark.parametrize("role", ["viewer", "editor"])
+@pytest.mark.parametrize("role", ["editor", "reviewer"])
 def test_ws_layer_subscription_accepts_authorized_users(role: str) -> None:
     layer_id = uuid4()
     user_id = uuid4()
@@ -36,6 +36,7 @@ def test_ws_layer_subscription_accepts_authorized_users(role: str) -> None:
             id=user_id,
             email=f"{role}@example.com",
             role=SimpleNamespace(value=role),
+            is_active=True,
         )
 
     async def get_layer_by_id(_layer_id):
@@ -101,13 +102,14 @@ def test_ws_layer_subscription_rejects_invalid_token() -> None:
 def test_ws_layer_subscription_rejects_unknown_layer() -> None:
     layer_id = uuid4()
     user_id = uuid4()
-    token = create_access_token(str(user_id), "viewer")
+    token = create_access_token(str(user_id), "reviewer")
 
     async def get_user_by_id(_user_id):
         return SimpleNamespace(
             id=user_id,
-            email="viewer@example.com",
-            role=SimpleNamespace(value="viewer"),
+            email="marina.reviewer@example.local",
+            role=SimpleNamespace(value="reviewer"),
+            is_active=True,
         )
 
     async def get_layer_by_id(_layer_id):

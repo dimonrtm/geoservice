@@ -3,6 +3,8 @@ import { computed, onMounted } from "vue";
 
 import LoginScreen from "./components/LoginScreen.vue";
 import MapPageView from "./components/MapPageView.vue";
+import ReviewerHome from "./components/ReviewerHome.vue";
+import { getRoleLabel, isEditorRole } from "@/domain/authRole";
 import { useAuthStore } from "@/stores/auth";
 import "./assets/main.css";
 
@@ -13,10 +15,12 @@ const userLabel = computed(() => {
     return "";
   }
 
-  const roleLabel = auth.user.role === "editor" ? "Редактор" : "Наблюдатель";
-
-  return `${auth.user.email} (${roleLabel})`;
+  return `${auth.user.email} (${getRoleLabel(auth.user.role)})`;
 });
+
+const showEditorWorkspace = computed(
+  () => auth.user !== null && isEditorRole(auth.user.role),
+);
 
 onMounted(() => {
   if (!auth.isReady && !auth.isRestoring) {
@@ -67,7 +71,8 @@ onMounted(() => {
       </div>
 
       <div class="content">
-        <MapPageView class="mapSlot" />
+        <MapPageView v-if="showEditorWorkspace" class="mapSlot" />
+        <ReviewerHome v-else />
       </div>
     </div>
 

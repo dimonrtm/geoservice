@@ -3,8 +3,8 @@ title: Local Development
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-05-30
-source: repository-snapshot:2026-05-30
+updated: 2026-06-13
+source: repository-change:2026-06-13
 tags: [dev-setup, docker, backend, frontend]
 ---
 
@@ -41,10 +41,18 @@ Backend в основном compose сам выполняет migrations и demo
 
 `seed_demo_users.py` поддерживает baseline demo-пользователей:
 
-- `editor@example.com` / `editor-password`, роль `editor`.
-- `viewer@example.com` / `viewer-password`, роль `viewer`.
+- `alexey.editor@example.local` / `alexey-editor-password`, роль `editor`.
+- `bolat.editor@example.local` / `bolat-editor-password`, роль `editor`.
+- `marina.reviewer@example.local` / `marina-reviewer-password`, роль `reviewer`.
 
-Seed idempotent: существующим demo users приводятся роль и пароль к ожидаемому состоянию.
+Seed использует существующую цепочку
+`seed_demo_users.py -> run_demo_user_seed() -> DemoUserSeedService`, стабильные
+UUID и при каждом старте backend приводит demo users к ожидаемым роли, паролю
+и `is_active=true`. Повторный запуск не создаёт дубликаты.
+
+Legacy credentials `editor@example.com` и `viewer@example.com` удалены.
+`Editor` видит существующий map/editor workspace. `Reviewer` видит отдельный
+placeholder без editor workspace; reviewer queue ещё не реализована.
 
 ## Переменные
 

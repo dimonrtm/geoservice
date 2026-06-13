@@ -9,6 +9,7 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+from domain.exceptions.auth_api_error import AuthApiError
 from models.user import User
 from repositories.user_repository import UserRepository
 from schemas.dev_login_in import DevLoginIn
@@ -36,6 +37,12 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Неверная электронная почта или пароль",
                 headers={"WWW-Authenticate": "Bearer"},
+            )
+        if not user.is_active:
+            raise AuthApiError(
+                status_code=status.HTTP_403_FORBIDDEN,
+                code="USER_INACTIVE",
+                message="Учетная запись отключена.",
             )
         return user
 

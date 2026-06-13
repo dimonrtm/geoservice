@@ -27,10 +27,20 @@ class UserRepository:
         return res.scalars().one_or_none()
 
     async def create_user(
-        self, email: str, role: UserRole, password_hash: str = None
-    ) -> User | None:
-        stmt = (
-            insert(User).values(email=email, role=role, password_hash=password_hash).returning(User)
-        )
+        self,
+        email: str,
+        role: UserRole,
+        password_hash: str | None = None,
+        user_id: UUID | None = None,
+    ) -> User:
+        values = {
+            "email": email,
+            "role": role,
+            "password_hash": password_hash,
+        }
+        if user_id is not None:
+            values["id"] = user_id
+
+        stmt = insert(User).values(**values).returning(User)
         res = await self.session.execute(stmt)
         return res.scalar_one()

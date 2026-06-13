@@ -15,6 +15,8 @@ from jose import JWTError, jwt
 
 from .deps import get_auth_service
 from core.settings import settings
+from domain.exceptions.auth_api_error import AuthApiError
+from models.user import User, UserRole
 from schemas.auth_login_in import AuthLoginIn
 from schemas.auth_me_out import AuthMeOut
 from schemas.auth_success_out import AuthSuccessOut
@@ -25,6 +27,7 @@ from services.auth_service import AuthService
 
 bearer = HTTPBearer(auto_error=False)
 auth_router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+SUPPORTED_AUTH_ROLES = {role.value for role in UserRole}
 
 
 def create_access_token(user_id: str, role: str) -> str:
@@ -50,29 +53,51 @@ def decode_token(token: str) -> dict:
         ) from exc
 
 
-def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer)) -> dict:
+async def get_current_user(
+    cred: HTTPAuthorizationCredentials = Depends(bearer),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> User:
     if cred is None or not cred.credentials:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен отсутствует",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthApiError(401, "AUTH_REQUIRED", "Требуется вход в систему.")
+
+    try:
+        payload = decode_token(cred.credentials)
+    except HTTPException as exc:
+        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.") from exc
+
+    if "sub" not in payload or payload.get("role") not in SUPPORTED_AUTH_ROLES:
+        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.")
+
+    try:
+        user_id = UUID(str(payload["sub"]))
+    except ValueError as exc:
+        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.") from exc
+
+    current_user = await auth_service.get_user_by_id(user_id)
+    if current_user is None:
+        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.")
+    if not current_user.is_active:
+        raise AuthApiError(403, "USER_INACTIVE", "Учетная запись отключена.")
+    return current_user
+
+
+def require_editor(user: User = Depends(get_current_user)) -> User:
+    if user.role is not UserRole.EDITOR:
+        raise AuthApiError(
+            403,
+            "ROLE_NOT_ALLOWED",
+            "Операция доступна только пользователю с ролью Editor.",
         )
+    return user
 
-    payload = decode_token(cred.credentials)
 
-    if "sub" not in payload or "role" not in payload:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Некорректное содержимое токена",
-            headers={"WWW-Authenticate": "Bearer"},
+def require_reviewer(user: User = Depends(get_current_user)) -> User:
+    if user.role is not UserRole.REVIEWER:
+        raise AuthApiError(
+            403,
+            "ROLE_NOT_ALLOWED",
+            "Операция доступна только пользователю с ролью Reviewer.",
         )
-
-    return payload
-
-
-def require_editor(user: dict = Depends(get_current_user)) -> dict:
-    if user.get("role") != "editor":
-        raise HTTPException(status_code=403, detail="Требуется роль редактора")
     return user
 
 
@@ -105,30 +130,11 @@ async def login(
 
 
 @auth_router.get("/me", response_model=AuthMeOut)
-async def me(
-    user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
-) -> AuthMeOut:
-    try:
-        user_id = UUID(user["sub"])
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен недействителен или срок его действия истёк",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from exc
-
-    current_user = await auth_service.get_user_by_id(user_id)
-    if current_user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен недействителен или срок его действия истёк",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
+async def me(user: User = Depends(get_current_user)) -> AuthMeOut:
     return AuthMeOut(
         user=AuthUserOut(
-            id=str(current_user.id),
-            email=current_user.email,
-            role=current_user.role.value,
+            id=str(user.id),
+            email=user.email,
+            role=user.role.value,
         )
     )

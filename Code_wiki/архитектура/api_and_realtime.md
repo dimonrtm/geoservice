@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-05-30
-source: repository-snapshot:2026-05-30
+updated: 2026-06-13
+source: repository-change:2026-06-13
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -33,6 +33,8 @@ Frontend хранит token в `localStorage`, добавляет `Authorization
 
 ## Ошибки
 
+- Auth errors возвращают `code`, `message`, `correlationId`, `details`; активные
+  коды Дня 2: `AUTH_REQUIRED`, `USER_INACTIVE`, `ROLE_NOT_ALLOWED`.
 - Domain validation возвращает 422 с `{"error": "..."}`.
 - Missing layer/feature возвращает 404.
 - Version conflict возвращает 409 с телом `VERSION_MISMATCH`, `featureId`, `requestVersion`, `currentVersion`, `message`.
@@ -44,7 +46,8 @@ Endpoint: `GET /api/v1/ws/layers/{layer_id}?token=...`.
 Server-side:
 
 - token проверяется через тот же JWT decode и перечитывание user из БД;
-- роли `viewer` и `editor` допускаются к подписке;
+- роли `editor` и `reviewer` допускаются к read-only подписке;
+- inactive user и legacy/unsupported token role отклоняются с policy violation;
 - подписки группируются по `layer_id` в `WebSocketConnectionManager`;
 - feature create/update/delete публикуют события `feature_created`, `feature_updated`, `feature_deleted`.
 

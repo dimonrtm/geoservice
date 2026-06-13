@@ -8,7 +8,7 @@ from api.auth import decode_token
 from services.auth_service import AuthService
 from services.realtime_connection_manager import WebSocketUserContext
 
-ALLOWED_REALTIME_ROLES = {"viewer", "editor"}
+ALLOWED_REALTIME_ROLES = {"editor", "reviewer"}
 
 
 def _websocket_auth_error(reason: str) -> WebSocketException:
@@ -26,7 +26,7 @@ async def authenticate_websocket_token(
     except HTTPException as exc:
         raise _websocket_auth_error(str(exc.detail)) from exc
 
-    if "sub" not in payload or "role" not in payload:
+    if "sub" not in payload or payload.get("role") not in ALLOWED_REALTIME_ROLES:
         raise _websocket_auth_error("Некорректное содержимое токена")
 
     try:
@@ -37,6 +37,9 @@ async def authenticate_websocket_token(
     current_user = await auth_service.get_user_by_id(user_id)
     if current_user is None:
         raise _websocket_auth_error("Токен недействителен или срок его действия истёк")
+
+    if not current_user.is_active:
+        raise _websocket_auth_error("Учетная запись отключена.")
 
     if current_user.role.value not in ALLOWED_REALTIME_ROLES:
         raise _websocket_auth_error("Подписка на realtime недоступна для этой роли")

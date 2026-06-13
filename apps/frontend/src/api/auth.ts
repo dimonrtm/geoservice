@@ -1,6 +1,6 @@
 import { http } from "@/api/http";
 
-export type AuthRole = "viewer" | "editor";
+export type AuthRole = "editor" | "reviewer";
 
 export type AuthUser = {
   id: string;

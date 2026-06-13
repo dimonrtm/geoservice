@@ -68,14 +68,14 @@ describe("auth store", () => {
       JSON.stringify({
         id: "stale-user",
         email: "stale@example.com",
-        role: "viewer",
+        role: "editor",
       }),
     );
     fetchMeMock.mockResolvedValue({
       user: {
         id: "user-2",
-        email: "viewer@example.com",
-        role: "viewer",
+        email: "marina.reviewer@example.local",
+        role: "reviewer",
       },
     });
 
@@ -88,8 +88,8 @@ describe("auth store", () => {
     expect(store.sessionError).toBeNull();
     expect(store.user).toEqual({
       id: "user-2",
-      email: "viewer@example.com",
-      role: "viewer",
+      email: "marina.reviewer@example.local",
+      role: "reviewer",
     });
   });
 

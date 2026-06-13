@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-05-30
-source: repository-snapshot:2026-05-30
+updated: 2026-06-13
+source: repository-change:2026-06-13
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -39,8 +39,11 @@ HTTP auth использует JWT Bearer:
 
 Роли:
 
-- `viewer` и `editor` могут читать layers/features и подписываться на realtime.
+- `editor` и `reviewer` могут читать layers/features и подписываться на realtime.
 - Только `editor` может создавать, изменять и удалять features.
+- `get_current_user` после JWT decode загружает актуального `User` из БД и
+  проверяет `is_active`; роль из JWT не является source of truth.
+- `require_editor` и `require_reviewer` реализуют взаимоисключающие role guards.
 
 ## Связанные Ноды
 

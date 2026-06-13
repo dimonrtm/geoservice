@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +10,7 @@ from services.password_service import hash_password, verify_password
 
 @dataclass(frozen=True)
 class DemoUserSpec:
+    id: UUID
     email: str
     password: str
     role: UserRole
@@ -16,14 +18,22 @@ class DemoUserSpec:
 
 DEMO_USER_SPECS: tuple[DemoUserSpec, ...] = (
     DemoUserSpec(
-        email="editor@example.com",
-        password="editor-password",
+        id=UUID("10000000-0000-4000-8000-000000000001"),
+        email="alexey.editor@example.local",
+        password="alexey-editor-password",
         role=UserRole.EDITOR,
     ),
     DemoUserSpec(
-        email="viewer@example.com",
-        password="viewer-password",
-        role=UserRole.VIEWER,
+        id=UUID("10000000-0000-4000-8000-000000000002"),
+        email="bolat.editor@example.local",
+        password="bolat-editor-password",
+        role=UserRole.EDITOR,
+    ),
+    DemoUserSpec(
+        id=UUID("10000000-0000-4000-8000-000000000003"),
+        email="marina.reviewer@example.local",
+        password="marina-reviewer-password",
+        role=UserRole.REVIEWER,
     ),
 )
 
@@ -44,16 +54,20 @@ class DemoUserSeedService:
                         email=spec.email,
                         role=spec.role,
                         password_hash=hash_password(spec.password),
+                        user_id=spec.id,
                     )
                 else:
                     role_changed = user.role != spec.role
                     password_changed = not verify_password(spec.password, user.password_hash)
+                    active_changed = not user.is_active
 
                     if role_changed:
                         user.role = spec.role
                     if password_changed:
                         user.password_hash = hash_password(spec.password)
-                    if role_changed or password_changed:
+                    if active_changed:
+                        user.is_active = True
+                    if role_changed or password_changed or active_changed:
                         await self.session.flush()
 
                 seeded_users.append(user)
