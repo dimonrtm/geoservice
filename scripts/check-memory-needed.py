@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Warn when durable planning/rule changes are staged without agent memory."""
+"""Warn when staged operating-rule changes are missing durable memory context."""
 
 from __future__ import annotations
 
@@ -9,13 +9,15 @@ import sys
 from pathlib import Path
 
 
-DURABLE_PREFIXES = (
+OPERATING_RULE_PATHS = {
     "AGENTS.md",
     "CONTRIBUTING.md",
-    "docs/superpowers/plans/",
-    "docs/superpowers/specs/",
+    "docs/agent-memory/protocol.md",
+    "docs/agent-memory/README.md",
+}
+OPERATING_RULE_PREFIXES = (
     "docs/knowledge-pipeline/",
-    ".agents/skills/",
+    ".agents/skills/source-command-",
 )
 MEMORY_PREFIX = "docs/agent-memory/"
 
@@ -30,9 +32,8 @@ def needs_memory_update(changed_paths: list[str], memory_paths: list[str]) -> bo
 
 def is_durable_path(path: str) -> bool:
     normalized = normalize(path)
-    return any(
-        normalized == prefix or normalized.startswith(prefix)
-        for prefix in DURABLE_PREFIXES
+    return normalized in OPERATING_RULE_PATHS or any(
+        normalized.startswith(prefix) for prefix in OPERATING_RULE_PREFIXES
     )
 
 
@@ -63,10 +64,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if needs_memory_update(paths, memory_paths):
         print(
-            "Durable plan/spec/rule changes are staged without docs/agent-memory updates."
+            "Operating memory or knowledge-pipeline rules are staged "
+            "without docs/agent-memory updates."
         )
         print(
-            "Add or update a relevant memory entry, or document why memory is not needed."
+            "Update an existing durable memory entry, create one only if it "
+            "adds unique knowledge, or document why the rule is self-contained."
         )
         return 1
 

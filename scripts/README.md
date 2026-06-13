@@ -12,8 +12,18 @@ python scripts/lint-wiki.py --root .
 
 ## `check-memory-needed.py`
 
-Предупреждает, если меняются durable plan/spec/rule files без изменения `docs/agent-memory/`.
+Предупреждает, если меняются operating rules памяти или knowledge pipeline без изменения `docs/agent-memory/`. Обычные plan/spec сами по себе не требуют memory-записи.
 
 ```powershell
 python scripts/check-memory-needed.py --check
 ```
+
+## `audit-memory.py`
+
+Read-only аудит agent memory: broken references, noisy sessions, exact duplicate summaries, age candidates, budgets и legacy repository-change entries.
+
+```powershell
+python scripts/audit-memory.py --root . --format markdown
+```
+
+Findings являются отчётом для review и не приводят к автоматическому удалению.

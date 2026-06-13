@@ -3,8 +3,8 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-05-30
-source: repository-snapshot:2026-05-30
+updated: 2026-06-13
+source: repository-change:2026-06-13
 tags: [testing, backend, frontend, quality]
 ---
 
@@ -47,8 +47,10 @@ Scripts tests лежат в `scripts/tests`:
 
 - `test_lint_wiki.py`
 - `test_check_memory_needed.py`
+- `test_memory_audit.py`
 
-Они защищают wiki frontmatter/wikilinks и правило обязательной agent memory для durable process changes.
+Они защищают wiki frontmatter/wikilinks, узкий gate обязательной agent memory
+для изменений operating rules и read-only аудит жизненного цикла памяти.
 
 ## Команды
 
@@ -77,7 +79,12 @@ Wiki:
 ```powershell
 python scripts/lint-wiki.py --root .
 python scripts/check-memory-needed.py --check
+python scripts/audit-memory.py --root .
 ```
+
+Findings `audit-memory.py` являются отчётом для ревизии, а не автоматическим
+разрешением на удаление. Изменять или удалять найденные записи можно только
+после явного подтверждения пользователя.
 
 ## Связанные Ноды
 

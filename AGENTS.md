@@ -5,9 +5,16 @@ Before working in this repository:
 1. Read `docs/agent-memory/protocol.md`.
 2. Search `docs/agent-memory/file-map.md` and memory entries for context related to the user's request.
 3. Read only the memory entries that are relevant to the request.
-4. After significant work, add or update a memory entry.
+4. After significant work, decide whether durable memory needs an update.
 
-Significant work means context that will still help in a week: decisions, bug root causes, non-obvious file relationships, important commands, or stable project patterns. Do not store secrets, full chats, temporary logs, or unverified guesses.
+Create or update agent memory only when both conditions hold:
+
+1. The knowledge is likely to remain useful for at least a week.
+2. Existing code, design, plan, runbook, or wiki does not already preserve it, or the memory adds an important explanation of why.
+
+Store decisions with consequences, non-obvious bug root causes, stable patterns, non-obvious file relationships, and unique operational constraints. Do not store task completion, changed-file lists, test logs, sync/ingest/lint results, or summaries of existing plans and wiki nodes. Update an existing entry instead of creating a duplicate. Use `sessions/` only for unfinished handoff or a unique result that fits no decision, pattern, bugfix, or wiki node.
+
+Do not store secrets, full chats, temporary logs, or unverified guesses.
 
 ## Project Knowledge Wiki
 
@@ -28,12 +35,13 @@ Manual wiki workflow:
 2. Before a meeting: run `/discover --context ... --phase ...`, prepare 10-15 questions, and prepare a checklist.
 3. After a meeting: put the transcript in `RAW_inputs/meetings/`, run `/ingest`, update `Vision_wiki`, record conflicts/follow-ups, and update `memory/project-state.md`.
 4. Weekly: run `/lint-wiki`, run `/sync-vision`, and produce a wiki health report.
+5. Weekly: run `/audit-memory`; present cleanup candidates and wait for confirmation before deleting or merging anything.
 
 When `/ingest` is run without parameters, process 1-5 unambiguous new RAW inputs sequentially. If there are more than 5 RAW candidates or any ambiguity, list the candidates and ask for confirmation before processing. If there are no new RAW inputs, do not edit files; report that ingest was not performed and suggest an explicit path, `/ingest repository-snapshot`, or `/ingest repository-change` if appropriate.
 
 Use `/ingest repository-snapshot` through `.agents/skills/source-command-ingest/SKILL.md` when existing unchanged repository content needs to be added to `Code_wiki`: initial technical inventory, large external changes, or stale Code_wiki. Snapshot writes only knowledge documentation and must not edit code, configuration, migrations, or tests.
 
-After the full implementation plan or major task is complete, and before the final report to the user, the agent must invoke `/ingest repository-change` through `.agents/skills/source-command-ingest/SKILL.md`. Do not invoke it after every small step. This is tied to completed plan/task work, not to commit. Pre-commit must not run or check repository-change ingest. Repository-change ingest writes only knowledge documentation in `Code_wiki`; it must not edit code, configuration, migrations, or tests.
+Invoke `/ingest repository-change` only when completed work contains new durable technical knowledge that needs to be reflected in `Code_wiki`. Repository Change Ingest itself must inspect the knowledge and its sources, determine whether to create a new node or update existing nodes, make those changes, and update the compact registry. If there is no new durable technical knowledge, do not invoke the mode. Task size, plan completion, commits, and successful tests are not triggers. Pre-commit must not run or check repository-change ingest. Repository-change ingest writes only knowledge documentation in `Code_wiki`; it must not edit code, configuration, migrations, or tests.
 
 Do not edit `C:\Repositories\ai-po-template-experiments`. It is a read-only reference for template/methodology ideas only. Do not copy project-specific facts from it.
 

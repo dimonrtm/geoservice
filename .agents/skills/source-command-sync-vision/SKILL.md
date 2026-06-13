@@ -69,13 +69,16 @@ git log --since="7 days ago" --pretty=format:"%h %ad %s" --date=short -- RAW_inp
 
 ## Шаг 5. Обновить `memory/project-state.md`
 
-Добавить раздел или строку:
+Сохранить только живое состояние и следующий action:
 
 - дата и время последнего `/sync-vision`;
-- что изменилось с прошлого sync;
 - открытые вопросы;
 - stale-ноды;
 - что требует решения пользователя.
+
+Не накапливать список завершённых событий, implementation details или
+repository-change history. История изменений остаётся в Git и canonical
+wiki/design/plan документах.
 
 ## Шаг 6. Доложить Пользователю
 

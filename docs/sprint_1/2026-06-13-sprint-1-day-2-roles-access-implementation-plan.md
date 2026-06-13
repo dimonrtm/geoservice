@@ -100,8 +100,6 @@ Day 2 design заменяет решение Дня 1 о generic `Viewer`, но 
 - Update through `/ingest repository-change`: `Code_wiki/dev_setup/local_development.md`
 - Update through `/ingest repository-change`: `Code_wiki/сборка/ci_and_quality.md`
 - Update through `/ingest repository-change`: `Code_wiki/deployment/docker_compose.md`
-- Create through `/ingest repository-change`: `docs/agent-memory/sessions/2026-06-13-sprint-1-day-2-roles-access-implementation.md`
-- Modify through `/ingest repository-change`: `docs/agent-memory/file-map.md`
 
 ### Задача 0: Зафиксировать Deployment Baseline До Изменений
 
@@ -1086,8 +1084,6 @@ index не изменён.
 - Update through `/ingest repository-change`: `Code_wiki/dev_setup/local_development.md`
 - Update through `/ingest repository-change`: `Code_wiki/сборка/ci_and_quality.md`
 - Update through `/ingest repository-change`: `Code_wiki/deployment/docker_compose.md`
-- Create through `/ingest repository-change`: `docs/agent-memory/sessions/2026-06-13-sprint-1-day-2-roles-access-implementation.md`
-- Modify through `/ingest repository-change`: `docs/agent-memory/file-map.md`
 
 - [ ] **Шаг 1: Обновить demo credentials в `README.md`**
 
@@ -1236,9 +1232,9 @@ Invoke `/ingest repository-change` through
 documentation, including the actual role model and demo credentials in
 `Code_wiki/dev_setup/local_development.md`, подтвержденные CI gates в
 `Code_wiki/сборка/ci_and_quality.md`, deployment smoke в
-`Code_wiki/deployment/docker_compose.md`, create
-`docs/agent-memory/sessions/2026-06-13-sprint-1-day-2-roles-access-implementation.md`,
-update `docs/agent-memory/file-map.md`, then run wiki lint.
+`Code_wiki/deployment/docker_compose.md`, then run wiki lint. Не создавать
+session task-log: реализация восстанавливается из code, tests и обновлённых
+`Code_wiki` нод.
 
 - [ ] **Шаг 10: Выполнить финальные проверки репозитория**
 

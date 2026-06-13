@@ -59,7 +59,6 @@ tags: [repository-snapshot, code-wiki, ingest]
 - [[../index]]
 - [[../../memory/project-state]]
 - `docs/agent-memory/file-map.md`
-- `docs/agent-memory/sessions/2026-05-30-repository-snapshot-initial-inventory.md`
 
 Наблюдения и пробелы:
 

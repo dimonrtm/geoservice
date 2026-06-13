@@ -7,6 +7,9 @@ description: Ручная процедура /lint-wiki для проверки 
 
 `/lint-wiki` проверяет техническое и структурное здоровье wiki.
 
+Lifecycle agent memory проверяется отдельно через `/audit-memory`. `/lint-wiki`
+не классифицирует session-записи, дубли memory и кандидатов на очистку.
+
 ## Шаг 1. Запустить Linter
 
 ```powershell
@@ -30,6 +33,12 @@ python scripts/lint-wiki.py --root .
 - устаревшие решения;
 - follow-up'ы без статуса;
 - новые RAW inputs без ingest.
+
+Для `docs/agent-memory/` вместо этого обзора выполнить:
+
+```powershell
+python scripts/audit-memory.py --root . --format markdown
+```
 
 ## Шаг 3. Что Можно Исправлять Сразу
 

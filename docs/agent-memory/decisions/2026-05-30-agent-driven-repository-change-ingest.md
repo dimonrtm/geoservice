@@ -2,6 +2,7 @@
 
 Date: 2026-05-30
 Type: decision
+Superseded by: `docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`
 Tags: wiki, ingest, task-completion, pre-commit
 Related files:
 
@@ -13,7 +14,11 @@ Related files:
 
 ## Summary
 
-Repository-change ingest больше не выполняется Python-скриптом и не проверяется pre-commit. После полного завершения реализации плана или крупной задачи агент должен сам вызвать `/ingest repository-change`, используя repo-local skill `source-command-ingest`, перед финальным отчетом пользователю. Триггер не привязан к commit и не должен срабатывать после каждого мелкого шага.
+Историческое решение отвязало repository-change ingest от Python-скрипта,
+pre-commit и commit. Его триггер по завершению плана или крупной задачи
+superseded: теперь `/ingest repository-change` вызывается только при наличии
+нового устойчивого технического знания для `Code_wiki`; выбор нод и их
+создание или обновление выполняет сам ingest.
 
 ## Context
 
@@ -26,6 +31,8 @@ Repository-change ingest больше не выполняется Python-скр�
 - 2026-05-30: В `.agents/skills/source-command-ingest/SKILL.md` добавлен режим `/ingest repository-change`.
 - 2026-05-30: Создан пустой журнал `Code_wiki/состояние_проекта/repository_change_ingest.md`.
 - 2026-05-30: Обновлены `AGENTS.md`, `docs/knowledge-pipeline/README.md`, `README.md`, `CONTRIBUTING.md`, `scripts/README.md` и file-map.
+- 2026-06-13: Task-completion trigger заменён двухусловным gate, журнал
+  переведён в компактный реестр изменений нод `Code_wiki`.
 
 ## Verification
 

@@ -8,7 +8,7 @@ The memory is local to this repository, versioned in Git, and written as Markdow
 
 - `protocol.md` - authoritative workflow for reading and writing memory.
 - `file-map.md` - compact topic-to-file map for fast retrieval.
-- `sessions/` - summaries of significant completed work.
+- `sessions/` - exceptional unfinished handoff or unique outcomes that fit no decision, pattern, bugfix, or wiki node; not a task log.
 - `decisions/` - architectural and product decisions.
 - `patterns/` - repeated implementation rules.
 - `bugfixes/` - bug symptoms, root causes, fixes, and verification.
@@ -25,6 +25,16 @@ Read `protocol.md` first, then use `file-map.md` and relevant memory entries. Do
 
 ## Writing Memory
 
-After significant work, add a Markdown entry using the template in `protocol.md`. Significant work means context that will still be useful in a week.
+After significant work, use the gate in `protocol.md`. Create or update memory only for unique durable knowledge that is not already preserved by code, design, plan, runbook, or wiki.
 
 Do not store secrets, full chats, noisy logs, or unverified guesses.
+
+## Auditing Memory
+
+Run the read-only lifecycle audit:
+
+```powershell
+python scripts/audit-memory.py --root . --format markdown
+```
+
+The report proposes review actions. It never authorizes automatic deletion.

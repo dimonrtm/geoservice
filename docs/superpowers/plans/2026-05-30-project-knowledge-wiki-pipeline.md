@@ -37,7 +37,7 @@
 - Создать `scripts/tests/test_repository_change_ingest.py`: standard-library тесты automatic ingest.
 - Изменить `.pre-commit-config.yaml`: добавить локальный guard hook для проверки, что `repository-change ingest` не пропущен.
 - Изменить `docs/agent-memory/file-map.md`: добавить карту новых файлов knowledge pipeline.
-- Создать `docs/agent-memory/sessions/2026-05-30-project-knowledge-wiki-pipeline.md`: memory entry после реализации.
+- Обновить `docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`: сохранить только устойчивые правила pipeline.
 - Изменить `docs/agent-memory/protocol.md`: добавить явные triggers, когда memory entry обязательна.
 - Создать `scripts/check-memory-needed.py`: предупреждение, если меняются планы/spec/rules без изменений в `docs/agent-memory/`.
 - Создать `scripts/tests/test_check_memory_needed.py`: standard-library тесты для memory-needed проверки.
@@ -1141,7 +1141,7 @@ python scripts/repository_change_ingest.py --repo-root . --check
 - Изменить: `.gitignore`
 - Изменить: `CONTRIBUTING.md`
 - Изменить: `docs/agent-memory/file-map.md`
-- Создать: `docs/agent-memory/sessions/2026-05-30-project-knowledge-wiki-pipeline.md`
+- Изменить: `docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`
 
 - [ ] **Шаг 1: Обновить `AGENTS.md`**
 
@@ -1258,55 +1258,13 @@ memory/local/
 - knowledge wiki style and ignore rules: `CONTRIBUTING.md`, `.gitignore`
 ```
 
-- [ ] **Шаг 6: Добавить session memory**
+- [ ] **Шаг 6: Обновить durable decision**
 
-Создать `docs/agent-memory/sessions/2026-05-30-project-knowledge-wiki-pipeline.md`:
-
-```markdown
-# Project Knowledge Wiki Pipeline
-
-Date: 2026-05-30
-Type: session
-Tags: knowledge-wiki, pipeline, ingest, code-wiki, pre-commit
-Related files:
-
-- `index.md`
-- `RAW_inputs/index.md`
-- `Vision_wiki/index.md`
-- `Vision_wiki/decisions/followups/index.md`
-- `Code_wiki/index.md`
-- `memory/project-state.md`
-- `docs/knowledge-pipeline/README.md`
-- `scripts/lint-wiki.py`
-- `scripts/repository_change_ingest.py`
-- `scripts/prepare_commit.cmd`
-
-## Summary
-
-В GeoService добавлен PO-style project knowledge wiki pipeline. Ручные workflow покрывают `/discover`, `/ingest`, `/sync-vision`, `/lint-wiki`; automatic repository-change ingest запускается через `scripts\prepare_commit.cmd` перед pre-commit для значимых staged changes.
-
-## Context
-
-Donor-репозиторий `C:\Repositories\ai-po-template-experiments` используется только read-only как источник шаблонов и методологии. Факты donor-проекта про Polus/Geoportal не мигрировались. Wiki ведется на русском языке.
-
-## Actions
-
-- 2026-05-30: Добавлены wiki skeleton, runbook, command docs, linting и automatic repository-change ingest.
-
-## Verification
-
-Run:
-
-```powershell
-python -m unittest discover -s scripts/tests
-python scripts/lint-wiki.py --root .
-rg -n "Polus|Geoportal|Георгий|Казань|Краснояр" index.md memory Vision_wiki Code_wiki RAW_inputs
-```
-
-## Retrieval Hints
-
-knowledge wiki, project-state, RAW_inputs, Vision_wiki, Code_wiki, repository-change ingest, pre-commit, followups, post-ingest correction, wiki на русском
-```
+Обновить
+`docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`
+только устойчивыми правилами pipeline. Не создавать session task-log:
+фактическое устройство wiki хранится в `docs/knowledge-pipeline/README.md`,
+`AGENTS.md`, repo-local skills и индексах wiki.
 
 ## Задача 6: Улучшить Надежность Записи Локальной Памяти
 

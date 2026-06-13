@@ -72,6 +72,17 @@ python scripts/lint-wiki.py --root .
 python scripts/check-memory-needed.py --check
 ```
 
+Жизненный цикл agent memory проверяется read-only аудитом:
+
+```powershell
+python scripts/audit-memory.py --root .
+```
+
+Аудит находит broken references, кандидатов на ревизию в `sessions/`,
+точные дубликаты summary, превышение бюджетов и исторические task-log блоки.
+Он не удаляет и не изменяет файлы; cleanup выполняется только после отчёта и
+явного подтверждения пользователя.
+
 ## Связанные Ноды
 
 - [[../правила_и_стиль/testing_strategy]]

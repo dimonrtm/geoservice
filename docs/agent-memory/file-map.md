@@ -7,10 +7,12 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - agent memory protocol workflow: `AGENTS.md`, `docs/agent-memory/protocol.md`
 - agent memory quick file lookup: `docs/agent-memory/file-map.md`
 - agent memory design spec: `docs/superpowers/specs/2026-05-30-agent-memory-design.md`
+- agent memory and knowledge base optimization design: `docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md`, `docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`
+- agent memory and knowledge base optimization plan: `docs/superpowers/plans/2026-06-13-memory-knowledge-base-optimization.md`
 - implementation plans language rule: `docs/agent-memory/patterns/2026-05-30-russian-implementation-plans.md`, `docs/superpowers/plans/`
 - project knowledge wiki pipeline: `index.md`, `RAW_inputs/`, `Vision_wiki/`, `Code_wiki/`, `memory/`, `Общие_принципы/`, `docs/knowledge-pipeline/README.md`, `.agents/skills/source-command-*/`
-- wiki checks: `scripts/lint-wiki.py`, `scripts/check-memory-needed.py`
-- repository-change ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `Code_wiki/состояние_проекта/repository_change_ingest.md`
+- wiki and memory checks: `scripts/lint-wiki.py`, `scripts/check-memory-needed.py`, `scripts/audit-memory.py`, `scripts/memory_audit.py`, `.agents/skills/source-command-audit-memory/SKILL.md`
+- repository-change ingest workflow and node registry: `.agents/skills/source-command-ingest/SKILL.md`, `Code_wiki/состояние_проекта/repository_change_ingest.md`
 - repository-snapshot ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `Code_wiki/состояние_проекта/repository_snapshot.md`
 - RAW_inputs batch ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `docs/knowledge-pipeline/README.md`, `RAW_inputs/index.md`
 - Release 1 RAW requirements ingest: `RAW_inputs/documents/спринт 1.odt`, `Vision_wiki/chats/2026-05-30-release-1-document.md`, `Vision_wiki/concepts/first_release_mvp.md`, `Vision_wiki/solution/USM.md`, `Vision_wiki/solution/roadmap.md`, `Vision_wiki/solution/nfr.md`, `Vision_wiki/solution/architecture_vision.md`, `Code_wiki/архитектура/api_contract_first_release_requirements.md`
@@ -31,8 +33,8 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - GeoService Release 1 sprint plan and compliance: `docs/requirements/release-1-utility-code-compliance.md`, `docs/superpowers/plans/2026-06-11-release-1-utility-workflow-sprints.md`
 - GeoService Sprint 1 current documents: `docs/sprint_1/README.md`, `docs/sprint_1/2026-06-12-sprint-1-utility-workflow-calendar-design.md`, `docs/sprint_1/2026-06-12-sprint-1-day-1-acceptance-design.md`, `docs/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md`, `docs/sprint_1/2026-06-12-sprint-1-day-1-api-contract-design.md`, `docs/sprint_1/2026-06-12-sprint-1-day-1-vertical-backlog-design.md`, `docs/agent-memory/decisions/2026-06-12-sprint-1-day-1-contracts.md`
 - GeoService Sprint 1 Day 2 roles and access: `docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-design.md`, `docs/agent-memory/decisions/2026-06-13-sprint-1-day-2-roles-access.md`
-- GeoService Sprint 1 Day 2 implementation plan: `docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md`, `docs/agent-memory/sessions/2026-06-13-sprint-1-day-2-roles-access-plan.md`
-- GeoService Sprint 1 Day 2 implementation: `apps/backend/app/alembic/versions/b82a5f2d91c3_editor_reviewer_roles.py`, `apps/backend/app/api/auth.py`, `apps/backend/app/api/websocket_auth.py`, `apps/backend/app/services/demo_user_seed_service.py`, `apps/frontend/src/domain/authRole.ts`, `apps/frontend/src/components/ReviewerHome.vue`, `docs/agent-memory/sessions/2026-06-13-sprint-1-day-2-roles-access-implementation.md`
+- GeoService Sprint 1 Day 2 implementation plan: `docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md`
+- GeoService Sprint 1 Day 2 implementation: `apps/backend/app/alembic/versions/b82a5f2d91c3_editor_reviewer_roles.py`, `apps/backend/app/api/auth.py`, `apps/backend/app/api/websocket_auth.py`, `apps/backend/app/services/demo_user_seed_service.py`, `apps/frontend/src/domain/authRole.ts`, `apps/frontend/src/components/ReviewerHome.vue`
 - Code_wiki repository snapshot inventory: `Code_wiki/архитектура/backend.md`, `Code_wiki/архитектура/frontend.md`, `Code_wiki/архитектура/api_and_realtime.md`, `Code_wiki/архитектура/data_model.md`, `Code_wiki/dev_setup/local_development.md`, `Code_wiki/deployment/docker_compose.md`, `Code_wiki/сборка/ci_and_quality.md`, `Code_wiki/правила_и_стиль/testing_strategy.md`, `Code_wiki/глоссарий/technical_terms.md`
 - Obsidian wiki graph config: `.obsidian/app.json`, `.obsidian/appearance.json`, `.obsidian/core-plugins.json`, `.obsidian/graph.json`, `.obsidian/templates.json`
 - discover startup mode and wiki filling phases: `.agents/skills/source-command-discover/SKILL.md`, `Общие_принципы/Вопросы стейкхолдеру.md`, `Общие_принципы/Фазы наполнения wiki.md`, `Vision_wiki/solution/USM.md`, `Vision_wiki/solution/roadmap.md`, `Vision_wiki/solution/nfr.md`, `Vision_wiki/solution/architecture_vision.md`

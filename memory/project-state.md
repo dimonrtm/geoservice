@@ -23,39 +23,10 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-12 15:14 +05:00, индексы и live state синхронизированы после Ф8, code compliance, планирования Release 1 и контрактов Дня 1 Спринта 1; новых необработанных RAW inputs и stale-нод нет.
 - Последний `/lint-wiki`: 2026-06-13, найдены ожидаемые `missing_frontmatter` для 12 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний repository-change ingest: 2026-06-13, реализованы роли и доступ
-  Дня 2: `Editor`/`Reviewer`, DB-backed auth, stable demo seed, realtime policy,
-  Reviewer placeholder и подтверждённая совместимость CI/Docker Compose.
-
-## Изменения С Прошлого `/sync-vision`
-
-- Ф8 приняла новый Release 1: work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit.
-- Добавлены Ф8 chat-нода, решение `release_1_utility_workflow`, resolved conflict старого и нового scope, design spec и follow-up'ы на code compliance matrix и синхронизацию старых requirements.
-- Составлена code compliance matrix; `FU-2026-06-11-001` закрыт.
-- Реализация разбита на 7 двухнедельных спринтов крупного уровня: foundation, editing, validation, reconcile, review/post, audit/demo operations, acceptance/hardening. Детальная техническая декомпозиция выполняется отдельно перед каждым спринтом.
-- Спринт 1 разложен на 14 календарных дней: будние дни интенсивные, выходные облегченные для интеграции, документации и резерва; итоговый путь - login -> assigned work order -> create/open edit version -> workspace.
-- День 1 является контрактным: AC-01..AC-07, сущности и инварианты, endpoints/DTO/errors и backlog S1-01..S1-10 согласованы; документы находятся в `docs/sprint_1`.
-- День 2 реализовал строгие взаимоисключающие роли `Editor`/`Reviewer`,
-  удаление legacy `Viewer`, DB-backed active-user auth, stable demo users
-  `alexey.editor`, `bolat.editor`, `marina.reviewer`, read-only realtime для
-  обеих ролей и отдельный Reviewer placeholder.
-- Migration `b82a5f2d91c3` и существующая seed-цепочка проверены на upgrade
-  сохранённого legacy volume и на clean install. Reviewer queue, assignment
-  authorization, approve/reject и `post` остаются в следующих backlog items.
-- Реализация плана Дня 2 должна выполняться в текущей ветке без worktree,
-  `git add` и `git commit`; существующий staging пользователя нельзя менять.
-  Demo users создаются через `seed_demo_users.py`, `run_demo_user_seed()` и
-  `DemoUserSeedService`, без нового параллельного seed-механизма.
-- Все текущие jobs `.github/workflows/ci.yml`, backend/frontend Docker builds
-  и Compose-сценарии `backend`, `dev`, `prod` являются обязательными
-  regression gates Дня 2. Backend `63 passed`, frontend `29 passed`; clean
-  install, upgrade legacy volume, base CI smoke и профили `dev`/`prod`
-  подтверждены. Отдельного CD workflow сейчас нет.
-- `AOI` принят как серверная граница данных workspace, `Feeder` - как агрегат `NetworkFeature` и внутрефидерных `NetworkAssociation`; пользовательский текст и application logs должны быть на русском языке.
-- Новых RAW inputs с прошлого sync нет; все 12 источников остаются отражены в `RAW_inputs/index.md`.
-- Новых concept/decision/entity/solution нод с прошлого sync: concept - 0, decision - 2, entity - 0, solution - 0.
-- Известный process conflict `FU-2026-06-01-004` по 12 неизменяемым RAW Markdown files остается актуальным.
-- Синтетическая репетиция поддержала utility workflow и выявила дополнительную зону ценности: единый evidence context для work order, документов, changes, validation/trace, conflicts и review.
+- `/ingest repository-change` применяется только если завершённая работа
+  содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
+  определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
+  завершение плана или commit не являются триггерами.
 
 ## Состояние Wiki На 2026-06-12
 

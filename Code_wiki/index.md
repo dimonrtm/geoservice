@@ -21,9 +21,11 @@ tags: [code-wiki, technical-knowledge]
 - [[deployment/_info]] - deployment notes, runbook'и и postmortems.
 - [[правила_и_стиль/_info]] - инженерные соглашения и правила review.
 - [[глоссарий/_info]] - технический глоссарий.
-- [[состояние_проекта/_info]] - текущее техническое состояние проекта, repository snapshot и repository-change log.
+- [[состояние_проекта/_info]] - текущее техническое состояние проекта,
+  repository snapshot и реестр изменений нод `Code_wiki`.
 - [[состояние_проекта/repository_snapshot]] - журнал `/ingest repository-snapshot`.
-- [[состояние_проекта/repository_change_ingest]] - журнал `/ingest repository-change`.
+- [[состояние_проекта/repository_change_ingest]] - компактный реестр
+  `/ingest repository-change`.
 
 ## Текущий Repository Snapshot
 
