@@ -18,25 +18,26 @@ GeoService - исследовательский pet-проект на стади
 
 ## Состояние Pipeline
 
-- Последний `/discover`: 2026-06-12, подготовлено 30-минутное интервью с реальным `Utility GIS editor` для проверки фактического workflow и пользовательской боли на последнем реальном work order.
-- Последний `/ingest`: 2026-06-12, обработан `RAW_inputs/meetings/utility_gis_editor_answers.md` как синтетическая репетиция; persona и JTBD приняты для design, но external user validation не заявляется.
-- Последний `/sync-vision`: 2026-06-12 15:14 +05:00, индексы и live state синхронизированы после Ф8, code compliance, планирования Release 1 и контрактов Дня 1 Спринта 1; новых необработанных RAW inputs и stale-нод нет.
-- Последний `/lint-wiki`: 2026-06-13, найдены ожидаемые `missing_frontmatter` для 12 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/discover`: 2026-06-13, подготовлено 30-минутное интервью с реальным `Reviewer` инженерной GIS-сети через разбор последнего review-кейса, evidence, критериев решения, возвратов и публикации.
+- Последний `/ingest`: 2026-06-13, обработаны broad-domain synthetic sources `utility_gis_editor_broad_domain_answers.md` и `utility_gis_reviewer_broad_domain_answers.md`; уточнены physical/logical network, as-built/redlining, review package и publisher responsibility без расширения Release 1 scope.
+- Последний `/sync-vision`: 2026-06-13 19:03 +05:00, индексы и live state синхронизированы после синтетической репетиции интервью, RBAC Дня 2 Спринта 1 и оптимизации agent memory/knowledge pipeline; необработанных RAW inputs и stale-нод нет.
+- Последний `/lint-wiki`: 2026-06-13, найдены ожидаемые `missing_frontmatter` для 15 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
+- Последний `/ingest repository-change`: 2026-06-13, существующие ноды `Code_wiki` синхронизированы с RBAC Дня 2 и новым workflow agent memory audit.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
   завершение плана или commit не являются триггерами.
 
-## Состояние Wiki На 2026-06-12
+## Состояние Wiki На 2026-06-13
 
-- Необработанные RAW inputs: не обнаружены; все 13 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs с прошлого `/sync-vision`: 1, синтетическая репетиция интервью обработана.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: Ф8 chat-нода, active decision `release_1_utility_workflow` и resolved conflict старого generic scope с utility workflow.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: отдельных нод нет; обновлены `Code_wiki/index.md` и журнал `repository_change_ingest.md`, добавлены связанные compliance и Sprint 1 документы.
+- Необработанные RAW inputs: не обнаружены; все 16 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: 4, synthetic editor/reviewer sources и их broad-domain расширения обработаны.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: чек-листы реальных интервью, четыре synthetic source summary и design-персона `Utility GIS Reviewer`; обновлены domain concept, personas, JTBD, risk log и follow-up queue.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: отдельных нод нет; существующие architecture, local development, deployment, CI/testing и project-state ноды обновлены по RBAC Дня 2 и memory audit workflow.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts: 1 process conflict, зафиксированный в `FU-2026-06-01-004`; сейчас проявляется на 12 RAW Markdown files.
-- Открытые follow-up'ы: 10.
+- Unresolved conflicts: process conflict `FU-2026-06-01-004` на 15 RAW Markdown files и product validation conflict `FU-2026-06-13-002` по границам reviewer role.
+- Открытые follow-up'ы: 11.
 
 ## Открытые Вопросы
 
@@ -44,7 +45,10 @@ GeoService - исследовательский pet-проект на стади
 
 Ключевые открытые вопросы:
 
-- Реальных пользователей пока нет; внешний workflow/conflict UX test по `Vision_wiki/chats/2026-06-12-utility-gis-editor-user-interview-checklist.md` отложен до появления доступа к представителям роли.
+- Интервью с реальным `Utility GIS editor` пока не проведено; checklist находится в `Vision_wiki/chats/2026-06-12-utility-gis-editor-user-interview-checklist.md`.
+- Реальное интервью с `Reviewer` по `Vision_wiki/chats/2026-06-13-utility-gis-reviewer-user-interview-checklist.md` пока не проведено; обработанный reviewer source является только синтетической репетицией.
+- Нужно внешне проверить, выполняет ли reviewer `post`, требуется ли routing очереди по специализации и допустимо ли совмещение ролей для low-risk changes.
+- Broad-domain applicability к electric/water/gas/telecom остается гипотезой; Release 1 сохраняет electric `synthetic_utility_feeder_01`.
 - Нужно отдельным запросом решить, что делать с пустыми/неполными dev/infra helper files, найденными repository snapshot.
 - Для `Utility GIS editor` нужно реализовать/подготовить `synthetic_utility_feeder_01`: 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, `Default` + 2 edit versions, 4 conflict-сценария.
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.

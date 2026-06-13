@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-12
+updated: 2026-06-13
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -38,3 +38,6 @@ tags: [raw-inputs, source-of-truth]
 | 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_risky_assumptions.md` | Три рискованных допущения и порядок их проверки | Да: [[../Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks]], [[../Vision_wiki/decisions/risk_assumption_log]] |
 | 2026-06-07 | `RAW_inputs/documents/utility_gis_editor_minimal_experiments.md` | Минимальные workflow, validation и conflict experiments | Да: [[../Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |
 | 2026-06-12 | `RAW_inputs/meetings/utility_gis_editor_answers.md` | Синтетическая репетиция интервью от первого лица; принята владельцем проекта как подтверждение design-сценария, но не как external user evidence | Да: [[../Vision_wiki/chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]], [[../Vision_wiki/entities/personas/utility_gis_editor]], [[../Vision_wiki/concepts/jtbd]], [[../Vision_wiki/decisions/risk_assumption_log]] |
+| 2026-06-13 | `RAW_inputs/meetings/utility_gis_reviewer_answers.md` | Синтетическая репетиция ответов от имени `Reviewer`; поддерживает design-персону и reviewer JTBD, но не является external user evidence | Да: [[../Vision_wiki/chats/2026-06-13-utility-gis-reviewer-synthetic-interview-rehearsal]], [[../Vision_wiki/entities/personas/utility_gis_reviewer]], [[../Vision_wiki/concepts/jtbd]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |
+| 2026-06-13 | `RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md` | Расширенная синтетическая доменная репетиция `Utility GIS editor`: physical/logical network state, as-built/redlining и review package | Да: [[../Vision_wiki/chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]], [[../Vision_wiki/concepts/utility_gis_editing_domain]], [[../Vision_wiki/entities/personas/utility_gis_editor]], [[../Vision_wiki/concepts/jtbd]], [[../Vision_wiki/decisions/risk_assumption_log]] |
+| 2026-06-13 | `RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md` | Расширенная синтетическая доменная репетиция `Reviewer`: review package, risk-based routing и publisher responsibility | Да: [[../Vision_wiki/chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]], [[../Vision_wiki/concepts/utility_gis_editing_domain]], [[../Vision_wiki/entities/personas/utility_gis_reviewer]], [[../Vision_wiki/concepts/jtbd]], [[../Vision_wiki/decisions/followups/index]] |

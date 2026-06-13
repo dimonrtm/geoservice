@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-12
+updated: 2026-06-13
 source: null
 tags: [vision-wiki, product]
 ---
@@ -66,6 +66,11 @@ tags: [vision-wiki, product]
 - [[decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] - разрешение конфликта между старым generic scope и новым utility workflow.
 - [[chats/2026-06-12-utility-gis-editor-user-interview-checklist]] - чек-лист 30-минутного интервью с реальным GIS-редактором о фактическом workflow и боли.
 - [[chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]] - синтетическая репетиция принята как подтверждение design-сценария и зоны ценности единого evidence context.
+- [[chats/2026-06-13-utility-gis-reviewer-user-interview-checklist]] - чек-лист 30-минутного интервью с реальным `Reviewer` инженерной GIS-сети о критериях решения, возвратах и публикации.
+- [[chats/2026-06-13-utility-gis-reviewer-synthetic-interview-rehearsal]] - синтетическая репетиция reviewer workflow, критериев безопасного решения и единого evidence context.
+- [[entities/personas/utility_gis_reviewer]] - design-персона проверяющего инженерной GIS-сети; границы `post`, routing очереди и separation of duties требуют внешней проверки.
+- [[chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]] - broad-domain synthetic framing editor workflow через physical/logical network state, as-built и review package.
+- [[chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]] - broad-domain synthetic framing reviewer как контроля между field reality, GIS model и operational systems.
 
 ## Открытые Вопросы
 

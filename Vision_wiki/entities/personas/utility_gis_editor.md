@@ -3,8 +3,8 @@ title: Utility GIS Editor
 type: entity
 status: active
 created: 2026-06-02
-updated: 2026-06-12
-source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_answers.md"
+updated: 2026-06-13
+source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md"
 tags: [persona, discovery, phase-f2, utility-network, authoritative-editing, research, synthetic-evidence]
 ---
 
@@ -25,6 +25,8 @@ Primary design-persona GeoService. Синтетическая репетиция
 
 - Подтверждено для проектирования: отдельная edit version, проверки connectivity/topology/trace, reconcile, review, post и сохранение lineage образуют связный workflow.
 - Поддержано синтетическим сценарием: основной расход времени связан с разрозненными исходными материалами и повторным поднятием контекста.
+- Поддержано broad-domain synthetic source: editor изменяет physical и logical
+  network state и вручную связывает field/as-built evidence с GIS change set.
 - Не подтверждено внешне: частота задач, длительность 2-4 часа, конкретное распределение ролей и распространенность используемых инструментов.
 
 ## Рабочая Задача
@@ -34,13 +36,17 @@ Primary design-persona GeoService. Синтетическая репетиция
 ## Рабочий Процесс
 
 1. Получить work order с замененным оборудованием и измененными подключениями.
-2. Создать named branch version, например `WO-2026-145-transformer-replace`.
-3. Обновить линии, устройства, узлы, associations и связанные nonspatial objects.
-4. Провалидировать topology и разобрать dirty areas.
-5. Выполнить reconcile с `Default`.
-6. Если есть конфликт, открыть `Conflicts view`, сравнить изменения и выбрать корректный результат.
-7. Передать подготовленные изменения reviewer.
-8. После подтверждения выполнить post в `Default` и повторно проверить сеть.
+2. Собрать redline/as-built evidence и определить affected area.
+3. Создать named branch version, например `WO-2026-145-transformer-replace`.
+4. Обновить physical objects, logical connectivity, attributes, statuses и
+   связанные nonspatial objects.
+5. Провалидировать topology, разобрать dirty areas и выполнить контрольные
+   trace-сценарии.
+6. Выполнить reconcile с `Default`.
+7. Если есть конфликт, открыть `Conflicts view`, сравнить изменения и выбрать корректный результат.
+8. Передать review package reviewer.
+9. После подтверждения передать approved change set ответственной publisher
+   role и проверить итог authoritative state.
 
 ## Боли-Гипотезы
 
@@ -51,6 +57,8 @@ Primary design-persona GeoService. Синтетическая репетиция
 - Контекст изменения разорван между work order, PDF, фотографиями, Excel, справочниками и сообщениями.
 - После возврата reviewer приходится восстанавливать контекст и повторять validation, trace и reconcile.
 - Визуально корректная карта может скрывать ошибочную association и неверный trace.
+- Field redline, проектная схема и фактическая трасса могут расходиться.
+- Review/edit package приходится вручную собирать из нескольких систем.
 
 ## Приоритет Ущерба
 
@@ -84,6 +92,7 @@ Primary design-persona GeoService. Синтетическая репетиция
 - [[../../chats/2026-06-02-phase-f2-users-and-pain]]
 - [[../../chats/2026-06-07-utility-gis-editor-domain-dictionary]]
 - [[../../chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]]
+- [[../../chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]]
 - [[../../concepts/utility_gis_editing_domain]]
 - [[../../concepts/jtbd]]
 - [[../../concepts/collaborative_editing_models]]

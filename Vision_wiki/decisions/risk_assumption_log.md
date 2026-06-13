@@ -3,8 +3,8 @@ title: Risk And Assumption Log
 type: risk
 status: active
 created: 2026-05-31
-updated: 2026-06-12
-source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; RAW_inputs/meetings/utility_gis_editor_answers.md"
+updated: 2026-06-13
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md"
 tags: [risk, assumption, discovery]
 ---
 
@@ -30,6 +30,8 @@ tags: [risk, assumption, discovery]
 | AS-2026-06-07-003 | hypothesis | Demo validation защищает сеть от критических topology/connectivity/association ошибок. | Validation trap test: обнаружить >=80% подготовленных ошибок и заблокировать post для 100% critical cases. |
 | AS-2026-06-07-004 | hypothesis | Conflict resolution предотвращает silent overwrite и stale post. | Two-editors conflict drill: обнаружить 100% подготовленных conflicts, показать Mine/Default diff и сохранить edits при stale post. |
 | AS-2026-06-12-001 | accepted-for-design | Значимая часть труда редактора уходит на сбор разрозненного evidence и повторное восстановление контекста после замечаний. | В demo связать work order, документы, измененные объекты, validation/trace, conflicts и review comments; измерить manual touch count. |
+| AS-2026-06-13-001 | supported-by-synthetic | Reviewer нужен единый evidence context с diff, associations, validation, trace, conflicts, документами, comments и audit, а не только карта и отсутствие validation errors. | Провести интервью и наблюдение реального review-кейса; проверить, какие evidence обязательны и сколько ручных переключений сокращает unified review view. |
+| AS-2026-06-13-002 | supported-by-synthetic | Physical + logical network state и review package являются более устойчивой domain framing, чем vendor-specific branch-version terminology. | Проверить формулировки с реальными editor/reviewer и убедиться, что electric demo покрывает geometry, attributes, associations, as-built evidence и downstream impact без расширения multi-utility scope. |
 
 ## Риски
 
@@ -47,7 +49,8 @@ tags: [risk, assumption, discovery]
 | RK-2026-06-07-001 | open      | Aggregate `Safe Authoritative Post Rate` может скрыть редкие safety-critical failures.                                          | Формально высокий процент будет достигнут при наличии silent overwrite, пропущенного critical conflict или Critical/High review error.                | Safety blockers имеют абсолютный veto и не компенсируются aggregate rate.                                                                                                             |
 | RK-2026-06-07-002 | open      | 200 synthetic work orders могут быть статистически зависимыми или слишком простыми.                                             | Результат не докажет переносимость на реальные topology/trace risks.                                                                                  | Стратифицировать work orders по сложности и conflict type, хранить seed/run identifiers и отдельно снять manual baseline на 10-20 типовых задачах.                                    |
 | RK-2026-06-07-003 | open      | Evidence storage может преждевременно расширить local demo до object-storage platform.                                          | Scope уйдет от проверки safe post к инфраструктуре хранения тяжелых доказательств.                                                                    | В demo хранить reports в Git и structured audit в PostgreSQL; immutable object storage вводить отдельным scope-решением.                                                              |
-| RK-2026-06-12-001 | open | Синтетическая репетиция может воспроизводить уже заложенные assumptions и создавать ложную уверенность в product validation. | Реальный workflow, частота боли и готовность пользователей к модели могут отличаться от design-сценария. | Маркировать evidence как synthetic, не публиковать claims о реальных пользователях и провести внешнюю validation при появлении доступа к представителям роли. |
+| RK-2026-06-12-001 | open | Синтетические репетиции editor и reviewer могут воспроизводить уже заложенные assumptions и создавать ложную уверенность в product validation. | Реальный workflow, частота боли, полномочия reviewer и готовность пользователей к модели могут отличаться от design-сценария. | Маркировать evidence как synthetic, не публиковать claims о реальных пользователях и провести внешнюю validation с представителями обеих ролей. |
+| RK-2026-06-13-001 | open | Broad-domain framing electric/water/gas/telecom может незаметно расширить Release 1 до универсальной utility platform. | Demo потеряет фокус и потребует несовместимых domain rules, topology и integrations. | Использовать broad vocabulary только для объяснения physical/logical network и review package; Release 1 сохранять electric `synthetic_utility_feeder_01`. |
 
 ## Связи
 
@@ -62,6 +65,9 @@ tags: [risk, assumption, discovery]
 - [[../chats/2026-06-06-utility-gis-editor-target-times]]
 - [[../chats/2026-06-07-phase-f7-metrics-and-risks]]
 - [[../chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]]
+- [[../chats/2026-06-13-utility-gis-reviewer-synthetic-interview-rehearsal]]
+- [[../chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]]
+- [[../chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]]
 - [[../concepts/metrics]]
 - [[../concepts/jtbd]]
 - [[../concepts/product_vision_board]]

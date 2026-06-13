@@ -121,13 +121,13 @@ Release 1 остается demo, а не production replacement для `ArcGIS E
 
 ### MVP / Demo
 
-| Элемент | Статус | Примечания |
-|---|---|---|
-| `geometry/association conflict` | required | Primary demo-сценарий с dirty areas, network consequence, reviewer decision и publication в authoritative state. |
-| Conflict explanation | required | Пользователь и reviewer должны понимать base value, edit version value, current `Default` и сетевое последствие. |
-| Reviewer decision | required | `Reviewer` принимает approve/reject/resolution decision перед publication. |
-| Optimistic conflict + review model | required | Достаточно собственной модели, не требуется full branch versioning. |
-| `edit after reconcile` | required guard | Изменение `Default` после reconcile блокирует post, сохраняет edits и требует нового reconcile. |
+| Элемент                            | Статус         | Примечания                                                                                                       |
+| ---------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `geometry/association conflict`    | required       | Primary demo-сценарий с dirty areas, network consequence, reviewer decision и publication в authoritative state. |
+| Conflict explanation               | required       | Пользователь и reviewer должны понимать base value, edit version value, current `Default` и сетевое последствие. |
+| Reviewer decision                  | required       | `Reviewer` принимает approve/reject/resolution decision перед publication.                                       |
+| Optimistic conflict + review model | required       | Достаточно собственной модели, не требуется full branch versioning.                                              |
+| `edit after reconcile`             | required guard | Изменение `Default` после reconcile блокирует post, сохраняет edits и требует нового reconcile.                  |
 
 ### Ф4 Walking Skeleton
 

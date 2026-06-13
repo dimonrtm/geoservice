@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-12
+updated: 2026-06-13
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -60,10 +60,13 @@ tags: [knowledge, index, geoservice]
 - 2026-06-12: Спринт 1 разложен на 14 календарных дней; контракты Дня 1 зафиксировали acceptance AC-01..AC-07, доменную модель, API и вертикальный backlog S1-01..S1-10 в `docs/sprint_1`.
 - 2026-06-12: Выполнен `/sync-vision`; индексы и [[memory/project-state]] синхронизированы после Ф8 и планирования Спринта 1, новых RAW inputs и stale-нод нет, открыты 10 follow-up'ов.
 - 2026-06-12: Обработана синтетическая репетиция интервью `Utility GIS editor`; primary persona и JTBD приняты для design, добавлен акцент на единый evidence context, внешний user validation отложен.
+- 2026-06-13: Реализованы роли `Editor`/`Reviewer`, DB-backed active-user auth, structured auth errors, demo seed и reviewer shell Дня 2 Спринта 1; связанные ноды [[Code_wiki/index]] синхронизированы через `/ingest repository-change`.
+- 2026-06-13: Agent memory и knowledge pipeline переведены на gate устойчивого знания, компактный реестр изменений `Code_wiki` и read-only memory audit.
+- 2026-06-13: Выполнен `/sync-vision`; необработанных RAW inputs и stale-нод нет, открыты 10 follow-up'ов, ожидаемый lint-конфликт остаётся на 12 неизменяемых RAW Markdown files.
 
 ## Открытые Вопросы
 
-- Новый Release 1 разбит на 7 двухнедельных спринтов; следующий шаг - выполнить Спринт 1 foundation/schema/work-order workspace.
+- Новый Release 1 разбит на 7 двухнедельных спринтов; роли и seed Дня 2 завершены, следующий scope Спринта 1 - utility schema, assigned work orders, edit version и frontend shell.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
@@ -84,4 +87,7 @@ tags: [knowledge, index, geoservice]
 
 `/ingest repository-snapshot` фиксирует уже существующее состояние репозитория в `Code_wiki` без привязки к `git diff`.
 
-После полного завершения implementation plan или крупной задачи агент вызывает `/ingest repository-change` перед финальным отчетом пользователю. Pre-commit не запускает и не проверяет repository-change ingest.
+`/ingest repository-change` запускается только когда завершённая работа содержит
+новое устойчивое техническое знание для `Code_wiki`. Завершение плана, commit
+или успешные тесты сами по себе не являются триггерами. Pre-commit не запускает
+и не проверяет repository-change ingest.
