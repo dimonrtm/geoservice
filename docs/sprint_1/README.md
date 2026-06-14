@@ -11,6 +11,8 @@
 - [Вертикальный backlog Дня 1](2026-06-12-sprint-1-day-1-vertical-backlog-design.md)
 - [Роли и доступ Дня 2](2026-06-13-sprint-1-day-2-roles-access-design.md)
 - [План реализации ролей и доступа Дня 2](2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md)
+- [Базовая модель сети Дня 3](2026-06-14-sprint-1-day-3-network-model-design.md)
+- [План реализации базовой модели сети Дня 3](2026-06-14-sprint-1-day-3-network-model-implementation-plan.md)
 
 ## Исторические Материалы
 

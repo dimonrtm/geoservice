@@ -123,6 +123,14 @@ jobs:
         run: |
           docker compose -f docker-compose.yml exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2); print('health ok')"
 
+      - name: PostgreSQL/PostGIS network model tests
+        working-directory: infra
+        run: |
+          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
+            pytest tests/test_network_model_integration.py -q
+          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
+            pytest tests/test_network_model_migration.py -q
+
       - name: Teardown
         if: always()
         working-directory: infra

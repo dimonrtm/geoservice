@@ -17,6 +17,22 @@ if config.config_file_name is not None:
 
 # --- IMPORT MODELS HERE (важно для autogenerate) ---
 from models.base import Base  # noqa: E402
+from models.feature_line import FeatureLine  # noqa: E402, F401
+from models.feature_multiline import FeatureMultiLine  # noqa: E402, F401
+from models.feature_multipoint import FeatureMultiPoint  # noqa: E402, F401
+from models.feature_multipolygon import FeatureMultiPolygon  # noqa: E402, F401
+from models.feature_point import FeaturePoint  # noqa: E402, F401
+from models.feature_polygon import FeaturePolygon  # noqa: E402, F401
+from models.layer import Layer  # noqa: E402, F401
+from models.user import User  # noqa: E402, F401
+from models.utility_network import (  # noqa: E402, F401
+    AOI,
+    AssociationType,
+    Feeder,
+    FeatureType,
+    NetworkAssociation,
+    NetworkFeature,
+)
 
 
 target_metadata = Base.metadata
@@ -45,6 +61,7 @@ def run_migrations_offline() -> None:
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
         compare_server_default=True,
+        include_schemas=True,
     )
 
     with context.begin_transaction():
@@ -61,6 +78,7 @@ def do_run_migrations(connection: Connection) -> None:
         target_metadata=target_metadata,
         compare_type=True,
         compare_server_default=True,
+        include_schemas=True,
     )
 
     with context.begin_transaction():
