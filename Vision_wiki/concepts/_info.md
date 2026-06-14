@@ -11,3 +11,7 @@ tags: [vision-wiki, concepts]
 # concepts
 
 Здесь хранятся атомарные продуктовые и доменные концепты.
+
+## Ноды
+
+- [[operational_utility_gis]] - справочная market category, не release scope.
