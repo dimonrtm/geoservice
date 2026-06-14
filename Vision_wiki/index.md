@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-13
+updated: 2026-06-14
 source: null
 tags: [vision-wiki, product]
 ---
@@ -71,6 +71,10 @@ tags: [vision-wiki, product]
 - [[entities/personas/utility_gis_reviewer]] - design-персона проверяющего инженерной GIS-сети; границы `post`, routing очереди и separation of duties требуют внешней проверки.
 - [[chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]] - broad-domain synthetic framing editor workflow через physical/logical network state, as-built и review package.
 - [[chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]] - broad-domain synthetic framing reviewer как контроля между field reality, GIS model и operational systems.
+- [[chats/2026-06-14-geometry-association-conflict-resolution-workshop]] - superseded assistant-led design input; сохранен как история развилки.
+- [[decisions/conflict_resolution_routing]] - planned решение следующего релиза по доверенному RAW source.
+- [[chats/2026-06-14-utility-gis-editor-conflict-routing-synthetic-research]] - доверенный design/research source: risk tiers, evidence, post blockers, audit и routing.
+- [[decisions/conflicts/2026-06-14-next-release-conflict-routing-responsibility]] - разрешенный provenance-конфликт; RAW source каноничен относительно chat workshop.
 
 ## Открытые Вопросы
 

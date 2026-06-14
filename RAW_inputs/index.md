@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-13
+updated: 2026-06-14
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -41,3 +41,4 @@ tags: [raw-inputs, source-of-truth]
 | 2026-06-13 | `RAW_inputs/meetings/utility_gis_reviewer_answers.md` | Синтетическая репетиция ответов от имени `Reviewer`; поддерживает design-персону и reviewer JTBD, но не является external user evidence | Да: [[../Vision_wiki/chats/2026-06-13-utility-gis-reviewer-synthetic-interview-rehearsal]], [[../Vision_wiki/entities/personas/utility_gis_reviewer]], [[../Vision_wiki/concepts/jtbd]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |
 | 2026-06-13 | `RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md` | Расширенная синтетическая доменная репетиция `Utility GIS editor`: physical/logical network state, as-built/redlining и review package | Да: [[../Vision_wiki/chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]], [[../Vision_wiki/concepts/utility_gis_editing_domain]], [[../Vision_wiki/entities/personas/utility_gis_editor]], [[../Vision_wiki/concepts/jtbd]], [[../Vision_wiki/decisions/risk_assumption_log]] |
 | 2026-06-13 | `RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md` | Расширенная синтетическая доменная репетиция `Reviewer`: review package, risk-based routing и publisher responsibility | Да: [[../Vision_wiki/chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]], [[../Vision_wiki/concepts/utility_gis_editing_domain]], [[../Vision_wiki/entities/personas/utility_gis_reviewer]], [[../Vision_wiki/concepts/jtbd]], [[../Vision_wiki/decisions/followups/index]] |
+| 2026-06-14 | `RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md` | Доверенный design/research source `Utility GIS editor`: risk tiers, evidence, post blockers, audit и routing для следующего релиза; выше assistant-led chat workshop по иерархии доверия, но не является direct user interview | Да: [[../Vision_wiki/chats/2026-06-14-utility-gis-editor-conflict-routing-synthetic-research]], [[../Vision_wiki/decisions/conflict_resolution_routing]], [[../Vision_wiki/decisions/conflicts/2026-06-14-next-release-conflict-routing-responsibility]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |

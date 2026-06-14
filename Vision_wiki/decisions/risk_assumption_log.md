@@ -3,8 +3,8 @@ title: Risk And Assumption Log
 type: risk
 status: active
 created: 2026-05-31
-updated: 2026-06-13
-source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md"
+updated: 2026-06-14
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; Vision_wiki/chats/2026-06-14-geometry-association-conflict-resolution-workshop.md; RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md"
 tags: [risk, assumption, discovery]
 ---
 
@@ -32,6 +32,7 @@ tags: [risk, assumption, discovery]
 | AS-2026-06-12-001 | accepted-for-design | Значимая часть труда редактора уходит на сбор разрозненного evidence и повторное восстановление контекста после замечаний. | В demo связать work order, документы, измененные объекты, validation/trace, conflicts и review comments; измерить manual touch count. |
 | AS-2026-06-13-001 | supported-by-synthetic | Reviewer нужен единый evidence context с diff, associations, validation, trace, conflicts, документами, comments и audit, а не только карта и отсутствие validation errors. | Провести интервью и наблюдение реального review-кейса; проверить, какие evidence обязательны и сколько ручных переключений сокращает unified review view. |
 | AS-2026-06-13-002 | supported-by-synthetic | Physical + logical network state и review package являются более устойчивой domain framing, чем vendor-specific branch-version terminology. | Проверить формулировки с реальными editor/reviewer и убедиться, что electric demo покрывает geometry, attributes, associations, as-built evidence и downstream impact без расширения multi-utility scope. |
+| AS-2026-06-14-001 | accepted-for-next-release | Risk-tiered routing по affected network area, компетенции и сетевому последствию может сократить лишнее согласование: `Simple` без обязательной эскалации, безопасный `Normal` с audit/sample review, `High` через решение `Reviewer`, `Critical` через совместное решение и профильного специалиста. | Проверить каноническую planned модель с реальными `Editor` и `Reviewer`, включая SLA, emergency path и полномочия Data Owner. |
 
 ## Риски
 
@@ -68,6 +69,8 @@ tags: [risk, assumption, discovery]
 - [[../chats/2026-06-13-utility-gis-reviewer-synthetic-interview-rehearsal]]
 - [[../chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]]
 - [[../chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]]
+- [[../chats/2026-06-14-geometry-association-conflict-resolution-workshop]]
+- [[../chats/2026-06-14-utility-gis-editor-conflict-routing-synthetic-research]]
 - [[../concepts/metrics]]
 - [[../concepts/jtbd]]
 - [[../concepts/product_vision_board]]

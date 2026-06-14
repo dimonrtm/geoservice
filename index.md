@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-13
+updated: 2026-06-14
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -63,6 +63,9 @@ tags: [knowledge, index, geoservice]
 - 2026-06-13: Реализованы роли `Editor`/`Reviewer`, DB-backed active-user auth, structured auth errors, demo seed и reviewer shell Дня 2 Спринта 1; связанные ноды [[Code_wiki/index]] синхронизированы через `/ingest repository-change`.
 - 2026-06-13: Agent memory и knowledge pipeline переведены на gate устойчивого знания, компактный реестр изменений `Code_wiki` и read-only memory audit.
 - 2026-06-13: Выполнен `/sync-vision`; необработанных RAW inputs и stale-нод нет, открыты 10 follow-up'ов, ожидаемый lint-конфликт остаётся на 12 неизменяемых RAW Markdown files.
+- 2026-06-13: Обработаны синтетическая репетиция `Utility GIS reviewer` и broad-domain репетиции editor/reviewer; добавлены reviewer persona, JTBD, checklist реального интервью и вопросы о границах reviewer role.
+- 2026-06-14: Выполнен `/sync-vision`; все 16 RAW sources обработаны, открыты 11 follow-up'ов, stale-ноды не обнаружены, ожидаемый lint-конфликт охватывает 15 неизменяемых RAW Markdown files.
+- 2026-06-14: Assistant-led chat workshop по `geometry/association conflict` помечен superseded; доверенный RAW source `utility_gis_editor_geometry_association_conflict_answers.md` стал канонической основой planned routing следующего релиза. Текущий Release 1 оставлен без изменений.
 
 ## Открытые Вопросы
 
@@ -73,6 +76,7 @@ tags: [knowledge, index, geoservice]
 - Нужно подготовить local demo support package: README, seed/reset/`full-clean` scripts, demo сценарий, troubleshooting, observability minimum и `import GeoJSON`.
 - Нужно проверить draft P95 targets на `synthetic_utility_feeder_01` в Chrome на reference hardware.
 - Нужно снять manual baseline на 10-20 work orders и провести product evaluation на 200 started work orders с 7-дневным correction window.
+- Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить право на `post`, routing по специализации, совмещение ролей и обязательность approve comment.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 
