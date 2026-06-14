@@ -75,6 +75,9 @@ tags: [vision-wiki, product]
 - [[decisions/conflict_resolution_routing]] - planned решение следующего релиза по доверенному RAW source.
 - [[chats/2026-06-14-utility-gis-editor-conflict-routing-synthetic-research]] - доверенный design/research source: risk tiers, evidence, post blockers, audit и routing.
 - [[decisions/conflicts/2026-06-14-next-release-conflict-routing-responsibility]] - разрешенный provenance-конфликт; RAW source каноничен относительно chat workshop.
+- [[chats/2026-06-14-release-2-conflict-explanation-editor-reviewer-research]] - доверенный синтез требований `Editor` и `Reviewer` к consequence-first explanation.
+- [[decisions/release_2_conflict_explanation]] - planned contract Release 2 для explanation, evidence, stale approval, audit и post gates.
+- [[decisions/conflicts/2026-06-14-trace-risk-tier-boundary]] - открытое расхождение по границе `High/Critical` при изменении trace.
 
 ## Открытые Вопросы
 

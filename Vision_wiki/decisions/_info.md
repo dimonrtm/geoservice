@@ -17,4 +17,6 @@ tags: [vision-wiki, decisions]
 - [[risk_assumption_log]] - гипотезы и риски discovery.
 - [[constraints]] - ограничения demo, rollout и promise boundaries.
 - [[conflict_resolution_routing]] - planned risk-tiered routing следующего релиза.
+- [[release_2_conflict_explanation]] - planned consequence-first explanation для `Editor` и `Reviewer`.
+- [[conflicts/2026-06-14-trace-risk-tier-boundary]] - открытая граница `High/Critical` для trace change.
 - [[followups/index]] - очередь открытых вопросов.

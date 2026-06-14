@@ -19,9 +19,9 @@ GeoService - исследовательский pet-проект на стади
 ## Состояние Pipeline
 
 - Последний `/discover`: 2026-06-14, совместная 45-минутная сессия `Utility GIS editor` и `Reviewer` спроектировала для следующего релиза risk-tiered routing `geometry/association conflict`; текущий Release 1 не меняется.
-- Последний `/ingest`: 2026-06-14, `utility_gis_editor_geometry_association_conflict_answers.md` принят как доверенный design/research source выше assistant-led chat workshop; planned routing следующего релиза обновлен, provenance-конфликт разрешен. Текущий Release 1 не менялся.
+- Последний `/ingest`: 2026-06-14, `release2_conflict_explanation_editor_reviewer_answers.md` принят как доверенный design/research source; создан planned Release 2 explanation contract и зафиксировано расхождение `High/Critical` для trace change. Текущий Release 1 не менялся.
 - Последний `/sync-vision`: 2026-06-14 16:58 +05:00, индексы и live state синхронизированы после reviewer и broad-domain ingest; необработанных RAW inputs и stale-нод нет.
-- Последний `/lint-wiki`: 2026-06-14, найдены ожидаемые `missing_frontmatter` для 16 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/lint-wiki`: 2026-06-14, найдены ожидаемые `missing_frontmatter` для 17 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний `/ingest repository-change`: 2026-06-13, существующие ноды `Code_wiki` синхронизированы с RBAC Дня 2 и новым workflow agent memory audit.
 - `/ingest repository-change` применяется только если завершённая работа
@@ -31,13 +31,13 @@ GeoService - исследовательский pet-проект на стади
 
 ## Состояние Wiki На 2026-06-14
 
-- Необработанные RAW inputs: не обнаружены; все 17 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs с прошлого `/sync-vision`: 1, synthetic conflict-routing source обработан.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: добавлены trusted conflict-routing research summary, planned routing decision и разрешенный provenance-конфликт; обновлены risk log и follow-up queue.
+- Необработанные RAW inputs: не обнаружены; все 18 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: 2, оба trusted Release 2 conflict research sources обработаны.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: добавлены trusted conflict-routing и conflict-explanation research summaries, planned routing и explanation decisions, разрешенный provenance-конфликт и открытая граница `High/Critical`; обновлены risk log и follow-up queue.
 - Новые значимые Code_wiki ноды с прошлого `/sync-vision`: не обнаружены.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts: process conflict `FU-2026-06-01-004` на 16 RAW Markdown files и product validation conflict `FU-2026-06-13-002` по границам reviewer role.
-- Открытые follow-up'ы: 12.
+- Unresolved conflicts: process conflict `FU-2026-06-01-004` на 17 RAW Markdown files, product validation conflict `FU-2026-06-13-002` по границам reviewer role и Release 2 risk boundary `FU-2026-06-14-002`.
+- Открытые follow-up'ы: 13.
 
 ## Открытые Вопросы
 
@@ -58,6 +58,8 @@ GeoService - исследовательский pet-проект на стади
 - Нужно выполнить repeatable benchmark P50/P95 для draft performance targets на reference hardware.
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.
 - Для следующего релиза нужно проверить с реальными участниками каноническую planned модель: routing по affected network area/компетенции/risk tier, `High` через `Reviewer`, audit + sample review для безопасного `Normal`, отсутствие обязательной эскалации `Simple`, SLA, emergency path и роль Data Owner; текущий Release 1 не расширять.
+- Для Release 2 нужно проверить consequence-first `Conflict explanation`: geometry/association diff, validation/dirty areas, trace before/after, affected service/subnetwork, evidence, stale approval, audit и post blockers.
+- До implementation contract нужно решить, является ли любой trace change `Critical` или только trace change с service/subnetwork, safety либо network error impact.
 - Нужно снять manual baseline на 10-20 work orders и затем провести 200-work-order product evaluation с 7-дневным correction window.
 - Нужно продолжить Спринт 1: utility schema, assigned work orders, edit version
   и frontend shell; роли/seed Дня 2 завершены.
