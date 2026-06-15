@@ -47,6 +47,12 @@ Related files:
   и компактный реестр. После явного подтверждения пользователя process-only
   и canonical-source session task logs удалены, legacy repository-change
   history убрана из рабочего дерева, а Git оставлен историческим архивом.
+- 2026-06-15: Зафиксировано пользовательское правило работы с Git: агент не
+  выполняет `git add`, `git commit` и не создает commit без прямой явной
+  просьбы пользователя. Подтверждение design, завершение реализации или
+  требование skill закоммитить документ сами по себе не считаются разрешением.
+  По умолчанию изменения остаются в working tree для пользовательской
+  проверки и самостоятельного commit.
 
 ## Verification
 
@@ -60,4 +66,4 @@ rg -n "уникального|read-only|repository-change gate|file-map" docs/ag
 
 ## Retrieval Hints
 
-agent memory, долговременная память, repo-local, markdown memory, file-map, significant work, значимая работа, протокол памяти, новый чат, Git-versioned memory, оптимизация памяти, repository-change trigger, memory audit
+agent memory, долговременная память, repo-local, markdown memory, file-map, significant work, значимая работа, протокол памяти, новый чат, Git-versioned memory, оптимизация памяти, repository-change trigger, memory audit, нельзя коммитить, не выполнять git add, commit только по явной просьбе

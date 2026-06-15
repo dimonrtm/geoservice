@@ -7,6 +7,7 @@ from domain.exceptions.business_validation_exception import BusinessValidationEx
 from domain.exceptions.feature_not_found_exception import FeatureNotFoundException
 from domain.exceptions.layer_not_found_exception import LayerNotFoundException
 from domain.exceptions.unknown_storage_table_error import UnknownStorageTableError
+from domain.exceptions.utility_network_api_error import UtilityNetworkApiError
 from domain.exceptions.version_mismatch_exception import VersionMismatchException
 from schemas.patch_feature_conflict_response import PatchFeatureConflictResponse
 
@@ -14,6 +15,22 @@ from schemas.patch_feature_conflict_response import PatchFeatureConflictResponse
 def install_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AuthApiError)
     async def auth_api_error(request: Request, error: AuthApiError):
+        correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
+        return JSONResponse(
+            status_code=error.status_code,
+            content={
+                "code": error.code,
+                "message": error.message,
+                "correlationId": correlation_id,
+                "details": {},
+            },
+        )
+
+    @app.exception_handler(UtilityNetworkApiError)
+    async def utility_network_api_error(
+        request: Request,
+        error: UtilityNetworkApiError,
+    ):
         correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
         return JSONResponse(
             status_code=error.status_code,

@@ -1,4 +1,4 @@
-from services.password_service import hash_password, verify_password
+from core.passwords import hash_password, verify_password
 
 
 def test_hash_password_returns_non_empty_hash() -> None:

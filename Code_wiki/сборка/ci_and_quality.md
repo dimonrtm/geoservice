@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-13
-source: repository-change:2026-06-13
+updated: 2026-06-15
+source: repository-change:2026-06-15
 tags: [ci, tests, lint, build]
 ---
 
@@ -23,6 +23,12 @@ Backend jobs собирают Docker image `geoservice-backend:dev` из `apps/b
 После format/lint/test собирается prod image `geoservice-backend:prod`.
 
 Отдельный smoke-test поднимает `postgis` и `backend` через `infra/docker-compose.yml`, ждет healthy backend и проверяет `/health` внутри container.
+
+Smoke job также запускает PostGIS tests network model, migration cycle,
+utility dataset seed и single-query repository. Migration cycle удаляет данные
+utility schema при downgrade, поэтому перед authenticated API smoke CI повторно
+запускает `python -m seeds.runners.seed_utility_dataset`. Затем Editor login
+проверяет полный feeder response с 19 features и 9 associations.
 
 Локальные настройки:
 

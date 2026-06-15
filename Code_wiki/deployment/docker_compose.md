@@ -3,8 +3,8 @@ title: Docker Compose Deployment
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-13
-source: repository-change:2026-06-13
+updated: 2026-06-15
+source: repository-change:2026-06-15
 tags: [deployment, docker-compose, postgis]
 ---
 
@@ -37,7 +37,9 @@ tags: [deployment, docker-compose, postgis]
 Важные детали:
 
 - `postgis` имеет healthcheck через `pg_isready`.
-- `backend` зависит от healthy `postgis`, запускает migrations, demo seed и uvicorn.
+- `backend` зависит от healthy `postgis` и запускает:
+  `alembic upgrade head`, `python -m seeds.runners.seed_demo_users`,
+  `python -m seeds.runners.seed_utility_dataset`, затем uvicorn.
 - `backend` healthcheck дергает `http://localhost:8000/health`.
 - `frontend-dev` зависит от healthy backend.
 - `frontend-prod` собирает статический frontend и отдает через nginx.
@@ -54,8 +56,8 @@ tags: [deployment, docker-compose, postgis]
 - clean install на отдельном временном volume создаёт ровно три целевых demo users;
 - профили `dev` и `prod` отвечают соответственно на `5173` и `8080`, backend
   отвечает на `8000`;
-- повторный restart backend и ручной `python seed_demo_users.py` не создают
-  дубликаты.
+- повторный restart backend не создаёт дубликаты demo users и не
+  перезаписывает существующий utility feeder.
 
 Для локального clean-install smoke PostGIS нужно считать готовым после
 устойчивых SQL-проверок: `pg_isready` может кратко отвечать во время временного

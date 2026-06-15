@@ -6,9 +6,9 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 
+from core.passwords import hash_password
 from domain.exceptions.auth_api_error import AuthApiError
 from services.auth_service import AuthService
-from services.password_service import hash_password
 
 
 def test_authenticate_user_returns_user_for_valid_credentials() -> None:

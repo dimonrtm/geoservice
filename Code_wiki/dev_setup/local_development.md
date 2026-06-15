@@ -3,8 +3,8 @@ title: Local Development
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-13
-source: repository-change:2026-06-13
+updated: 2026-06-15
+source: repository-change:2026-06-15
 tags: [dev-setup, docker, backend, frontend]
 ---
 
@@ -35,20 +35,25 @@ docker compose --profile dev up --build
 - `frontend-prod` - nginx build, порт `8080`, профиль `prod`.
 - `migrate` - отдельный profile service для `alembic upgrade head`.
 
-Backend в основном compose сам выполняет migrations и demo seed при старте.
+Backend в основном compose сам выполняет migrations, demo-user seed и utility
+dataset seed при старте.
 
 ## Demo Users
 
-`seed_demo_users.py` поддерживает baseline demo-пользователей:
+`python -m seeds.runners.seed_demo_users` поддерживает baseline
+demo-пользователей:
 
 - `alexey.editor@example.local` / `alexey-editor-password`, роль `editor`.
 - `bolat.editor@example.local` / `bolat-editor-password`, роль `editor`.
 - `marina.reviewer@example.local` / `marina-reviewer-password`, роль `reviewer`.
 
-Seed использует существующую цепочку
-`seed_demo_users.py -> run_demo_user_seed() -> DemoUserSeedService`, стабильные
+Seed использует цепочку `SeedDemoUserService -> SeedUserRepository`, стабильные
 UUID и при каждом старте backend приводит demo users к ожидаемым роли, паролю
 и `is_active=true`. Повторный запуск не создаёт дубликаты.
+
+`python -m seeds.runners.seed_utility_dataset` создаёт
+`synthetic_utility_feeder_01`: 1 AOI, 19 features и 9 associations. Повторный
+запуск при существующем feeder является no-op и сохраняет ручные изменения.
 
 Legacy credentials `editor@example.com` и `viewer@example.com` удалены.
 `Editor` видит существующий map/editor workspace. `Reviewer` видит отдельный

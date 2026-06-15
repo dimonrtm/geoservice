@@ -4,6 +4,7 @@ from api.lifespan import lifespan
 from api.auth import auth_router
 from api.exception_handlers import install_exception_handlers
 from api.secure_router import secure_router
+from api.utility_network import utility_network_router
 from api.layers import layers_router
 from api.ws_layers import ws_layers_router
 from core.settings import settings
@@ -19,6 +20,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(utility_network_router)
 app.include_router(secure_router)
 app.include_router(layers_router)
 app.include_router(ws_layers_router)

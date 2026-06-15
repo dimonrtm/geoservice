@@ -3,9 +3,10 @@ from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
+from core.passwords import hash_password, verify_password
 from models.user import UserRole
-from services.demo_user_seed_service import DEMO_USER_SPECS, DemoUserSeedService
-from services.password_service import hash_password, verify_password
+from seeds.services.seed_demo_user_service import SeedDemoUserService
+from seeds.specs.seed_demo_user_specs import SEED_DEMO_USER_SPECS
 
 
 EXPECTED_DEMO_USERS = {
@@ -37,23 +38,23 @@ def build_seeded_user(spec):
 
 
 def test_demo_user_specs_define_three_stable_users() -> None:
-    assert {spec.email: spec.role for spec in DEMO_USER_SPECS} == EXPECTED_DEMO_USERS
-    assert len({spec.id for spec in DEMO_USER_SPECS}) == 3
+    assert {spec.email: spec.role for spec in SEED_DEMO_USER_SPECS} == EXPECTED_DEMO_USERS
+    assert len({spec.id for spec in SEED_DEMO_USER_SPECS}) == 3
 
 
 def test_ensure_demo_users_creates_missing_demo_users() -> None:
     session = FakeSession()
     repository = AsyncMock()
     repository.get_by_email.side_effect = [None, None, None]
-    repository.create_user.side_effect = [build_seeded_user(spec) for spec in DEMO_USER_SPECS]
-    service = DemoUserSeedService(session, repository)
+    repository.create_user.side_effect = [build_seeded_user(spec) for spec in SEED_DEMO_USER_SPECS]
+    service = SeedDemoUserService(session, repository)
 
     users = asyncio.run(service.ensure_demo_users())
 
     assert session.begin_calls == 1
     assert len(users) == 3
     assert repository.create_user.await_count == 3
-    for call, spec in zip(repository.create_user.await_args_list, DEMO_USER_SPECS):
+    for call, spec in zip(repository.create_user.await_args_list, SEED_DEMO_USER_SPECS):
         assert call.kwargs["user_id"] == spec.id
         assert call.kwargs["email"] == spec.email
         assert call.kwargs["role"] is spec.role
@@ -63,7 +64,7 @@ def test_ensure_demo_users_creates_missing_demo_users() -> None:
 def test_seed_restores_reviewer_baseline() -> None:
     session = FakeSession()
     marina = SimpleNamespace(
-        id=DEMO_USER_SPECS[2].id,
+        id=SEED_DEMO_USER_SPECS[2].id,
         email="marina.reviewer@example.local",
         role=UserRole.EDITOR,
         password_hash=None,
@@ -71,11 +72,11 @@ def test_seed_restores_reviewer_baseline() -> None:
     )
     repository = AsyncMock()
     repository.get_by_email.side_effect = [
-        build_seeded_user(DEMO_USER_SPECS[0]),
-        build_seeded_user(DEMO_USER_SPECS[1]),
+        build_seeded_user(SEED_DEMO_USER_SPECS[0]),
+        build_seeded_user(SEED_DEMO_USER_SPECS[1]),
         marina,
     ]
-    service = DemoUserSeedService(session, repository)
+    service = SeedDemoUserService(session, repository)
 
     users = asyncio.run(service.ensure_demo_users())
 
@@ -90,8 +91,8 @@ def test_seed_restores_reviewer_baseline() -> None:
 def test_ensure_demo_users_is_stable_when_demo_users_are_already_seeded() -> None:
     session = FakeSession()
     repository = AsyncMock()
-    repository.get_by_email.side_effect = [build_seeded_user(spec) for spec in DEMO_USER_SPECS]
-    service = DemoUserSeedService(session, repository)
+    repository.get_by_email.side_effect = [build_seeded_user(spec) for spec in SEED_DEMO_USER_SPECS]
+    service = SeedDemoUserService(session, repository)
 
     users = asyncio.run(service.ensure_demo_users())
 

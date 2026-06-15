@@ -13,8 +13,10 @@ from services.feature_realtime_publisher import FeatureRealtimePublisher
 from services.feature_service import FeatureService
 from services.layer_service import LayerService
 from services.realtime_connection_manager import WebSocketConnectionManager
+from services.utility_network_service import UtilityNetworkService
 from repositories.user_repository import UserRepository
 from repositories.layer_repository import LayerRepository
+from repositories.utility_network_repository import UtilityNetworkRepository
 
 
 def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
@@ -35,6 +37,15 @@ def get_feature_service(
 
 def get_layer_service(session: AsyncSession = Depends(get_session)) -> LayerService:
     return LayerService(session, LayerRepository(session))
+
+
+def get_utility_network_service(
+    session: AsyncSession = Depends(get_session),
+) -> UtilityNetworkService:
+    return UtilityNetworkService(
+        session,
+        UtilityNetworkRepository(session),
+    )
 
 
 def get_websocket_connection_manager(websocket: WebSocket) -> WebSocketConnectionManager:

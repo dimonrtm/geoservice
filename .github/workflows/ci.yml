@@ -130,6 +130,36 @@ jobs:
             pytest tests/test_network_model_integration.py -q
           docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
             pytest tests/test_network_model_migration.py -q
+          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
+            pytest tests/test_seed_utility_dataset_integration.py -q
+          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
+            pytest tests/test_utility_network_repository_integration.py -q
+
+      - name: Utility dataset authenticated API smoke
+        working-directory: infra
+        run: |
+          docker compose -f docker-compose.yml exec -T backend \
+            python -m seeds.runners.seed_utility_dataset
+          docker compose -f docker-compose.yml exec -T backend python -c \
+            "import json, urllib.request; \
+            login=urllib.request.Request( \
+              'http://127.0.0.1:8000/api/v1/auth/login', \
+              data=json.dumps({ \
+                'email':'alexey.editor@example.local', \
+                'password':'alexey-editor-password' \
+              }).encode(), \
+              headers={'Content-Type':'application/json'} \
+            ); \
+            token=json.load(urllib.request.urlopen(login))['access_token']; \
+            request=urllib.request.Request( \
+              'http://127.0.0.1:8000/api/v1/utility-network/feeders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0101', \
+              headers={'Authorization':'Bearer '+token} \
+            ); \
+            payload=json.load(urllib.request.urlopen(request)); \
+            assert payload['code']=='synthetic_utility_feeder_01'; \
+            assert len(payload['network']['features'])==19; \
+            assert len(payload['associations'])==9; \
+            print('utility dataset api ok')"
 
       - name: Teardown
         if: always()

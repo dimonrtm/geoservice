@@ -3,8 +3,8 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-13
-source: repository-change:2026-06-13
+updated: 2026-06-15
+source: repository-change:2026-06-15
 tags: [testing, backend, frontend, quality]
 ---
 
@@ -18,7 +18,7 @@ Backend tests находятся в `apps/backend/app/tests`.
 
 Покрытые области:
 
-- auth service, password service и demo user seed;
+- auth service, `core/passwords.py` и demo user seed;
 - settings security validation;
 - bbox validation;
 - exception handlers;
@@ -26,6 +26,10 @@ Backend tests находятся в `apps/backend/app/tests`.
 - feature realtime publisher;
 - websocket auth, websocket role checks и layer websocket endpoint;
 - realtime connection manager.
+- utility dataset specs, create-once/no-op service и rollback behavior;
+- PostGIS persistence, spatial AOI intersection и single-query feeder
+  aggregate;
+- utility mapping, structured errors и Editor-only API access.
 
 ## Frontend Tests
 

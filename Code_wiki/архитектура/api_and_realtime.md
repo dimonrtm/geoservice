@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-06-13
-source: repository-change:2026-06-13
+updated: 2026-06-15
+source: repository-change:2026-06-15
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -31,10 +31,26 @@ Frontend хранит token в `localStorage`, добавляет `Authorization
 
 `bbox` валидируется как четыре числа с диапазонами долготы/широты. `limit` нормализуется backend-ом в диапазон `1..5000`; frontend обычно запрашивает `500`.
 
+## Utility Network API
+
+- `GET /api/v1/utility-network/feeders/{feederId}` возвращает полный feeder,
+  все его features и associations, а также все пространственно пересекающиеся
+  AOI.
+- `feederId` является UUID primary key; неизвестный feeder возвращает
+  structured `404 FEEDER_NOT_FOUND`, невалидный UUID - стандартный FastAPI
+  `422`.
+- Endpoint требует активного `Editor`; `Reviewer` получает
+  `403 ROLE_NOT_ALLOWED`.
+- Response использует GeoJSON `FeatureCollection` для `network` и `aois`;
+  публичные keys `isActive`, `assetCode`, `featureType`, `fromFeatureId`,
+  `toFeatureId`, `associationType` сериализуются в camelCase.
+
 ## Ошибки
 
 - Auth errors возвращают `code`, `message`, `correlationId`, `details`; активные
   коды Дня 2: `AUTH_REQUIRED`, `USER_INACTIVE`, `ROLE_NOT_ALLOWED`.
+- Utility read errors используют тот же structured contract; повреждённый
+  aggregate возвращает `500 UTILITY_DATASET_INVALID`.
 - Domain validation возвращает 422 с `{"error": "..."}`.
 - Missing layer/feature возвращает 404.
 - Version conflict возвращает 409 с телом `VERSION_MISMATCH`, `featureId`, `requestVersion`, `currentVersion`, `message`.

@@ -9,11 +9,12 @@ from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.passwords import verify_password
 from domain.exceptions.auth_api_error import AuthApiError
 from models.user import User
 from repositories.user_repository import UserRepository
 from schemas.dev_login_in import DevLoginIn
-from services.password_service import verify_password
 
 
 class AuthService:

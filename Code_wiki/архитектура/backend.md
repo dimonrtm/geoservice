@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-06-13
-source: repository-change:2026-06-13
+updated: 2026-06-15
+source: repository-change:2026-06-15
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -21,11 +21,28 @@ Backend GeoService находится в `apps/backend/app` и построен 
 ## Слои Кода
 
 - `api/` содержит HTTP/WebSocket routers, dependency wiring и exception handlers.
-- `services/` содержит бизнес-операции: auth, layer read, feature CRUD, realtime publishing, demo seed.
-- `repositories/` изолирует SQLAlchemy-запросы к users, layers и geometry tables.
+- `services/` содержит runtime business operations: auth, layer read, feature
+  CRUD, realtime publishing и чтение utility network.
+- `repositories/` изолирует runtime SQLAlchemy-запросы к users, layers,
+  geometry tables и utility network.
 - `models/` описывает таблицы `users`, `layers` и feature-таблицы по типам геометрии.
 - `schemas/` содержит Pydantic DTO для входов, ответов и GeoJSON.
 - `domain/` содержит bbox parsing, feature registry и domain exceptions.
+- `seeds/` изолирует startup data logic в подпакетах `repositories`,
+  `services`, `specs` и `runners`; seed-код не использует runtime repositories
+  или services.
+
+Общая password logic находится в нейтральном `core/passwords.py` и
+используется как auth runtime, так и demo-user seed.
+
+## Utility Read Path
+
+`GET /api/v1/utility-network/feeders/{feederId}` доступен только активному
+`Editor`. `UtilityNetworkRepository.get_feeder_aggregate()` выполняет один SQL
+round trip и возвращает feeder вместе с тремя независимо отсортированными
+JSONB aggregates: features, associations и пересекающиеся AOI. AOI выбираются
+через correlated `EXISTS` + `ST_Intersects`; плоский JOIN коллекций не
+используется, чтобы не создавать размножение строк.
 
 ## Конфигурация И Безопасность
 

@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-14
+updated: 2026-06-15
 source: null
 tags: [project-state, geoservice]
 ---
@@ -23,7 +23,9 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-14 16:58 +05:00, индексы и live state синхронизированы после reviewer и broad-domain ingest; необработанных RAW inputs и stale-нод нет.
 - Последний `/lint-wiki`: 2026-06-14, найдены ожидаемые `missing_frontmatter` для 18 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-13, существующие ноды `Code_wiki` синхронизированы с RBAC Дня 2 и новым workflow agent memory audit.
+- Последний `/ingest repository-change`: 2026-06-15, существующие ноды
+  `Code_wiki` синхронизированы с пакетом `seeds`, utility dataset,
+  single-query feeder API и CI smoke.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
@@ -62,6 +64,6 @@ GeoService - исследовательский pet-проект на стади
 - До implementation contract нужно решить, является ли любой trace change `Critical` или только trace change с service/subnetwork, safety либо network error impact.
 - `Operational Utility GIS` хранится только как справочная карта рынка; vendor claims до внешнего использования требуют проверки.
 - Нужно снять manual baseline на 10-20 work orders и затем провести 200-work-order product evaluation с 7-дневным correction window.
-- Нужно продолжить Спринт 1: utility schema, assigned work orders, edit version
-  и frontend shell; роли/seed Дня 2 завершены.
+- В Спринте 1 готовы utility schema, `synthetic_utility_feeder_01` и read-only
+  feeder API; далее нужны assigned work orders, edit version и frontend shell.
 - Нужно синхронизировать старые generic requirements/API docs с активным utility workflow.
