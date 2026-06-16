@@ -3,8 +3,8 @@ title: Utility GIS Reviewer
 type: entity
 status: active
 created: 2026-06-13
-updated: 2026-06-13
-source: "RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md"
+updated: 2026-06-16
+source: "RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; RAW_inputs/meetings/Reviwer Decision.md"
 tags: [persona, reviewer, utility-network, authoritative-editing, synthetic-evidence]
 ---
 
@@ -27,6 +27,9 @@ Design-персона GeoService, поддержанная синтетичес�
 - Подтверждает готовность change set к публикации.
 - Выступает контрольным слоем между field reality, engineering documents,
   physical/logical network model и operational systems.
+- Для Release 2 принимает reviewer decision как approval of change package for
+  post readiness; это не обязательно означает, что сам `Reviewer` выполняет
+  технический `post` в `Default`.
 
 ## Рабочая Задача
 
@@ -45,8 +48,8 @@ Design-персона GeoService, поддержанная синтетичес�
    специалистов.
 6. Принять изменение, вернуть его с объяснимыми замечаниями или передать
    профильному специалисту.
-7. После исправления повторно проверить весь affected area и актуальность
-   change set.
+7. После исправления или stale approval повторно проверить delta-since-approval
+   с доступом к полной previously approved package baseline.
 8. Зафиксировать решение и evidence для audit.
 
 ## Критерии Решения
@@ -59,6 +62,11 @@ Design-персона GeoService, поддержанная синтетичес�
 - изменение сохраняет lineage старых объектов;
 - контекст понятен следующему специалисту без устного объяснения автора;
 - approval относится к неизмененному и актуальному change set.
+- для `High` reviewer принимает финальное решение по содержанию package;
+- для `Critical` reviewer участвует в dual control вместе с профильным
+  специалистом или utility-network admin;
+- `post authorization` отделен от reviewer package approval и требует
+  актуального reconcile/technical gate.
 
 ## Боли-Гипотезы
 
@@ -85,11 +93,16 @@ Design-персона GeoService, поддержанная синтетичес�
 
 Синтетический источник не подтверждает:
 
-- выполняет ли reviewer `post` самостоятельно;
 - является ли review queue общей или маршрутизируется по специализации;
 - допустимо ли совмещение ролей для низкорисковых изменений;
 - обязателен ли комментарий при любом approve;
 - какие проверки и документы являются формальным регламентом.
+
+`RAW_inputs/meetings/Reviwer Decision.md` рекомендует разделить reviewer package
+approval и technical `post authorization`: `Reviewer` подтверждает содержательную
+готовность пакета, а право публикации в `Default` остается отдельным gate у
+уполномоченной роли / владельца authoritative state. Это accepted-for-design,
+но не direct user evidence.
 
 Эти вопросы отслеживаются в `FU-2026-06-13-002`.
 
@@ -98,6 +111,7 @@ Design-персона GeoService, поддержанная синтетичес�
 - [[../../chats/2026-06-13-utility-gis-reviewer-user-interview-checklist]]
 - [[../../chats/2026-06-13-utility-gis-reviewer-synthetic-interview-rehearsal]]
 - [[../../chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]]
+- [[../../chats/2026-06-16-release-2-reviewer-decision]]
 - [[../../concepts/jtbd]]
 - [[../../decisions/risk_assumption_log]]
 - [[../../decisions/release_1_utility_workflow]]

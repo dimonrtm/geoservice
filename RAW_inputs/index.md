@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-14
+updated: 2026-06-16
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -44,3 +44,4 @@ tags: [raw-inputs, source-of-truth]
 | 2026-06-14 | `RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md` | Доверенный design/research source `Utility GIS editor`: risk tiers, evidence, post blockers, audit и routing для следующего релиза; выше assistant-led chat workshop по иерархии доверия, но не является direct user interview | Да: [[../Vision_wiki/chats/2026-06-14-utility-gis-editor-conflict-routing-synthetic-research]], [[../Vision_wiki/decisions/conflict_resolution_routing]], [[../Vision_wiki/decisions/conflicts/2026-06-14-next-release-conflict-routing-responsibility]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |
 | 2026-06-14 | `RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md` | Доверенный design/research source с синтезированными ответами `Editor` и `Reviewer` для Release 2 Conflict Explanation; не является direct user interview | Да: [[../Vision_wiki/chats/2026-06-14-release-2-conflict-explanation-editor-reviewer-research]], [[../Vision_wiki/decisions/release_2_conflict_explanation]], [[../Vision_wiki/decisions/conflicts/2026-06-14-trace-risk-tier-boundary]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |
 | 2026-06-14 | `RAW_inputs/documents/UtilityGisEditor.md` | Доверенный market research input для расширения базы знаний: реконструкция `Utility GIS editor`, международные и русскоязычные аналоги, справочная категория `Operational Utility GIS`; релизы не меняет, vendor claims требуют проверки | Да: [[../Vision_wiki/chats/2026-06-14-utility-gis-editor-market-research]], [[../Vision_wiki/concepts/operational_utility_gis]], [[../Vision_wiki/entities/competitors/utility_gis_editor_market_landscape]], [[../Vision_wiki/decisions/followups/index]] |
+| 2026-06-16 | `RAW_inputs/meetings/Reviwer Decision.md` | Design/architecture input для Release 2 Reviewer decision: package approval for post readiness, разделение approval/post authorization, post blockers, stale approval, repeat review и граница `High/Critical` для trace change; не является direct user interview | Да: [[../Vision_wiki/chats/2026-06-16-release-2-reviewer-decision]], [[../Vision_wiki/decisions/release_2_conflict_explanation]], [[../Vision_wiki/decisions/conflict_resolution_routing]], [[../Vision_wiki/decisions/conflicts/2026-06-14-trace-risk-tier-boundary]], [[../Vision_wiki/entities/personas/utility_gis_reviewer]], [[../Vision_wiki/decisions/risk_assumption_log]], [[../Vision_wiki/decisions/followups/index]] |

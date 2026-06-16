@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-14
+updated: 2026-06-16
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -64,19 +64,24 @@ tags: [knowledge, index, geoservice]
 - 2026-06-13: Agent memory и knowledge pipeline переведены на gate устойчивого знания, компактный реестр изменений `Code_wiki` и read-only memory audit.
 - 2026-06-13: Выполнен `/sync-vision`; необработанных RAW inputs и stale-нод нет, открыты 10 follow-up'ов, ожидаемый lint-конфликт остаётся на 12 неизменяемых RAW Markdown files.
 - 2026-06-13: Обработаны синтетическая репетиция `Utility GIS reviewer` и broad-domain репетиции editor/reviewer; добавлены reviewer persona, JTBD, checklist реального интервью и вопросы о границах reviewer role.
-- 2026-06-14: Выполнен `/sync-vision`; все 16 RAW sources обработаны, открыты 11 follow-up'ов, stale-ноды не обнаружены, ожидаемый lint-конфликт охватывает 15 неизменяемых RAW Markdown files.
+- 2026-06-14: Выполнен `/sync-vision`; все 19 RAW sources обработаны, открыты 13 follow-up'ов, stale-ноды не обнаружены, ожидаемый lint-конфликт охватывает 18 неизменяемых RAW Markdown files.
 - 2026-06-14: Assistant-led chat workshop по `geometry/association conflict` помечен superseded; доверенный RAW source `utility_gis_editor_geometry_association_conflict_answers.md` стал канонической основой planned routing следующего релиза. Текущий Release 1 оставлен без изменений.
+- 2026-06-15: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с utility schema, seed `synthetic_utility_feeder_01`, read-only feeder API, startup order и тестовым покрытием.
+- 2026-06-16: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с package boundaries `utility_service`, Docker/CI contract `utility_service` и новой раскладкой backend tests.
+- 2026-06-16: Выполнен `/sync-vision`; новых RAW inputs и stale-нод нет, открыты 13 follow-up'ов, ожидаемый lint-конфликт остается на 18 неизменяемых RAW Markdown files.
+- 2026-06-16: Обработан RAW source `RAW_inputs/meetings/Reviwer Decision.md`; Release 2 reviewer decision уточнен как package approval for post readiness, approval/post authorization разделены, trace-boundary conflict закрыт для planned policy.
 
 ## Открытые Вопросы
 
-- Новый Release 1 разбит на 7 двухнедельных спринтов; роли и seed Дня 2 завершены, следующий scope Спринта 1 - utility schema, assigned work orders, edit version и frontend shell.
+- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01` и read-only feeder API; следующий scope - assigned work orders, edit version и frontend shell.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset/`full-clean` scripts, demo сценарий, troubleshooting, observability minimum и `import GeoJSON`.
 - Нужно проверить draft P95 targets на `synthetic_utility_feeder_01` в Chrome на reference hardware.
 - Нужно снять manual baseline на 10-20 work orders и провести product evaluation на 200 started work orders с 7-дневным correction window.
-- Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить право на `post`, routing по специализации, совмещение ролей и обязательность approve comment.
+- Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить planned policy: package approval vs technical `post`, routing по специализации, совмещение ролей, обязательность approve comment и user validation trace-boundary.
+- До implementation contract нужно превратить Release 2 reviewer decision policy в state machine, API/events и audit schema.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 

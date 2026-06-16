@@ -3,8 +3,8 @@ title: Release 2 Conflict Explanation
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-14
-source: RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md
+updated: 2026-06-16
+source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md"
 tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-network]
 ---
 
@@ -21,6 +21,21 @@ association conflict через сетевое последствие и evidenc
 ## Решение
 
 Conflict explanation строится как consequence-first карточка.
+
+`Reviewer decision` для Release 2 трактуется как approval of change package for
+post readiness. `Reviewer` принимает решение по пакету изменения, а не только по
+одному conflict resolution item. Conflict resolution остается подшагом внутри
+reconcile/post workflow, routing/escalation - исключительным путем, а `post`
+gate - отдельной технической проверкой против текущего `Default`.
+
+Approval и `post authorization` разделяются:
+
+- `approve package` подтверждает, что пакет содержательно корректен и
+  безопасен по имеющимся evidence;
+- `post authorized` подтверждает, что пакет все еще можно публиковать в
+  `Default` сейчас, после актуального reconcile и технических gates;
+- если между approval и `post` изменился `Default` или topology-relevant часть
+  пакета, approval становится stale и требует repeat review.
 
 Обязательный первый уровень:
 
@@ -42,6 +57,9 @@ Conflict explanation строится как consequence-first карточка.
 
 Обязательные workflow rules:
 
+- `Reviewer` получает пакет после `Editor proposal`, reconcile against current
+  `Default` и pre-review gate: validation/topology, trace или subnetwork impact
+  и Differences view;
 - recommendation не является автоматическим решением;
 - `High/Critical` нельзя автоматически approve или downgrade;
 - unresolved association diff, stale approval, неполная validation, неожиданный
@@ -53,26 +71,57 @@ Conflict explanation строится как consequence-first карточка.
 - audit сохраняет рассмотренные альтернативы, risk before/after, evidence,
   решения ролей, stale events и итог `post`.
 
+Жесткие `post` blockers:
+
+- невыполненный reconcile или изменение `Default` после reconcile;
+- unreviewed conflicts;
+- dirty areas в зоне предполагаемого сетевого эффекта;
+- error dirty areas, network errors или invalid topology state;
+- dirty/invalid subnetwork в affected contour;
+- unresolved association diff с влиянием на connectivity, containment или
+  structural attachment;
+- unexpected trace impact без согласованного rationale;
+- missing evidence для field facts, safety-related changes или service-impacting
+  corrections.
+
 ## Ролевой Контракт
 
 - `Editor` отвечает за предложение resolution, его причину, evidence и
   подготовку безопасного change package.
 - `Reviewer` проверяет соответствие work order/evidence, сетевое последствие и
-  post gate; для сложных сетевых изменений возвращает на Manual edit, а не
-  исправляет их скрыто.
-- Профильный специалист подтверждает domain-specific safety для `Critical`.
-- Владелец authoritative data сохраняет финальное полномочие по спорному
-  authoritative state согласно planned routing.
+  post gate; для сложных сетевых изменений возвращает на Manual edit или
+  эскалирует, а не исправляет их скрыто.
+- Для `Normal` без network impact допустим audit + sample review без
+  индивидуального reviewer approval.
+- Для `High` `Reviewer` принимает финальное решение по содержанию пакета, а не
+  только подтверждает proposal `Editor`.
+- Для `Critical` нужен dual control: `Reviewer` + профильный специалист или
+  utility-network admin.
+- Владелец authoritative data / version administrator equivalent сохраняет
+  финальное право publication в `Default` и право решения при разногласии.
 
-## Неразрешенное Расхождение
+## Разрешение Trace Boundary
 
-Источник относит association diff и trace change минимум к `High`, повышая до
-`Critical` при service, safety, network rule или subnetwork impact. Нода
-[[conflict_resolution_routing]] сейчас определяет любое изменение trace как
-`Critical`.
+`RAW_inputs/meetings/Reviwer Decision.md` уточняет, что trace change не должен
+автоматически становиться `Critical`. `Critical` возникает, когда trace delta
+меняет authoritative network behavior: affected service, subnetwork,
+controllers, safety isolation, traversability/barriers, rule-dependent
+connectivity или operational outputs.
 
-До решения [[conflicts/2026-06-14-trace-risk-tier-boundary]] точная автоматическая
-классификация risk tier не считается утвержденным implementation contract.
+Trace delta без service/subnetwork/safety semantics и без
+rule/terminal/controller impact может оставаться `High`.
+
+## Acceptance Examples
+
+- Безопасный `High`: ограниченный geometry/attribute diff, clean validation,
+  trace без subnetwork/controller impact; `Reviewer` принимает финальное
+  package approval, а `post` возможен только если `Default` не изменился.
+- `Critical`: association или terminal/path change меняет upstream/downstream
+  behavior или dirty/invalid subnetwork; без dual approval и clean subnetwork
+  state `post` невозможен.
+- Stale approval: после approval изменился `Default` или пакет; approval
+  помечается stale, показывается delta-since-approval и обновленный package
+  summary, `post` заблокирован до repeat review.
 
 ## Последствия
 
@@ -83,11 +132,13 @@ Conflict explanation строится как consequence-first карточка.
 - Queue sorting учитывает `Critical`, SLA, affected service, trace impact,
   `High`, work order priority и domain/area.
 - Реальная применимость остается design-гипотезой до проверки с участниками
-  обеих ролей.
+  обеих ролей; новый источник является design/architecture input, а не direct
+  user interview.
 
 ## Связи
 
 - [[../chats/2026-06-14-release-2-conflict-explanation-editor-reviewer-research]]
+- [[../chats/2026-06-16-release-2-reviewer-decision]]
 - [[conflict_resolution_routing]]
 - [[conflicts/2026-06-14-trace-risk-tier-boundary]]
 - [[risk_assumption_log]]

@@ -19,9 +19,9 @@ GeoService - исследовательский pet-проект на стади
 ## Состояние Pipeline
 
 - Последний `/discover`: 2026-06-14, совместная 45-минутная сессия `Utility GIS editor` и `Reviewer` спроектировала для следующего релиза risk-tiered routing `geometry/association conflict`; текущий Release 1 не меняется.
-- Последний `/ingest`: 2026-06-14, `UtilityGisEditor.md` принят как доверенный market research input для расширения базы знаний; добавлены справочная категория `Operational Utility GIS` и карта vendors. Релизы не менялись.
-- Последний `/sync-vision`: 2026-06-14 16:58 +05:00, индексы и live state синхронизированы после reviewer и broad-domain ingest; необработанных RAW inputs и stale-нод нет.
-- Последний `/lint-wiki`: 2026-06-14, найдены ожидаемые `missing_frontmatter` для 18 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/ingest`: 2026-06-16, `RAW_inputs/meetings/Reviwer Decision.md` обработан как design/architecture input для Release 2 Reviewer decision; approval of change package for post readiness отделен от technical `post authorization`, trace-boundary conflict закрыт для planned policy.
+- Последний `/sync-vision`: 2026-06-16 20:36 +05:00, корневой индекс и live state синхронизированы после двух repository-change ingest; новых RAW inputs и stale-нод нет.
+- Последний `/lint-wiki`: 2026-06-16, найдены ожидаемые `missing_frontmatter` для 19 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний `/ingest repository-change`: 2026-06-16, существующие ноды
   `Code_wiki` синхронизированы с package boundaries `utility_service`,
@@ -31,15 +31,15 @@ GeoService - исследовательский pet-проект на стади
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
   завершение плана или commit не являются триггерами.
 
-## Состояние Wiki На 2026-06-14
+## Состояние Wiki На 2026-06-16
 
-- Необработанные RAW inputs: не обнаружены; все 19 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs с прошлого `/sync-vision`: 3, два Release 2 conflict sources и один market research source обработаны.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: добавлены Release 2 conflict decisions, справочная категория `Operational Utility GIS` и расширенная market landscape; обновлены risk log и follow-up queue.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: не обнаружены.
+- Необработанные RAW inputs: не обнаружены; все 20 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: не обнаружены.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: добавлена summary-нода [[../Vision_wiki/chats/2026-06-16-release-2-reviewer-decision]], обновлены Release 2 reviewer decision/routing, reviewer persona, risk log и follow-up queue.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; существующие ноды обновлены через repository-change ingest для utility schema/read-only feeder API и package boundaries `utility_service`.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts: process conflict `FU-2026-06-01-004` на 18 RAW Markdown files, product validation conflict `FU-2026-06-13-002` и Release 2 risk boundary `FU-2026-06-14-002`.
-- Открытые follow-up'ы: 13.
+- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 19 RAW Markdown files, product validation conflict `FU-2026-06-13-002` и Release 2 user validation `FU-2026-06-14-001`.
+- Открытые follow-up'ы: 12.
 
 ## Открытые Вопросы
 
@@ -52,18 +52,16 @@ GeoService - исследовательский pet-проект на стади
 - Нужно внешне проверить, выполняет ли reviewer `post`, требуется ли routing очереди по специализации и допустимо ли совмещение ролей для low-risk changes.
 - Broad-domain applicability к electric/water/gas/telecom остается гипотезой; Release 1 сохраняет electric `synthetic_utility_feeder_01`.
 - Нужно отдельным запросом решить, что делать с пустыми/неполными dev/infra helper files, найденными repository snapshot.
-- Для `Utility GIS editor` нужно реализовать/подготовить `synthetic_utility_feeder_01`: 1 AOI, 1 feeder, 7 junctions, 6 line segments, 6 devices, 8-10 associations, 2 work orders, 3 users, `Default` + 2 edit versions, 4 conflict-сценария.
+- После готового read-only feeder API следующий scope Спринта 1: assigned work orders, edit version и frontend shell.
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.
 - Нужно отдельной implementation/docs-задачей согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset script, demo сценарий, troubleshooting, `PostGIS seed`, `auth`.
 - Нужно реализовать audit/reset contract: audit переживает restart и обычный reset; `full-clean` удаляет всё; обязательны healthcheck, logs, correlation ID и понятные UI errors.
 - Нужно выполнить repeatable benchmark P50/P95 для draft performance targets на reference hardware.
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.
-- Для следующего релиза нужно проверить с реальными участниками каноническую planned модель: routing по affected network area/компетенции/risk tier, `High` через `Reviewer`, audit + sample review для безопасного `Normal`, отсутствие обязательной эскалации `Simple`, SLA, emergency path и роль Data Owner; текущий Release 1 не расширять.
+- Для следующего релиза нужно проверить с реальными участниками каноническую planned модель: reviewer decision как package approval for post readiness, разделение `approve package` / technical `post authorization`, routing по affected network area/компетенции/risk tier, `High` через финальное решение `Reviewer`, audit + sample review для безопасного `Normal`, SLA, emergency path и роль Data Owner; текущий Release 1 не расширять.
 - Для Release 2 нужно проверить consequence-first `Conflict explanation`: geometry/association diff, validation/dirty areas, trace before/after, affected service/subnetwork, evidence, stale approval, audit и post blockers.
-- До implementation contract нужно решить, является ли любой trace change `Critical` или только trace change с service/subnetwork, safety либо network error impact.
+- До implementation contract нужно превратить Release 2 reviewer decision policy в state machine, API/events и audit schema.
 - `Operational Utility GIS` хранится только как справочная карта рынка; vendor claims до внешнего использования требуют проверки.
 - Нужно снять manual baseline на 10-20 work orders и затем провести 200-work-order product evaluation с 7-дневным correction window.
-- В Спринте 1 готовы utility schema, `synthetic_utility_feeder_01` и read-only
-  feeder API; далее нужны assigned work orders, edit version и frontend shell.
 - Нужно синхронизировать старые generic requirements/API docs с активным utility workflow.

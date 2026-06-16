@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-14
+updated: 2026-06-16
 source: null
 tags: [vision-wiki, product]
 ---
@@ -77,7 +77,8 @@ tags: [vision-wiki, product]
 - [[decisions/conflicts/2026-06-14-next-release-conflict-routing-responsibility]] - разрешенный provenance-конфликт; RAW source каноничен относительно chat workshop.
 - [[chats/2026-06-14-release-2-conflict-explanation-editor-reviewer-research]] - доверенный синтез требований `Editor` и `Reviewer` к consequence-first explanation.
 - [[decisions/release_2_conflict_explanation]] - planned contract Release 2 для explanation, evidence, stale approval, audit и post gates.
-- [[decisions/conflicts/2026-06-14-trace-risk-tier-boundary]] - открытое расхождение по границе `High/Critical` при изменении trace.
+- [[decisions/conflicts/2026-06-14-trace-risk-tier-boundary]] - resolved policy по границе `High/Critical`: trace change становится `Critical` только при изменении authoritative network behavior.
+- [[chats/2026-06-16-release-2-reviewer-decision]] - design/architecture input: reviewer decision как package approval for post readiness, разделение approval/post authorization, post blockers и resolved trace boundary.
 - [[chats/2026-06-14-utility-gis-editor-market-research]] - доверенное market research по полному Use Case, vendors и product families.
 - [[concepts/operational_utility_gis]] - справочная рыночная категория из network editor, field execution и integration hub.
 - [[entities/competitors/utility_gis_editor_market_landscape]] - международные и русскоязычные utility GIS референсы.
