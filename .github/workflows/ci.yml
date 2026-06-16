@@ -18,16 +18,16 @@ jobs:
       - name: Build backend dev image (cached)
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/backend/app
+          context: ./apps/backend
           target: dev
-          tags: geoservice-backend:dev
+          tags: utility_service:dev
           load: true
           cache-from: type=gha,scope=backend-dev
           cache-to: type=gha,mode=max,scope=backend-dev
       - name: Black version
-        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "black --version"
+        run: docker run --rm --entrypoint bash utility_service:dev -lc "black --version"
       - name: Black check
-        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "black --check ."
+        run: docker run --rm --entrypoint bash utility_service:dev -lc "black --check ."
 
   backend_lint:
     runs-on: ubuntu-latest
@@ -39,15 +39,15 @@ jobs:
       - name: Build backend dev image (cached)
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/backend/app
+          context: ./apps/backend
           target: dev
-          tags: geoservice-backend:dev
+          tags: utility_service:dev
           load: true
           cache-from: type=gha,scope=backend-dev
           cache-to: type=gha,mode=max,scope=backend-dev
 
       - name: Ruff check
-        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "ruff check ."
+        run: docker run --rm --entrypoint bash utility_service:dev -lc "ruff check ."
 
   backend_test:
     runs-on: ubuntu-latest
@@ -59,15 +59,15 @@ jobs:
       - name: Build backend dev image (cached)
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/backend/app
+          context: ./apps/backend
           target: dev
-          tags: geoservice-backend:dev
+          tags: utility_service:dev
           load: true
           cache-from: type=gha,scope=backend-dev
           cache-to: type=gha,mode=max,scope=backend-dev
 
       - name: Pytest
-        run: docker run --rm --entrypoint bash geoservice-backend:dev -lc "pytest"
+        run: docker run --rm --entrypoint bash utility_service:dev -lc "pytest"
 
   backend_build_prod:
     runs-on: ubuntu-latest
@@ -80,9 +80,9 @@ jobs:
       - name: Build backend prod image (cached)
         uses: docker/build-push-action@v6
         with:
-          context: ./apps/backend/app
+          context: ./apps/backend
           target: prod
-          tags: geoservice-backend:prod
+          tags: utility_service:prod
           load: true
           cache-from: type=gha,scope=backend-prod
           cache-to: type=gha,mode=max,scope=backend-prod
@@ -93,54 +93,54 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Start postgis + backend (compose)
+      - name: Start postgis + utility_service (compose)
         working-directory: infra
         run: |
-          docker compose -f docker-compose.yml up -d --build postgis backend
+          docker compose -f docker-compose.yml up -d --build postgis utility_service
           docker compose -f docker-compose.yml ps
 
-      - name: Wait for backend health
+      - name: Wait for utility_service health
         working-directory: infra
         run: |
-          CID="$(docker compose -f docker-compose.yml ps -q backend)"
-          echo "backend container id: $CID"
+          CID="$(docker compose -f docker-compose.yml ps -q utility_service)"
+          echo "utility_service container id: $CID"
           for i in $(seq 1 30); do
             STATUS="$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || echo unknown)"
-            echo "wait #$i: backend health = $STATUS"
+            echo "wait #$i: utility_service health = $STATUS"
             if [ "$STATUS" = "healthy" ]; then break; fi
             sleep 2
           done
           STATUS="$(docker inspect -f '{{.State.Health.Status}}' "$CID" 2>/dev/null || echo unknown)"
           if [ "$STATUS" != "healthy" ]; then
-            echo "Backend did not become healthy"
+            echo "utility_service did not become healthy"
             docker compose -f docker-compose.yml ps
-            docker compose -f docker-compose.yml logs backend --tail=200
+            docker compose -f docker-compose.yml logs utility_service --tail=200
             exit 1
           fi
 
       - name: GET /health inside container
         working-directory: infra
         run: |
-          docker compose -f docker-compose.yml exec -T backend python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2); print('health ok')"
+          docker compose -f docker-compose.yml exec -T utility_service python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2); print('health ok')"
 
       - name: PostgreSQL/PostGIS network model tests
         working-directory: infra
         run: |
-          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
-            pytest tests/test_network_model_integration.py -q
-          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
-            pytest tests/test_network_model_migration.py -q
-          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
-            pytest tests/test_seed_utility_dataset_integration.py -q
-          docker compose -f docker-compose.yml exec -T backend env RUN_DB_TESTS=1 \
-            pytest tests/test_utility_network_repository_integration.py -q
+          docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
+            pytest tests/integration_tests/test_network_model_integration.py -q
+          docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
+            pytest tests/integration_tests/test_network_model_migration.py -q
+          docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
+            pytest tests/integration_tests/test_seed_utility_dataset_integration.py -q
+          docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
+            pytest tests/integration_tests/test_utility_network_repository_integration.py -q
 
       - name: Utility dataset authenticated API smoke
         working-directory: infra
         run: |
-          docker compose -f docker-compose.yml exec -T backend \
+          docker compose -f docker-compose.yml exec -T utility_service \
             python -m seeds.runners.seed_utility_dataset
-          docker compose -f docker-compose.yml exec -T backend python -c \
+          docker compose -f docker-compose.yml exec -T utility_service python -c \
             "import json, urllib.request; \
             login=urllib.request.Request( \
               'http://127.0.0.1:8000/api/v1/auth/login', \

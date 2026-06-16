@@ -8,5 +8,13 @@ line-length = 100
 target-version = ["py312"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = [
+    "utility_service/web_api/tests",
+    "utility_service/use_cases/tests",
+    "utility_service/domain_services/tests",
+    "utility_service/infrastructure/tests",
+    "utility_service/utils/tests",
+    "seeds/tests",
+    "tests",
+]
 addopts = "-q"

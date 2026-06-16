@@ -17,7 +17,7 @@ services:
     restart: unless-stopped
   migrate:
     build:
-      context: ../apps/backend/app/
+      context: ../apps/backend/
       dockerfile: Dockerfile
     depends_on:
       postgis:
@@ -27,9 +27,10 @@ services:
     command: ["bash", "-lc", "set -euo pipefail; alembic upgrade head"]
     restart: no
     profiles: ["migrate"]
-  backend:
+  utility_service:
+    container_name: utility_service
     build:
-      context: ../apps/backend/app/
+      context: ../apps/backend/
       dockerfile: Dockerfile
       target: dev
     environment:
@@ -45,7 +46,7 @@ services:
       [
         "bash",
         "-lc",
-        "set -euo pipefail; alembic upgrade head; python -m seeds.runners.seed_demo_users; python -m seeds.runners.seed_utility_dataset; uvicorn main:app --host 0.0.0.0 --port 8000"
+        "set -euo pipefail; alembic upgrade head; python -m seeds.runners.seed_demo_users; python -m seeds.runners.seed_utility_dataset; uvicorn utility_service.web_api.main:app --host 0.0.0.0 --port 8000"
       ]
     depends_on:
       postgis:
@@ -67,7 +68,7 @@ services:
     ports:
       - "5173:5173"
     depends_on:
-      backend:
+      utility_service:
         condition: service_healthy
     healthcheck:
       test:
@@ -90,7 +91,7 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      backend:
+      utility_service:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null || exit 1"]

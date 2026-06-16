@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-15
-source: repository-change:2026-06-15
+updated: 2026-06-16
+source: repository-change:2026-06-16
 tags: [ci, tests, lint, build]
 ---
 
@@ -14,29 +14,38 @@ CI описан в `.github/workflows/ci.yml` и разделен на backend/f
 
 ## Backend
 
-Backend jobs собирают Docker image `geoservice-backend:dev` из `apps/backend/app` и запускают:
+Backend jobs собирают Docker image `utility_service:dev` из `apps/backend` и запускают:
 
 - `black --check .`
 - `ruff check .`
 - `pytest`
 
-После format/lint/test собирается prod image `geoservice-backend:prod`.
+После format/lint/test собирается prod image `utility_service:prod`.
 
-Отдельный smoke-test поднимает `postgis` и `backend` через `infra/docker-compose.yml`, ждет healthy backend и проверяет `/health` внутри container.
+Отдельный smoke-test поднимает `postgis` и `utility_service` через
+`infra/docker-compose.yml`, ждет healthy `utility_service` и проверяет `/health` внутри
+container.
 
-Smoke job также запускает PostGIS tests network model, migration cycle,
-utility dataset seed и single-query repository. Migration cycle удаляет данные
-utility schema при downgrade, поэтому перед authenticated API smoke CI повторно
-запускает `python -m seeds.runners.seed_utility_dataset`. Затем Editor login
+Smoke job также запускает PostGIS tests network model, migration cycle, utility dataset seed и
+single-query repository. Integration tests лежат в `apps/backend/tests/integration_tests`, а CI
+запускает их как `pytest tests/integration_tests/<test_file>.py -q` внутри `utility_service`.
+Migration cycle удаляет данные utility schema при downgrade, поэтому перед authenticated API
+smoke CI повторно запускает `python -m seeds.runners.seed_utility_dataset`. Затем Editor login
 проверяет полный feeder response с 19 features и 9 associations.
 
 Локальные настройки:
 
-- `apps/backend/pyproject.toml` задает `ruff`/`black` line length `100`, target Python `3.12`, pytest `testpaths = ["tests"]`.
-- Backend test files лежат в `apps/backend/app/tests`.
-- `apps/backend/app/tests/conftest.py` задаёт безопасные test-only defaults для
-  `DATABASE_URL`, `DEV_MODE` и `JWT_SECRET`, поэтому чистый CI container может
-  импортировать DB-backed auth modules без внешнего runtime env.
+- `apps/backend/pyproject.toml` задает `ruff`/`black` line length `100`, target Python `3.12`
+  и pytest discovery для package-local unit tests, `seeds/tests` и `tests`.
+- Unit tests backend лежат рядом с соответствующими пакетами:
+  `utility_service/web_api/tests`, `utility_service/use_cases/tests`,
+  `utility_service/domain_services/tests`, `utility_service/infrastructure/tests`,
+  `utility_service/utils/tests`, `seeds/tests`.
+- `apps/backend/conftest.py` задает безопасные test-only defaults для `DATABASE_URL`,
+  `DEV_MODE` и `JWT_SECRET`, поэтому чистый CI container может импортировать DB-backed auth
+  modules без внешнего runtime env.
+- Архитектурный тест в `apps/backend/tests/test_architecture_boundaries.py` запрещает
+  `web_api -> infrastructure`, `use_cases -> web_api` и `infrastructure -> web_api`.
 
 ## Frontend
 
@@ -48,21 +57,7 @@ Frontend jobs используют Node 20 и `npm ci` в `apps/frontend`, за�
 - `npm test`
 - `npm run build`
 
-Frontend unit tests лежат рядом с кодом как `*.test.ts`.
-
-## Проверка Дня 2
-
-На 2026-06-13 без изменения `.github/workflows/ci.yml` подтверждены:
-
-- backend: `black --check .`, `ruff check .`, `63 passed`, сборка targets
-  `dev` и `prod`;
-- frontend: format, lint, typecheck, `29 passed`, production build и nginx image;
-- Compose smoke из CI: healthy backend, три login-роли
-  `editor/editor/reviewer`, legacy `viewer` получает `401`;
-- syntax checks base, merged override, `dev` и `prod` profiles.
-
-Vite сохраняет существующее предупреждение о production chunk больше `500 kB`;
-оно не является ошибкой сборки.
+Frontend unit tests лежат рядом с TypeScript modules как `*.test.ts`.
 
 ## Wiki Checks
 
@@ -84,10 +79,9 @@ python scripts/check-memory-needed.py --check
 python scripts/audit-memory.py --root .
 ```
 
-Аудит находит broken references, кандидатов на ревизию в `sessions/`,
-точные дубликаты summary, превышение бюджетов и исторические task-log блоки.
-Он не удаляет и не изменяет файлы; cleanup выполняется только после отчёта и
-явного подтверждения пользователя.
+Findings `audit-memory.py` являются отчетом для ревизии, а не автоматическим разрешением на
+удаление. Изменять или удалять найденные записи можно только после явного подтверждения
+пользователя.
 
 ## Связанные Ноды
 

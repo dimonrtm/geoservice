@@ -3,33 +3,46 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-15
-source: repository-change:2026-06-15
+updated: 2026-06-16
+source: repository-change:2026-06-16
 tags: [testing, backend, frontend, quality]
 ---
 
 # Testing Strategy
 
-В репозитории есть backend pytest suite, frontend Vitest suite и отдельные тесты knowledge-pipeline scripts.
+В репозитории есть backend pytest suite, frontend Vitest suite и отдельные тесты
+knowledge-pipeline scripts.
 
 ## Backend Tests
 
-Backend tests находятся в `apps/backend/app/tests`.
+Backend unit tests лежат рядом с соответствующими пакетами:
+
+- `apps/backend/utility_service/web_api/tests`
+- `apps/backend/utility_service/use_cases/tests`
+- `apps/backend/utility_service/domain_services/tests`
+- `apps/backend/utility_service/infrastructure/tests`
+- `apps/backend/utility_service/utils/tests`
+- `apps/backend/seeds/tests`
+
+Backend integration tests лежат в `apps/backend/tests/integration_tests`.
+Общие root-level проверки, которые не являются unit или integration тестом конкретного пакета,
+могут оставаться в `apps/backend/tests`; сейчас там находится архитектурная проверка импортных
+границ и sanity test.
 
 Покрытые области:
 
-- auth service, `core/passwords.py` и demo user seed;
+- auth service, `utility_service/utils/passwords.py` и demo user seed;
 - settings security validation;
 - bbox validation;
 - exception handlers;
 - feature service CRUD/version behavior;
 - feature realtime publisher;
 - websocket auth, websocket role checks и layer websocket endpoint;
-- realtime connection manager.
+- realtime connection manager;
 - utility dataset specs, create-once/no-op service и rollback behavior;
-- PostGIS persistence, spatial AOI intersection и single-query feeder
-  aggregate;
-- utility mapping, structured errors и Editor-only API access.
+- PostGIS persistence, spatial AOI intersection и single-query feeder aggregate;
+- utility mapping, structured errors и Editor-only API access;
+- architecture boundaries между `web_api`, `use_cases` и `infrastructure`.
 
 ## Frontend Tests
 
@@ -43,7 +56,8 @@ Frontend tests находятся рядом с TypeScript modules:
 - `composables/map/useFeatureTileCache.test.ts`
 - `composables/map/useLayerRealtime.test.ts`
 
-Тесты покрывают contract guards, auth/edit stores, feature grid/tile cache и realtime reconnect/event parsing.
+Тесты покрывают contract guards, auth/edit stores, feature grid/tile cache и realtime
+reconnect/event parsing.
 
 ## Pipeline Tests
 
@@ -53,18 +67,27 @@ Scripts tests лежат в `scripts/tests`:
 - `test_check_memory_needed.py`
 - `test_memory_audit.py`
 
-Они защищают wiki frontmatter/wikilinks, узкий gate обязательной agent memory
-для изменений operating rules и read-only аудит жизненного цикла памяти.
+Они защищают wiki frontmatter/wikilinks, узкий gate обязательной agent memory для изменений
+operating rules и read-only аудит жизненного цикла памяти.
 
 ## Команды
 
 Backend:
 
 ```powershell
-cd apps/backend/app
+cd apps/backend
 pytest
 black --check .
 ruff check .
+```
+
+Docker/CI-equivalent backend:
+
+```powershell
+docker build --target dev -t utility_service:dev apps/backend
+docker run --rm --entrypoint bash utility_service:dev -lc "black --check ."
+docker run --rm --entrypoint bash utility_service:dev -lc "ruff check ."
+docker run --rm --entrypoint bash utility_service:dev -lc "pytest"
 ```
 
 Frontend:
@@ -86,9 +109,9 @@ python scripts/check-memory-needed.py --check
 python scripts/audit-memory.py --root .
 ```
 
-Findings `audit-memory.py` являются отчётом для ревизии, а не автоматическим
-разрешением на удаление. Изменять или удалять найденные записи можно только
-после явного подтверждения пользователя.
+Findings `audit-memory.py` являются отчетом для ревизии, а не автоматическим разрешением на
+удаление. Изменять или удалять найденные записи можно только после явного подтверждения
+пользователя.
 
 ## Связанные Ноды
 

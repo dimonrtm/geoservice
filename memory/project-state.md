@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-15
+updated: 2026-06-16
 source: null
 tags: [project-state, geoservice]
 ---
@@ -23,9 +23,9 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-14 16:58 +05:00, индексы и live state синхронизированы после reviewer и broad-domain ingest; необработанных RAW inputs и stale-нод нет.
 - Последний `/lint-wiki`: 2026-06-14, найдены ожидаемые `missing_frontmatter` для 18 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-15, существующие ноды
-  `Code_wiki` синхронизированы с пакетом `seeds`, utility dataset,
-  single-query feeder API и CI smoke.
+- Последний `/ingest repository-change`: 2026-06-16, существующие ноды
+  `Code_wiki` синхронизированы с package boundaries `utility_service`,
+  Docker/CI contract `utility_service` и новой раскладкой backend tests.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;

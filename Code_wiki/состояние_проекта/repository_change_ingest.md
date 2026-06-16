@@ -3,7 +3,7 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-15
+updated: 2026-06-16
 source: docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md
 tags: [repository-change, code-wiki, ingest]
 ---
@@ -21,6 +21,10 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-06-16 | [[архитектура/backend]] | Зафиксированы package boundaries `utility_service`: `web_api -> use_cases -> infrastructure`, перенос `deps` и Pydantic schemas в `use_cases`. | `docs/superpowers/specs/2026-06-16-utility-service-refactor-links-design.md`, `apps/backend/utility_service/` |
+| 2026-06-16 | [[deployment/docker_compose]] | Зафиксирован runtime contract: service/container `utility_service`, build context `apps/backend` и uvicorn path `utility_service.web_api.main:app`. | `infra/docker-compose.yml`, `apps/backend/Dockerfile` |
+| 2026-06-16 | [[сборка/ci_and_quality]] | Обновлен CI contract для image tag `utility_service`, package-local backend tests и integration path `tests/integration_tests`. | `.github/workflows/ci.yml`, `apps/backend/pyproject.toml` |
+| 2026-06-16 | [[правила_и_стиль/testing_strategy]] | Зафиксирована новая раскладка backend unit tests по пакетам и integration tests в `apps/backend/tests/integration_tests`. | `apps/backend/utility_service/*/tests`, `apps/backend/tests/integration_tests` |
 | 2026-06-13 | [[состояние_проекта/_info]] | Repository-change log заменён компактным реестром с двухусловным gate. | `docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md` |
 | 2026-06-13 | [[сборка/ci_and_quality]] | Добавлена read-only проверка жизненного цикла agent memory. | `docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md` |
 | 2026-06-13 | [[правила_и_стиль/testing_strategy]] | Зафиксированы тесты и ручной workflow memory audit. | `docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md` |
