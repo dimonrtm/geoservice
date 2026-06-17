@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
 STARTUP_SEEDS = (
     "python -m seeds.runners.seed_demo_users",
     "python -m seeds.runners.seed_utility_dataset",
@@ -9,16 +9,11 @@ STARTUP_SEEDS = (
 )
 
 
-def _compose_text(path: str) -> str:
-    return (REPO_ROOT / path).read_text(encoding="utf-8")
+def test_utility_service_startup_script_runs_all_seed_runners_before_api() -> None:
+    script_text = (BACKEND_ROOT / "scripts" / "start_utility_service.sh").read_text(
+        encoding="utf-8"
+    )
+    positions = [script_text.index(seed) for seed in STARTUP_SEEDS]
 
-
-def test_utility_service_startup_runs_all_seed_runners_before_api() -> None:
-    for compose_path in ("infra/docker-compose.yml", "infra/docker-compose.override.yml"):
-        command_text = _compose_text(compose_path)
-        positions = [command_text.index(seed) for seed in STARTUP_SEEDS]
-
-        assert positions == sorted(positions), compose_path
-        assert positions[-1] < command_text.index(
-            "uvicorn utility_service.web_api.main:app"
-        ), compose_path
+    assert positions == sorted(positions)
+    assert positions[-1] < script_text.index("uvicorn utility_service.web_api.main:app")

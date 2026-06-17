@@ -43,10 +43,11 @@ Build context для backend: `apps/backend`.
 
 - `postgis` имеет healthcheck через `pg_isready`.
 - `migrate` собирается из `../apps/backend/` и запускает `alembic upgrade head`.
-- `utility_service` зависит от healthy `postgis` и запускает:
-  `alembic upgrade head`, `python -m seeds.runners.seed_demo_users`,
+- `utility_service` зависит от healthy `postgis` и запускает
+  `bash scripts/start_utility_service.sh`. Скрипт выполняет `alembic upgrade head`,
+  затем `python -m seeds.runners.seed_demo_users`,
   `python -m seeds.runners.seed_utility_dataset`,
-  `python -m seeds.runners.seed_work_orders`, затем
+  `python -m seeds.runners.seed_work_orders` и после seed запускает
   `uvicorn utility_service.web_api.main:app --host 0.0.0.0 --port 8000`.
 - `utility_service` healthcheck дергает `http://localhost:8000/health`.
 - `frontend-dev` и `frontend-prod` зависят от healthy `utility_service`.

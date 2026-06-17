@@ -35,8 +35,9 @@ docker compose --profile dev up --build
 - `frontend-prod` - nginx build, порт `8080`, профиль `prod`.
 - `migrate` - отдельный profile service для `alembic upgrade head`.
 
-Backend в основном compose сам выполняет migrations, demo-user seed, utility
-dataset seed и WorkOrder seed при старте.
+Backend в основном compose вызывает `bash scripts/start_utility_service.sh`.
+Этот script сам выполняет migrations, demo-user seed, utility dataset seed и
+WorkOrder seed при старте.
 
 ## Demo Users
 
