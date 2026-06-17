@@ -15,6 +15,8 @@
 - [План реализации базовой модели сети Дня 3](2026-06-14-sprint-1-day-3-network-model-implementation-plan.md)
 - [Utility dataset и read-only backend API Дня 4](2026-06-15-sprint-1-day-4-utility-dataset-design.md)
 - [План реализации utility dataset и read-only backend API Дня 4](2026-06-15-sprint-1-day-4-utility-dataset-implementation-plan.md)
+- [Backend foundation Work Orders Дня 5](2026-06-17-sprint-1-day-5-work-orders-design.md)
+- [План реализации backend foundation Work Orders Дня 5](2026-06-17-sprint-1-day-5-work-orders-implementation-plan.md)
 
 ## Исторические Материалы
 

@@ -3,8 +3,8 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-15
-source: repository-change:2026-06-15
+updated: 2026-06-17
+source: repository-change:2026-06-17
 tags: [database, postgis, sqlalchemy, geojson]
 ---
 
@@ -18,7 +18,7 @@ tags: [database, postgis, sqlalchemy, geojson]
 - `layers`: `id`, `name`, `title`, `geometry_type`, `srid`, `storage_table`.
 - Feature tables: `feature_points`, `feature_lines`, `feature_polygons`, `feature_multipoints`, `feature_multilines`, `feature_multipolygons`.
 - Utility schema `utility_network`: `aois`, `feeders`, `network_features`,
-  `network_associations`.
+  `network_associations`, `work_orders`.
 
 Каждая feature table содержит:
 
@@ -30,7 +30,9 @@ tags: [database, postgis, sqlalchemy, geojson]
 
 ## Feature Registry
 
-`apps/backend/app/domain/feature_registry.py` связывает `layers.storage_table` с SQLAlchemy model. Это центральное место, которое решает, в какую таблицу читать/писать feature конкретного слоя.
+`apps/backend/utility_service/domain_services/feature_registry.py` связывает
+`layers.storage_table` с SQLAlchemy model. Это центральное место, которое
+решает, в какую таблицу читать/писать feature конкретного слоя.
 
 ## Spatial Queries
 
@@ -45,7 +47,8 @@ JSONB subqueries; AOI проверяют наличие пересекающег
 
 ## Миграции И Seed
 
-Alembic migrations лежат в `apps/backend/app/alembic/versions`:
+Alembic migrations лежат в
+`apps/backend/utility_service/infrastructure/postgresql/alembic/versions`:
 
 - `431fdb240d56_feature_lines.py` создает `feature_lines`.
 - `0d9dcd16a92c_add_all_types_features.py` добавляет остальные feature tables.
@@ -53,11 +56,24 @@ Alembic migrations лежат в `apps/backend/app/alembic/versions`:
 - `c6cef6320f1d_create_users.py` создает users.
 - `d3a01f4e9c21_network_model.py` создает utility schema, feeder graph,
   geometry/FK/check constraints и spatial indexes.
+- `e4b7a9c2d5f8_work_orders.py` добавляет
+  `utility_network.work_orders` с FK на `users`, `aois` и `feeders`,
+  статусами `assigned`/`in_progress`, уникальным `code` и индексами для
+  assignment/status lookups.
 
 После migrations backend запускает module runners demo users и utility
 dataset. `synthetic_utility_feeder_01` создаётся атомарно только при отсутствии
 feeder с этим code; существующий aggregate не синхронизируется и не
 перезаписывается.
+
+`seed_work_order_specs.py` и `SeedWorkOrderService` задают create-once seed
+`WO-001`: задача назначается `alexey.editor@example.local`, связывается с
+`synthetic_utility_feeder_01` и первым AOI dataset. Assignee читается через
+`SeedUserRepository`, feeder и AOI читаются через `SeedUtilityDatasetRepository`,
+а `SeedWorkOrderRepository` отвечает только за work-order-specific операции. Если `WO-001` уже
+существует, seed не меняет assignee, status, title, description, AOI или
+feeder; отсутствие assignee, feeder или AOI считается ошибкой целостности
+seed-зависимостей.
 
 ## Связанные Ноды
 

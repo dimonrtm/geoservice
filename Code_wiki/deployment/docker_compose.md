@@ -3,8 +3,8 @@ title: Docker Compose Deployment
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-16
-source: repository-change:2026-06-16
+updated: 2026-06-17
+source: repository-change:2026-06-17
 tags: [deployment, docker-compose, postgis]
 ---
 
@@ -45,7 +45,8 @@ Build context для backend: `apps/backend`.
 - `migrate` собирается из `../apps/backend/` и запускает `alembic upgrade head`.
 - `utility_service` зависит от healthy `postgis` и запускает:
   `alembic upgrade head`, `python -m seeds.runners.seed_demo_users`,
-  `python -m seeds.runners.seed_utility_dataset`, затем
+  `python -m seeds.runners.seed_utility_dataset`,
+  `python -m seeds.runners.seed_work_orders`, затем
   `uvicorn utility_service.web_api.main:app --host 0.0.0.0 --port 8000`.
 - `utility_service` healthcheck дергает `http://localhost:8000/health`.
 - `frontend-dev` и `frontend-prod` зависят от healthy `utility_service`.

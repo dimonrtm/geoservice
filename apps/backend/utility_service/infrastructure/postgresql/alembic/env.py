@@ -44,6 +44,8 @@ from utility_service.infrastructure.postgresql.models.utility_network import (  
     FeatureType,
     NetworkAssociation,
     NetworkFeature,
+    WorkOrder,
+    WorkOrderStatus,
 )
 
 

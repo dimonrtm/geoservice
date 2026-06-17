@@ -5,19 +5,19 @@ Type: decision
 Tags: sprint-1, acceptance, domain-model, api, backlog, localization
 Related files:
 
-- `docs/sprint_1/README.md`
-- `docs/sprint_1/2026-06-12-sprint-1-day-1-acceptance-design.md`
-- `docs/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md`
-- `docs/sprint_1/2026-06-12-sprint-1-day-1-api-contract-design.md`
-- `docs/sprint_1/2026-06-12-sprint-1-day-1-vertical-backlog-design.md`
+- `docs/release_1/sprint_1/README.md`
+- `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-acceptance-design.md`
+- `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md`
+- `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-api-contract-design.md`
+- `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-vertical-backlog-design.md`
 
 ## Summary
 
 День 1 нового Спринта 1 завершает контрактную подготовку без production-кода.
 Результат разделен на четыре источника истины: acceptance-сценарий, доменную
 модель, API-контракт и вертикальный backlog. Все документы Спринта 1 собраны в
-`docs/sprint_1`; старые generic-планы сохранены в
-`docs/sprint_1/legacy-generic-plan`.
+`docs/release_1/sprint_1`; старые generic-планы сохранены в
+`docs/release_1/sprint_1/legacy-generic-plan`.
 
 ## Context
 
@@ -42,7 +42,7 @@ review и post не входят в Спринт 1.
 - 2026-06-12: Принято правило: весь пользовательский текст и все сообщения,
   формируемые приложением для logs, пишутся на русском языке; API paths, JSON
   keys, error `code`, типы и идентификаторы остаются на английском.
-- 2026-06-12: Документы Спринта 1 перенесены в `docs/sprint_1`, исторический
+- 2026-06-12: Документы Спринта 1 перенесены в `docs/release_1/sprint_1`, исторический
   generic scope отделен в подпапку `legacy-generic-plan`.
 
 ## Verification
@@ -55,4 +55,4 @@ review и post не входят в Спринт 1.
 
 Спринт 1 День 1, acceptance AC-01 AC-07, AOI серверная граница, Feeder агрегат,
 EditVersion idempotent open, API contract, вертикальный backlog, русские логи,
-docs/sprint_1
+docs/release_1/sprint_1

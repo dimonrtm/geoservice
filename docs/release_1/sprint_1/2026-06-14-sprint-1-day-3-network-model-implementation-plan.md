@@ -69,7 +69,7 @@
 **CI и документация**
 
 - Modify: `.github/workflows/ci.yml`
-- Modify: `docs/sprint_1/README.md`
+- Modify: `docs/release_1/sprint_1/README.md`
 
 ### Задача 1: Добавить AOI И Feeder С Metadata-Тестами
 
@@ -2284,13 +2284,13 @@ docker compose -f infra/docker-compose.yml down -v
 
 **Files:**
 
-- Modify: `docs/sprint_1/README.md`
-- Verify: `docs/sprint_1/2026-06-14-sprint-1-day-3-network-model-design.md`
-- Verify: `docs/sprint_1/2026-06-14-sprint-1-day-3-network-model-implementation-plan.md`
+- Modify: `docs/release_1/sprint_1/README.md`
+- Verify: `docs/release_1/sprint_1/2026-06-14-sprint-1-day-3-network-model-design.md`
+- Verify: `docs/release_1/sprint_1/2026-06-14-sprint-1-day-3-network-model-implementation-plan.md`
 
 - [ ] **Шаг 1: Проверить implementation plan в индексе Спринта 1**
 
-Убедиться, что в `docs/sprint_1/README.md` рядом с design Дня 3 сохранена строка:
+Убедиться, что в `docs/release_1/sprint_1/README.md` рядом с design Дня 3 сохранена строка:
 
 ```markdown
 - [План реализации базовой модели сети Дня 3](2026-06-14-sprint-1-day-3-network-model-implementation-plan.md)

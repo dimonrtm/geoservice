@@ -8,6 +8,8 @@ from utility_service.infrastructure.postgresql.models.utility_network import (
     FeatureType,
     NetworkAssociation,
     NetworkFeature,
+    WorkOrder,
+    WorkOrderStatus,
 )
 
 
@@ -27,6 +29,8 @@ def test_utility_network_package_exports_public_contract() -> None:
         "FeatureType",
         "NetworkAssociation",
         "NetworkFeature",
+        "WorkOrder",
+        "WorkOrderStatus",
     }
 
 
@@ -181,10 +185,77 @@ def test_network_relationships_do_not_delete_children_in_orm() -> None:
 def test_check_constraints_are_named() -> None:
     checks = [
         constraint
-        for model in (AOI, NetworkFeature, NetworkAssociation)
+        for model in (AOI, NetworkFeature, NetworkAssociation, WorkOrder)
         for constraint in model.__table__.constraints
         if isinstance(constraint, CheckConstraint)
     ]
 
     assert checks
     assert all(constraint.name for constraint in checks)
+
+
+def test_work_order_status_values_are_stable_strings() -> None:
+    assert {item.value for item in WorkOrderStatus} == {
+        "assigned",
+        "in_progress",
+    }
+
+
+def test_work_order_metadata_contains_assignment_guards() -> None:
+    assert WorkOrder.__tablename__ == "work_orders"
+    assert WorkOrder.__table__.schema == "utility_network"
+    assert {column.name for column in WorkOrder.__table__.columns} == {
+        "id",
+        "code",
+        "title",
+        "description",
+        "status",
+        "assignee_id",
+        "aoi_id",
+        "feeder_id",
+        "created_at",
+        "updated_at",
+    }
+    assert {
+        "uq_work_orders_code",
+        "ck_work_orders_status",
+    }.issubset(constraint_names(WorkOrder))
+    assert any(
+        isinstance(constraint, UniqueConstraint)
+        and tuple(column.name for column in constraint.columns) == ("code",)
+        for constraint in WorkOrder.__table__.constraints
+    )
+
+
+def test_work_order_foreign_keys_are_restrictive_and_schema_qualified() -> None:
+    foreign_keys = [
+        constraint
+        for constraint in WorkOrder.__table__.constraints
+        if isinstance(constraint, ForeignKeyConstraint)
+    ]
+
+    assert len(foreign_keys) == 3
+    assert {element.ondelete for constraint in foreign_keys for element in constraint.elements} == {
+        "RESTRICT"
+    }
+    assert {
+        element.target_fullname for constraint in foreign_keys for element in constraint.elements
+    } == {
+        "users.id",
+        "utility_network.aois.id",
+        "utility_network.feeders.id",
+    }
+
+
+def test_work_order_declares_lookup_indexes() -> None:
+    indexes = {
+        index.name: tuple(column.name for column in index.columns)
+        for index in WorkOrder.__table__.indexes
+    }
+
+    assert indexes == {
+        "ix_work_orders_assignee_id": ("assignee_id",),
+        "ix_work_orders_status": ("status",),
+        "ix_work_orders_aoi_id": ("aoi_id",),
+        "ix_work_orders_feeder_id": ("feeder_id",),
+    }

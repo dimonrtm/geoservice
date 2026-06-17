@@ -35,7 +35,7 @@ commit-шагов. После каждого task выполняются тол�
 
 ## Предусловия
 
-- Design: `docs/sprint_1/2026-06-15-sprint-1-day-4-utility-dataset-design.md`.
+- Design: `docs/release_1/sprint_1/2026-06-15-sprint-1-day-4-utility-dataset-design.md`.
 - Модели День 3 уже существуют в `models.utility_network`.
 - Миграция `d3a01f4e9c21` является текущим head и не изменяется.
 - Generic `Layer`/feature API не используется как storage или API для
@@ -99,7 +99,7 @@ commit-шагов. После каждого task выполняются тол�
 - Modify: `infra/docker-compose.yml`
 - Modify: `infra/docker-compose.override.yml`
 - Modify: `.github/workflows/ci.yml`
-- Modify: `docs/sprint_1/README.md`
+- Modify: `docs/release_1/sprint_1/README.md`
 
 ## Стабильные Идентификаторы Dataset
 
@@ -2193,13 +2193,13 @@ Expected: `reviewer denied`.
 
 **Files:**
 
-- Modify: `docs/sprint_1/README.md`
-- Verify: `docs/sprint_1/2026-06-15-sprint-1-day-4-utility-dataset-design.md`
-- Verify: `docs/sprint_1/2026-06-15-sprint-1-day-4-utility-dataset-implementation-plan.md`
+- Modify: `docs/release_1/sprint_1/README.md`
+- Verify: `docs/release_1/sprint_1/2026-06-15-sprint-1-day-4-utility-dataset-design.md`
+- Verify: `docs/release_1/sprint_1/2026-06-15-sprint-1-day-4-utility-dataset-implementation-plan.md`
 
 - [ ] **Step 1: Добавить implementation plan в Sprint 1 index**
 
-В `docs/sprint_1/README.md` после design Дня 4 добавить:
+В `docs/release_1/sprint_1/README.md` после design Дня 4 добавить:
 
 ```markdown
 - [План реализации utility dataset и read-only backend API Дня 4](2026-06-15-sprint-1-day-4-utility-dataset-implementation-plan.md)

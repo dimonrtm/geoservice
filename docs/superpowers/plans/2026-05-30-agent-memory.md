@@ -290,7 +290,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 ## Project Documentation
 
 - product requirements planning: `docs/requirements/geoservice-prd-v1.md`, `docs/requirements/geoservice-requirements.md`, `docs/requirements/action-plan.md`
-- legacy generic sprint 1 plans: `docs/sprint_1/legacy-generic-plan/sprint-1-plan.md`, `docs/sprint_1/legacy-generic-plan/day-8-plan.md`
+- legacy generic sprint 1 plans: `docs/release_1/sprint_1/legacy-generic-plan/sprint-1-plan.md`, `docs/release_1/sprint_1/legacy-generic-plan/day-8-plan.md`
 - project overview: `README.md`, `docs/project-description.md`
 
 ## Backend
@@ -480,7 +480,7 @@ rg -n "repo-local|Markdown|file-map|значимой работы" docs\agent-me
 - [agent-memory](docs/agent-memory/README.md)
 - [action-plan.md](C:/Repositories/geoservice/docs/requirements/action-plan.md)
 - [requirements-compliance-audit.md](C:/Repositories/geoservice/docs/requirements/requirements-compliance-audit.md)
-- [sprint-1-plan.md](C:/Repositories/geoservice/docs/sprint_1/legacy-generic-plan/sprint-1-plan.md)
+- [sprint-1-plan.md](C:/Repositories/geoservice/docs/release_1/sprint_1/legacy-generic-plan/sprint-1-plan.md)
 ```
 
 - [ ] **Шаг 2: Проверить ссылку в корневом README**

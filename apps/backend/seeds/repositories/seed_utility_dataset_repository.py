@@ -19,6 +19,10 @@ class SeedUtilityDatasetRepository:
         result = await self.session.execute(select(Feeder).where(Feeder.code == code))
         return result.scalars().one_or_none()
 
+    async def get_first_aoi(self) -> AOI | None:
+        result = await self.session.execute(select(AOI).order_by(AOI.name, AOI.id).limit(1))
+        return result.scalars().one_or_none()
+
     async def create_dataset(self, spec: SeedUtilityDatasetSpec) -> Feeder:
         aoi = AOI(
             id=spec.aoi.id,

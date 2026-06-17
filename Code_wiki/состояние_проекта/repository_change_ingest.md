@@ -3,7 +3,7 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-16
+updated: 2026-06-17
 source: docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md
 tags: [repository-change, code-wiki, ingest]
 ---
@@ -21,6 +21,11 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-06-17 | [[deployment/docker_compose]] | Уточнен startup order `utility_service`: после migrations запускаются `seed_demo_users`, `seed_utility_dataset`, `seed_work_orders`, затем API. | `infra/docker-compose.yml`, `infra/docker-compose.override.yml` |
+| 2026-06-17 | [[dev_setup/local_development]] | Зафиксировано, что `dev_up.cmd` через compose запускает WorkOrder seed после demo users и utility dataset. | `infra/dev-up.cmd`, `infra/docker-compose.override.yml`, `apps/backend/seeds/runners/seed_work_orders.py` |
+| 2026-06-17 | [[архитектура/data_model]] | Зафиксирована таблица `utility_network.work_orders`, статусы `assigned`/`in_progress`, FK на users/AOI/feeder и create-once seed `WO-001`, где assignee lookup использует `SeedUserRepository`, а feeder/AOI dependencies читаются через `SeedUtilityDatasetRepository`. | `apps/backend/utility_service/infrastructure/postgresql/models/utility_network/work_order.py`, `apps/backend/seeds/specs/seed_work_order_specs.py` |
+| 2026-06-17 | [[архитектура/backend]] | Зафиксирован backend foundation `WorkOrderService` без публичного endpoint: service принимает `actor_id`, загружает пользователя через `UserRepository`, применяет assignment guard, active Editor requirement и выполняет переход `assigned -> in_progress` внутри transaction boundary. | `apps/backend/utility_service/use_cases/services/work_order_service.py`, `apps/backend/utility_service/infrastructure/postgresql/repositories/work_order_repository.py` |
+| 2026-06-17 | [[правила_и_стиль/testing_strategy]] | Добавлено устойчивое покрытие WorkOrder metadata, seed и use-case rules. | `apps/backend/utility_service/infrastructure/tests/test_network_model_metadata.py`, `apps/backend/seeds/tests/test_seed_work_order_service.py`, `apps/backend/utility_service/use_cases/tests/test_work_order_service.py` |
 | 2026-06-16 | [[архитектура/backend]] | Зафиксированы package boundaries `utility_service`: `web_api -> use_cases -> infrastructure`, перенос `deps` и Pydantic schemas в `use_cases`. | `docs/superpowers/specs/2026-06-16-utility-service-refactor-links-design.md`, `apps/backend/utility_service/` |
 | 2026-06-16 | [[deployment/docker_compose]] | Зафиксирован runtime contract: service/container `utility_service`, build context `apps/backend` и uvicorn path `utility_service.web_api.main:app`. | `infra/docker-compose.yml`, `apps/backend/Dockerfile` |
 | 2026-06-16 | [[сборка/ci_and_quality]] | Обновлен CI contract для image tag `utility_service`, package-local backend tests и integration path `tests/integration_tests`. | `.github/workflows/ci.yml`, `apps/backend/pyproject.toml` |

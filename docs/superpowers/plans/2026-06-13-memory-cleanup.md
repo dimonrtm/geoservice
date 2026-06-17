@@ -37,7 +37,7 @@ session-файлы и 19 legacy-блоков удаляются из рабоч�
 **Files:**
 - Delete: 33 файла, классифицированных как `noisy_session` или
   `canonical_source_session`; последний кандидат обнаружен после добавления
-  `docs/sprint_1/` в canonical prefixes аудита
+  `docs/release_1/sprint_1/` в canonical prefixes аудита
 - Preserve: `docs/agent-memory/sessions/2026-05-30-agent-memory-mvp.md`
 
 - [ ] Удалить только подтверждённые process/canonical-source файлы.
@@ -60,7 +60,7 @@ session-файлы и 19 legacy-блоков удаляются из рабоч�
 - Modify:
   `docs/superpowers/plans/2026-05-30-project-knowledge-wiki-pipeline.md`
 - Modify:
-  `docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md`
+  `docs/release_1/sprint_1/2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md`
 - Modify: `memory/project-state.md`
 
 - [ ] Удалить или заменить прямые ссылки на удалённые session-файлы.

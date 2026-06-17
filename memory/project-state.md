@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-16
+updated: 2026-06-17
 source: null
 tags: [project-state, geoservice]
 ---
@@ -23,9 +23,10 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-16 20:36 +05:00, корневой индекс и live state синхронизированы после двух repository-change ingest; новых RAW inputs и stale-нод нет.
 - Последний `/lint-wiki`: 2026-06-16, найдены ожидаемые `missing_frontmatter` для 19 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-16, существующие ноды
-  `Code_wiki` синхронизированы с package boundaries `utility_service`,
-  Docker/CI contract `utility_service` и новой раскладкой backend tests.
+- Последний `/ingest repository-change`: 2026-06-17, существующие ноды
+  `Code_wiki` синхронизированы с backend foundation `WorkOrder`: таблица
+  `utility_network.work_orders`, create-once seed `WO-001`, `WorkOrderService`
+  assignment/status rules и unit coverage.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
@@ -36,7 +37,7 @@ GeoService - исследовательский pet-проект на стади
 - Необработанные RAW inputs: не обнаружены; все 20 RAW sources отражены в `RAW_inputs/index.md`.
 - Новые RAW inputs с прошлого `/sync-vision`: не обнаружены.
 - Новые значимые Vision ноды с прошлого `/sync-vision`: добавлена summary-нода [[../Vision_wiki/chats/2026-06-16-release-2-reviewer-decision]], обновлены Release 2 reviewer decision/routing, reviewer persona, risk log и follow-up queue.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; существующие ноды обновлены через repository-change ingest для utility schema/read-only feeder API и package boundaries `utility_service`.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; существующие ноды обновлены через repository-change ingest для utility schema/read-only feeder API, package boundaries `utility_service` и backend foundation `WorkOrder`.
 - Stale-ноды: не обнаружены.
 - Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 19 RAW Markdown files, product validation conflict `FU-2026-06-13-002` и Release 2 user validation `FU-2026-06-14-001`.
 - Открытые follow-up'ы: 12.
@@ -52,7 +53,8 @@ GeoService - исследовательский pet-проект на стади
 - Нужно внешне проверить, выполняет ли reviewer `post`, требуется ли routing очереди по специализации и допустимо ли совмещение ролей для low-risk changes.
 - Broad-domain applicability к electric/water/gas/telecom остается гипотезой; Release 1 сохраняет electric `synthetic_utility_feeder_01`.
 - Нужно отдельным запросом решить, что делать с пустыми/неполными dev/infra helper files, найденными repository snapshot.
-- После готового read-only feeder API следующий scope Спринта 1: assigned work orders, edit version и frontend shell.
+- После готового backend foundation `WorkOrder` следующий scope Спринта 1:
+  integration seed/migration checks, edit version и frontend shell.
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.
 - Нужно отдельной implementation/docs-задачей согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset script, demo сценарий, troubleshooting, `PostGIS seed`, `auth`.

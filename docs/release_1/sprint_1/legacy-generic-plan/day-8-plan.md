@@ -2,7 +2,7 @@
 
 ## Summary
 
-Целевой файл плана: `docs/sprint_1/legacy-generic-plan/day-8-plan.md`.
+Целевой файл плана: `docs/release_1/sprint_1/legacy-generic-plan/day-8-plan.md`.
 
 Day 8 должен добавить во frontend WebSocket client для подписки на realtime-события активного слоя, сразу применять входящие `feature_created|updated|deleted` к карте, встроить reconnect/backoff с лимитом попыток и выполнять принудительную синхронизацию `reloadFeatures(..., force=true)` только после успешного восстановления соединения. Вне Day 8 остаются дальнейшее укрепление cache orchestration на краевых случаях, расширенные unit-тесты идемпотентности и integration-сценарий двух клиентов.
 

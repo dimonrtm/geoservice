@@ -96,7 +96,7 @@ Day 2 design заменяет решение Дня 1 о generic `Viewer`, но 
 **Документация**
 
 - Modify: `README.md`
-- Modify: `docs/sprint_1/README.md`
+- Modify: `docs/release_1/sprint_1/README.md`
 - Update through `/ingest repository-change`: `Code_wiki/dev_setup/local_development.md`
 - Update through `/ingest repository-change`: `Code_wiki/сборка/ci_and_quality.md`
 - Update through `/ingest repository-change`: `Code_wiki/deployment/docker_compose.md`
@@ -1080,7 +1080,7 @@ index не изменён.
 **Files:**
 
 - Modify: `README.md`
-- Modify: `docs/sprint_1/README.md`
+- Modify: `docs/release_1/sprint_1/README.md`
 - Update through `/ingest repository-change`: `Code_wiki/dev_setup/local_development.md`
 - Update through `/ingest repository-change`: `Code_wiki/сборка/ci_and_quality.md`
 - Update through `/ingest repository-change`: `Code_wiki/deployment/docker_compose.md`
@@ -1104,7 +1104,7 @@ Document:
 
 - [ ] **Шаг 2: Добавить план в индекс Спринта 1**
 
-Add to `docs/sprint_1/README.md`:
+Add to `docs/release_1/sprint_1/README.md`:
 
 ```markdown
 - [План реализации ролей и доступа Дня 2](2026-06-13-sprint-1-day-2-roles-access-implementation-plan.md)

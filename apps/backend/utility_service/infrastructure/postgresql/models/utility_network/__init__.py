@@ -5,6 +5,7 @@ from .network_association import (
     NetworkAssociation,
 )
 from .network_feature import FeatureType, NetworkFeature
+from .work_order import WorkOrder, WorkOrderStatus
 
 __all__ = [
     "AOI",
@@ -13,4 +14,6 @@ __all__ = [
     "FeatureType",
     "NetworkAssociation",
     "NetworkFeature",
+    "WorkOrder",
+    "WorkOrderStatus",
 ]

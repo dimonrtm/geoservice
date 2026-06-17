@@ -8,6 +8,9 @@ from utility_service.infrastructure.postgresql.repositories.user_repository impo
 from utility_service.infrastructure.postgresql.repositories.utility_network_repository import (
     UtilityNetworkRepository,
 )
+from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
+    WorkOrderRepository,
+)
 from utility_service.infrastructure.postgresql.session import engine, get_session
 from utility_service.use_cases.services.auth_service import AuthService
 from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
@@ -17,6 +20,7 @@ from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
 )
 from utility_service.use_cases.services.utility_network_service import UtilityNetworkService
+from utility_service.use_cases.services.work_order_service import WorkOrderService
 
 
 def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
@@ -45,6 +49,16 @@ def get_utility_network_service(
     return UtilityNetworkService(
         session,
         UtilityNetworkRepository(session),
+    )
+
+
+def get_work_order_service(
+    session: AsyncSession = Depends(get_session),
+) -> WorkOrderService:
+    return WorkOrderService(
+        session,
+        WorkOrderRepository(session),
+        UserRepository(session),
     )
 
 

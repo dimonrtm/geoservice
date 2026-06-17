@@ -1,0 +1,129 @@
+import asyncio
+from contextlib import asynccontextmanager
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+
+import pytest
+
+from seeds.services.seed_work_order_service import (
+    SeedWorkOrderDependencyError,
+    SeedWorkOrderService,
+)
+from seeds.specs.seed_work_order_specs import SEED_WORK_ORDER_SPEC
+
+
+class FakeSession:
+    def __init__(self) -> None:
+        self.begin_calls = 0
+
+    @asynccontextmanager
+    async def begin(self):
+        self.begin_calls += 1
+        yield self
+
+
+def dependency_objects() -> tuple[SimpleNamespace, SimpleNamespace, SimpleNamespace]:
+    user = SimpleNamespace(id="user-id", email=SEED_WORK_ORDER_SPEC.assignee_email)
+    feeder = SimpleNamespace(id="feeder-id", code=SEED_WORK_ORDER_SPEC.feeder_code)
+    aoi = SimpleNamespace(id="aoi-id", name="Район-1")
+    return user, feeder, aoi
+
+
+def test_seed_creates_work_order_when_absent_and_dependencies_exist() -> None:
+    session = FakeSession()
+    user, feeder, aoi = dependency_objects()
+    created = SimpleNamespace(id=SEED_WORK_ORDER_SPEC.id, code=SEED_WORK_ORDER_SPEC.code)
+    work_order_repository = AsyncMock()
+    work_order_repository.get_work_order_by_code.return_value = None
+    work_order_repository.create_work_order.return_value = created
+    user_repository = AsyncMock()
+    user_repository.get_by_email.return_value = user
+    utility_dataset_repository = AsyncMock()
+    utility_dataset_repository.get_feeder_by_code.return_value = feeder
+    utility_dataset_repository.get_first_aoi.return_value = aoi
+    service = SeedWorkOrderService(
+        session,
+        work_order_repository,
+        user_repository,
+        utility_dataset_repository,
+    )
+
+    result = asyncio.run(service.ensure_work_order())
+
+    assert result.created is True
+    assert result.work_order_id == SEED_WORK_ORDER_SPEC.id
+    assert session.begin_calls == 1
+    user_repository.get_by_email.assert_awaited_once_with(SEED_WORK_ORDER_SPEC.assignee_email)
+    utility_dataset_repository.get_feeder_by_code.assert_awaited_once_with(
+        SEED_WORK_ORDER_SPEC.feeder_code
+    )
+    utility_dataset_repository.get_first_aoi.assert_awaited_once_with()
+    work_order_repository.create_work_order.assert_awaited_once_with(
+        SEED_WORK_ORDER_SPEC,
+        assignee_id=user.id,
+        feeder_id=feeder.id,
+        aoi_id=aoi.id,
+    )
+
+
+def test_seed_is_noop_when_work_order_already_exists() -> None:
+    session = FakeSession()
+    existing = SimpleNamespace(id=SEED_WORK_ORDER_SPEC.id, code=SEED_WORK_ORDER_SPEC.code)
+    work_order_repository = AsyncMock()
+    work_order_repository.get_work_order_by_code.return_value = existing
+    user_repository = AsyncMock()
+    utility_dataset_repository = AsyncMock()
+    service = SeedWorkOrderService(
+        session,
+        work_order_repository,
+        user_repository,
+        utility_dataset_repository,
+    )
+
+    result = asyncio.run(service.ensure_work_order())
+
+    assert result.created is False
+    assert result.work_order_id == existing.id
+    user_repository.get_by_email.assert_not_awaited()
+    utility_dataset_repository.get_feeder_by_code.assert_not_awaited()
+    utility_dataset_repository.get_first_aoi.assert_not_awaited()
+    work_order_repository.create_work_order.assert_not_awaited()
+
+
+@pytest.mark.parametrize(
+    ("missing_dependency", "expected_message"),
+    [
+        ("user", "assignee"),
+        ("feeder", "feeder"),
+        ("aoi", "AOI"),
+    ],
+)
+def test_seed_fails_when_required_dependency_is_missing(
+    missing_dependency: str,
+    expected_message: str,
+) -> None:
+    session = FakeSession()
+    user, feeder, aoi = dependency_objects()
+    work_order_repository = AsyncMock()
+    work_order_repository.get_work_order_by_code.return_value = None
+    user_repository = AsyncMock()
+    user_repository.get_by_email.return_value = None if missing_dependency == "user" else user
+    utility_dataset_repository = AsyncMock()
+    utility_dataset_repository.get_feeder_by_code.return_value = (
+        None if missing_dependency == "feeder" else feeder
+    )
+    utility_dataset_repository.get_first_aoi.return_value = (
+        None if missing_dependency == "aoi" else aoi
+    )
+    service = SeedWorkOrderService(
+        session,
+        work_order_repository,
+        user_repository,
+        utility_dataset_repository,
+    )
+
+    with pytest.raises(SeedWorkOrderDependencyError) as exc_info:
+        asyncio.run(service.ensure_work_order())
+
+    assert expected_message in str(exc_info.value)
+    work_order_repository.create_work_order.assert_not_awaited()

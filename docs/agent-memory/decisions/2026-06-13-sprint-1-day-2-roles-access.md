@@ -5,8 +5,8 @@ Type: decision
 Tags: sprint-1, roles, access, rbac, editor, reviewer, demo-users
 Related files:
 
-- `docs/sprint_1/2026-06-13-sprint-1-day-2-roles-access-design.md`
-- `docs/sprint_1/README.md`
+- `docs/release_1/sprint_1/2026-06-13-sprint-1-day-2-roles-access-design.md`
+- `docs/release_1/sprint_1/README.md`
 - `apps/backend/app/models/user.py`
 - `apps/backend/app/api/auth.py`
 - `apps/backend/app/services/demo_user_seed_service.py`

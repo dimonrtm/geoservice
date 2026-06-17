@@ -3,8 +3,8 @@ title: Local Development
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-15
-source: repository-change:2026-06-15
+updated: 2026-06-17
+source: repository-change:2026-06-17
 tags: [dev-setup, docker, backend, frontend]
 ---
 
@@ -35,8 +35,8 @@ docker compose --profile dev up --build
 - `frontend-prod` - nginx build, порт `8080`, профиль `prod`.
 - `migrate` - отдельный profile service для `alembic upgrade head`.
 
-Backend в основном compose сам выполняет migrations, demo-user seed и utility
-dataset seed при старте.
+Backend в основном compose сам выполняет migrations, demo-user seed, utility
+dataset seed и WorkOrder seed при старте.
 
 ## Demo Users
 
@@ -54,6 +54,10 @@ UUID и при каждом старте backend приводит demo users к 
 `python -m seeds.runners.seed_utility_dataset` создаёт
 `synthetic_utility_feeder_01`: 1 AOI, 19 features и 9 associations. Повторный
 запуск при существующем feeder является no-op и сохраняет ручные изменения.
+
+`python -m seeds.runners.seed_work_orders` создаёт create-once `WO-001` после
+demo users и utility dataset. Повторный запуск при существующем `WO-001` не
+перезаписывает assignee, status, title, description, AOI или feeder.
 
 Legacy credentials `editor@example.com` и `viewer@example.com` удалены.
 `Editor` видит существующий map/editor workspace. `Reviewer` видит отдельный

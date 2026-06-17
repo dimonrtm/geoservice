@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-06-16
-source: repository-change:2026-06-16
+updated: 2026-06-17
+source: repository-change:2026-06-17
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -49,6 +49,27 @@ runtime-зависимостей: `web_api -> use_cases -> infrastructure`; об
 feeder вместе с тремя независимо отсортированными JSONB aggregates: features, associations и
 пересекающиеся AOI. AOI выбираются через correlated `EXISTS` + `ST_Intersects`; плоский JOIN
 коллекций не используется, чтобы не создавать размножение строк.
+
+## WorkOrder Foundation
+
+`WorkOrder` backend foundation реализован без публичного HTTP endpoint и без
+frontend shell. `WorkOrderService` находится в `utility_service.use_cases`,
+принимает `actor_id`, загружает актуального `User` через `UserRepository` и
+централизует правила:
+
+- пользователь `actor_id` должен существовать и быть активным `Editor`;
+- work order должен существовать;
+- `assignee_id` должен совпадать с текущим пользователем;
+- переход `assigned -> in_progress` выполняется через service внутри
+  `AsyncSession` transaction boundary и сохраняется repository;
+- повторный старт или другой несовместимый статус возвращает
+  `WORK_ORDER_STATE_CONFLICT`.
+
+`WorkOrderRepository` остается тонким PostgreSQL adapter в
+`utility_service.infrastructure.postgresql.repositories`; чтение пользователя
+остается ответственностью `UserRepository`. `get_work_order_service` добавлен в
+`utility_service.use_cases.deps` для будущих routers, но День 5 не добавляет
+`/api/v1/work-orders/...`.
 
 ## Конфигурация И Безопасность
 
