@@ -3,8 +3,8 @@ title: Risk And Assumption Log
 type: risk
 status: active
 created: 2026-05-31
-updated: 2026-06-16
-source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; Vision_wiki/chats/2026-06-14-geometry-association-conflict-resolution-workshop.md; RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md; RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md"
+updated: 2026-06-17
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; RAW_inputs/documents/Ф2.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/documents/utility_gis_editor_target_times.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; Vision_wiki/chats/2026-06-14-geometry-association-conflict-resolution-workshop.md; RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md; RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md"
 tags: [risk, assumption, discovery]
 ---
 
@@ -34,6 +34,7 @@ tags: [risk, assumption, discovery]
 | AS-2026-06-13-002 | supported-by-synthetic | Physical + logical network state и review package являются более устойчивой domain framing, чем vendor-specific branch-version terminology. | Проверить формулировки с реальными editor/reviewer и убедиться, что electric demo покрывает geometry, attributes, associations, as-built evidence и downstream impact без расширения multi-utility scope. |
 | AS-2026-06-14-001 | accepted-for-next-release | Risk-tiered routing по affected network area, компетенции и сетевому последствию может сократить лишнее согласование: `Simple` без обязательной эскалации, безопасный `Normal` с audit/sample review, `High` через финальное решение `Reviewer`, `Critical` через dual control с профильным специалистом или utility-network admin. | Проверить каноническую planned модель с реальными `Editor` и `Reviewer`, включая SLA, emergency path, полномочия Data Owner и разделение `approve package` / `post authorization`. |
 | AS-2026-06-14-002 | accepted-for-next-release | Полезный `Conflict explanation` для Utility GIS должен быть consequence-first и связывать version diff с associations, validation, trace, affected service, evidence, stale approval и post gate; reviewer decision является approval of change package for post readiness. | Провести live workflow test с реальными `Editor` и `Reviewer`: роли должны правильно объяснить риск, выбрать следующий шаг и заметить stale/unsafe state без открытия внешней GIS для типового случая. |
+| AS-2026-06-17-001 | hypothesis | `Geometry/association conflict` explanation ценен только если переводит feature diff в network consequence и снижает неопределенность `Editor` перед `post`, а не просто добавляет еще один слой текста поверх Conflicts view. | Проверить с реальными `Editor`/`Reviewer`: уменьшается ли число внешних проверок и время до уверенного решения, влияет ли `High/Critical` на routing, совпадает ли tiering с экспертными решениями. |
 
 ## Риски
 
@@ -54,6 +55,7 @@ tags: [risk, assumption, discovery]
 | RK-2026-06-12-001 | open | Синтетические репетиции editor и reviewer могут воспроизводить уже заложенные assumptions и создавать ложную уверенность в product validation. | Реальный workflow, частота боли, полномочия reviewer и готовность пользователей к модели могут отличаться от design-сценария. | Маркировать evidence как synthetic, не публиковать claims о реальных пользователях и провести внешнюю validation с представителями обеих ролей. |
 | RK-2026-06-13-001 | open | Broad-domain framing electric/water/gas/telecom может незаметно расширить Release 1 до универсальной utility platform. | Demo потеряет фокус и потребует несовместимых domain rules, topology и integrations. | Использовать broad vocabulary только для объяснения physical/logical network и review package; Release 1 сохранять electric `synthetic_utility_feeder_01`. |
 | RK-2026-06-14-001 | open | Зелёный summary, recommendation или validation status без явного trace/association/service context может создать ложное чувство безопасности. | `Editor` или `Reviewer` подтвердит опасный resolution, а stale approval откроет `post` для уже изменившихся данных. | Показывать consequence-first summary, confidence и blockers; запрещать auto-approve `High/Critical`; разделить `approve package` и `post authorization`; инвалидировать approval после topology-relevant changes или изменения `Default`; измерять false-safe и review fatigue. |
+| RK-2026-06-17-001 | open | Release 2 может переусложнить workflow, если consequence-first explanation будет дублировать Conflicts view и не менять routing или уверенность решения. | Появится новая taxonomy и review friction без сокращения внешних проверок, времени решения или риска unsafe post. | Валидировать на canonical geometry/association scenarios, считать внешние проверки и time-to-confident-decision, держать claims в hypothesis language до проверки с реальными ролями. |
 
 ## Связи
 
@@ -75,6 +77,7 @@ tags: [risk, assumption, discovery]
 - [[../chats/2026-06-14-utility-gis-editor-conflict-routing-synthetic-research]]
 - [[../chats/2026-06-14-release-2-conflict-explanation-editor-reviewer-research]]
 - [[../chats/2026-06-16-release-2-reviewer-decision]]
+- [[../chats/2026-06-17-geometry-association-conflict-f1]]
 - [[../concepts/metrics]]
 - [[../concepts/jtbd]]
 - [[../concepts/product_vision_board]]

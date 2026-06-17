@@ -3,8 +3,8 @@ title: Release 2 Conflict Explanation
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-16
-source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md"
+updated: 2026-06-17
+source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md"
 tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-network]
 ---
 
@@ -15,6 +15,11 @@ tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-netw
 Сравнение `Base / Mine / Default` объясняет расхождение версий, но не доказывает
 безопасность состояния инженерной сети. Release 2 должен объяснять geometry и
 association conflict через сетевое последствие и evidence для решения.
+
+F1 research/design input уточняет границу: `Base / Mine / Default`, field diff и
+geometry diff показывают feature representation, но не отвечают сами по себе,
+изменились ли connectivity, containment, attachment/locatability, trace behavior
+или subnetwork state.
 
 Текущий Release 1 не меняется.
 
@@ -116,6 +121,10 @@ rule/terminal/controller impact может оставаться `High`.
 - Безопасный `High`: ограниченный geometry/attribute diff, clean validation,
   trace без subnetwork/controller impact; `Reviewer` принимает финальное
   package approval, а `post` возможен только если `Default` не изменился.
+- Geometry почти не изменилась, но connectivity association трансформатора или
+  service device меняется существенно: визуально это небольшой map diff, но по
+  смыслу возможное изменение authoritative network behavior, trace,
+  subnetwork membership и downstream interpretation.
 - `Critical`: association или terminal/path change меняет upstream/downstream
   behavior или dirty/invalid subnetwork; без dual approval и clean subnetwork
   state `post` невозможен.
@@ -134,11 +143,16 @@ rule/terminal/controller impact может оставаться `High`.
 - Реальная применимость остается design-гипотезой до проверки с участниками
   обеих ролей; новый источник является design/architecture input, а не direct
   user interview.
+- До user validation нельзя формулировать как доказанные claims, что
+  consequence-first explanation предотвращает unsafe post, снижает review
+  friction, устраняет открытие внешней GIS или позволяет безопасно переводить
+  `Normal` в audit/sample review.
 
 ## Связи
 
 - [[../chats/2026-06-14-release-2-conflict-explanation-editor-reviewer-research]]
 - [[../chats/2026-06-16-release-2-reviewer-decision]]
+- [[../chats/2026-06-17-geometry-association-conflict-f1]]
 - [[conflict_resolution_routing]]
 - [[conflicts/2026-06-14-trace-risk-tier-boundary]]
 - [[risk_assumption_log]]

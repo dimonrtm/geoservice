@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-16
+updated: 2026-06-17
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -70,6 +70,9 @@ tags: [knowledge, index, geoservice]
 - 2026-06-16: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с package boundaries `utility_service`, Docker/CI contract `utility_service` и новой раскладкой backend tests.
 - 2026-06-16: Выполнен `/sync-vision`; новых RAW inputs и stale-нод нет, открыты 13 follow-up'ов, ожидаемый lint-конфликт остается на 18 неизменяемых RAW Markdown files.
 - 2026-06-16: Обработан RAW source `RAW_inputs/meetings/Reviwer Decision.md`; Release 2 reviewer decision уточнен как package approval for post readiness, approval/post authorization разделены, trace-boundary conflict закрыт для planned policy.
+- 2026-06-17: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с backend foundation `WorkOrder`: таблица `utility_network.work_orders`, seed `WO-001`, assignment/status rules и unit coverage.
+- 2026-06-17: Выполнен `/sync-vision`; новых RAW inputs и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 19 неизменяемых RAW Markdown files.
+- 2026-06-17: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f1.md`; уточнен why-now Release 2 для `geometry/association conflict`, границы `Normal`/`High`/`Critical`, risk переусложнения и validation caveats.
 
 ## Открытые Вопросы
 
@@ -81,6 +84,7 @@ tags: [knowledge, index, geoservice]
 - Нужно проверить draft P95 targets на `synthetic_utility_feeder_01` в Chrome на reference hardware.
 - Нужно снять manual baseline на 10-20 work orders и провести product evaluation на 200 started work orders с 7-дневным correction window.
 - Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить planned policy: package approval vs technical `post`, routing по специализации, совмещение ролей, обязательность approve comment и user validation trace-boundary.
+- Для Release 2 нужно проверить, снижает ли consequence-first explanation внешние проверки и time-to-confident-decision по `geometry/association conflict`, и не дублирует ли UI обычный Conflicts view.
 - До implementation contract нужно превратить Release 2 reviewer decision policy в state machine, API/events и audit schema.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
