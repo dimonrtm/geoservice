@@ -17,6 +17,8 @@
 - [План реализации utility dataset и read-only backend API Дня 4](2026-06-15-sprint-1-day-4-utility-dataset-implementation-plan.md)
 - [Backend foundation Work Orders Дня 5](2026-06-17-sprint-1-day-5-work-orders-design.md)
 - [План реализации backend foundation Work Orders Дня 5](2026-06-17-sprint-1-day-5-work-orders-implementation-plan.md)
+- [Облегченная интеграционная проверка Дня 6](2026-06-18-sprint-1-day-6-integration-check-design.md)
+- [План реализации облегченной интеграционной проверки Дня 6](2026-06-18-sprint-1-day-6-integration-check-implementation-plan.md)
 
 ## Исторические Материалы
 
