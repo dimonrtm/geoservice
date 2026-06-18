@@ -3,8 +3,8 @@ title: Risk-Tiered Routing Для Следующего Релиза
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-17
-source: "RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md; user clarification on source trust, 2026-06-14; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md"
+updated: 2026-06-18
+source: "RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md; user clarification on source trust, 2026-06-14; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md"
 tags: [decision, next-release, conflict-resolution, routing, risk, editor, reviewer]
 ---
 
@@ -26,6 +26,13 @@ authoritative network behavior. Обычный feature diff, `Base / Mine / Defa
 geometry comparison показывают representation, но не дают достаточного ответа
 про connectivity, containment, attachment/locatability, trace и subnetwork
 state.
+
+Ф2 research/design input уточняет пользователя и момент боли: primary user
+конфликта - `Editor` в named/edit version; `Reviewer`, version admin и
+профильный инженер подключаются как escalation/governance роли. Conflict
+становится явным на reconcile, но риск появляется уже при edit/validate и
+возвращается перед `post`, если `Default` изменился после reconcile или
+approval.
 
 ## Решение
 
@@ -81,6 +88,9 @@ switching/outage/safety decisions или другие operational outputs. Trace
   эскалации.
 - Conflict view должен показывать geometry/association diff, validation и trace
   impact до решения.
+- Routing должен опираться не только на видимый geometry diff, но и на
+  association/terminal diff, dirty areas, validation errors, trace/subnetwork
+  consequence и наличие field evidence.
 - Все решения требуют причины и сохраняются в audit.
 - Workflow должен поддерживать совместное подтверждение и окончательное решение
   владельца authoritative data.
@@ -104,6 +114,7 @@ switching/outage/safety decisions или другие operational outputs. Trace
 - [[../chats/2026-06-14-utility-gis-editor-conflict-routing-synthetic-research]]
 - [[../chats/2026-06-16-release-2-reviewer-decision]]
 - [[../chats/2026-06-17-geometry-association-conflict-f1]]
+- [[../chats/2026-06-18-geometry-association-conflict-f2]]
 - [[../chats/2026-06-14-geometry-association-conflict-resolution-workshop]]
 - [[conflicts/2026-06-14-next-release-conflict-routing-responsibility]]
 - [[../solution/USM]]

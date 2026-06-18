@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-17
+updated: 2026-06-18
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -73,6 +73,8 @@ tags: [knowledge, index, geoservice]
 - 2026-06-17: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с backend foundation `WorkOrder`: таблица `utility_network.work_orders`, seed `WO-001`, assignment/status rules и unit coverage.
 - 2026-06-17: Выполнен `/sync-vision`; новых RAW inputs и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 19 неизменяемых RAW Markdown files.
 - 2026-06-17: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f1.md`; уточнен why-now Release 2 для `geometry/association conflict`, границы `Normal`/`High`/`Critical`, risk переусложнения и validation caveats.
+- 2026-06-18: Выполнен `/sync-vision`; новых RAW inputs и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 20 неизменяемых RAW Markdown files.
+- 2026-06-18: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f2.md`; уточнен primary user `Editor`, момент боли и safe post criteria для Release 2 `geometry/association conflict`.
 
 ## Открытые Вопросы
 

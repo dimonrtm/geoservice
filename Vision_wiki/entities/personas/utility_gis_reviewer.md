@@ -3,8 +3,8 @@ title: Utility GIS Reviewer
 type: entity
 status: active
 created: 2026-06-13
-updated: 2026-06-16
-source: "RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; RAW_inputs/meetings/Reviwer Decision.md"
+updated: 2026-06-18
+source: "RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f2.md"
 tags: [persona, reviewer, utility-network, authoritative-editing, synthetic-evidence]
 ---
 
@@ -30,6 +30,9 @@ Design-персона GeoService, поддержанная синтетичес�
 - Для Release 2 принимает reviewer decision как approval of change package for
   post readiness; это не обязательно означает, что сам `Reviewer` выполняет
   технический `post` в `Default`.
+- В `geometry/association conflict` является вторичным пользователем:
+  подключается для competing representations, association/attribute logic,
+  `High` risk или package approval, но не является первичным носителем боли.
 
 ## Рабочая Задача
 
@@ -76,6 +79,9 @@ Design-персона GeoService, поддержанная синтетичес�
   affected area.
 - Geometry и attributes видны лучше, чем association changes до/после.
 - Автоматические проверки не доказывают инженерный смысл изменения.
+- Для reviewer escalation требуется уже собранный context package:
+  association/terminal diff, validation/dirty areas, trace before/after,
+  subnetwork status и field evidence.
 - Один trace может не обнаружить проблему соседнего участка сети.
 - Универсальный reviewer может не увидеть domain-specific эксплуатационный
   риск.
@@ -112,6 +118,7 @@ approval и technical `post authorization`: `Reviewer` подтверждает 
 - [[../../chats/2026-06-13-utility-gis-reviewer-synthetic-interview-rehearsal]]
 - [[../../chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]]
 - [[../../chats/2026-06-16-release-2-reviewer-decision]]
+- [[../../chats/2026-06-18-geometry-association-conflict-f2]]
 - [[../../concepts/jtbd]]
 - [[../../decisions/risk_assumption_log]]
 - [[../../decisions/release_1_utility_workflow]]

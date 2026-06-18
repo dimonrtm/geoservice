@@ -3,8 +3,8 @@ title: Utility GIS Editor
 type: entity
 status: active
 created: 2026-06-02
-updated: 2026-06-13
-source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md"
+updated: 2026-06-18
+source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/geometry_association_conflict_f2.md"
 tags: [persona, discovery, phase-f2, utility-network, authoritative-editing, research, synthetic-evidence]
 ---
 
@@ -27,6 +27,9 @@ Primary design-persona GeoService. Синтетическая репетиция
 - Поддержано синтетическим сценарием: основной расход времени связан с разрозненными исходными материалами и повторным поднятием контекста.
 - Поддержано broad-domain synthetic source: editor изменяет physical и logical
   network state и вручную связывает field/as-built evidence с GIS change set.
+- Поддержано Ф2 research/design input по `geometry/association conflict`:
+  primary user боли - `Editor` в named/edit version, который должен понять,
+  меняет ли конфликт только representation или authoritative network behavior.
 - Не подтверждено внешне: частота задач, длительность 2-4 часа, конкретное распределение ролей и распространенность используемых инструментов.
 
 ## Рабочая Задача
@@ -57,6 +60,12 @@ Primary design-persona GeoService. Синтетическая репетиция
 - Контекст изменения разорван между work order, PDF, фотографиями, Excel, справочниками и сообщениями.
 - После возврата reviewer приходится восстанавливать контекст и повторять validation, trace и reconcile.
 - Визуально корректная карта может скрывать ошибочную association и неверный trace.
+- `Editor` видит feature diff, но не получает в одном месте ответ, меняются ли
+  connectivity, containment, terminals, trace, subnetwork state или только
+  геометрическое представление.
+- Для confidence перед `post` приходится вручную собирать Differences/Conflicts
+  view, association tools, dirty areas, validation, trace, subnetwork checks,
+  work order, field evidence, screenshots и notes.
 - Field redline, проектная схема и фактическая трасса могут расходиться.
 - Review/edit package приходится вручную собирать из нескольких систем.
 
@@ -74,6 +83,8 @@ Primary design-persona GeoService. Синтетическая репетиция
 - Post в `Default` завершен.
 - Topology провалидирована, dirty areas закрыты.
 - Trace и анализ сети возвращают ожидаемый результат.
+- Association/terminal state согласован с rules, subnetwork state не invalid, а
+  trace before/after объясняет expected network behavior.
 - Рабочую версию можно закрыть или удалить.
 
 ## Synthetic Validation
@@ -93,6 +104,7 @@ Primary design-persona GeoService. Синтетическая репетиция
 - [[../../chats/2026-06-07-utility-gis-editor-domain-dictionary]]
 - [[../../chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]]
 - [[../../chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]]
+- [[../../chats/2026-06-18-geometry-association-conflict-f2]]
 - [[../../concepts/utility_gis_editing_domain]]
 - [[../../concepts/jtbd]]
 - [[../../concepts/collaborative_editing_models]]
