@@ -19,6 +19,9 @@
 - [План реализации backend foundation Work Orders Дня 5](2026-06-17-sprint-1-day-5-work-orders-implementation-plan.md)
 - [Облегченная интеграционная проверка Дня 6](2026-06-18-sprint-1-day-6-integration-check-design.md)
 - [План реализации облегченной интеграционной проверки Дня 6](2026-06-18-sprint-1-day-6-integration-check-implementation-plan.md)
+- [Документация и резерв Дня 7](2026-06-19-sprint-1-day-7-documentation-reserve-design.md)
+- [План реализации документации и резерва Дня 7](2026-06-19-sprint-1-day-7-documentation-reserve-implementation-plan.md)
+- [Результат сверки документации и резерва Дня 7](2026-06-19-sprint-1-day-7-documentation-reserve-audit.md)
 
 ## Исторические Материалы
 
