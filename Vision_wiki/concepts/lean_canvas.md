@@ -3,8 +3,8 @@ title: Lean Canvas GeoService
 type: concept
 status: draft
 created: 2026-05-31
-updated: 2026-06-05
-source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md"
+updated: 2026-06-19
+source: "Vision_wiki/chats/2026-05-31-phase-f1-why-now.md; Vision_wiki/chats/2026-06-02-phase-f2-users-and-pain.md; RAW_inputs/documents/03.06.2026deep-research-report.md; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; RAW_inputs/meetings/geometry_association_conflict_f3.md"
 tags: [lean-canvas, discovery, research]
 ---
 
@@ -45,6 +45,9 @@ tags: [lean-canvas, discovery, research]
 - Инженерная ценность: проверка AI-first разработки сложной геоинформационной системы.
 - Ф5 ценность первого rollout: `learning value`; показать на demo, что pipeline действительно стал проще.
 - Возможная продуктовая ценность пока является гипотезой.
+- Для planned Release 2 гипотеза ценности уточнена: меньше внешних trace/check
+  opens, ручных notes/screenshots, handoff и времени от reconcile до go/no-go
+  решения.
 
 ## Cost / Constraints
 
@@ -60,3 +63,7 @@ tags: [lean-canvas, discovery, research]
 ## Unfair Advantage
 
 - Гипотеза Ф3: focused demo, self-hosted/local mode, open-source posture и AI-first объяснение конфликта для reviewer'а. Это преимущество работает только в узкой нише explainability/review productivity, а не в замене ArcGIS Enterprise.
+- Уточнение Ф3 для Release 2: главный unfair advantage - unified evidence
+  context поверх authoritative state, где `Editor` и `Reviewer` видят один
+  conflict package, trace/subnetwork consequence и audit trail; AI-текст
+  вторичен без trust in authoritative state.

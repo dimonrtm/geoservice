@@ -3,8 +3,8 @@ title: Рыночный Ландшафт Utility GIS Editor
 type: entity
 status: draft
 created: 2026-06-14
-updated: 2026-06-14
-source: RAW_inputs/documents/UtilityGisEditor.md
+updated: 2026-06-19
+source: "RAW_inputs/documents/UtilityGisEditor.md; RAW_inputs/meetings/geometry_association_conflict_f3.md"
 tags: [competitors, utility-gis-editor, market, international, russian]
 ---
 
@@ -49,6 +49,11 @@ deployment, pricing и licensing.
   experience; преимущество перед зрелыми platforms не доказано.
 - Локальные vendors расширяют справочный контекст по on-prem, integration и
   domain capabilities; выводов об изменении demo scope из этого не следует.
+- Ф3 `geometry/association conflict` уточняет, что adjacent suites уровня
+  Cityworks/Bentley и generic self-hosted platform конкурируют как work context,
+  governance, history/API или internal-dashboard foundation, но их наличие не
+  доказывает semantic reviewer decision для authoritative utility-network
+  conflict.
 
 ## Ограничения
 
@@ -56,10 +61,13 @@ deployment, pricing и licensing.
 - Некоторые URLs даны без protocol и требуют проверки.
 - Capability и commercial claims могут изменяться между версиями.
 - Сравнение не является vendor due diligence.
+- Claims о том, что adjacent suites закрывают именно `geometry/association
+  conflict` consequence review, требуют отдельного официального подтверждения.
 
 ## Связи
 
 - [[../../chats/2026-06-14-utility-gis-editor-market-research]]
+- [[../../chats/2026-06-19-geometry-association-conflict-f3]]
 - [[../../concepts/operational_utility_gis]]
 - [[collaborative_editing_alternatives]]
 - [[../../decisions/followups/index]]

@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-18
+updated: 2026-06-19
 source: null
 tags: [vision-wiki, product]
 ---
@@ -81,6 +81,7 @@ tags: [vision-wiki, product]
 - [[chats/2026-06-16-release-2-reviewer-decision]] - design/architecture input: reviewer decision как package approval for post readiness, разделение approval/post authorization, post blockers и resolved trace boundary.
 - [[chats/2026-06-17-geometry-association-conflict-f1]] - research/design input: why-now для Release 2 `geometry/association conflict`, feature diff vs network consequence, refined `Normal`/`High`/`Critical` и validation caveats.
 - [[chats/2026-06-18-geometry-association-conflict-f2]] - research/design input Ф2: primary user `Editor`, момент боли, текущий workaround и safe post criteria для `geometry/association conflict`.
+- [[chats/2026-06-19-geometry-association-conflict-f3]] - research/design input Ф3: конкурентный baseline `ArcGIS native + SOP + экспертный handoff`, good-enough зоны, blockers и demo proof для unified evidence context.
 - [[chats/2026-06-14-utility-gis-editor-market-research]] - доверенное market research по полному Use Case, vendors и product families.
 - [[concepts/operational_utility_gis]] - справочная рыночная категория из network editor, field execution и integration hub.
 - [[entities/competitors/utility_gis_editor_market_landscape]] - международные и русскоязычные utility GIS референсы.

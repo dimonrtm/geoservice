@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-18
+updated: 2026-06-19
 source: null
 tags: [project-state, geoservice]
 ---
@@ -19,9 +19,9 @@ GeoService - исследовательский pet-проект на стади
 ## Состояние Pipeline
 
 - Последний `/discover`: 2026-06-14, совместная 45-минутная сессия `Utility GIS editor` и `Reviewer` спроектировала для следующего релиза risk-tiered routing `geometry/association conflict`; текущий Release 1 не меняется.
-- Последний `/ingest`: 2026-06-18, `RAW_inputs/meetings/geometry_association_conflict_f2.md` обработан как research/design input Ф2 для Release 2 `geometry/association conflict`; уточнены primary user `Editor`, момент боли, текущий workaround и safe post criteria.
-- Последний `/sync-vision`: 2026-06-18 20:08 +05:00, корневой индекс и live state синхронизированы; новых RAW inputs и stale-нод нет.
-- Последний `/lint-wiki`: 2026-06-18, найдены ожидаемые `missing_frontmatter` для 21 неизменяемого RAW Markdown file; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/ingest`: 2026-06-19, `RAW_inputs/meetings/geometry_association_conflict_f3.md` обработан как research/design input Ф3 для Release 2 `geometry/association conflict`; уточнены конкурентный baseline `ArcGIS native + SOP + экспертный handoff`, good-enough зоны baseline, blockers и demo proof для unified evidence context.
+- Последний `/sync-vision`: 2026-06-19 19:19 +05:00, корневой индекс и live state синхронизированы; новых RAW inputs после учтенного ingest Ф2 и stale-нод нет.
+- Последний `/lint-wiki`: 2026-06-19, через bundled Python найдены ожидаемые `missing_frontmatter` для 22 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний `/ingest repository-change`: 2026-06-17, существующие ноды
   `Code_wiki` синхронизированы с backend foundation `WorkOrder`: таблица
@@ -32,14 +32,14 @@ GeoService - исследовательский pet-проект на стади
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
   завершение плана или commit не являются триггерами.
 
-## Состояние Wiki На 2026-06-18
+## Состояние Wiki На 2026-06-19
 
-- Необработанные RAW inputs: не обнаружены; все 22 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs с прошлого `/sync-vision`: `RAW_inputs/meetings/geometry_association_conflict_f2.md` обработан через `/ingest`.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-18-geometry-association-conflict-f2]]; также обновлены persona/JTBD и planned Release 2 routing/explanation.
+- Необработанные RAW inputs: не обнаружены; все 23 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: `RAW_inputs/meetings/geometry_association_conflict_f3.md` обработан через `/ingest`.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-19-geometry-association-conflict-f3]]; также уточнены alternatives, market landscape, PVB/Lean Canvas, risk log и follow-up validation.
 - Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 21 RAW Markdown file, product validation `FU-2026-06-13-002` и Release 2 user validation `FU-2026-06-14-001`.
+- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 22 RAW Markdown files, product validation `FU-2026-06-13-002` и Release 2 user validation `FU-2026-06-14-001`; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
 - Открытые follow-up'ы: 12.
 
 ## Открытые Вопросы
@@ -63,6 +63,7 @@ GeoService - исследовательский pet-проект на стади
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.
 - Для следующего релиза нужно проверить с реальными участниками каноническую planned модель: reviewer decision как package approval for post readiness, разделение `approve package` / technical `post authorization`, routing по affected network area/компетенции/risk tier, `High` через финальное решение `Reviewer`, audit + sample review для безопасного `Normal`, SLA, emergency path и роль Data Owner; текущий Release 1 не расширять.
 - Для Release 2 нужно проверить consequence-first `Conflict explanation`: primary user `Editor`, geometry/association diff, validation/dirty areas, trace before/after, affected service/subnetwork, evidence, stale approval, audit и post blockers; отдельно проверить, снижает ли он внешние проверки и time-to-confident-decision и не дублирует ли обычный Conflicts view.
+- Для Release 2 нужно сравнить unified evidence context против `ArcGIS native + SOP + expert handoff` и custom internal overlay: измерить внешние trace/check opens, notes/screenshots, handoff и time-to-confident-decision.
 - До implementation contract нужно превратить Release 2 reviewer decision policy в state machine, API/events и audit schema.
 - `Operational Utility GIS` хранится только как справочная карта рынка; vendor claims до внешнего использования требуют проверки.
 - Нужно снять manual baseline на 10-20 work orders и затем провести 200-work-order product evaluation с 7-дневным correction window.
