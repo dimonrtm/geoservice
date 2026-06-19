@@ -4,6 +4,9 @@ from sqlalchemy.orm import configure_mappers
 from utility_service.infrastructure.postgresql.models.utility_network import (
     AOI,
     AssociationType,
+    DefaultState,
+    EditVersion,
+    EditVersionStatus,
     Feeder,
     FeatureType,
     NetworkAssociation,
@@ -25,6 +28,9 @@ def test_utility_network_package_exports_public_contract() -> None:
     assert set(utility_network.__all__) == {
         "AOI",
         "AssociationType",
+        "DefaultState",
+        "EditVersion",
+        "EditVersionStatus",
         "Feeder",
         "FeatureType",
         "NetworkAssociation",
@@ -185,7 +191,7 @@ def test_network_relationships_do_not_delete_children_in_orm() -> None:
 def test_check_constraints_are_named() -> None:
     checks = [
         constraint
-        for model in (AOI, NetworkFeature, NetworkAssociation, WorkOrder)
+        for model in (AOI, NetworkFeature, NetworkAssociation, WorkOrder, DefaultState, EditVersion)
         for constraint in model.__table__.constraints
         if isinstance(constraint, CheckConstraint)
     ]
@@ -259,3 +265,79 @@ def test_work_order_declares_lookup_indexes() -> None:
         "ix_work_orders_aoi_id": ("aoi_id",),
         "ix_work_orders_feeder_id": ("feeder_id",),
     }
+
+
+def test_default_state_metadata_contains_singleton_revision_guards() -> None:
+    assert DefaultState.__tablename__ == "default_states"
+    assert DefaultState.__table__.schema == "utility_network"
+    assert {column.name for column in DefaultState.__table__.columns} == {
+        "id",
+        "name",
+        "current_revision",
+        "created_at",
+        "updated_at",
+    }
+    assert DefaultState.__table__.c.current_revision.default.arg == 1
+    assert str(DefaultState.__table__.c.current_revision.server_default.arg) == "1"
+    assert {
+        "uq_default_states_name",
+        "ck_default_states_current_revision_positive",
+    }.issubset(constraint_names(DefaultState))
+    assert any(
+        isinstance(constraint, UniqueConstraint)
+        and tuple(column.name for column in constraint.columns) == ("name",)
+        for constraint in DefaultState.__table__.constraints
+    )
+
+
+def test_edit_version_status_values_are_stable_strings() -> None:
+    assert {item.value for item in EditVersionStatus} == {"open"}
+
+
+def test_edit_version_metadata_contains_open_version_guards() -> None:
+    assert EditVersion.__tablename__ == "edit_versions"
+    assert EditVersion.__table__.schema == "utility_network"
+    assert {column.name for column in EditVersion.__table__.columns} == {
+        "id",
+        "work_order_id",
+        "owner_id",
+        "base_revision",
+        "status",
+        "created_at",
+        "last_opened_at",
+    }
+    assert EditVersion.__table__.c.base_revision.default.arg == 1
+    assert str(EditVersion.__table__.c.base_revision.server_default.arg) == "1"
+    assert {
+        "ck_edit_versions_base_revision_positive",
+        "ck_edit_versions_status",
+    }.issubset(constraint_names(EditVersion))
+
+
+def test_edit_version_foreign_keys_are_restrictive_and_schema_qualified() -> None:
+    foreign_keys = [
+        constraint
+        for constraint in EditVersion.__table__.constraints
+        if isinstance(constraint, ForeignKeyConstraint)
+    ]
+
+    assert len(foreign_keys) == 2
+    assert {element.ondelete for constraint in foreign_keys for element in constraint.elements} == {
+        "RESTRICT"
+    }
+    assert {
+        element.target_fullname for constraint in foreign_keys for element in constraint.elements
+    } == {
+        "users.id",
+        "utility_network.work_orders.id",
+    }
+
+
+def test_edit_version_declares_partial_open_unique_index() -> None:
+    indexes = {index.name: index for index in EditVersion.__table__.indexes}
+
+    assert "uq_edit_versions_open_work_order" in indexes
+    index = indexes["uq_edit_versions_open_work_order"]
+    assert tuple(column.name for column in index.columns) == ("work_order_id",)
+    assert index.unique is True
+    assert str(index.dialect_options["postgresql"]["where"]) == "status = 'open'"

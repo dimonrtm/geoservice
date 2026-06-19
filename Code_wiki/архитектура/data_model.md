@@ -3,8 +3,8 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-17
-source: repository-change:2026-06-17
+updated: 2026-06-19
+source: repository-change:2026-06-19
 tags: [database, postgis, sqlalchemy, geojson]
 ---
 
@@ -18,7 +18,7 @@ tags: [database, postgis, sqlalchemy, geojson]
 - `layers`: `id`, `name`, `title`, `geometry_type`, `srid`, `storage_table`.
 - Feature tables: `feature_points`, `feature_lines`, `feature_polygons`, `feature_multipoints`, `feature_multilines`, `feature_multipolygons`.
 - Utility schema `utility_network`: `aois`, `feeders`, `network_features`,
-  `network_associations`, `work_orders`.
+  `network_associations`, `work_orders`, `default_states`, `edit_versions`.
 
 Каждая feature table содержит:
 
@@ -60,6 +60,16 @@ Alembic migrations лежат в
   `utility_network.work_orders` с FK на `users`, `aois` и `feeders`,
   статусами `assigned`/`in_progress`, уникальным `code` и индексами для
   assignment/status lookups.
+- `a8c1f2d3e4b5_edit_versions.py` добавляет singleton-состояние
+  `utility_network.default_states` (`name = 'default'`,
+  `current_revision >= 1`) и `utility_network.edit_versions` с FK на
+  `work_orders` и `users`, `base_revision >= 1`, статусом `open` и partial
+  unique index `uq_edit_versions_open_work_order` для запрета двух открытых
+  версий одного work order.
+
+`default_states.current_revision` является источником `base_revision` при
+создании edit version от Default. В текущем foundation разрешен только статус
+`open`; будущие статусы потребуют расширения check constraint и service rules.
 
 После migrations backend запускает module runners demo users и utility
 dataset. `synthetic_utility_feeder_01` создаётся атомарно только при отсутствии

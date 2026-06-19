@@ -4,6 +4,12 @@ from fastapi import Depends, Request, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.repositories.layer_repository import LayerRepository
+from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
+    DefaultStateRepository,
+)
+from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
+    EditVersionRepository,
+)
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.infrastructure.postgresql.repositories.utility_network_repository import (
     UtilityNetworkRepository,
@@ -13,6 +19,7 @@ from utility_service.infrastructure.postgresql.repositories.work_order_repositor
 )
 from utility_service.infrastructure.postgresql.session import engine, get_session
 from utility_service.use_cases.services.auth_service import AuthService
+from utility_service.use_cases.services.edit_version_service import EditVersionService
 from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
 from utility_service.use_cases.services.feature_service import FeatureService
 from utility_service.use_cases.services.layer_service import LayerService
@@ -59,6 +66,18 @@ def get_work_order_service(
         session,
         WorkOrderRepository(session),
         UserRepository(session),
+    )
+
+
+def get_edit_version_service(
+    session: AsyncSession = Depends(get_session),
+) -> EditVersionService:
+    return EditVersionService(
+        session,
+        UserRepository(session),
+        WorkOrderRepository(session),
+        EditVersionRepository(session),
+        DefaultStateRepository(session),
     )
 
 

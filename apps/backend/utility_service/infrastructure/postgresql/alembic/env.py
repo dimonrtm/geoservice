@@ -40,6 +40,9 @@ from utility_service.infrastructure.postgresql.models.user import User  # noqa: 
 from utility_service.infrastructure.postgresql.models.utility_network import (  # noqa: E402, F401
     AOI,
     AssociationType,
+    DefaultState,
+    EditVersion,
+    EditVersionStatus,
     Feeder,
     FeatureType,
     NetworkAssociation,

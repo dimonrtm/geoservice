@@ -7,6 +7,7 @@ from utility_service.web_api.api.secure_router import secure_router
 from utility_service.web_api.api.utility_network import utility_network_router
 from utility_service.web_api.api.layers import layers_router
 from utility_service.web_api.api.ws_layers import ws_layers_router
+from utility_service.web_api.api.work_orders import work_orders_router
 from utility_service.utils.settings import settings
 
 app = FastAPI(lifespan=lifespan)
@@ -24,6 +25,7 @@ app.include_router(utility_network_router)
 app.include_router(secure_router)
 app.include_router(layers_router)
 app.include_router(ws_layers_router)
+app.include_router(work_orders_router)
 
 
 @app.get("/health")

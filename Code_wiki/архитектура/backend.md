@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-06-17
-source: repository-change:2026-06-17
+updated: 2026-06-19
+source: repository-change:2026-06-19
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -70,6 +70,33 @@ frontend shell. `WorkOrderService` находится в `utility_service.use_ca
 остается ответственностью `UserRepository`. `get_work_order_service` добавлен в
 `utility_service.use_cases.deps` для будущих routers, но День 5 не добавляет
 `/api/v1/work-orders/...`.
+
+## EditVersion Foundation
+
+`EditVersionService` открывает изолированную edit version от текущего состояния
+`Default` для назначенного work order. Service остается application-layer
+оркестратором: он принимает `actor_id`, работает внутри `AsyncSession`
+transaction boundary и зависит от repository adapters (`UserRepository`,
+`WorkOrderRepository`, `EditVersionRepository`, `DefaultStateRepository`), а не
+от других services.
+
+Правила открытия:
+
+- actor должен быть активным `Editor`;
+- work order видим только своему assignee; чужой или отсутствующий work order
+  маскируется как `404 WORK_ORDER_NOT_FOUND`;
+- `assigned` без открытой edit version создает `EditVersion` с
+  `base_revision = default_states.current_revision` и переводит work order в
+  `in_progress` в той же transaction boundary;
+- `in_progress` с уже открытой edit version возвращает существующую версию,
+  обновляя `last_opened_at`;
+- рассинхрон work order и edit version возвращает
+  `422 WORK_ORDER_CONTEXT_INVALID`, а несовместимый статус work order -
+  `409 WORK_ORDER_STATE_CONFLICT`.
+
+`POST /api/v1/work-orders/{work_order_id}/edit-versions` является первым
+публичным Work Orders endpoint: он требует `Editor`, возвращает `201` при
+создании и `200` при повторном открытии существующей версии.
 
 ## Конфигурация И Безопасность
 

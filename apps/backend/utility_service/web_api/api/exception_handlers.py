@@ -21,6 +21,7 @@ from utility_service.use_cases.domain.exceptions.utility_network_api_error impor
 from utility_service.use_cases.domain.exceptions.version_mismatch_exception import (
     VersionMismatchException,
 )
+from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
 from utility_service.use_cases.schemas.feature.patch_feature_conflict_response import (
     PatchFeatureConflictResponse,
 )
@@ -45,6 +46,19 @@ def install_exception_handlers(app: FastAPI) -> None:
         request: Request,
         error: UtilityNetworkApiError,
     ):
+        correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
+        return JSONResponse(
+            status_code=error.status_code,
+            content={
+                "code": error.code,
+                "message": error.message,
+                "correlationId": correlation_id,
+                "details": {},
+            },
+        )
+
+    @app.exception_handler(WorkOrderApiError)
+    async def work_order_api_error(request: Request, error: WorkOrderApiError):
         correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
         return JSONResponse(
             status_code=error.status_code,

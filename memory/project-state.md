@@ -23,10 +23,11 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-19 19:19 +05:00, корневой индекс и live state синхронизированы; новых RAW inputs после учтенного ingest Ф2 и stale-нод нет.
 - Последний `/lint-wiki`: 2026-06-19, через bundled Python найдены ожидаемые `missing_frontmatter` для 22 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-17, существующие ноды
-  `Code_wiki` синхронизированы с backend foundation `WorkOrder`: таблица
-  `utility_network.work_orders`, create-once seed `WO-001`, `WorkOrderService`
-  assignment/status rules и unit coverage.
+- Последний `/ingest repository-change`: 2026-06-19, существующие ноды
+  `Code_wiki` синхронизированы с backend foundation `EditVersion from Default`:
+  `utility_network.default_states`, `utility_network.edit_versions`,
+  `EditVersionService`, endpoint `POST /api/v1/work-orders/{work_order_id}/edit-versions`
+  и CI integration migration test.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
@@ -53,8 +54,6 @@ GeoService - исследовательский pet-проект на стади
 - Нужно внешне проверить, выполняет ли reviewer `post`, требуется ли routing очереди по специализации и допустимо ли совмещение ролей для low-risk changes.
 - Broad-domain applicability к electric/water/gas/telecom остается гипотезой; Release 1 сохраняет electric `synthetic_utility_feeder_01`.
 - Нужно отдельным запросом решить, что делать с пустыми/неполными dev/infra helper files, найденными repository snapshot.
-- После готового backend foundation `WorkOrder` следующий scope Спринта 1:
-  integration seed/migration checks, edit version и frontend shell.
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.
 - Нужно отдельной implementation/docs-задачей согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset script, demo сценарий, troubleshooting, `PostGIS seed`, `auth`.

@@ -131,6 +131,8 @@ jobs:
           docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
             pytest tests/integration_tests/test_network_model_migration.py -q
           docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
+            pytest tests/integration_tests/test_edit_version_migration.py -q
+          docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
             pytest tests/integration_tests/test_seed_utility_dataset_integration.py -q
           docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 \
             pytest tests/integration_tests/test_work_order_seed_chain_integration.py -q

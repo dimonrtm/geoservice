@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-06-15
-source: repository-change:2026-06-15
+updated: 2026-06-19
+source: repository-change:2026-06-19
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -45,12 +45,29 @@ Frontend хранит token в `localStorage`, добавляет `Authorization
   публичные keys `isActive`, `assetCode`, `featureType`, `fromFeatureId`,
   `toFeatureId`, `associationType` сериализуются в camelCase.
 
+## Work Orders API
+
+- `POST /api/v1/work-orders/{work_order_id}/edit-versions` открывает edit
+  version для назначенного work order текущего `Editor`.
+- При первом открытии endpoint создает `EditVersion` от текущего
+  `Default.current_revision`, переводит work order из `assigned` в
+  `in_progress` и возвращает `201` с `created: true`.
+- При повторном открытии work order в `in_progress` endpoint возвращает уже
+  открытую edit version, обновляет `lastOpenedAt` и отвечает `200` с
+  `created: false`.
+- Response содержит `editVersion.id`, `workOrderId`, `ownerId`, `status`,
+  `baseRevision`, `createdAt`, `lastOpenedAt`.
+
 ## Ошибки
 
 - Auth errors возвращают `code`, `message`, `correlationId`, `details`; активные
   коды Дня 2: `AUTH_REQUIRED`, `USER_INACTIVE`, `ROLE_NOT_ALLOWED`.
 - Utility read errors используют тот же structured contract; повреждённый
   aggregate возвращает `500 UTILITY_DATASET_INVALID`.
+- Work Orders errors используют structured contract `code`, `message`,
+  `correlationId`, `details`: `WORK_ORDER_NOT_FOUND` для отсутствующего или
+  чужого work order, `WORK_ORDER_CONTEXT_INVALID` для рассинхрона work order и
+  edit version, `WORK_ORDER_STATE_CONFLICT` для несовместимого статуса.
 - Domain validation возвращает 422 с `{"error": "..."}`.
 - Missing layer/feature возвращает 404.
 - Version conflict возвращает 409 с телом `VERSION_MISMATCH`, `featureId`, `requestVersion`, `currentVersion`, `message`.

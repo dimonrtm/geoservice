@@ -1,4 +1,5 @@
 import asyncio
+from contextlib import asynccontextmanager
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -9,6 +10,21 @@ from fastapi import HTTPException
 from utility_service.utils.passwords import hash_password
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.services.auth_service import AuthService
+
+
+class FakeReadSession:
+    def __init__(self) -> None:
+        self.begin_calls = 0
+        self.in_transaction = False
+
+    @asynccontextmanager
+    async def begin(self):
+        self.begin_calls += 1
+        self.in_transaction = True
+        try:
+            yield self
+        finally:
+            self.in_transaction = False
 
 
 def test_authenticate_user_returns_user_for_valid_credentials() -> None:
@@ -27,6 +43,27 @@ def test_authenticate_user_returns_user_for_valid_credentials() -> None:
 
     assert result is user
     repository.get_by_email.assert_awaited_once_with("editor@example.com")
+
+
+def test_get_user_by_id_closes_read_transaction_before_session_reuse() -> None:
+    user = SimpleNamespace(
+        id=uuid4(),
+        email="editor@example.com",
+        role=SimpleNamespace(value="editor"),
+        password_hash=hash_password("editor-password"),
+        is_active=True,
+    )
+    repository = AsyncMock()
+    repository.get_by_id.return_value = user
+    session = FakeReadSession()
+    service = AuthService(session=session, user_repository=repository)
+
+    result = asyncio.run(service.get_user_by_id(user.id))
+
+    assert result is user
+    assert session.begin_calls == 1
+    assert session.in_transaction is False
+    repository.get_by_id.assert_awaited_once_with(user.id)
 
 
 def test_authenticate_user_raises_401_for_unknown_email() -> None:
