@@ -3,8 +3,8 @@ title: Local Development
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-17
-source: repository-change:2026-06-17
+updated: 2026-06-20
+source: repository-change:2026-06-20
 tags: [dev-setup, docker, backend, frontend]
 ---
 
@@ -58,7 +58,9 @@ UUID и при каждом старте backend приводит demo users к 
 
 `python -m seeds.runners.seed_work_orders` создаёт create-once `WO-001` после
 demo users и utility dataset. Повторный запуск при существующем `WO-001` не
-перезаписывает assignee, status, title, description, AOI или feeder.
+перезаписывает assignee, status, title или description, но гарантирует активный
+per-WorkOrder `DefaultState`, скопированный из текущего
+`synthetic_utility_feeder_01`.
 
 Legacy credentials `editor@example.com` и `viewer@example.com` удалены.
 `Editor` видит существующий map/editor workspace. `Reviewer` видит отдельный

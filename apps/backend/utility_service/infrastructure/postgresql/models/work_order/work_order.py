@@ -8,7 +8,6 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     Enum as SAEnum,
-    ForeignKey,
     Index,
     String,
     Text,
@@ -16,7 +15,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from utility_service.infrastructure.postgresql.models.base import Base
 
@@ -34,11 +33,10 @@ class WorkOrder(Base):
             "status IN ('assigned', 'in_progress')",
             name="ck_work_orders_status",
         ),
-        Index("ix_work_orders_assignee_id", "assignee_id"),
+        Index("ix_work_orders_assignee_user_id", "assignee_user_id"),
+        Index("ix_work_orders_created_by_user_id", "created_by_user_id"),
         Index("ix_work_orders_status", "status"),
-        Index("ix_work_orders_aoi_id", "aoi_id"),
-        Index("ix_work_orders_feeder_id", "feeder_id"),
-        {"schema": "utility_network"},
+        {"schema": "work_order"},
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -63,33 +61,8 @@ class WorkOrder(Base):
         default=WorkOrderStatus.ASSIGNED,
         server_default=WorkOrderStatus.ASSIGNED.value,
     )
-    assignee_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey(
-            "users.id",
-            name="fk_work_orders_assignee",
-            ondelete="RESTRICT",
-        ),
-        nullable=False,
-    )
-    aoi_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey(
-            "utility_network.aois.id",
-            name="fk_work_orders_aoi",
-            ondelete="RESTRICT",
-        ),
-        nullable=False,
-    )
-    feeder_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey(
-            "utility_network.feeders.id",
-            name="fk_work_orders_feeder",
-            ondelete="RESTRICT",
-        ),
-        nullable=False,
-    )
+    assignee_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -101,6 +74,3 @@ class WorkOrder(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
-
-    aoi = relationship("AOI")
-    feeder = relationship("Feeder")

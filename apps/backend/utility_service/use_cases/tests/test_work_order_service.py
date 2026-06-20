@@ -7,7 +7,7 @@ from uuid import uuid4
 import pytest
 
 from utility_service.infrastructure.postgresql.models.user import UserRole
-from utility_service.infrastructure.postgresql.models.utility_network import WorkOrderStatus
+from utility_service.infrastructure.postgresql.models.work_order import WorkOrderStatus
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
 from utility_service.use_cases.services.work_order_service import WorkOrderService
 
@@ -17,14 +17,14 @@ def user(role: UserRole = UserRole.EDITOR, *, is_active: bool = True) -> SimpleN
 
 
 def work_order(
-    assignee_id,
+    assignee_user_id,
     *,
     status: WorkOrderStatus = WorkOrderStatus.ASSIGNED,
 ) -> SimpleNamespace:
     return SimpleNamespace(
         id=uuid4(),
         code="WO-001",
-        assignee_id=assignee_id,
+        assignee_user_id=assignee_user_id,
         status=status,
     )
 

@@ -41,12 +41,20 @@ from utility_service.infrastructure.postgresql.models.utility_network import (  
     AOI,
     AssociationType,
     DefaultState,
-    EditVersion,
-    EditVersionStatus,
+    DefaultStateAssociation,
+    DefaultStateFeature,
+    DefaultStateStatus,
     Feeder,
     FeatureType,
     NetworkAssociation,
     NetworkFeature,
+    NetworkState,
+)
+from utility_service.infrastructure.postgresql.models.work_order import (  # noqa: E402, F401
+    EditVersion,
+    EditVersionAssociation,
+    EditVersionFeature,
+    EditVersionStatus,
     WorkOrder,
     WorkOrderStatus,
 )

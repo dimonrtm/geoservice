@@ -7,9 +7,6 @@ from utility_service.infrastructure.postgresql.repositories.layer_repository imp
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
     DefaultStateRepository,
 )
-from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
-    EditVersionRepository,
-)
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.infrastructure.postgresql.repositories.utility_network_repository import (
     UtilityNetworkRepository,
@@ -76,7 +73,6 @@ def get_edit_version_service(
         session,
         UserRepository(session),
         WorkOrderRepository(session),
-        EditVersionRepository(session),
         DefaultStateRepository(session),
     )
 

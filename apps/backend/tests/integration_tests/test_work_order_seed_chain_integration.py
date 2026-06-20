@@ -19,15 +19,37 @@ from tests.integration_tests.network_db_support import run_in_rollback_transacti
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
 from utility_service.infrastructure.postgresql.models.utility_network import (
     AOI,
+    DefaultState,
+    DefaultStateAssociation,
+    DefaultStateFeature,
     Feeder,
     NetworkAssociation,
     NetworkFeature,
+)
+from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
+    DefaultStateRepository,
+)
+from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
+from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
+    WorkOrderRepository,
+)
+from utility_service.infrastructure.postgresql.models.work_order import (
+    EditVersion,
+    EditVersionAssociation,
+    EditVersionFeature,
     WorkOrder,
     WorkOrderStatus,
 )
+from utility_service.use_cases.services.edit_version_service import EditVersionService
 
 
 async def remove_canonical_seed_chain(session: AsyncSession) -> None:
+    await session.execute(
+        delete(EditVersion).where(EditVersion.work_order_id == SEED_WORK_ORDER_SPEC.id)
+    )
+    await session.execute(
+        delete(DefaultState).where(DefaultState.work_order_id == SEED_WORK_ORDER_SPEC.id)
+    )
     await session.execute(delete(WorkOrder).where(WorkOrder.code == SEED_WORK_ORDER_SPEC.code))
     await session.execute(
         delete(NetworkAssociation).where(
@@ -77,9 +99,12 @@ def test_seed_chain_creates_work_order_with_user_network_links() -> None:
         await run_seed_chain(session)
 
         work_order = await load_work_order(session)
-        assignee = await session.get(User, work_order.assignee_id)
-        feeder = await session.get(Feeder, work_order.feeder_id)
-        aoi = await session.get(AOI, work_order.aoi_id)
+        assignee = await session.get(User, work_order.assignee_user_id)
+        feeder = await session.get(Feeder, UTILITY_DATASET_SPEC.feeder.id)
+        aoi = await session.get(AOI, UTILITY_DATASET_SPEC.aoi.id)
+        default_state = await session.scalar(
+            select(DefaultState).where(DefaultState.work_order_id == work_order.id)
+        )
         reviewer = await session.scalar(
             select(User).where(User.email == "marina.reviewer@example.local")
         )
@@ -91,6 +116,20 @@ def test_seed_chain_creates_work_order_with_user_network_links() -> None:
                 NetworkFeature.feeder_id == UTILITY_DATASET_SPEC.feeder.id
             )
         )
+        assert default_state is not None
+        default_state_feature_count = await session.scalar(
+            select(func.count(DefaultStateFeature.feature_id)).where(
+                DefaultStateFeature.default_state_id == default_state.id
+            )
+        )
+        default_state_association_count = await session.scalar(
+            select(func.count(DefaultStateAssociation.association_id)).where(
+                DefaultStateAssociation.default_state_id == default_state.id
+            )
+        )
+        default_state_aggregate = await DefaultStateRepository(
+            session
+        ).get_active_aggregate_by_work_order_id(work_order.id)
 
         assert work_order_count == 1
         assert work_order.id == SEED_WORK_ORDER_SPEC.id
@@ -101,11 +140,18 @@ def test_seed_chain_creates_work_order_with_user_network_links() -> None:
         assert assignee.is_active is True
         assert reviewer is not None
         assert reviewer.role is UserRole.REVIEWER
-        assert reviewer.id != work_order.assignee_id
+        assert reviewer.id != work_order.assignee_user_id
         assert feeder is not None
         assert feeder.code == UTILITY_FEEDER_CODE
         assert aoi is not None
         assert network_feature_count == 19
+        assert default_state.base_network_revision == 1
+        assert default_state_feature_count == 19
+        assert default_state_association_count == 9
+        assert default_state_aggregate is not None
+        assert default_state_aggregate.state.id == default_state.id
+        assert len(default_state_aggregate.features) == 19
+        assert len(default_state_aggregate.associations) == 9
 
     run_in_rollback_transaction(scenario)
 
@@ -118,9 +164,7 @@ def test_repeated_seed_chain_preserves_existing_work_order_state() -> None:
         work_order = await load_work_order(session)
         work_order.title = "Измененная задача интеграционного дня"
         work_order.status = WorkOrderStatus.IN_PROGRESS
-        original_assignee_id = work_order.assignee_id
-        original_aoi_id = work_order.aoi_id
-        original_feeder_id = work_order.feeder_id
+        original_assignee_user_id = work_order.assignee_user_id
         await session.commit()
 
         await run_seed_chain(session)
@@ -133,8 +177,42 @@ def test_repeated_seed_chain_preserves_existing_work_order_state() -> None:
         assert work_order_count == 1
         assert refreshed.title == "Измененная задача интеграционного дня"
         assert refreshed.status is WorkOrderStatus.IN_PROGRESS
-        assert refreshed.assignee_id == original_assignee_id
-        assert refreshed.aoi_id == original_aoi_id
-        assert refreshed.feeder_id == original_feeder_id
+        assert refreshed.assignee_user_id == original_assignee_user_id
+
+    run_in_rollback_transaction(scenario)
+
+
+def test_seed_chain_opens_edit_version_with_full_default_state_slice() -> None:
+    async def scenario(session: AsyncSession) -> None:
+        await remove_canonical_seed_chain(session)
+        await run_seed_chain(session)
+
+        assignee_id = next(
+            spec.id
+            for spec in SEED_DEMO_USER_SPECS
+            if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
+        )
+
+        result = await EditVersionService(
+            session,
+            UserRepository(session),
+            WorkOrderRepository(session),
+            DefaultStateRepository(session),
+        ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+
+        edit_feature_count = await session.scalar(
+            select(func.count(EditVersionFeature.feature_id)).where(
+                EditVersionFeature.edit_version_id == result.edit_version.id
+            )
+        )
+        edit_association_count = await session.scalar(
+            select(func.count(EditVersionAssociation.association_id)).where(
+                EditVersionAssociation.edit_version_id == result.edit_version.id
+            )
+        )
+
+        assert result.created is True
+        assert edit_feature_count == 19
+        assert edit_association_count == 9
 
     run_in_rollback_transaction(scenario)

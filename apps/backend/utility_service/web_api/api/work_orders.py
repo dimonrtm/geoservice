@@ -36,9 +36,9 @@ async def open_edit_version(
         edit_version=EditVersionOut(
             id=edit_version.id,
             work_order_id=edit_version.work_order_id,
-            owner_id=edit_version.owner_id,
+            owner_user_id=edit_version.owner_user_id,
             status=status_value,
-            base_revision=edit_version.base_revision,
+            base_network_revision=edit_version.base_network_revision,
             created_at=edit_version.created_at,
             last_opened_at=edit_version.last_opened_at,
         ),

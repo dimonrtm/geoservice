@@ -18,6 +18,7 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
+    op.execute(sa.text("CREATE SCHEMA work_order"))
     op.create_table(
         "work_orders",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
@@ -37,9 +38,8 @@ def upgrade() -> None:
             server_default="assigned",
             nullable=False,
         ),
-        sa.Column("assignee_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("aoi_id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("feeder_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("assignee_user_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("created_by_user_id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -56,77 +56,48 @@ def upgrade() -> None:
             "status IN ('assigned', 'in_progress')",
             name="ck_work_orders_status",
         ),
-        sa.ForeignKeyConstraint(
-            ["assignee_id"],
-            ["users.id"],
-            name="fk_work_orders_assignee",
-            ondelete="RESTRICT",
-        ),
-        sa.ForeignKeyConstraint(
-            ["aoi_id"],
-            ["utility_network.aois.id"],
-            name="fk_work_orders_aoi",
-            ondelete="RESTRICT",
-        ),
-        sa.ForeignKeyConstraint(
-            ["feeder_id"],
-            ["utility_network.feeders.id"],
-            name="fk_work_orders_feeder",
-            ondelete="RESTRICT",
-        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("code", name="uq_work_orders_code"),
-        schema="utility_network",
+        schema="work_order",
     )
     op.create_index(
-        "ix_work_orders_assignee_id",
+        "ix_work_orders_assignee_user_id",
         "work_orders",
-        ["assignee_id"],
+        ["assignee_user_id"],
         unique=False,
-        schema="utility_network",
+        schema="work_order",
+    )
+    op.create_index(
+        "ix_work_orders_created_by_user_id",
+        "work_orders",
+        ["created_by_user_id"],
+        unique=False,
+        schema="work_order",
     )
     op.create_index(
         "ix_work_orders_status",
         "work_orders",
         ["status"],
         unique=False,
-        schema="utility_network",
-    )
-    op.create_index(
-        "ix_work_orders_aoi_id",
-        "work_orders",
-        ["aoi_id"],
-        unique=False,
-        schema="utility_network",
-    )
-    op.create_index(
-        "ix_work_orders_feeder_id",
-        "work_orders",
-        ["feeder_id"],
-        unique=False,
-        schema="utility_network",
+        schema="work_order",
     )
 
 
 def downgrade() -> None:
     op.drop_index(
-        "ix_work_orders_feeder_id",
-        table_name="work_orders",
-        schema="utility_network",
-    )
-    op.drop_index(
-        "ix_work_orders_aoi_id",
-        table_name="work_orders",
-        schema="utility_network",
-    )
-    op.drop_index(
         "ix_work_orders_status",
         table_name="work_orders",
-        schema="utility_network",
+        schema="work_order",
     )
     op.drop_index(
-        "ix_work_orders_assignee_id",
+        "ix_work_orders_created_by_user_id",
         table_name="work_orders",
-        schema="utility_network",
+        schema="work_order",
     )
-    op.drop_table("work_orders", schema="utility_network")
+    op.drop_index(
+        "ix_work_orders_assignee_user_id",
+        table_name="work_orders",
+        schema="work_order",
+    )
+    op.drop_table("work_orders", schema="work_order")
+    op.execute(sa.text("DROP SCHEMA work_order"))

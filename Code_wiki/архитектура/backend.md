@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-06-19
-source: repository-change:2026-06-19
+updated: 2026-06-20
+source: repository-change:2026-06-20
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -52,10 +52,9 @@ feeder вместе с тремя независимо отсортирован�
 
 ## WorkOrder Foundation
 
-`WorkOrder` backend foundation реализован без публичного HTTP endpoint и без
-frontend shell. `WorkOrderService` находится в `utility_service.use_cases`,
-принимает `actor_id`, загружает актуального `User` через `UserRepository` и
-централизует правила:
+`WorkOrder` теперь является агрегатом в границе `work_order`. `WorkOrderService`
+находится в `utility_service.use_cases`, принимает `actor_id`, загружает
+актуального `User` через `UserRepository` и централизует правила:
 
 - пользователь `actor_id` должен существовать и быть активным `Editor`;
 - work order должен существовать;
@@ -65,29 +64,42 @@ frontend shell. `WorkOrderService` находится в `utility_service.use_ca
 - повторный старт или другой несовместимый статус возвращает
   `WORK_ORDER_STATE_CONFLICT`.
 
-`WorkOrderRepository` остается тонким PostgreSQL adapter в
-`utility_service.infrastructure.postgresql.repositories`; чтение пользователя
-остается ответственностью `UserRepository`. `get_work_order_service` добавлен в
-`utility_service.use_cases.deps` для будущих routers, но День 5 не добавляет
-`/api/v1/work-orders/...`.
+`WorkOrderRepository` является единым writer/repository агрегата `WorkOrder`: он
+читает сам work order, сохраняет status transitions, ищет открытую
+`EditVersion` и пишет `work_order.edit_versions`,
+`edit_version_features`/`edit_version_associations` из уже переданных baseline
+rows. Чтение пользователя остается ответственностью `UserRepository`, чтение
+`DefaultState` и его features/associations - `DefaultStateRepository`.
+`DefaultStateRepository.get_active_aggregate_by_work_order_id` выполняет один
+SQL round trip с независимыми JSONB aggregation subqueries для features и
+associations, чтобы не делать несколько repository calls и не получать
+`features x associations` row explosion. Текст запроса вынесен в
+`utility_service/infrastructure/postgresql/sql/default_state_aggregate.sql` и
+читается один раз при импорте repository module в module-level SQLAlchemy
+statement. Отдельного `EditVersionRepository` в финальной границе нет.
 
 ## EditVersion Foundation
 
-`EditVersionService` открывает изолированную edit version от текущего состояния
-`Default` для назначенного work order. Service остается application-layer
+`EditVersionService` открывает изолированную edit version от активного
+`DefaultState` назначенного work order. Service остается application-layer
 оркестратором: он принимает `actor_id`, работает внутри `AsyncSession`
-transaction boundary и зависит от repository adapters (`UserRepository`,
-`WorkOrderRepository`, `EditVersionRepository`, `DefaultStateRepository`), а не
-от других services.
+transaction boundary и связывает данные из разных схем только через repositories
+(`UserRepository`, `WorkOrderRepository`, `DefaultStateRepository`), а не через
+cross-schema FK или прямые обращения к чужим моделям.
 
 Правила открытия:
 
 - actor должен быть активным `Editor`;
 - work order видим только своему assignee; чужой или отсутствующий work order
   маскируется как `404 WORK_ORDER_NOT_FOUND`;
-- `assigned` без открытой edit version создает `EditVersion` с
-  `base_revision = default_states.current_revision` и переводит work order в
-  `in_progress` в той же transaction boundary;
+- `assigned` без открытой edit version требует активный `DefaultState` этого
+  work order; `EditVersionService` через один aggregate-вызов
+  `DefaultStateRepository` получает baseline features/associations, затем
+  передает их в `WorkOrderRepository`, который создает deep copy в
+  `work_order.edit_versions`, `edit_version_features` и
+  `edit_version_associations` с сохранением UUID features/associations и записывает
+  `base_network_revision = DefaultState.base_network_revision` и переводит work
+  order в `in_progress` в той же transaction boundary;
 - `in_progress` с уже открытой edit version возвращает существующую версию,
   обновляя `last_opened_at`;
 - рассинхрон work order и edit version возвращает

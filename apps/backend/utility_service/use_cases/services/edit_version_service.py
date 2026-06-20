@@ -6,16 +6,13 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
-from utility_service.infrastructure.postgresql.models.utility_network import (
+from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersion,
     WorkOrder,
     WorkOrderStatus,
 )
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
     DefaultStateRepository,
-)
-from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
-    EditVersionRepository,
 )
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
@@ -36,13 +33,11 @@ class EditVersionService:
         session: AsyncSession,
         user_repository: UserRepository,
         work_order_repository: WorkOrderRepository,
-        edit_version_repository: EditVersionRepository,
         default_state_repository: DefaultStateRepository,
     ):
         self.session = session
         self.user_repository = user_repository
         self.work_order_repository = work_order_repository
-        self.edit_version_repository = edit_version_repository
         self.default_state_repository = default_state_repository
 
     async def open_for_work_order(
@@ -53,12 +48,12 @@ class EditVersionService:
         async with self.session.begin():
             actor = await self.get_actor(actor_id)
             work_order = await self.get_visible_work_order(work_order_id, actor)
-            existing = await self.edit_version_repository.get_open_by_work_order_id(work_order.id)
+            existing = await self.work_order_repository.get_open_edit_version(work_order.id)
 
             if work_order.status is WorkOrderStatus.IN_PROGRESS:
                 if existing is None:
                     self.raise_context_invalid()
-                await self.edit_version_repository.touch_last_opened(existing)
+                await self.work_order_repository.touch_edit_version(existing)
                 return OpenEditVersionResult(created=False, edit_version=existing)
 
             if work_order.status is not WorkOrderStatus.ASSIGNED:
@@ -71,14 +66,22 @@ class EditVersionService:
             if existing is not None:
                 self.raise_context_invalid()
 
-            default_state = await self.default_state_repository.get_default()
-            if default_state is None:
+            default_state_aggregate = (
+                await self.default_state_repository.get_active_aggregate_by_work_order_id(
+                    work_order.id
+                )
+            )
+            if default_state_aggregate is None:
                 self.raise_context_invalid()
 
-            created = await self.edit_version_repository.create_open(
+            default_state = default_state_aggregate.state
+            created = await self.work_order_repository.create_open_edit_version(
                 work_order_id=work_order.id,
-                owner_id=actor.id,
-                base_revision=default_state.current_revision,
+                default_state_id=default_state.id,
+                base_network_revision=default_state.base_network_revision,
+                default_features=default_state_aggregate.features,
+                default_associations=default_state_aggregate.associations,
+                owner_user_id=actor.id,
             )
             work_order.status = WorkOrderStatus.IN_PROGRESS
             await self.work_order_repository.save(work_order)
@@ -97,7 +100,7 @@ class EditVersionService:
 
     async def get_visible_work_order(self, work_order_id: UUID, actor: User) -> WorkOrder:
         work_order = await self.work_order_repository.get_by_id(work_order_id)
-        if work_order is None or work_order.assignee_id != actor.id:
+        if work_order is None or work_order.assignee_user_id != actor.id:
             raise WorkOrderApiError(
                 404,
                 "WORK_ORDER_NOT_FOUND",

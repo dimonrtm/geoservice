@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
-from utility_service.infrastructure.postgresql.models.utility_network import (
+from utility_service.infrastructure.postgresql.models.work_order import (
     WorkOrder,
     WorkOrderStatus,
 )
@@ -74,7 +74,7 @@ class WorkOrderService:
             )
 
     def require_assigned(self, work_order: WorkOrder, actor: User) -> None:
-        if work_order.assignee_id != actor.id:
+        if work_order.assignee_user_id != actor.id:
             raise WorkOrderApiError(
                 403,
                 "WORK_ORDER_NOT_ASSIGNED",

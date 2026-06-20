@@ -1,16 +1,25 @@
 from sqlalchemy import CheckConstraint, ForeignKeyConstraint, UniqueConstraint
 from sqlalchemy.orm import configure_mappers
 
+from utility_service.infrastructure.postgresql.models.user import User
 from utility_service.infrastructure.postgresql.models.utility_network import (
     AOI,
     AssociationType,
     DefaultState,
-    EditVersion,
-    EditVersionStatus,
+    DefaultStateAssociation,
+    DefaultStateFeature,
+    DefaultStateStatus,
     Feeder,
     FeatureType,
     NetworkAssociation,
     NetworkFeature,
+    NetworkState,
+)
+from utility_service.infrastructure.postgresql.models.work_order import (
+    EditVersion,
+    EditVersionAssociation,
+    EditVersionFeature,
+    EditVersionStatus,
     WorkOrder,
     WorkOrderStatus,
 )
@@ -22,6 +31,15 @@ def constraint_names(model: type) -> set[str]:
     }
 
 
+def foreign_key_targets(model: type) -> set[str]:
+    return {
+        element.target_fullname
+        for constraint in model.__table__.constraints
+        if isinstance(constraint, ForeignKeyConstraint)
+        for element in constraint.elements
+    }
+
+
 def test_utility_network_package_exports_public_contract() -> None:
     from utility_service.infrastructure.postgresql.models import utility_network
 
@@ -29,15 +47,63 @@ def test_utility_network_package_exports_public_contract() -> None:
         "AOI",
         "AssociationType",
         "DefaultState",
-        "EditVersion",
-        "EditVersionStatus",
+        "DefaultStateAssociation",
+        "DefaultStateFeature",
+        "DefaultStateStatus",
         "Feeder",
         "FeatureType",
         "NetworkAssociation",
         "NetworkFeature",
+        "NetworkState",
+    }
+
+
+def test_work_order_package_exports_public_contract() -> None:
+    from utility_service.infrastructure.postgresql.models import work_order
+
+    assert set(work_order.__all__) == {
+        "EditVersion",
+        "EditVersionAssociation",
+        "EditVersionFeature",
+        "EditVersionStatus",
         "WorkOrder",
         "WorkOrderStatus",
     }
+
+
+def test_user_model_uses_user_schema() -> None:
+    assert User.__tablename__ == "users"
+    assert User.__table__.schema == "user"
+
+
+def test_work_order_models_use_work_order_schema() -> None:
+    assert WorkOrder.__table__.schema == "work_order"
+    assert EditVersion.__table__.schema == "work_order"
+    assert EditVersionFeature.__table__.schema == "work_order"
+    assert EditVersionAssociation.__table__.schema == "work_order"
+
+
+def test_new_utility_baseline_models_use_utility_network_schema() -> None:
+    assert NetworkState.__table__.schema == "utility_network"
+    assert DefaultState.__table__.schema == "utility_network"
+    assert DefaultStateFeature.__table__.schema == "utility_network"
+    assert DefaultStateAssociation.__table__.schema == "utility_network"
+
+
+def test_work_order_has_no_cross_schema_foreign_keys() -> None:
+    assert foreign_key_targets(WorkOrder) == set()
+    assert foreign_key_targets(EditVersion) == {"work_order.work_orders.id"}
+    assert foreign_key_targets(EditVersionFeature) == {"work_order.edit_versions.id"}
+    assert foreign_key_targets(EditVersionAssociation) == {
+        "work_order.edit_versions.id",
+        "work_order.edit_version_features.edit_version_id",
+        "work_order.edit_version_features.feature_id",
+    }
+
+
+def test_default_state_uses_plain_work_order_reference() -> None:
+    assert "work_order_id" in DefaultState.__table__.c
+    assert "work_order.work_orders.id" not in foreign_key_targets(DefaultState)
 
 
 def test_aoi_metadata_contains_geometry_guards() -> None:
@@ -191,7 +257,19 @@ def test_network_relationships_do_not_delete_children_in_orm() -> None:
 def test_check_constraints_are_named() -> None:
     checks = [
         constraint
-        for model in (AOI, NetworkFeature, NetworkAssociation, WorkOrder, DefaultState, EditVersion)
+        for model in (
+            AOI,
+            NetworkFeature,
+            NetworkAssociation,
+            NetworkState,
+            DefaultState,
+            DefaultStateFeature,
+            DefaultStateAssociation,
+            WorkOrder,
+            EditVersion,
+            EditVersionFeature,
+            EditVersionAssociation,
+        )
         for constraint in model.__table__.constraints
         if isinstance(constraint, CheckConstraint)
     ]
@@ -207,18 +285,17 @@ def test_work_order_status_values_are_stable_strings() -> None:
     }
 
 
-def test_work_order_metadata_contains_assignment_guards() -> None:
+def test_work_order_metadata_contains_aggregate_guards() -> None:
     assert WorkOrder.__tablename__ == "work_orders"
-    assert WorkOrder.__table__.schema == "utility_network"
+    assert WorkOrder.__table__.schema == "work_order"
     assert {column.name for column in WorkOrder.__table__.columns} == {
         "id",
         "code",
         "title",
         "description",
         "status",
-        "assignee_id",
-        "aoi_id",
-        "feeder_id",
+        "assignee_user_id",
+        "created_by_user_id",
         "created_at",
         "updated_at",
     }
@@ -233,26 +310,6 @@ def test_work_order_metadata_contains_assignment_guards() -> None:
     )
 
 
-def test_work_order_foreign_keys_are_restrictive_and_schema_qualified() -> None:
-    foreign_keys = [
-        constraint
-        for constraint in WorkOrder.__table__.constraints
-        if isinstance(constraint, ForeignKeyConstraint)
-    ]
-
-    assert len(foreign_keys) == 3
-    assert {element.ondelete for constraint in foreign_keys for element in constraint.elements} == {
-        "RESTRICT"
-    }
-    assert {
-        element.target_fullname for constraint in foreign_keys for element in constraint.elements
-    } == {
-        "users.id",
-        "utility_network.aois.id",
-        "utility_network.feeders.id",
-    }
-
-
 def test_work_order_declares_lookup_indexes() -> None:
     indexes = {
         index.name: tuple(column.name for column in index.columns)
@@ -260,34 +317,109 @@ def test_work_order_declares_lookup_indexes() -> None:
     }
 
     assert indexes == {
-        "ix_work_orders_assignee_id": ("assignee_id",),
+        "ix_work_orders_assignee_user_id": ("assignee_user_id",),
+        "ix_work_orders_created_by_user_id": ("created_by_user_id",),
         "ix_work_orders_status": ("status",),
-        "ix_work_orders_aoi_id": ("aoi_id",),
-        "ix_work_orders_feeder_id": ("feeder_id",),
     }
 
 
-def test_default_state_metadata_contains_singleton_revision_guards() -> None:
-    assert DefaultState.__tablename__ == "default_states"
-    assert DefaultState.__table__.schema == "utility_network"
-    assert {column.name for column in DefaultState.__table__.columns} == {
+def test_network_state_metadata_contains_current_revision_guards() -> None:
+    assert NetworkState.__tablename__ == "network_states"
+    assert NetworkState.__table__.schema == "utility_network"
+    assert {column.name for column in NetworkState.__table__.columns} == {
         "id",
         "name",
         "current_revision",
         "created_at",
         "updated_at",
     }
-    assert DefaultState.__table__.c.current_revision.default.arg == 1
-    assert str(DefaultState.__table__.c.current_revision.server_default.arg) == "1"
+    assert NetworkState.__table__.c.current_revision.default.arg == 1
+    assert str(NetworkState.__table__.c.current_revision.server_default.arg) == "1"
     assert {
-        "uq_default_states_name",
-        "ck_default_states_current_revision_positive",
+        "uq_network_states_name",
+        "ck_network_states_current_revision_positive",
+    }.issubset(constraint_names(NetworkState))
+
+
+def test_default_state_status_values_are_stable_strings() -> None:
+    assert {item.value for item in DefaultStateStatus} == {"active"}
+
+
+def test_default_state_metadata_contains_work_order_baseline_guards() -> None:
+    assert DefaultState.__tablename__ == "default_states"
+    assert DefaultState.__table__.schema == "utility_network"
+    assert {column.name for column in DefaultState.__table__.columns} == {
+        "id",
+        "work_order_id",
+        "network_state_id",
+        "base_network_revision",
+        "status",
+        "created_at",
+        "updated_at",
+    }
+    assert DefaultState.__table__.c.base_network_revision.default.arg == 1
+    assert str(DefaultState.__table__.c.base_network_revision.server_default.arg) == "1"
+    assert {
+        "uq_default_states_work_order",
+        "ck_default_states_base_network_revision_positive",
+        "ck_default_states_status",
     }.issubset(constraint_names(DefaultState))
     assert any(
         isinstance(constraint, UniqueConstraint)
-        and tuple(column.name for column in constraint.columns) == ("name",)
+        and tuple(column.name for column in constraint.columns) == ("work_order_id",)
         for constraint in DefaultState.__table__.constraints
     )
+
+
+def test_default_state_foreign_keys_stay_inside_utility_network() -> None:
+    assert foreign_key_targets(DefaultState) == {"utility_network.network_states.id"}
+
+
+def test_default_state_feature_metadata_preserves_future_network_ids() -> None:
+    assert DefaultStateFeature.__tablename__ == "default_state_features"
+    assert DefaultStateFeature.__table__.schema == "utility_network"
+    assert {column.name for column in DefaultStateFeature.__table__.columns} == {
+        "default_state_id",
+        "feature_id",
+        "asset_code",
+        "feature_type",
+        "geometry",
+        "properties",
+        "network_version",
+    }
+    assert {
+        "fk_default_state_features_default_state",
+        "uq_default_state_features_default_state_asset_code",
+        "uq_default_state_features_default_state_id_feature_id",
+        "ck_default_state_features_geometry_not_empty",
+        "ck_default_state_features_geometry_valid",
+        "ck_default_state_features_geometry_srid",
+        "ck_default_state_features_geometry_matches_type",
+        "ck_default_state_features_network_version_positive",
+    }.issubset(constraint_names(DefaultStateFeature))
+
+
+def test_default_state_association_metadata_preserves_future_network_ids() -> None:
+    assert DefaultStateAssociation.__tablename__ == "default_state_associations"
+    assert DefaultStateAssociation.__table__.schema == "utility_network"
+    assert {column.name for column in DefaultStateAssociation.__table__.columns} == {
+        "default_state_id",
+        "association_id",
+        "association_type",
+        "from_feature_id",
+        "to_feature_id",
+        "properties",
+        "network_version",
+    }
+    assert {
+        "fk_default_state_associations_default_state",
+        "fk_default_state_associations_from_feature",
+        "fk_default_state_associations_to_feature",
+        "uq_default_state_associations_default_state_id_association_id",
+        "uq_default_state_associations_directed_edge",
+        "ck_default_state_associations_no_self_reference",
+        "ck_default_state_associations_network_version_positive",
+    }.issubset(constraint_names(DefaultStateAssociation))
 
 
 def test_edit_version_status_values_are_stable_strings() -> None:
@@ -296,41 +428,39 @@ def test_edit_version_status_values_are_stable_strings() -> None:
 
 def test_edit_version_metadata_contains_open_version_guards() -> None:
     assert EditVersion.__tablename__ == "edit_versions"
-    assert EditVersion.__table__.schema == "utility_network"
+    assert EditVersion.__table__.schema == "work_order"
     assert {column.name for column in EditVersion.__table__.columns} == {
         "id",
         "work_order_id",
-        "owner_id",
-        "base_revision",
+        "default_state_id",
+        "owner_user_id",
+        "base_network_revision",
         "status",
         "created_at",
         "last_opened_at",
     }
-    assert EditVersion.__table__.c.base_revision.default.arg == 1
-    assert str(EditVersion.__table__.c.base_revision.server_default.arg) == "1"
+    assert EditVersion.__table__.c.base_network_revision.default.arg == 1
+    assert str(EditVersion.__table__.c.base_network_revision.server_default.arg) == "1"
     assert {
-        "ck_edit_versions_base_revision_positive",
+        "ck_edit_versions_base_network_revision_positive",
         "ck_edit_versions_status",
     }.issubset(constraint_names(EditVersion))
 
 
-def test_edit_version_foreign_keys_are_restrictive_and_schema_qualified() -> None:
+def test_edit_version_foreign_keys_stay_inside_work_order_schema() -> None:
     foreign_keys = [
         constraint
         for constraint in EditVersion.__table__.constraints
         if isinstance(constraint, ForeignKeyConstraint)
     ]
 
-    assert len(foreign_keys) == 2
+    assert len(foreign_keys) == 1
     assert {element.ondelete for constraint in foreign_keys for element in constraint.elements} == {
         "RESTRICT"
     }
     assert {
         element.target_fullname for constraint in foreign_keys for element in constraint.elements
-    } == {
-        "users.id",
-        "utility_network.work_orders.id",
-    }
+    } == {"work_order.work_orders.id"}
 
 
 def test_edit_version_declares_partial_open_unique_index() -> None:
@@ -341,3 +471,54 @@ def test_edit_version_declares_partial_open_unique_index() -> None:
     assert tuple(column.name for column in index.columns) == ("work_order_id",)
     assert index.unique is True
     assert str(index.dialect_options["postgresql"]["where"]) == "status = 'open'"
+
+
+def test_edit_version_feature_metadata_preserves_future_network_ids() -> None:
+    assert EditVersionFeature.__tablename__ == "edit_version_features"
+    assert EditVersionFeature.__table__.schema == "work_order"
+    assert {column.name for column in EditVersionFeature.__table__.columns} == {
+        "edit_version_id",
+        "feature_id",
+        "asset_code",
+        "feature_type",
+        "geometry",
+        "properties",
+        "network_version",
+        "operation",
+    }
+    assert {
+        "fk_edit_version_features_edit_version",
+        "uq_edit_version_features_edit_version_asset_code",
+        "uq_edit_version_features_edit_version_id_feature_id",
+        "ck_edit_version_features_geometry_not_empty",
+        "ck_edit_version_features_geometry_valid",
+        "ck_edit_version_features_geometry_srid",
+        "ck_edit_version_features_geometry_matches_type",
+        "ck_edit_version_features_network_version_positive",
+        "ck_edit_version_features_operation",
+    }.issubset(constraint_names(EditVersionFeature))
+
+
+def test_edit_version_association_metadata_preserves_future_network_ids() -> None:
+    assert EditVersionAssociation.__tablename__ == "edit_version_associations"
+    assert EditVersionAssociation.__table__.schema == "work_order"
+    assert {column.name for column in EditVersionAssociation.__table__.columns} == {
+        "edit_version_id",
+        "association_id",
+        "association_type",
+        "from_feature_id",
+        "to_feature_id",
+        "properties",
+        "network_version",
+        "operation",
+    }
+    assert {
+        "fk_edit_version_associations_edit_version",
+        "fk_edit_version_associations_from_feature",
+        "fk_edit_version_associations_to_feature",
+        "uq_edit_version_associations_edit_version_id_association_id",
+        "uq_edit_version_associations_directed_edge",
+        "ck_edit_version_associations_no_self_reference",
+        "ck_edit_version_associations_network_version_positive",
+        "ck_edit_version_associations_operation",
+    }.issubset(constraint_names(EditVersionAssociation))

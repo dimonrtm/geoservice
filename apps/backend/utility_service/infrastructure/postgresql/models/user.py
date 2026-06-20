@@ -23,6 +23,8 @@ class UserRole(str, enum.Enum):
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = {"schema": "user"}
+
     id: Mapped[UUID] = mapped_column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email: Mapped[str] = mapped_column(String(256), nullable=False, unique=True)
     password_hash: Mapped[str | None] = mapped_column(String(1024), nullable=True)

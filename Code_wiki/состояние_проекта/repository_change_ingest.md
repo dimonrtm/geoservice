@@ -3,7 +3,7 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-19
+updated: 2026-06-20
 source: docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md
 tags: [repository-change, code-wiki, ingest]
 ---
@@ -21,6 +21,12 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-06-20 | [[архитектура/data_model]] | Зафиксирована новая граница схем: `user.users`, `utility_network` для актуальной сети и per-WorkOrder `DefaultState`, `work_order` для агрегата `WorkOrder`/`EditVersion`, без cross-schema FK между будущими сервисными границами. | `apps/backend/utility_service/infrastructure/postgresql/models/user.py`, `apps/backend/utility_service/infrastructure/postgresql/models/utility_network/`, `apps/backend/utility_service/infrastructure/postgresql/models/work_order/`, `apps/backend/utility_service/infrastructure/postgresql/alembic/versions/a8c1f2d3e4b5_edit_versions.py` |
+| 2026-06-20 | [[архитектура/backend]] | Зафиксировано, что `EditVersionService` получает `DefaultState` features/associations одним aggregate-вызовом `DefaultStateRepository` и передает их в aggregate `WorkOrderRepository`, который только пишет `work_order.*`; отдельный `EditVersionRepository` не входит в новую границу. | `apps/backend/utility_service/infrastructure/postgresql/repositories/default_state_repository.py`, `apps/backend/utility_service/infrastructure/postgresql/repositories/work_order_repository.py`, `apps/backend/utility_service/use_cases/services/edit_version_service.py` |
+| 2026-06-20 | [[архитектура/api_and_realtime]] | Обновлен Work Orders API contract: response использует `baseNetworkRevision`, а первое открытие создает `EditVersion` из per-WorkOrder `DefaultState`. | `apps/backend/utility_service/use_cases/schemas/edit_version/edit_version_out.py`, `apps/backend/utility_service/web_api/api/work_orders.py` |
+| 2026-06-20 | [[правила_и_стиль/testing_strategy]] | Обновлено описание покрытия schema boundary checks, aggregate repository, per-WorkOrder `DefaultState`, `baseNetworkRevision` и новой migration contract. | `apps/backend/utility_service/infrastructure/tests/test_network_model_metadata.py`, `apps/backend/tests/integration_tests/test_edit_version_migration.py`, `apps/backend/utility_service/web_api/tests/test_work_orders_api.py` |
+| 2026-06-20 | [[dev_setup/local_development]] | Уточнен локальный seed contract: `seed_work_orders` сохраняет create-once `WO-001` и гарантирует активный per-WorkOrder `DefaultState` из `synthetic_utility_feeder_01`. | `apps/backend/seeds/services/seed_work_order_service.py`, `apps/backend/seeds/repositories/seed_work_order_repository.py` |
+| 2026-06-20 | [[сборка/ci_and_quality]] | Уточнено, что integration migration coverage проверяет `utility_network` baseline tables и `work_order` edit tables, а локальный smoke для demo edit version требует `seed_work_orders`. | `apps/backend/tests/integration_tests/test_edit_version_migration.py`, `infra/docker-compose.yml`, `apps/backend/seeds/runners/seed_work_orders.py` |
 | 2026-06-19 | [[архитектура/backend]] | Зафиксирован `EditVersionService`: открытие edit version от `Default`, зависимость service только от repositories, idempotent reopen, переход work order `assigned -> in_progress` и structured work-order errors. | `apps/backend/utility_service/use_cases/services/edit_version_service.py`, `apps/backend/utility_service/web_api/api/work_orders.py` |
 | 2026-06-19 | [[архитектура/data_model]] | Зафиксированы таблицы `utility_network.default_states` и `utility_network.edit_versions`, singleton `default:1`, FK на `work_orders`/`users`, status `open` и partial unique index `uq_edit_versions_open_work_order`. | `apps/backend/utility_service/infrastructure/postgresql/alembic/versions/a8c1f2d3e4b5_edit_versions.py` |
 | 2026-06-19 | [[архитектура/api_and_realtime]] | Добавлен public Work Orders endpoint `POST /api/v1/work-orders/{work_order_id}/edit-versions` с ответами `201` для создания и `200` для повторного открытия существующей edit version. | `apps/backend/utility_service/web_api/api/work_orders.py` |

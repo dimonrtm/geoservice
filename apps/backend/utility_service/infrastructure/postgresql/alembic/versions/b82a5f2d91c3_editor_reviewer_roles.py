@@ -23,17 +23,18 @@ def upgrade() -> None:
     op.execute(
         sa.text(
             """
-            DELETE FROM users
+            DELETE FROM "user".users
             WHERE role = 'viewer'
                OR email IN ('editor@example.com', 'viewer@example.com')
             """
         )
     )
-    op.drop_constraint("user_role", "users", type_="check")
+    op.drop_constraint("user_role", "users", schema="user", type_="check")
     op.create_check_constraint(
         "user_role",
         "users",
         "role IN ('editor', 'reviewer')",
+        schema="user",
     )
     op.add_column(
         "users",
@@ -43,15 +44,17 @@ def upgrade() -> None:
             nullable=False,
             server_default=sa.text("true"),
         ),
+        schema="user",
     )
 
 
 def downgrade() -> None:
-    op.execute(sa.text("DELETE FROM users WHERE role = 'reviewer'"))
-    op.drop_constraint("user_role", "users", type_="check")
+    op.execute(sa.text("DELETE FROM \"user\".users WHERE role = 'reviewer'"))
+    op.drop_constraint("user_role", "users", schema="user", type_="check")
     op.create_check_constraint(
         "user_role",
         "users",
         "role IN ('viewer', 'editor')",
+        schema="user",
     )
-    op.drop_column("users", "is_active")
+    op.drop_column("users", "is_active", schema="user")

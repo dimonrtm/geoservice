@@ -40,6 +40,17 @@ class SeedWorkOrderService:
         async with self.session.begin():
             existing = await self.repository.get_work_order_by_code(SEED_WORK_ORDER_SPEC.code)
             if existing is not None:
+                feeder = await self.utility_dataset_repository.get_feeder_by_code(
+                    SEED_WORK_ORDER_SPEC.feeder_code
+                )
+                if feeder is None:
+                    raise SeedWorkOrderDependencyError(
+                        f"Не найден feeder для seed WorkOrder: {SEED_WORK_ORDER_SPEC.feeder_code}"
+                    )
+                await self.repository.ensure_default_state_for_work_order(
+                    work_order_id=existing.id,
+                    feeder_id=feeder.id,
+                )
                 logger.info(
                     "WorkOrder уже существует; startup seed не изменяет задачу.",
                     extra={
@@ -73,9 +84,12 @@ class SeedWorkOrderService:
 
             work_order = await self.repository.create_work_order(
                 SEED_WORK_ORDER_SPEC,
-                assignee_id=assignee.id,
+                assignee_user_id=assignee.id,
+                created_by_user_id=assignee.id,
+            )
+            await self.repository.ensure_default_state_for_work_order(
+                work_order_id=work_order.id,
                 feeder_id=feeder.id,
-                aoi_id=aoi.id,
             )
             logger.info(
                 "Seed WorkOrder создан.",

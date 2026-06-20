@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-19
-source: repository-change:2026-06-19
+updated: 2026-06-20
+source: repository-change:2026-06-20
 tags: [ci, tests, lint, build]
 ---
 
@@ -29,13 +29,17 @@ container.
 Smoke job также запускает PostGIS tests network model, migration cycle, utility dataset seed и
 single-query repository. После EditVersion foundation в этот же блок добавлен
 `pytest tests/integration_tests/test_edit_version_migration.py -q`, который
-проверяет миграцию `a8c1f2d3e4b5_edit_versions.py`, singleton Default state и
-partial unique index на одну открытую edit version. Integration tests лежат в
+проверяет миграцию `a8c1f2d3e4b5_edit_versions.py`, `utility_network`
+baseline tables, `work_order` edit tables и partial unique index на одну
+открытую edit version. Integration tests лежат в
 `apps/backend/tests/integration_tests`, а CI запускает их как
 `pytest tests/integration_tests/<test_file>.py -q` внутри `utility_service`.
 Migration cycle удаляет данные utility schema при downgrade, поэтому перед authenticated API
-smoke CI повторно запускает `python -m seeds.runners.seed_utility_dataset`. Затем Editor login
-проверяет полный feeder response с 19 features и 9 associations.
+smoke CI повторно запускает `python -m seeds.runners.seed_utility_dataset`.
+Для локального smoke после уже поднятого dev volume также нужен
+`python -m seeds.runners.seed_work_orders`, если проверяется создание
+`DefaultState`/`EditVersion` для demo work order. Затем Editor login проверяет
+полный feeder response с 19 features и 9 associations.
 
 Локальные настройки:
 

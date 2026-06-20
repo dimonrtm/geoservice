@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-06-19
-source: repository-change:2026-06-19
+updated: 2026-06-20
+source: repository-change:2026-06-20
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -49,14 +49,14 @@ Frontend хранит token в `localStorage`, добавляет `Authorization
 
 - `POST /api/v1/work-orders/{work_order_id}/edit-versions` открывает edit
   version для назначенного work order текущего `Editor`.
-- При первом открытии endpoint создает `EditVersion` от текущего
-  `Default.current_revision`, переводит work order из `assigned` в
+- При первом открытии endpoint создает `EditVersion` как deep copy активного
+  `DefaultState` этого work order, переводит work order из `assigned` в
   `in_progress` и возвращает `201` с `created: true`.
 - При повторном открытии work order в `in_progress` endpoint возвращает уже
   открытую edit version, обновляет `lastOpenedAt` и отвечает `200` с
   `created: false`.
 - Response содержит `editVersion.id`, `workOrderId`, `ownerId`, `status`,
-  `baseRevision`, `createdAt`, `lastOpenedAt`.
+  `baseNetworkRevision`, `createdAt`, `lastOpenedAt`.
 
 ## Ошибки
 

@@ -21,7 +21,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from utility_service.infrastructure.postgresql.models.base import Base
 
 if TYPE_CHECKING:
-    from utility_service.infrastructure.postgresql.models.utility_network.work_order import (
+    from utility_service.infrastructure.postgresql.models.work_order.work_order import (
         WorkOrder,
     )
 
@@ -34,8 +34,8 @@ class EditVersion(Base):
     __tablename__ = "edit_versions"
     __table_args__ = (
         CheckConstraint(
-            "base_revision >= 1",
-            name="ck_edit_versions_base_revision_positive",
+            "base_network_revision >= 1",
+            name="ck_edit_versions_base_network_revision_positive",
         ),
         CheckConstraint(
             "status IN ('open')",
@@ -47,7 +47,7 @@ class EditVersion(Base):
             unique=True,
             postgresql_where=text("status = 'open'"),
         ),
-        {"schema": "utility_network"},
+        {"schema": "work_order"},
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -58,22 +58,15 @@ class EditVersion(Base):
     work_order_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey(
-            "utility_network.work_orders.id",
+            "work_order.work_orders.id",
             name="fk_edit_versions_work_order",
             ondelete="RESTRICT",
         ),
         nullable=False,
     )
-    owner_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey(
-            "users.id",
-            name="fk_edit_versions_owner",
-            ondelete="RESTRICT",
-        ),
-        nullable=False,
-    )
-    base_revision: Mapped[int] = mapped_column(
+    default_state_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    owner_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    base_network_revision: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         default=1,

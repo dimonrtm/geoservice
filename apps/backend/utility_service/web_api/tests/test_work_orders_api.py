@@ -36,14 +36,14 @@ def auth_context(role: str, *, is_active: bool = True):
     return auth_service, token, user_id
 
 
-def edit_version(work_order_id, owner_id):
+def edit_version(work_order_id, owner_user_id):
     now = datetime(2026, 6, 19, 9, 0, tzinfo=timezone.utc)
     return SimpleNamespace(
         id=uuid4(),
         work_order_id=work_order_id,
-        owner_id=owner_id,
+        owner_user_id=owner_user_id,
         status="open",
-        base_revision=12,
+        base_network_revision=12,
         created_at=now,
         last_opened_at=now,
     )
@@ -70,7 +70,7 @@ def test_open_edit_version_returns_201_when_created() -> None:
     assert response.json()["editVersion"]["workOrderId"] == str(work_order_id)
     assert response.json()["editVersion"]["ownerId"] == str(user_id)
     assert response.json()["editVersion"]["status"] == "open"
-    assert response.json()["editVersion"]["baseRevision"] == 12
+    assert response.json()["editVersion"]["baseNetworkRevision"] == 12
     edit_version_service.open_for_work_order.assert_awaited_once_with(work_order_id, user_id)
 
 

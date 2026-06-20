@@ -3,8 +3,8 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-19
-source: repository-change:2026-06-19
+updated: 2026-06-20
+source: repository-change:2026-06-20
 tags: [testing, backend, frontend, quality]
 ---
 
@@ -40,14 +40,17 @@ Backend integration tests лежат в `apps/backend/tests/integration_tests`.
 - websocket auth, websocket role checks и layer websocket endpoint;
 - realtime connection manager;
 - utility dataset specs, create-once/no-op service и rollback behavior;
-- work order model metadata, stable `WO-001` seed spec, create-once work order
-  seed service и assignment/status use-case rules;
-- edit version metadata, `DefaultState`/`EditVersion` repositories,
-  `EditVersionService` rules, Work Orders API open/reopen behavior и structured
-  errors;
+- work order model metadata, schema boundary checks for `user`,
+  `utility_network` и `work_order`, stable `WO-001` seed spec, create-once work
+  order seed service, creation of per-WorkOrder `DefaultState` и
+  assignment/status use-case rules;
+- edit version metadata, aggregate `WorkOrderRepository`, `DefaultState`
+  repository lookup, `EditVersionService` rules, Work Orders API open/reopen
+  behavior, `baseNetworkRevision` response contract и structured errors;
 - PostGIS persistence, spatial AOI intersection и single-query feeder aggregate;
 - migration integration test для `a8c1f2d3e4b5_edit_versions.py`, включая
-  upgrade/downgrade/upgrade cycle, seed singleton `default:1`, constraints и
+  upgrade/downgrade/upgrade cycle, `utility_network.network_states`,
+  per-WorkOrder `DefaultState`, `work_order.edit_versions`, constraints и
   partial unique index `uq_edit_versions_open_work_order`;
 - utility mapping, structured errors и Editor-only API access;
 - architecture boundaries между `web_api`, `use_cases` и `infrastructure`.

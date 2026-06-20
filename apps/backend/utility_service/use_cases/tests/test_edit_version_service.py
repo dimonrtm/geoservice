@@ -8,7 +8,7 @@ from uuid import uuid4
 import pytest
 
 from utility_service.infrastructure.postgresql.models.user import UserRole
-from utility_service.infrastructure.postgresql.models.utility_network import (
+from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
     WorkOrderStatus,
 )
@@ -21,29 +21,44 @@ def user(role: UserRole = UserRole.EDITOR, *, is_active: bool = True) -> SimpleN
 
 
 def work_order(
-    assignee_id,
+    assignee_user_id,
     *,
     status: WorkOrderStatus = WorkOrderStatus.ASSIGNED,
 ) -> SimpleNamespace:
     return SimpleNamespace(
         id=uuid4(),
         code="WO-001",
-        assignee_id=assignee_id,
+        assignee_user_id=assignee_user_id,
         status=status,
     )
 
 
-def default_state(current_revision: int = 12) -> SimpleNamespace:
-    return SimpleNamespace(id=uuid4(), name="default", current_revision=current_revision)
+def default_state(work_order_id, *, base_network_revision: int = 12) -> SimpleNamespace:
+    return SimpleNamespace(
+        id=uuid4(),
+        work_order_id=work_order_id,
+        base_network_revision=base_network_revision,
+    )
 
 
-def edit_version(work_order_id, owner_id, *, base_revision: int = 12) -> SimpleNamespace:
+def default_feature(default_state_id) -> SimpleNamespace:
+    return SimpleNamespace(default_state_id=default_state_id, feature_id=uuid4())
+
+
+def default_association(default_state_id) -> SimpleNamespace:
+    return SimpleNamespace(default_state_id=default_state_id, association_id=uuid4())
+
+
+def edit_version(
+    work_order_id, owner_user_id, *, base_network_revision: int = 12
+) -> SimpleNamespace:
     now = datetime(2026, 6, 19, 9, 0, tzinfo=timezone.utc)
     return SimpleNamespace(
         id=uuid4(),
         work_order_id=work_order_id,
-        owner_id=owner_id,
-        base_revision=base_revision,
+        default_state_id=uuid4(),
+        owner_user_id=owner_user_id,
+        base_network_revision=base_network_revision,
         status=EditVersionStatus.OPEN,
         created_at=now,
         last_opened_at=now,
@@ -77,16 +92,21 @@ def build_service(
     session: FakeSession | None = None,
     user_repository=None,
     work_order_repository=None,
-    edit_version_repository=None,
     default_state_repository=None,
 ) -> EditVersionService:
     return EditVersionService(
         session=session or FakeSession(),
         user_repository=user_repository or repository(get_by_id=None),
-        work_order_repository=work_order_repository or repository(get_by_id=None, save=None),
-        edit_version_repository=edit_version_repository
-        or repository(get_open_by_work_order_id=None, create_open=None, touch_last_opened=None),
-        default_state_repository=default_state_repository or repository(get_default=None),
+        work_order_repository=work_order_repository
+        or repository(
+            get_by_id=None,
+            get_open_edit_version=None,
+            create_open_edit_version=None,
+            touch_edit_version=None,
+            save=None,
+        ),
+        default_state_repository=default_state_repository
+        or repository(get_active_aggregate_by_work_order_id=None),
     )
 
 
@@ -94,20 +114,28 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
     actor = user()
     assigned = work_order(actor.id)
     created = edit_version(assigned.id, actor.id)
+    baseline = default_state(assigned.id, base_network_revision=12)
+    baseline_aggregate = SimpleNamespace(
+        state=baseline,
+        features=[default_feature(baseline.id)],
+        associations=[default_association(baseline.id)],
+    )
     session = FakeSession()
     user_repository = repository(get_by_id=actor)
-    work_order_repository = repository(get_by_id=assigned, save=None)
-    edit_version_repository = repository(
-        get_open_by_work_order_id=None,
-        create_open=created,
-        touch_last_opened=None,
+    work_order_repository = repository(
+        get_by_id=assigned,
+        get_open_edit_version=None,
+        create_open_edit_version=created,
+        touch_edit_version=None,
+        save=None,
     )
-    default_state_repository = repository(get_default=default_state(12))
+    default_state_repository = repository(
+        get_active_aggregate_by_work_order_id=baseline_aggregate,
+    )
     service = build_service(
         session=session,
         user_repository=user_repository,
         work_order_repository=work_order_repository,
-        edit_version_repository=edit_version_repository,
         default_state_repository=default_state_repository,
     )
 
@@ -117,10 +145,16 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
     assert result.edit_version is created
     assert assigned.status is WorkOrderStatus.IN_PROGRESS
     assert session.begin_calls == 1
-    edit_version_repository.create_open.assert_awaited_once_with(
+    default_state_repository.get_active_aggregate_by_work_order_id.assert_awaited_once_with(
+        assigned.id
+    )
+    work_order_repository.create_open_edit_version.assert_awaited_once_with(
         work_order_id=assigned.id,
-        owner_id=actor.id,
-        base_revision=12,
+        default_state_id=baseline.id,
+        base_network_revision=baseline.base_network_revision,
+        default_features=baseline_aggregate.features,
+        default_associations=baseline_aggregate.associations,
+        owner_user_id=actor.id,
     )
     work_order_repository.save.assert_awaited_once_with(assigned)
 
@@ -129,24 +163,25 @@ def test_open_in_progress_work_order_returns_existing_edit_version() -> None:
     actor = user()
     started = work_order(actor.id, status=WorkOrderStatus.IN_PROGRESS)
     existing = edit_version(started.id, actor.id)
-    edit_version_repository = repository(
-        get_open_by_work_order_id=existing,
-        create_open=None,
-        touch_last_opened=None,
+    work_order_repository = repository(
+        get_by_id=started,
+        get_open_edit_version=existing,
+        create_open_edit_version=None,
+        touch_edit_version=None,
+        save=None,
     )
     service = build_service(
         user_repository=repository(get_by_id=actor),
-        work_order_repository=repository(get_by_id=started, save=None),
-        edit_version_repository=edit_version_repository,
-        default_state_repository=repository(get_default=None),
+        work_order_repository=work_order_repository,
+        default_state_repository=repository(get_active_aggregate_by_work_order_id=None),
     )
 
     result = asyncio.run(service.open_for_work_order(started.id, actor.id))
 
     assert result.created is False
     assert result.edit_version is existing
-    edit_version_repository.touch_last_opened.assert_awaited_once_with(existing)
-    edit_version_repository.create_open.assert_not_awaited()
+    work_order_repository.touch_edit_version.assert_awaited_once_with(existing)
+    work_order_repository.create_open_edit_version.assert_not_awaited()
 
 
 @pytest.mark.parametrize(
@@ -191,13 +226,12 @@ def test_open_rejects_missing_default_state() -> None:
     assigned = work_order(actor.id)
     service = build_service(
         user_repository=repository(get_by_id=actor),
-        work_order_repository=repository(get_by_id=assigned, save=None),
-        edit_version_repository=repository(
-            get_open_by_work_order_id=None,
-            create_open=None,
-            touch_last_opened=None,
+        work_order_repository=repository(
+            get_by_id=assigned,
+            get_open_edit_version=None,
+            save=None,
         ),
-        default_state_repository=repository(get_default=None),
+        default_state_repository=repository(get_active_aggregate_by_work_order_id=None),
     )
 
     with pytest.raises(WorkOrderApiError) as exc_info:
@@ -213,11 +247,12 @@ def test_open_rejects_assigned_work_order_with_existing_open_version() -> None:
     existing = edit_version(assigned.id, actor.id)
     service = build_service(
         user_repository=repository(get_by_id=actor),
-        work_order_repository=repository(get_by_id=assigned, save=None),
-        edit_version_repository=repository(
-            get_open_by_work_order_id=existing,
-            create_open=None,
-            touch_last_opened=None,
+        work_order_repository=repository(
+            get_by_id=assigned,
+            get_open_edit_version=existing,
+            create_open_edit_version=None,
+            touch_edit_version=None,
+            save=None,
         ),
     )
 
@@ -233,11 +268,10 @@ def test_open_rejects_in_progress_work_order_without_existing_open_version() -> 
     started = work_order(actor.id, status=WorkOrderStatus.IN_PROGRESS)
     service = build_service(
         user_repository=repository(get_by_id=actor),
-        work_order_repository=repository(get_by_id=started, save=None),
-        edit_version_repository=repository(
-            get_open_by_work_order_id=None,
-            create_open=None,
-            touch_last_opened=None,
+        work_order_repository=repository(
+            get_by_id=started,
+            get_open_edit_version=None,
+            save=None,
         ),
     )
 

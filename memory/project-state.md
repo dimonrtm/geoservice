@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-19
+updated: 2026-06-20
 source: null
 tags: [project-state, geoservice]
 ---
@@ -23,11 +23,12 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-19 19:19 +05:00, корневой индекс и live state синхронизированы; новых RAW inputs после учтенного ingest Ф2 и stale-нод нет.
 - Последний `/lint-wiki`: 2026-06-19, через bundled Python найдены ожидаемые `missing_frontmatter` для 22 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-19, существующие ноды
-  `Code_wiki` синхронизированы с backend foundation `EditVersion from Default`:
-  `utility_network.default_states`, `utility_network.edit_versions`,
-  `EditVersionService`, endpoint `POST /api/v1/work-orders/{work_order_id}/edit-versions`
-  и CI integration migration test.
+- Последний `/ingest repository-change`: 2026-06-20, существующие ноды
+  `Code_wiki` синхронизированы с новой границей модели данных:
+  `user.users`, `utility_network` для актуальной сети и per-WorkOrder
+  `DefaultState`, `work_order` для агрегата `WorkOrder`/`EditVersion`,
+  repository-only связи между схемами, `baseNetworkRevision` API contract и
+  CI/local seed notes.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;

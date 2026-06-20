@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from utility_service.infrastructure.postgresql.models.utility_network import WorkOrderStatus
+from utility_service.infrastructure.postgresql.models.work_order import WorkOrderStatus
 from seeds.specs.seed_utility_dataset_specs import UTILITY_FEEDER_CODE
 
 
