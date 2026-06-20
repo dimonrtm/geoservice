@@ -54,11 +54,16 @@ test_reopening_seeded_edit_version_returns_existing_version_without_duplicates
 2. Запустить seed chain.
 3. Найти `assignee_id` по `SEED_WORK_ORDER_SPEC.assignee_email`.
 4. Вызвать `EditVersionService.open_for_work_order(...)` первый раз.
-5. Зафиксировать `edit_version.id`, `last_opened_at`, количество open versions,
-   количество `EditVersionFeature` и `EditVersionAssociation`.
+5. Зафиксировать только `edit_version.id` и `last_opened_at`.
 6. Вызвать `EditVersionService.open_for_work_order(...)` второй раз для того же
    `WorkOrder`.
-7. Проверить, что второй вызов вернул существующую версию без дублей.
+7. После второго вызова посчитать open versions, `EditVersionFeature` и
+   `EditVersionAssociation`.
+8. Проверить, что второй вызов вернул существующую версию без дублей.
+
+Важно не выполнять `session.scalar(...)` между первым и вторым вызовом
+`open_for_work_order`: SQLAlchemy откроет implicit transaction, а service при
+повторном входе сам начинает явную transaction boundary через `session.begin()`.
 
 ## Acceptance Criteria
 

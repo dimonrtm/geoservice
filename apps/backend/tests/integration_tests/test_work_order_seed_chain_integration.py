@@ -243,23 +243,6 @@ def test_reopening_seeded_edit_version_returns_existing_version_without_duplicat
         first_edit_version_id = first_result.edit_version.id
         first_last_opened_at = first_result.edit_version.last_opened_at
 
-        first_open_version_count = await session.scalar(
-            select(func.count(EditVersion.id)).where(
-                EditVersion.work_order_id == SEED_WORK_ORDER_SPEC.id,
-                EditVersion.status == EditVersionStatus.OPEN,
-            )
-        )
-        first_edit_feature_count = await session.scalar(
-            select(func.count(EditVersionFeature.feature_id)).where(
-                EditVersionFeature.edit_version_id == first_edit_version_id
-            )
-        )
-        first_edit_association_count = await session.scalar(
-            select(func.count(EditVersionAssociation.association_id)).where(
-                EditVersionAssociation.edit_version_id == first_edit_version_id
-            )
-        )
-
         second_result = await service.open_for_work_order(
             SEED_WORK_ORDER_SPEC.id,
             assignee_id,
@@ -285,11 +268,8 @@ def test_reopening_seeded_edit_version_returns_existing_version_without_duplicat
         assert first_result.created is True
         assert second_result.created is False
         assert second_result.edit_version.id == first_edit_version_id
-        assert first_open_version_count == 1
         assert second_open_version_count == 1
-        assert first_edit_feature_count == 19
         assert second_edit_feature_count == 19
-        assert first_edit_association_count == 9
         assert second_edit_association_count == 9
         assert second_result.edit_version.last_opened_at >= first_last_opened_at
 
