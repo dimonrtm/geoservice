@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-19
+updated: 2026-06-20
 source: null
 tags: [vision-wiki, product]
 ---
@@ -82,7 +82,9 @@ tags: [vision-wiki, product]
 - [[chats/2026-06-17-geometry-association-conflict-f1]] - research/design input: why-now для Release 2 `geometry/association conflict`, feature diff vs network consequence, refined `Normal`/`High`/`Critical` и validation caveats.
 - [[chats/2026-06-18-geometry-association-conflict-f2]] - research/design input Ф2: primary user `Editor`, момент боли, текущий workaround и safe post criteria для `geometry/association conflict`.
 - [[chats/2026-06-19-geometry-association-conflict-f3]] - research/design input Ф3: конкурентный baseline `ArcGIS native + SOP + экспертный handoff`, good-enough зоны, blockers и demo proof для unified evidence context.
+- [[chats/2026-06-20-geometry-association-conflict-f4]] - research/design input Ф4: canonical transformer terminal association scenario, read-only consequence package, walking skeleton, audit object и stale/failure case для Release 2.
 - [[chats/2026-06-14-utility-gis-editor-market-research]] - доверенное market research по полному Use Case, vendors и product families.
+- [[chats/2026-06-20-utility-gis-editor-role-research]] - research source о реальной работе роли: authoritative network change owner/editor, ArcGIS и QGIS/PostGIS/QField/GISwater stacks, field sync, topology QA, training и KPI.
 - [[concepts/operational_utility_gis]] - справочная рыночная категория из network editor, field execution и integration hub.
 - [[entities/competitors/utility_gis_editor_market_landscape]] - международные и русскоязычные utility GIS референсы.
 

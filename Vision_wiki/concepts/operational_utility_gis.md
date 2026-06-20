@@ -3,8 +3,8 @@ title: Operational Utility GIS
 type: concept
 status: draft
 created: 2026-06-14
-updated: 2026-06-14
-source: RAW_inputs/documents/UtilityGisEditor.md
+updated: 2026-06-20
+source: "RAW_inputs/documents/UtilityGisEditor.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [concept, utility-gis, authoritative-editing, field-work, integrations]
 ---
 
@@ -53,13 +53,30 @@ downstream integrations.
 
 Исследование рынка не меняет Release 1, Release 2 или roadmap.
 
+## Практические Стеки И Боли
+
+Role research добавляет две устойчивые практические архитектуры:
+
+- `ArcGIS Pro + ArcGIS Enterprise + Utility Network + branch versioning` для
+  governed versioned editing, conflicts, protected `Default` и web feature
+  layers;
+- `QGIS + PostGIS + QField/QFieldCloud`, а для water/wastewater -
+  `GISwater + EPANET/SWMM`, где важны field sync, GeoPackage/PostGIS round-trip,
+  SQL/Python automation и import cleanup.
+
+Повторяющиеся боли operational utility GIS: version conflicts, dirty topology,
+mobile sync/data loss, office/field divergence, PostGIS/client setup и
+качество входных данных.
+
 ## Источники
 
 - `RAW_inputs/documents/UtilityGisEditor.md`
+- `RAW_inputs/documents/UtilityGisEditorRole.md`
 
 ## Связи
 
 - [[../chats/2026-06-14-utility-gis-editor-market-research]]
+- [[../chats/2026-06-20-utility-gis-editor-role-research]]
 - [[../entities/competitors/utility_gis_editor_market_landscape]]
 - [[utility_gis_editing_domain]]
 - [[../index]]

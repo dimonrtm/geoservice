@@ -3,8 +3,8 @@ title: Utility GIS Editor
 type: entity
 status: active
 created: 2026-06-02
-updated: 2026-06-18
-source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/geometry_association_conflict_f2.md"
+updated: 2026-06-20
+source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [persona, discovery, phase-f2, utility-network, authoritative-editing, research, synthetic-evidence]
 ---
 
@@ -30,6 +30,11 @@ Primary design-persona GeoService. Синтетическая репетиция
 - Поддержано Ф2 research/design input по `geometry/association conflict`:
   primary user боли - `Editor` в named/edit version, который должен понять,
   меняет ли конфликт только representation или authoritative network behavior.
+- Поддержано role research: в открытых источниках близкие роли чаще называются
+  `GIS editor`, `utility network editor`, `manager`, `fieldworker`,
+  `hydraulics technician`, `MIS specialist`; их работа ближе к
+  owner/editor of authoritative utility network changes, чем к generic map
+  editing.
 - Не подтверждено внешне: частота задач, длительность 2-4 часа, конкретное распределение ролей и распространенность используемых инструментов.
 
 ## Рабочая Задача
@@ -68,6 +73,23 @@ Primary design-persona GeoService. Синтетическая репетиция
   work order, field evidence, screenshots и notes.
 - Field redline, проектная схема и фактическая трасса могут расходиться.
 - Review/edit package приходится вручную собирать из нескольких систем.
+- Реальные рабочие стеки добавляют боли field/office sync, PostGIS/client
+  setup, import cleanup и mobile edge cases; роль требует не только GIS skill,
+  но и базовой platform-admin literacy.
+
+## Реальные Практики Из Research
+
+По `UtilityGisEditorRole.md` работа роли держится на пяти блоках:
+
+1. Редактирование assets, attributes, geometry и attachments.
+2. Поддержание topology/rules QA через dirty areas, validation и connectivity.
+3. Trace/isolation и проверка operational consequence.
+4. Field package/sync между office и field контуром.
+5. Интеграции с PostGIS/GeoPackage/web layers, CRM/SCADA/ERP и документами.
+
+Для обучения роль лучше раскладывать на `core editing discipline`, `change
+governance` и `field/integration operations`. KPI роли лучше связывать с
+качеством публикации изменений, а не с количеством отредактированных объектов.
 
 ## Приоритет Ущерба
 
@@ -105,6 +127,7 @@ Primary design-persona GeoService. Синтетическая репетиция
 - [[../../chats/2026-06-12-utility-gis-editor-synthetic-interview-rehearsal]]
 - [[../../chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]]
 - [[../../chats/2026-06-18-geometry-association-conflict-f2]]
+- [[../../chats/2026-06-20-utility-gis-editor-role-research]]
 - [[../../concepts/utility_gis_editing_domain]]
 - [[../../concepts/jtbd]]
 - [[../../concepts/collaborative_editing_models]]

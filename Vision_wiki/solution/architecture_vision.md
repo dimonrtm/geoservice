@@ -3,8 +3,8 @@ title: Architecture Vision
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-11
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; user answers to /discover --phase Ф8, 2026-06-11"
+updated: 2026-06-20
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; user answers to /discover --phase Ф8, 2026-06-11; RAW_inputs/meetings/geometry_association_conflict_f4.md"
 tags: [solution, architecture, release-1]
 ---
 
@@ -119,12 +119,31 @@ Working version можно хранить как change-set (`base_version_id`, 
 - `import GeoJSON` входит в первый walking skeleton.
 - Backup/restore и SLA не входят в local demo.
 
+## Release 2 Ф4 Architecture Boundary
+
+Release 2 `geometry/association conflict` demo строится как consequence-first
+decision support layer поверх native reconcile/conflict workflow, а не как
+замена native conflict editor.
+
+| Capability | Ф4 Подход | Не Делать В Ф4 Demo |
+|---|---|---|
+| Conflict package | Read-only пакет из version representations, geometry diff, association delta, dirty/validation status, trace/subnetwork evidence и work order context | Write-back replacement UI и full native conflict resolve parity |
+| Consequence engine | Правила demo, которые переводят evidence в summary, risk tier и blockers | Production topology engine и полный utility rules catalog |
+| Routing | Safe next step: self-resolve, send to Reviewer, escalate to specialist, block post | SLA queue, batch review и полноценный dual-control workflow |
+| Audit | Persistent decision object с package hash/evidence, risk before/after, role decision и stale events | Зависимость только от native conflict history, которая может очищаться после reconcile/post |
+| Failure handling | Stale decision и untrustworthy trace/subnetwork блокируют `post` | Auto-approve или downgrade для `High/Critical` |
+
+Canonical demo scenario: `medium-voltage line / midspan tap / high-side terminal
+of transformer`, где terminal-aware connectivity association делает trace и
+subnetwork consequence видимыми.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
 - `Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md`
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
+- `Vision_wiki/chats/2026-06-20-geometry-association-conflict-f4.md`
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]
 - [[../decisions/release_1_utility_workflow]]
 - [[../chats/2026-06-11-phase-f8-release-1-closeout]]

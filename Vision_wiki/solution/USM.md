@@ -3,8 +3,8 @@ title: User Story Map
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-11
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; user answers to /discover --phase Ф8, 2026-06-11"
+updated: 2026-06-20
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; user answers to /discover --phase Ф8, 2026-06-11; RAW_inputs/meetings/geometry_association_conflict_f4.md"
 tags: [solution, usm, release-1]
 ---
 
@@ -193,6 +193,42 @@ Conflict library для demo: `Update/Update`, `Geometry/Geometry`, `Update/Dele
 
 Детальные критерии находятся в `RAW_inputs/documents/utility_gis_editor_acceptance_criteria.md`. Главный критерий: ни одна параллельная правка инженерной сети не теряется молча.
 
+## Release 2 Ф4 Geometry/Association Conflict Scope
+
+Этот раздел является planned scope следующего релиза и не расширяет текущий
+Release 1.
+
+| Активность | Пользовательская Цель | Критерий |
+|---|---|---|
+| Conflict package | Увидеть сетевое последствие `geometry/association conflict` | Пакет показывает `Mine / Default / Base`, association delta, dirty/validation status, trace/subnetwork evidence и work order context. |
+| Consequence explanation | Понять за 1-2 минуты, меняет ли conflict authoritative network behavior | UI явно разделяет representation-only change и network consequence. |
+| Safe next step | Выбрать безопасное действие | Система предлагает self-resolve, send to Reviewer, escalate to specialist или block post. |
+| Audit object | Сохранить основание решения | Audit содержит evidence, risk before/after, выбранный next step, роль decision maker и stale events. |
+
+### Release 2 Ф4 Walking Skeleton
+
+1. Reconcile обнаруживает conflict вокруг `medium-voltage line / midspan tap /
+   high-side terminal of transformer`.
+2. Система загружает `Current / Target / Common Ancestor`.
+3. Пакет добавляет geometry diff, association delta, dirty areas и validation
+   status.
+4. Пакет добавляет trace before/after или явный `trace not trustworthy` и
+   subnetwork status.
+5. Система строит consequence summary и risk tier `Normal / High / Critical`.
+6. UI предлагает safe next step.
+7. Решение, escalation или block post сохраняются как audit object.
+
+### Явно Не Входит В Ф4 Release 2 Demo
+
+- Write-back replacement UI для native conflict resolution.
+- Собственный topology engine.
+- Full ArcGIS parity.
+- Production utility rules catalog.
+- Batch review queue.
+- SLA orchestration.
+- Dual-control workflow как полноценная реализация.
+- Полнофункциональный post execution layer.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
@@ -203,6 +239,7 @@ Conflict library для demo: `Update/Update`, `Geometry/Geometry`, `Update/Dele
 - [[../chats/2026-06-02-phase-f2-users-and-pain]]
 - [[../chats/2026-06-04-phase-f4-solution-scope]]
 - [[../chats/2026-06-05-utility-gis-editor-walking-skeleton-and-dataset]]
+- [[../chats/2026-06-20-geometry-association-conflict-f4]]
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]
 - [[../decisions/release_1_utility_workflow]]
 - [[../chats/2026-06-11-phase-f8-release-1-closeout]]

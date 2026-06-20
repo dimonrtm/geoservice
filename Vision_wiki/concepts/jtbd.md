@@ -3,8 +3,8 @@ title: JTBD GeoService
 type: concept
 status: active
 created: 2026-06-02
-updated: 2026-06-18
-source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; RAW_inputs/meetings/geometry_association_conflict_f2.md"
+updated: 2026-06-20
+source: "user answers to /discover --phase Ф2, 2026-06-02; RAW_inputs/documents/Ф2.md; RAW_inputs/meetings/utility_gis_editor_answers.md; RAW_inputs/meetings/utility_gis_reviewer_answers.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [jtbd, discovery, phase-f2, authoritative-editing, reviewer, research, synthetic-evidence]
 ---
 
@@ -22,6 +22,7 @@ Primary JTBD `Utility GIS editor` и связанный reviewer JTBD приня
 | Когда | Пользователь Хочет | Чтобы |
 |---|---|---|
 | `Utility GIS editor` вносит изменение по work order при неполных полевых данных и параллельной работе других редакторов | Собрать контекст изменения, изолировать правки, проверить connectivity/trace, разобрать conflicts и контролируемо опубликовать результат | Не допустить неверного состояния сети, сохранить lineage и сделать решение проверяемым для reviewer и следующего редактора |
+| `Utility GIS editor` принимает field/office update или импортирует внешний пакет данных | Проверить topology, dirty areas, required attributes/attachments, sync completeness и пригодность данных для authoritative model | Не внести в эксплуатационный контур частично синхронизированное или rule-invalid состояние сети |
 | `Utility GIS editor` после edit/validate/reconcile сталкивается с `geometry/association conflict` | Понять, меняет ли conflict только representation или authoritative network behavior, и выбрать безопасный route решения | Не выполнить unsafe post, не переэскалировать простой случай и сохранить доказуемую логику решения |
 | `Utility GIS reviewer` получает подготовленное изменение инженерной сети | Увидеть единый evidence context, проверить diff, associations, validation, trace, conflicts и документы, затем объяснимо принять или вернуть change set | Не пропустить скрытую ошибку сети и разрешить публикацию только для актуального, доказанного и неизмененного результата |
 | Кадастровый инженер выполняет split/merge участков параллельно с другими делами | Сохранить lineage, разобрать конфликт и опубликовать согласованное кадастровое изменение | Не допустить юридически значимой ошибки границ и сохранить прослеживаемую историю; deferred research-сценарий |
@@ -39,6 +40,9 @@ Primary JTBD `Utility GIS editor` и связанный reviewer JTBD приня
   Differences/Conflicts view, association tools, validation/dirty areas,
   trace before/after, subnetwork checks, work order, field evidence,
   screenshots, notes и устные подтверждения.
+- В real-world stack editor также вручную управляет field package/sync,
+  GeoPackage/PostGIS round-trip, import cleanup, client setup и mobile edge
+  cases.
 - После исправления reviewer повторно проверяет affected area, потому что
   change set или connectivity могли измениться шире замечания.
 - Для кадастра дополнительно важна дисциплина "одна версия - одно кадастровое дело".
@@ -60,6 +64,8 @@ Primary JTBD `Utility GIS editor` и связанный reviewer JTBD приня
 - Синтетические репетиции editor и reviewer подтверждают внутреннюю связность
   JTBD для design и demo.
 - Частота, длительность и распространенность боли не подтверждены реальными пользователями.
+- Role research подтверждает, что аналогичные функции существуют в публичных
+  sources, но точное имя `UtilityGisEditor` редко используется.
 - Распределение reviewer/post полномочий, routing очереди и допустимость
   совмещения ролей требуют внешней validation.
 
@@ -74,5 +80,6 @@ Primary JTBD `Utility GIS editor` и связанный reviewer JTBD приня
 - [[../chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]]
 - [[../chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]]
 - [[../chats/2026-06-18-geometry-association-conflict-f2]]
+- [[../chats/2026-06-20-utility-gis-editor-role-research]]
 - [[../solution/USM]]
 - [[../decisions/followups/index]]

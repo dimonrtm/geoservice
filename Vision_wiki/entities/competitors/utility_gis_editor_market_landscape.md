@@ -3,8 +3,8 @@ title: Рыночный Ландшафт Utility GIS Editor
 type: entity
 status: draft
 created: 2026-06-14
-updated: 2026-06-19
-source: "RAW_inputs/documents/UtilityGisEditor.md; RAW_inputs/meetings/geometry_association_conflict_f3.md"
+updated: 2026-06-20
+source: "RAW_inputs/documents/UtilityGisEditor.md; RAW_inputs/meetings/geometry_association_conflict_f3.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [competitors, utility-gis-editor, market, international, russian]
 ---
 
@@ -29,6 +29,7 @@ deployment, pricing и licensing.
 | CAD/GIS bridge | Autodesk Map 3D | enterprise geodata внутри CAD-centric engineering workflow |
 | Open domain platform | GISwater | water/wastewater model, simulations и open-source ecosystem |
 | Lightweight field/offline | Mappt | mobile collection, photos, forms и offline work |
+| Open-source field/office utility practice | QGIS, PostGIS, QField/QFieldCloud, GISwater, EPANET/SWMM | field package/sync, GeoPackage/PostGIS round-trip, water/wastewater modeling, SQL/Python automation и import cleanup |
 
 ## Русскоязычный Сегмент
 
@@ -54,6 +55,9 @@ deployment, pricing и licensing.
   governance, history/API или internal-dashboard foundation, но их наличие не
   доказывает semantic reviewer decision для authoritative utility-network
   conflict.
+- Role research уточняет, что для многих real-world workflows конкурентом
+  является не один продукт, а stack из GIS editor, field client, PostGIS,
+  scripts, domain tooling и operational integrations.
 
 ## Ограничения
 
@@ -61,6 +65,8 @@ deployment, pricing и licensing.
 - Некоторые URLs даны без protocol и требуют проверки.
 - Capability и commercial claims могут изменяться между версиями.
 - Сравнение не является vendor due diligence.
+- Публичная доказательная база по точному названию `UtilityGisEditor` слабая;
+  выводы привязаны к функции роли и adjacent titles.
 - Claims о том, что adjacent suites закрывают именно `geometry/association
   conflict` consequence review, требуют отдельного официального подтверждения.
 
@@ -68,6 +74,7 @@ deployment, pricing и licensing.
 
 - [[../../chats/2026-06-14-utility-gis-editor-market-research]]
 - [[../../chats/2026-06-19-geometry-association-conflict-f3]]
+- [[../../chats/2026-06-20-utility-gis-editor-role-research]]
 - [[../../concepts/operational_utility_gis]]
 - [[collaborative_editing_alternatives]]
 - [[../../decisions/followups/index]]

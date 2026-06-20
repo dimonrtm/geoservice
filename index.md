@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-19
+updated: 2026-06-20
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -77,10 +77,14 @@ tags: [knowledge, index, geoservice]
 - 2026-06-18: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f2.md`; уточнен primary user `Editor`, момент боли и safe post criteria для Release 2 `geometry/association conflict`.
 - 2026-06-19: Выполнен `/sync-vision`; новых RAW inputs после учтенного ingest Ф2 и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 21 неизменяемый RAW Markdown file.
 - 2026-06-19: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f3.md`; уточнен конкурентный baseline `ArcGIS native + SOP + экспертный handoff`, good-enough зоны baseline и demo proof для unified evidence context Release 2.
+- 2026-06-20: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с новой границей модели данных: `user.users`, `utility_network` для актуальной сети и per-WorkOrder `DefaultState`, `work_order` для `WorkOrder`/`EditVersion`, repository-only связи, `baseNetworkRevision` API contract и seed/CI notes.
+- 2026-06-20: Выполнен `/sync-vision`; новых RAW inputs и новых Vision/Code_wiki нод нет, обновления Code_wiki от repository-change ingest отражены в индексе и [[memory/project-state]], открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 22 неизменяемых RAW Markdown files.
+- 2026-06-20: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f4.md`; Ф4 сузила Release 2 demo до transformer terminal association scenario, read-only consequence package, routing/audit object и stale/failure case.
+- 2026-06-20: Обработан RAW source `RAW_inputs/documents/UtilityGisEditorRole.md`; уточнена реальная практика роли как owner/editor of authoritative utility network changes, два основных tooling stacks, field sync, topology QA, training и KPI.
 
 ## Открытые Вопросы
 
-- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01` и read-only feeder API; следующий scope - assigned work orders, edit version и frontend shell.
+- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder` и создание `EditVersion` из per-WorkOrder `DefaultState`; следующий scope - frontend shell и дальнейшие шаги workflow.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
@@ -89,6 +93,7 @@ tags: [knowledge, index, geoservice]
 - Нужно снять manual baseline на 10-20 work orders и провести product evaluation на 200 started work orders с 7-дневным correction window.
 - Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить planned policy: package approval vs technical `post`, routing по специализации, совмещение ролей, обязательность approve comment и user validation trace-boundary.
 - Для Release 2 нужно проверить, снижает ли consequence-first explanation внешние проверки и time-to-confident-decision по `geometry/association conflict`, и не дублирует ли UI обычный Conflicts view.
+- Для Release 2 Ф4 demo нужно проверить canonical transformer terminal association scenario, package evidence, `Normal/High/Critical` tiers без преждевременного `Simple`, stale decision handling и audit object.
 - До implementation contract нужно превратить Release 2 reviewer decision policy в state machine, API/events и audit schema.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].

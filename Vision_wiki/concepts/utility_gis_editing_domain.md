@@ -3,8 +3,8 @@ title: Utility GIS Editing Domain
 type: concept
 status: active
 created: 2026-06-07
-updated: 2026-06-13
-source: "RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md"
+updated: 2026-06-20
+source: "RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md; RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [utility-network, domain-language, authoritative-editing, workflow, as-built, network-model]
 ---
 
@@ -94,6 +94,23 @@ Electric, water, gas и telecom используют сходную physical/log
 рамку, но требуют разных domain rules. Release 1 остается electric demo и не
 становится универсальной multi-utility platform.
 
+## Реальная Практика Роли
+
+Role research уточняет, что `Utility GIS editor` в публичных источниках чаще
+описан через функцию, а не точное имя роли. Близкие роли работают на стыке:
+
+- authoritative network editing и controlled publication;
+- topology QA: dirty areas, validation, rule compliance и connectivity;
+- version governance: named versions, reconcile/post, conflict review и
+  protected `Default`;
+- field/office sync: QField/QFieldCloud-like packages, deltas, GeoPackage и
+  PostGIS round-trip;
+- operational integrations: CRM/SCADA/ERP, документы, photos/attachments,
+  SQL/Python automation и import cleanup.
+
+Это усиливает границу "не CRUD карты": editing без QA/governance/sync не
+описывает реальную роль достаточно полно.
+
 ## Неясно
 
 - Какие части словаря станут публичными API names после проектирования implementation contract.
@@ -106,12 +123,14 @@ Electric, water, gas и telecom используют сходную physical/log
 - `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md`
 - `RAW_inputs/meetings/utility_gis_editor_broad_domain_answers.md`
 - `RAW_inputs/meetings/utility_gis_reviewer_broad_domain_answers.md`
+- `RAW_inputs/documents/UtilityGisEditorRole.md`
 
 ## Связи
 
 - [[../chats/2026-06-07-utility-gis-editor-domain-dictionary]]
 - [[../chats/2026-06-13-utility-gis-editor-broad-domain-rehearsal]]
 - [[../chats/2026-06-13-utility-gis-reviewer-broad-domain-rehearsal]]
+- [[../chats/2026-06-20-utility-gis-editor-role-research]]
 - [[../entities/personas/utility_gis_editor]]
 - [[../entities/personas/utility_gis_reviewer]]
 - [[jtbd]]

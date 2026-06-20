@@ -3,8 +3,8 @@ title: Risk-Tiered Routing Для Следующего Релиза
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-18
-source: "RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md; user clarification on source trust, 2026-06-14; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md"
+updated: 2026-06-20
+source: "RAW_inputs/meetings/utility_gis_editor_geometry_association_conflict_answers.md; user clarification on source trust, 2026-06-14; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md"
 tags: [decision, next-release, conflict-resolution, routing, risk, editor, reviewer]
 ---
 
@@ -33,6 +33,11 @@ state.
 становится явным на reconcile, но риск появляется уже при edit/validate и
 возвращается перед `post`, если `Default` изменился после reconcile или
 approval.
+
+Ф4 research/design input уточняет demo boundary: первый scenario должен
+доказывать routing через transformer terminal association conflict и не вводить
+`Simple` как safe default, пока consequence package не доказал отсутствие
+network impact.
 
 ## Решение
 
@@ -72,6 +77,17 @@ downstream assets, traversability, rule-dependent connectivity,
 switching/outage/safety decisions или другие operational outputs. Trace delta
 без service/subnetwork/safety semantics и без rule/terminal/controller impact
 может оставаться `High`.
+
+Для первого Ф4 demo используется subset `Normal / High / Critical`:
+
+- `Normal`: self-resolve после доказанного отсутствия association/trace/subnetwork
+  impact;
+- `High`: send to Reviewer при bounded network consequence;
+- `Critical` или failure: escalate/block post при stale basis, invalid topology,
+  invalid subnetwork, terminal path/service semantics или недостоверном trace.
+
+`Simple` остается частью planned модели следующего релиза, но требует проверки
+на реальных scenarios, чтобы не создавать ложную безопасность.
 
 ## Альтернативы
 
@@ -115,6 +131,7 @@ switching/outage/safety decisions или другие operational outputs. Trace
 - [[../chats/2026-06-16-release-2-reviewer-decision]]
 - [[../chats/2026-06-17-geometry-association-conflict-f1]]
 - [[../chats/2026-06-18-geometry-association-conflict-f2]]
+- [[../chats/2026-06-20-geometry-association-conflict-f4]]
 - [[../chats/2026-06-14-geometry-association-conflict-resolution-workshop]]
 - [[conflicts/2026-06-14-next-release-conflict-routing-responsibility]]
 - [[../solution/USM]]

@@ -3,8 +3,8 @@ title: Release 2 Conflict Explanation
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-18
-source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md"
+updated: 2026-06-20
+source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md"
 tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-network]
 ---
 
@@ -25,6 +25,11 @@ geometry diff показывают feature representation, но не отвеч�
 GeoService он собирает consequence вручную из Differences/Conflicts view,
 association tools, dirty areas, validation, trace, subnetwork checks, work
 order, field evidence, screenshots и notes.
+
+Ф4 research/design input задает demo scope: canonical scenario - конфликт
+вокруг `medium-voltage line / midspan tap / high-side terminal of transformer`,
+где terminal-aware connectivity association делает сетевое последствие видимым
+лучше, чем чистый geometry conflict.
 
 Текущий Release 1 не меняется.
 
@@ -96,6 +101,43 @@ Approval и `post authorization` разделяются:
 - missing evidence для field facts, safety-related changes или service-impacting
   corrections.
 
+## Ф4 Demo Scope
+
+Первое Release 2 demo должно доказывать не собственный conflict editor, а
+consequence-first decision support поверх native conflict workflow.
+
+MVP boundary:
+
+- read-only `conflict package`;
+- routing recommendation;
+- persistent audit object;
+- no write-back replacement UI;
+- no own topology engine;
+- no full resolve/post workflow parity.
+
+Первый `conflict package` содержит:
+
+- `Current / Target / Common Ancestor` или эквивалентные `Mine / Default /
+  Base` representations;
+- geometry diff;
+- association delta;
+- dirty areas и validation status;
+- trace before/after или явный `trace not trustworthy`;
+- subnetwork status;
+- work order и field evidence references.
+
+Safe next steps:
+
+- self-resolve, если representation diff не меняет network consequence,
+  validation clean, trace эквивалентен и subnetwork status стабилен;
+- send to Reviewer, если network consequence bounded, объясним и требует
+  package approval;
+- escalate to specialist, если меняется terminal path, affected service,
+  subnetwork boundary/semantics, rule validity или требуется профильное знание;
+- block post, если basis недостоверен: dirty/invalid topology, invalid
+  subnetwork, stale approval, new `Default` edits after reconcile или missing
+  required evidence.
+
 ## Ролевой Контракт
 
 - `Editor` отвечает за предложение resolution, его причину, evidence и
@@ -125,6 +167,9 @@ rule/terminal/controller impact может оставаться `High`.
 
 ## Acceptance Examples
 
+- `Normal` demo case: geometry линии меняется, association delta отсутствует,
+  validation clean, trace before/after эквивалентен, subnetwork status не
+  меняется; next step - self-resolve.
 - Безопасный `High`: ограниченный geometry/attribute diff, clean validation,
   trace без subnetwork/controller impact; `Reviewer` принимает финальное
   package approval, а `post` возможен только если `Default` не изменился.
@@ -141,6 +186,9 @@ rule/terminal/controller impact может оставаться `High`.
 - Stale approval: после approval изменился `Default` или пакет; approval
   помечается stale, показывается delta-since-approval и обновленный package
   summary, `post` заблокирован до repeat review.
+- Ф4 failure case: validate after reconcile, новые `Default` edits или
+  untrustworthy trace/subnetwork делают прежнее reviewer decision stale;
+  система блокирует `post` и требует пересборку decision package.
 
 ## Последствия
 
@@ -157,6 +205,9 @@ rule/terminal/controller impact может оставаться `High`.
   consequence-first explanation предотвращает unsafe post, снижает review
   friction, устраняет открытие внешней GIS или позволяет безопасно переводить
   `Normal` в audit/sample review.
+- Для первого Ф4 demo не вводить `Simple` как safe default: сначала нужно
+  доказать отсутствие network consequence. `Simple` остается planned routing
+  tier для будущей validation.
 
 ## Связи
 
@@ -164,6 +215,7 @@ rule/terminal/controller impact может оставаться `High`.
 - [[../chats/2026-06-16-release-2-reviewer-decision]]
 - [[../chats/2026-06-17-geometry-association-conflict-f1]]
 - [[../chats/2026-06-18-geometry-association-conflict-f2]]
+- [[../chats/2026-06-20-geometry-association-conflict-f4]]
 - [[conflict_resolution_routing]]
 - [[conflicts/2026-06-14-trace-risk-tier-boundary]]
 - [[risk_assumption_log]]

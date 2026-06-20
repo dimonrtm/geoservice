@@ -3,8 +3,8 @@ title: Roadmap
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-11
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; user answers to /discover --phase Ф8, 2026-06-11"
+updated: 2026-06-20
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; user answers to /discover --phase Ф8, 2026-06-11; RAW_inputs/meetings/geometry_association_conflict_f4.md"
 tags: [solution, roadmap, release-1]
 ---
 
@@ -85,6 +85,16 @@ Scope creep сигнал: появление новых незапланиров
 | 4 | Manual baseline | 10-20 work orders low/medium/high измерены по времени, errors, returns, rework и touch count. |
 | 5 | Product evaluation | 200 started work orders, `Safe Authoritative Post Rate >=95%`, 7-дневное окно и абсолютный veto safety blockers. |
 
+## Release 2 Ф4 Demo Roadmap
+
+Этот раздел фиксирует planned next-release demo, а не текущий Release 1.
+
+| Горизонт | Scope | Критерий Готовности |
+|---|---|---|
+| Now | Canonical transformer terminal association scenario: conflict package, consequence summary, `Normal/High/Critical` routing, stale/failure case и audit object | Demo показывает за 1-2 минуты, меняется ли authoritative network behavior, и предлагает safe next step без полноценной замены native resolve/post workflow |
+| Next | Live validation с реальными `Editor`/`Reviewer`, сравнение с `ArcGIS native + SOP + expert handoff`, проверка language/UI comprehension | Измерены external trace/check opens, notes/screenshots, handoff и time-to-confident-decision |
+| Later | `Simple` tier, batch review, SLA queue, dual-control workflow и production-grade utility rules | Возвращаться только после validation, что consequence package реально снижает uncertainty и не создает false-safe decisions |
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
@@ -93,6 +103,7 @@ Scope creep сигнал: появление новых незапланиров
 - `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - `Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md`
+- `Vision_wiki/chats/2026-06-20-geometry-association-conflict-f4.md`
 - [[USM]]
 - [[../concepts/first_release_mvp]]
 - [[../decisions/release_1_utility_workflow]]
