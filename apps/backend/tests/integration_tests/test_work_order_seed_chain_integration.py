@@ -37,6 +37,7 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersion,
     EditVersionAssociation,
     EditVersionFeature,
+    EditVersionStatus,
     WorkOrder,
     WorkOrderStatus,
 )
@@ -214,5 +215,82 @@ def test_seed_chain_opens_edit_version_with_full_default_state_slice() -> None:
         assert result.created is True
         assert edit_feature_count == 19
         assert edit_association_count == 9
+
+    run_in_rollback_transaction(scenario)
+
+
+def test_reopening_seeded_edit_version_returns_existing_version_without_duplicates() -> None:
+    async def scenario(session: AsyncSession) -> None:
+        await remove_canonical_seed_chain(session)
+        await run_seed_chain(session)
+
+        assignee_id = next(
+            spec.id
+            for spec in SEED_DEMO_USER_SPECS
+            if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
+        )
+        service = EditVersionService(
+            session,
+            UserRepository(session),
+            WorkOrderRepository(session),
+            DefaultStateRepository(session),
+        )
+
+        first_result = await service.open_for_work_order(
+            SEED_WORK_ORDER_SPEC.id,
+            assignee_id,
+        )
+        first_edit_version_id = first_result.edit_version.id
+        first_last_opened_at = first_result.edit_version.last_opened_at
+
+        first_open_version_count = await session.scalar(
+            select(func.count(EditVersion.id)).where(
+                EditVersion.work_order_id == SEED_WORK_ORDER_SPEC.id,
+                EditVersion.status == EditVersionStatus.OPEN,
+            )
+        )
+        first_edit_feature_count = await session.scalar(
+            select(func.count(EditVersionFeature.feature_id)).where(
+                EditVersionFeature.edit_version_id == first_edit_version_id
+            )
+        )
+        first_edit_association_count = await session.scalar(
+            select(func.count(EditVersionAssociation.association_id)).where(
+                EditVersionAssociation.edit_version_id == first_edit_version_id
+            )
+        )
+
+        second_result = await service.open_for_work_order(
+            SEED_WORK_ORDER_SPEC.id,
+            assignee_id,
+        )
+
+        second_open_version_count = await session.scalar(
+            select(func.count(EditVersion.id)).where(
+                EditVersion.work_order_id == SEED_WORK_ORDER_SPEC.id,
+                EditVersion.status == EditVersionStatus.OPEN,
+            )
+        )
+        second_edit_feature_count = await session.scalar(
+            select(func.count(EditVersionFeature.feature_id)).where(
+                EditVersionFeature.edit_version_id == first_edit_version_id
+            )
+        )
+        second_edit_association_count = await session.scalar(
+            select(func.count(EditVersionAssociation.association_id)).where(
+                EditVersionAssociation.edit_version_id == first_edit_version_id
+            )
+        )
+
+        assert first_result.created is True
+        assert second_result.created is False
+        assert second_result.edit_version.id == first_edit_version_id
+        assert first_open_version_count == 1
+        assert second_open_version_count == 1
+        assert first_edit_feature_count == 19
+        assert second_edit_feature_count == 19
+        assert first_edit_association_count == 9
+        assert second_edit_association_count == 9
+        assert second_result.edit_version.last_opened_at >= first_last_opened_at
 
     run_in_rollback_transaction(scenario)
