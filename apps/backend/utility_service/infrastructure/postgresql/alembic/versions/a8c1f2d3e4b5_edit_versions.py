@@ -493,15 +493,11 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("edit_version_associations", schema="work_order")
-    op.drop_table("edit_version_features", schema="work_order")
-    op.drop_index(
-        "uq_edit_versions_open_work_order",
-        table_name="edit_versions",
-        schema="work_order",
-    )
-    op.drop_table("edit_versions", schema="work_order")
-    op.drop_table("default_state_associations", schema="utility_network")
-    op.drop_table("default_state_features", schema="utility_network")
-    op.drop_table("default_states", schema="utility_network")
-    op.drop_table("network_states", schema="utility_network")
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_version_associations"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_version_features"))
+    op.execute(sa.text("DROP INDEX IF EXISTS work_order.uq_edit_versions_open_work_order"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_versions"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_state_associations"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_state_features"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_states"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.network_states"))

@@ -87,7 +87,9 @@ Alembic migrations лежат в
   сети и в первом шаге имеет только статус `active`. `EditVersion` хранит
   `base_network_revision`, статус `open` и partial unique index
   `uq_edit_versions_open_work_order` для запрета двух открытых версий одного
-  work order.
+  work order. Downgrade этой ревизии использует `DROP ... IF EXISTS`, потому
+  что более поздняя schema-boundary ревизия может уже удалить эти таблицы при
+  откате `head -> d3a01f4e9c21` в migration-cycle тестах.
 - `f2b3c4d5e6a7_sprint1_schema_boundaries.py` является schema-boundary миграцией:
   создает схемы `user`/`work_order`, переносит
   `public.users` в `user.users` при необходимости, удаляет legacy
