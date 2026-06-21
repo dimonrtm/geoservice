@@ -392,5 +392,59 @@ def downgrade() -> None:
     op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_state_features CASCADE"))
     op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_states CASCADE"))
     op.execute(sa.text("DROP TABLE IF EXISTS utility_network.network_states CASCADE"))
-    op.execute(sa.text("DROP TABLE IF EXISTS work_order.work_orders CASCADE"))
+    op.execute(sa.text("CREATE SCHEMA IF NOT EXISTS work_order"))
+    op.execute(
+        sa.text(
+            """
+            CREATE TABLE IF NOT EXISTS work_order.work_orders (
+                id uuid PRIMARY KEY,
+                code varchar(100) NOT NULL,
+                title varchar(200) NOT NULL,
+                description text NULL,
+                status varchar(16) NOT NULL DEFAULT 'assigned',
+                assignee_user_id uuid NOT NULL,
+                created_by_user_id uuid NOT NULL,
+                created_at timestamptz NOT NULL DEFAULT now(),
+                updated_at timestamptz NOT NULL DEFAULT now(),
+                CONSTRAINT uq_work_orders_code UNIQUE (code),
+                CONSTRAINT ck_work_orders_status
+                    CHECK (status IN ('assigned', 'in_progress'))
+            )
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
+            ALTER TABLE work_order.work_orders
+            DROP CONSTRAINT IF EXISTS fk_work_orders_aoi
+            """
+        )
+    )
+    op.execute(sa.text("DROP INDEX IF EXISTS work_order.ix_work_orders_aoi_id"))
+    op.execute(sa.text("ALTER TABLE work_order.work_orders DROP COLUMN IF EXISTS aoi_id"))
+    op.execute(
+        sa.text(
+            """
+            CREATE INDEX IF NOT EXISTS ix_work_orders_assignee_user_id
+            ON work_order.work_orders (assignee_user_id)
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
+            CREATE INDEX IF NOT EXISTS ix_work_orders_created_by_user_id
+            ON work_order.work_orders (created_by_user_id)
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
+            CREATE INDEX IF NOT EXISTS ix_work_orders_status
+            ON work_order.work_orders (status)
+            """
+        )
+    )
     op.execute(sa.text("DROP TABLE IF EXISTS work_order.aois CASCADE"))

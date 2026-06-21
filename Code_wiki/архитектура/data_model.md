@@ -3,8 +3,8 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-21
-source: repository-change:2026-06-21
+updated: 2026-06-22
+source: repository-change:2026-06-22
 tags: [database, postgis, sqlalchemy, geojson]
 ---
 
@@ -73,11 +73,17 @@ Alembic migrations лежат в
 - `c6cef6320f1d_create_users.py` создает схему `user` и таблицу
   `user.users`.
 - `d3a01f4e9c21_network_model.py` создает utility schema, feeder graph,
-  geometry/FK/check constraints и spatial indexes.
+  geometry/FK/check constraints и spatial indexes. Downgrade этой ревизии
+  использует `DROP ... IF EXISTS`, потому что более поздние schema-boundary
+  ревизии могут уже удалить `utility_network.aois` и часть индексов при откате
+  `head -> b82a5f2d91c3` в migration-cycle тестах.
 - `e4b7a9c2d5f8_work_orders.py` добавляет
   `work_order.work_orders` со статусами `assigned`/`in_progress`, уникальным
   `code`, индексами для assignment/status lookups и plain UUID полями
-  `assignee_user_id`/`created_by_user_id` без FK на `user.users`.
+  `assignee_user_id`/`created_by_user_id` без FK на `user.users`. Downgrade
+  этой ревизии использует `DROP ... IF EXISTS`, потому что более поздняя
+  schema-boundary ревизия может уже удалить `work_order.work_orders` и его
+  индексы при откате `head -> d3a01f4e9c21` в migration-cycle тестах.
 - `a8c1f2d3e4b5_edit_versions.py` добавляет
   `utility_network.network_states`, per-WorkOrder
   `utility_network.default_states`, `default_state_features`,
@@ -95,7 +101,10 @@ Alembic migrations лежат в
   `public.users` в `user.users` при необходимости, удаляет legacy
   `utility_network.work_orders`/`utility_network.edit_versions`/`utility_network.aois`,
   создает `work_order.aois`, `work_order.work_orders` с обязательным `aoi_id`
-  и новую схему таблиц без compatibility views.
+  и новую схему таблиц без compatibility views. Downgrade этой ревизии удаляет
+  новые edit/default-state таблицы, но сохраняет/воссоздает
+  `work_order.work_orders` в контракте `e4b7a9c2d5f8`: без `aoi_id`,
+  `fk_work_orders_aoi` и `ix_work_orders_aoi_id`.
 - `c9d0e1f2a3b4_repair_work_order_aoi_scope.py` является repair-миграцией для
   dev/CI volumes, где `alembic_version` уже помечен как `f2b3c4d5e6a7`, но
   физическая таблица `work_order.work_orders` осталась без `aoi_id`. Миграция

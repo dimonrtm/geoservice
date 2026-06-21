@@ -3,7 +3,7 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-20
+updated: 2026-06-22
 source: docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md
 tags: [repository-change, code-wiki, ingest]
 ---
@@ -21,6 +21,9 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-06-22 | [[архитектура/data_model]] | Уточнен migration contract: downgrade `f2b3c4d5e6a7_sprint1_schema_boundaries.py` сохраняет/воссоздает `work_order.work_orders` в контракте `e4b7a9c2d5f8` без `aoi_id`, чтобы последующий upgrade `e4 -> a8 -> f2/c9` не падал на FK `work_order.edit_versions -> work_order.work_orders`. | `apps/backend/utility_service/infrastructure/postgresql/alembic/versions/f2b3c4d5e6a7_sprint1_schema_boundaries.py`, `apps/backend/tests/integration_tests/test_edit_version_migration.py` |
+| 2026-06-22 | [[архитектура/data_model]] | Уточнен migration contract: downgrade `d3a01f4e9c21_network_model.py` стал idempotent через `DROP ... IF EXISTS`, чтобы откат `head -> b82a5f2d91c3` не падал после schema-boundary ревизий, уже удаливших `utility_network.aois` и часть индексов. | `apps/backend/utility_service/infrastructure/postgresql/alembic/versions/d3a01f4e9c21_network_model.py`, `apps/backend/tests/integration_tests/test_network_model_migration.py` |
+| 2026-06-22 | [[архитектура/data_model]] | Уточнен migration contract: downgrade `e4b7a9c2d5f8_work_orders.py` стал idempotent через `DROP ... IF EXISTS`, чтобы откат `head -> d3a01f4e9c21` не падал после `f2b3c4d5e6a7`, уже удалившей `work_order.work_orders` и индексы. | `apps/backend/utility_service/infrastructure/postgresql/alembic/versions/e4b7a9c2d5f8_work_orders.py`, `apps/backend/tests/integration_tests/test_network_model_migration.py` |
 | 2026-06-21 | [[архитектура/data_model]] | Уточнен migration contract: downgrade `a8c1f2d3e4b5_edit_versions.py` стал idempotent через `DROP ... IF EXISTS`, чтобы откат `head -> d3a01f4e9c21` не падал после schema-boundary ревизий, уже удаливших edit/default-state таблицы. | `apps/backend/utility_service/infrastructure/postgresql/alembic/versions/a8c1f2d3e4b5_edit_versions.py`, `apps/backend/tests/integration_tests/test_network_model_migration.py` |
 | 2026-06-21 | [[архитектура/data_model]] | Добавлена repair migration `c9d0e1f2a3b4_repair_work_order_aoi_scope.py` для dev/CI volumes, где Alembic уже проштампован `f2b3c4d5e6a7`, но `work_order.work_orders.aoi_id` физически отсутствует; migration-test воспроизводит stamped-boundary сценарий. | `apps/backend/utility_service/infrastructure/postgresql/alembic/versions/c9d0e1f2a3b4_repair_work_order_aoi_scope.py`, `apps/backend/tests/integration_tests/test_edit_version_migration.py` |
 | 2026-06-21 | [[архитектура/data_model]] | Зафиксировано, что AOI перенесён в bounded context `work_order`: `work_order.aois`, обязательный `work_order.work_orders.aoi_id`, отсутствие ownership `utility_network.aois`, seed AOI через `SeedWorkOrderRepository`, а workspace features/associations читаются из `work_order` edit version и фильтруются по AOI. | `apps/backend/utility_service/infrastructure/postgresql/models/work_order/aoi.py`, `apps/backend/utility_service/infrastructure/postgresql/models/work_order/work_order.py`, `apps/backend/utility_service/infrastructure/postgresql/repositories/work_order_repository.py`, `apps/backend/seeds/repositories/seed_work_order_repository.py` |

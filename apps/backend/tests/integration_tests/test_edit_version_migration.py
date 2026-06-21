@@ -24,12 +24,11 @@ UTILITY_BASELINE_TABLES = {
     "default_state_associations",
 }
 EDIT_VERSION_TABLES = {
-    "aois",
-    "work_orders",
     "edit_versions",
     "edit_version_features",
     "edit_version_associations",
 }
+WORK_ORDER_TABLES = {"aois", "work_orders", *EDIT_VERSION_TABLES}
 REQUIRED_CONSTRAINTS = {
     "uq_network_states_name",
     "ck_network_states_current_revision_positive",
@@ -143,7 +142,7 @@ def utility_network_aoi_exists() -> bool:
 
 def assert_edit_version_schema_contract() -> None:
     assert read_tables(NETWORK_SCHEMA, UTILITY_BASELINE_TABLES) == UTILITY_BASELINE_TABLES
-    assert read_tables(WORK_ORDER_SCHEMA, EDIT_VERSION_TABLES) == EDIT_VERSION_TABLES
+    assert read_tables(WORK_ORDER_SCHEMA, WORK_ORDER_TABLES) == WORK_ORDER_TABLES
     assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is True
     constraints = read_constraints(NETWORK_SCHEMA) | read_constraints(WORK_ORDER_SCHEMA)
     assert REQUIRED_CONSTRAINTS.issubset(constraints)
@@ -154,6 +153,9 @@ def assert_edit_version_schema_contract() -> None:
 def assert_edit_version_schema_absent() -> None:
     assert read_tables(NETWORK_SCHEMA, UTILITY_BASELINE_TABLES) == set()
     assert read_tables(WORK_ORDER_SCHEMA, EDIT_VERSION_TABLES) == set()
+    assert read_tables(WORK_ORDER_SCHEMA, {"work_orders"}) == {"work_orders"}
+    assert read_tables(WORK_ORDER_SCHEMA, {"aois"}) == set()
+    assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is False
 
 
 def test_edit_version_migration_upgrade_downgrade_upgrade_cycle() -> None:
@@ -186,6 +188,7 @@ def test_schema_repair_migration_handles_stamped_boundary_without_aoi_id() -> No
     try:
         command.downgrade(config, PREVIOUS_REVISION)
         command.upgrade(config, EDIT_VERSION_REVISION)
+        assert read_tables(WORK_ORDER_SCHEMA, {"work_orders"}) == {"work_orders"}
         assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is False
 
         command.stamp(config, SCHEMA_BOUNDARY_REVISION)

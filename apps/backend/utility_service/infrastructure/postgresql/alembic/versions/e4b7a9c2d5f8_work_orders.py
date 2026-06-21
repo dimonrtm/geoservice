@@ -84,20 +84,8 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index(
-        "ix_work_orders_status",
-        table_name="work_orders",
-        schema="work_order",
-    )
-    op.drop_index(
-        "ix_work_orders_created_by_user_id",
-        table_name="work_orders",
-        schema="work_order",
-    )
-    op.drop_index(
-        "ix_work_orders_assignee_user_id",
-        table_name="work_orders",
-        schema="work_order",
-    )
-    op.drop_table("work_orders", schema="work_order")
-    op.execute(sa.text("DROP SCHEMA work_order"))
+    op.execute(sa.text("DROP INDEX IF EXISTS work_order.ix_work_orders_status"))
+    op.execute(sa.text("DROP INDEX IF EXISTS work_order.ix_work_orders_created_by_user_id"))
+    op.execute(sa.text("DROP INDEX IF EXISTS work_order.ix_work_orders_assignee_user_id"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.work_orders"))
+    op.execute(sa.text("DROP SCHEMA IF EXISTS work_order"))

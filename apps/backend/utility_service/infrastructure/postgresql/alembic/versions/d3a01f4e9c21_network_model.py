@@ -301,18 +301,10 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_table("network_associations", schema="utility_network")
-    op.drop_index(
-        "ix_network_features_geometry",
-        table_name="network_features",
-        schema="utility_network",
-    )
-    op.drop_table("network_features", schema="utility_network")
-    op.drop_table("feeders", schema="utility_network")
-    op.drop_index(
-        "ix_aois_geometry",
-        table_name="aois",
-        schema="utility_network",
-    )
-    op.drop_table("aois", schema="utility_network")
-    op.execute(sa.text("DROP SCHEMA utility_network"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.network_associations"))
+    op.execute(sa.text("DROP INDEX IF EXISTS utility_network.ix_network_features_geometry"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.network_features"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.feeders"))
+    op.execute(sa.text("DROP INDEX IF EXISTS utility_network.ix_aois_geometry"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.aois"))
+    op.execute(sa.text("DROP SCHEMA IF EXISTS utility_network"))
