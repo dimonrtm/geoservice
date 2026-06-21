@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from geoalchemy2.elements import WKTElement
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,8 +12,8 @@ from utility_service.infrastructure.postgresql.models.utility_network import (
     NetworkFeature,
     NetworkState,
 )
-from utility_service.infrastructure.postgresql.models.work_order import WorkOrder
-from seeds.specs.seed_work_order_specs import SeedWorkOrderSpec
+from utility_service.infrastructure.postgresql.models.work_order import AOI, WorkOrder
+from seeds.specs.seed_work_order_specs import SEED_WORK_ORDER_AOI_SPEC, SeedWorkOrderSpec
 
 
 DEFAULT_NETWORK_STATE_ID = UUID("6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0501")
@@ -26,10 +27,26 @@ class SeedWorkOrderRepository:
         result = await self.session.execute(select(WorkOrder).where(WorkOrder.code == code))
         return result.scalars().one_or_none()
 
+    async def ensure_aoi(self) -> AOI:
+        existing = await self.session.get(AOI, SEED_WORK_ORDER_AOI_SPEC.id)
+        if existing is not None:
+            return existing
+
+        aoi = AOI(
+            id=SEED_WORK_ORDER_AOI_SPEC.id,
+            name=SEED_WORK_ORDER_AOI_SPEC.name,
+            description=SEED_WORK_ORDER_AOI_SPEC.description,
+            geometry=WKTElement(SEED_WORK_ORDER_AOI_SPEC.geometry_wkt, srid=4326),
+        )
+        self.session.add(aoi)
+        await self.session.flush()
+        return aoi
+
     async def create_work_order(
         self,
         spec: SeedWorkOrderSpec,
         *,
+        aoi_id: UUID,
         assignee_user_id: UUID,
         created_by_user_id: UUID,
     ) -> WorkOrder:
@@ -39,6 +56,7 @@ class SeedWorkOrderRepository:
             title=spec.title,
             description=spec.description,
             status=spec.status,
+            aoi_id=aoi_id,
             assignee_user_id=assignee_user_id,
             created_by_user_id=created_by_user_id,
         )

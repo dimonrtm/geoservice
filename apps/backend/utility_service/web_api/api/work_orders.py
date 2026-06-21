@@ -5,9 +5,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
 
-from utility_service.use_cases.deps import get_edit_version_service
+from utility_service.use_cases.deps import get_edit_version_service, get_workspace_service
 from utility_service.use_cases.schemas.edit_version import EditVersionOut, OpenEditVersionOut
+from utility_service.use_cases.schemas.workspace import WorkspaceOut
 from utility_service.use_cases.services.edit_version_service import EditVersionService
+from utility_service.use_cases.services.workspace_service import WorkspaceService
 from utility_service.web_api.api.auth import require_editor
 
 
@@ -42,4 +44,21 @@ async def open_edit_version(
             created_at=edit_version.created_at,
             last_opened_at=edit_version.last_opened_at,
         ),
+    )
+
+
+@work_orders_router.get(
+    "/{work_order_id}/edit-versions/{edit_version_id}/workspace",
+    response_model=WorkspaceOut,
+)
+async def get_workspace(
+    work_order_id: UUID,
+    edit_version_id: UUID,
+    user: Any = Depends(require_editor),
+    workspace_service: WorkspaceService = Depends(get_workspace_service),
+) -> WorkspaceOut:
+    return await workspace_service.get_workspace(
+        work_order_id=work_order_id,
+        edit_version_id=edit_version_id,
+        actor_id=user.id,
     )

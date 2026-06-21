@@ -1,17 +1,38 @@
 from datetime import datetime, timezone
+from dataclasses import dataclass
 from typing import Any, Sequence
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import cast, func, literal, select
+from sqlalchemy.dialects.postgresql import JSONB, aggregate_order_by
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.work_order import (
+    AOI,
     EditVersion,
     EditVersionAssociation,
     EditVersionFeature,
     EditVersionStatus,
     WorkOrder,
 )
+
+
+@dataclass(frozen=True)
+class WorkspaceAoiRow:
+    id: UUID
+    name: str
+    description: str | None
+    geometry_data: dict[str, Any]
+    extent: list[float]
+
+
+@dataclass(frozen=True)
+class WorkspaceAggregateRow:
+    work_order: WorkOrder
+    edit_version: EditVersion
+    aoi: WorkspaceAoiRow
+    features_data: list[dict[str, Any]]
+    associations_data: list[dict[str, Any]]
 
 
 class WorkOrderRepository:
@@ -105,3 +126,136 @@ class WorkOrderRepository:
         edit_version.last_opened_at = datetime.now(timezone.utc)
         self.session.add(edit_version)
         await self.session.flush()
+
+    async def get_workspace_aggregate(
+        self,
+        *,
+        work_order_id: UUID,
+        edit_version_id: UUID,
+    ) -> WorkspaceAggregateRow | None:
+        empty_array = cast(literal("[]"), JSONB)
+
+        workspace_feature_ids = (
+            select(EditVersionFeature.feature_id)
+            .where(
+                EditVersionFeature.edit_version_id == EditVersion.id,
+                func.ST_Intersects(AOI.geometry, EditVersionFeature.geometry),
+            )
+            .correlate(EditVersion, AOI)
+        )
+
+        feature_json = func.jsonb_build_object(
+            "id",
+            EditVersionFeature.feature_id,
+            "asset_code",
+            EditVersionFeature.asset_code,
+            "feature_type",
+            EditVersionFeature.feature_type,
+            "geometry_data",
+            cast(func.ST_AsGeoJSON(EditVersionFeature.geometry), JSONB),
+            "properties",
+            EditVersionFeature.properties,
+            "network_version",
+            EditVersionFeature.network_version,
+            "operation",
+            EditVersionFeature.operation,
+        )
+        features_data = (
+            select(
+                func.coalesce(
+                    func.jsonb_agg(
+                        aggregate_order_by(
+                            feature_json,
+                            EditVersionFeature.asset_code,
+                            EditVersionFeature.feature_id,
+                        )
+                    ),
+                    empty_array,
+                )
+            )
+            .where(
+                EditVersionFeature.edit_version_id == EditVersion.id,
+                EditVersionFeature.feature_id.in_(workspace_feature_ids),
+            )
+            .correlate(EditVersion, AOI)
+            .scalar_subquery()
+        )
+
+        association_json = func.jsonb_build_object(
+            "id",
+            EditVersionAssociation.association_id,
+            "from_feature_id",
+            EditVersionAssociation.from_feature_id,
+            "to_feature_id",
+            EditVersionAssociation.to_feature_id,
+            "association_type",
+            EditVersionAssociation.association_type,
+            "version",
+            EditVersionAssociation.network_version,
+        )
+        associations_data = (
+            select(
+                func.coalesce(
+                    func.jsonb_agg(
+                        aggregate_order_by(
+                            association_json,
+                            EditVersionAssociation.from_feature_id,
+                            EditVersionAssociation.to_feature_id,
+                            EditVersionAssociation.association_type,
+                            EditVersionAssociation.association_id,
+                        )
+                    ),
+                    empty_array,
+                )
+            )
+            .where(
+                EditVersionAssociation.edit_version_id == EditVersion.id,
+                EditVersionAssociation.from_feature_id.in_(workspace_feature_ids),
+                EditVersionAssociation.to_feature_id.in_(workspace_feature_ids),
+            )
+            .correlate(EditVersion, AOI)
+            .scalar_subquery()
+        )
+
+        extent_data = func.jsonb_build_array(
+            func.ST_XMin(func.Box2D(AOI.geometry)),
+            func.ST_YMin(func.Box2D(AOI.geometry)),
+            func.ST_XMax(func.Box2D(AOI.geometry)),
+            func.ST_YMax(func.Box2D(AOI.geometry)),
+        )
+
+        result = await self.session.execute(
+            select(
+                WorkOrder,
+                EditVersion,
+                AOI.id.label("aoi_id"),
+                AOI.name.label("aoi_name"),
+                AOI.description.label("aoi_description"),
+                cast(func.ST_AsGeoJSON(AOI.geometry), JSONB).label("aoi_geometry_data"),
+                extent_data.label("aoi_extent"),
+                features_data.label("features_data"),
+                associations_data.label("associations_data"),
+            )
+            .join(EditVersion, EditVersion.work_order_id == WorkOrder.id)
+            .join(AOI, WorkOrder.aoi_id == AOI.id)
+            .where(
+                WorkOrder.id == work_order_id,
+                EditVersion.id == edit_version_id,
+            )
+        )
+        row = result.one_or_none()
+        if row is None:
+            return None
+        return WorkspaceAggregateRow(
+            work_order=row.WorkOrder,
+            edit_version=row.EditVersion,
+            aoi=WorkspaceAoiRow(
+                id=row.aoi_id,
+                name=row.aoi_name,
+                description=row.aoi_description,
+                geometry_data=row.aoi_geometry_data,
+                extent=row.aoi_extent,
+            ),
+            features_data=row.features_data,
+            associations_data=row.associations_data,
+        )

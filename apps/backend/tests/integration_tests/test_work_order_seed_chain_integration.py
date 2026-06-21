@@ -14,11 +14,10 @@ from seeds.specs.seed_utility_dataset_specs import (
     UTILITY_DATASET_SPEC,
     UTILITY_FEEDER_CODE,
 )
-from seeds.specs.seed_work_order_specs import SEED_WORK_ORDER_SPEC
+from seeds.specs.seed_work_order_specs import SEED_WORK_ORDER_AOI_SPEC, SEED_WORK_ORDER_SPEC
 from tests.integration_tests.network_db_support import run_in_rollback_transaction
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
 from utility_service.infrastructure.postgresql.models.utility_network import (
-    AOI,
     DefaultState,
     DefaultStateAssociation,
     DefaultStateFeature,
@@ -34,6 +33,7 @@ from utility_service.infrastructure.postgresql.repositories.work_order_repositor
     WorkOrderRepository,
 )
 from utility_service.infrastructure.postgresql.models.work_order import (
+    AOI,
     EditVersion,
     EditVersionAssociation,
     EditVersionFeature,
@@ -61,7 +61,7 @@ async def remove_canonical_seed_chain(session: AsyncSession) -> None:
         delete(NetworkFeature).where(NetworkFeature.feeder_id == UTILITY_DATASET_SPEC.feeder.id)
     )
     await session.execute(delete(Feeder).where(Feeder.id == UTILITY_DATASET_SPEC.feeder.id))
-    await session.execute(delete(AOI).where(AOI.id == UTILITY_DATASET_SPEC.aoi.id))
+    await session.execute(delete(AOI).where(AOI.id == SEED_WORK_ORDER_AOI_SPEC.id))
     await session.execute(
         delete(User).where(User.email.in_([spec.email for spec in SEED_DEMO_USER_SPECS]))
     )
@@ -102,7 +102,7 @@ def test_seed_chain_creates_work_order_with_user_network_links() -> None:
         work_order = await load_work_order(session)
         assignee = await session.get(User, work_order.assignee_user_id)
         feeder = await session.get(Feeder, UTILITY_DATASET_SPEC.feeder.id)
-        aoi = await session.get(AOI, UTILITY_DATASET_SPEC.aoi.id)
+        aoi = await session.get(AOI, SEED_WORK_ORDER_AOI_SPEC.id)
         default_state = await session.scalar(
             select(DefaultState).where(DefaultState.work_order_id == work_order.id)
         )
@@ -145,6 +145,7 @@ def test_seed_chain_creates_work_order_with_user_network_links() -> None:
         assert feeder is not None
         assert feeder.code == UTILITY_FEEDER_CODE
         assert aoi is not None
+        assert work_order.aoi_id == aoi.id
         assert network_feature_count == 19
         assert default_state.base_network_revision == 1
         assert default_state_feature_count == 19
@@ -215,6 +216,38 @@ def test_seed_chain_opens_edit_version_with_full_default_state_slice() -> None:
         assert result.created is True
         assert edit_feature_count == 19
         assert edit_association_count == 9
+
+    run_in_rollback_transaction(scenario)
+
+
+def test_seed_chain_workspace_aggregate_returns_work_order_scope() -> None:
+    async def scenario(session: AsyncSession) -> None:
+        await remove_canonical_seed_chain(session)
+        await run_seed_chain(session)
+
+        assignee_id = next(
+            spec.id
+            for spec in SEED_DEMO_USER_SPECS
+            if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
+        )
+        result = await EditVersionService(
+            session,
+            UserRepository(session),
+            WorkOrderRepository(session),
+            DefaultStateRepository(session),
+        ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+
+        aggregate = await WorkOrderRepository(session).get_workspace_aggregate(
+            work_order_id=SEED_WORK_ORDER_SPEC.id,
+            edit_version_id=result.edit_version.id,
+        )
+
+        assert aggregate is not None
+        assert aggregate.work_order.code == SEED_WORK_ORDER_SPEC.code
+        assert aggregate.aoi.id == SEED_WORK_ORDER_AOI_SPEC.id
+        assert aggregate.aoi.name == SEED_WORK_ORDER_AOI_SPEC.name
+        assert len(aggregate.features_data) == 19
+        assert len(aggregate.associations_data) == 9
 
     run_in_rollback_transaction(scenario)
 

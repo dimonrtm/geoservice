@@ -23,12 +23,10 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-20 19:15 +05:00, корневой индекс, `Code_wiki/index.md` и live state синхронизированы после repository-change ingest; новых RAW inputs и stale-нод нет.
 - Последний `/lint-wiki`: 2026-06-20, через bundled Python найдены ожидаемые `missing_frontmatter` для 24 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-20, существующие ноды
-  `Code_wiki` синхронизированы с новой границей модели данных:
-  `user.users`, `utility_network` для актуальной сети и per-WorkOrder
-  `DefaultState`, `work_order` для агрегата `WorkOrder`/`EditVersion`,
-  repository-only связи между схемами, `baseNetworkRevision` API contract и
-  CI/local seed notes.
+- Последний `/ingest repository-change`: 2026-06-21, существующие ноды
+  `Code_wiki` синхронизированы с переносом AOI в `work_order`, nested
+  Workspace API `/api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}/workspace`,
+  отсутствием AOI в Utility Network API и seed ownership через `SeedWorkOrderRepository`.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
@@ -39,7 +37,7 @@ GeoService - исследовательский pet-проект на стади
 - Необработанные RAW inputs: не обнаружены; все 25 RAW sources отражены в `RAW_inputs/index.md`.
 - Новые RAW inputs с прошлого `/sync-vision`: `RAW_inputs/meetings/geometry_association_conflict_f4.md` и `RAW_inputs/documents/UtilityGisEditorRole.md` обработаны через `/ingest`.
 - Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-20-geometry-association-conflict-f4]] и [[../Vision_wiki/chats/2026-06-20-utility-gis-editor-role-research]]; также уточнены Release 2 conflict explanation, routing, USM, roadmap, architecture vision, persona/domain/market/JTBD, risk log и follow-up validation.
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; обновлены существующие ноды [[../Code_wiki/архитектура/data_model]], [[../Code_wiki/архитектура/backend]], [[../Code_wiki/архитектура/api_and_realtime]], [[../Code_wiki/правила_и_стиль/testing_strategy]], [[../Code_wiki/dev_setup/local_development]], [[../Code_wiki/сборка/ci_and_quality]] и [[../Code_wiki/состояние_проекта/repository_change_ingest]] после repository-change ingest 2026-06-20.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; обновлены существующие ноды [[../Code_wiki/архитектура/data_model]], [[../Code_wiki/архитектура/api_and_realtime]] и [[../Code_wiki/состояние_проекта/repository_change_ingest]] после repository-change ingest 2026-06-21.
 - Stale-ноды: не обнаружены.
 - Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 24 RAW Markdown files, product validation `FU-2026-06-13-002` и Release 2 user validation `FU-2026-06-14-001`; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
 - Открытые follow-up'ы: 12.

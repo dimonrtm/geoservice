@@ -1,4 +1,3 @@
-from .aoi import AOI
 from .default_state import DefaultState, DefaultStateStatus
 from .default_state_association import DefaultStateAssociation
 from .default_state_feature import DefaultStateFeature
@@ -11,7 +10,6 @@ from .network_feature import FeatureType, NetworkFeature
 from .network_state import NetworkState
 
 __all__ = [
-    "AOI",
     "AssociationType",
     "DefaultState",
     "DefaultStateAssociation",

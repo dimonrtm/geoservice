@@ -52,7 +52,6 @@ def feeder_response() -> UtilityFeederOut:
         code="synthetic_utility_feeder_01",
         name="Демонстрационный фидер 10 кВ",
         is_active=True,
-        aois=UtilityFeatureCollectionOut(features=[]),
         network=UtilityFeatureCollectionOut(features=[]),
         associations=[
             UtilityAssociationOut(

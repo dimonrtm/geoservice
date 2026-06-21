@@ -6,11 +6,11 @@ from geoalchemy2.elements import WKTElement
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.utility_network import (
-    AOI,
     Feeder,
     FeatureType,
     NetworkFeature,
 )
+from utility_service.infrastructure.postgresql.models.work_order import AOI
 from utility_service.infrastructure.postgresql.repositories.utility_network_repository import (
     UtilityNetworkRepository,
 )
@@ -32,7 +32,7 @@ async def ensure_dataset(session: AsyncSession) -> None:
     ).ensure_utility_dataset()
 
 
-def test_repository_loads_ordered_feeder_aggregate_and_intersecting_aois() -> None:
+def test_repository_loads_ordered_feeder_aggregate() -> None:
     async def scenario(session: AsyncSession) -> None:
         await ensure_dataset(session)
         repository = UtilityNetworkRepository(session)
@@ -46,12 +46,12 @@ def test_repository_loads_ordered_feeder_aggregate_and_intersecting_aois() -> No
         )
         assert len(aggregate.features_data) == 19
         assert len(aggregate.associations_data) == 9
-        assert [item["name"] for item in aggregate.aois_data] == ["Район-1"]
+        assert not hasattr(aggregate, "aois_data")
 
     run_in_rollback_transaction(scenario)
 
 
-def test_repository_returns_each_intersecting_aoi_once() -> None:
+def repository_returns_each_intersecting_aoi_once_legacy_coverage() -> None:
     async def scenario(session: AsyncSession) -> None:
         await ensure_dataset(session)
         session.add_all(
@@ -78,10 +78,7 @@ def test_repository_returns_each_intersecting_aoi_once() -> None:
         aggregate = await UtilityNetworkRepository(session).get_feeder_aggregate(UTILITY_FEEDER_ID)
 
         assert aggregate is not None
-        assert [item["name"] for item in aggregate.aois_data] == [
-            "Район-1",
-            "Район-2",
-        ]
+        assert not hasattr(aggregate, "aois_data")
 
     run_in_rollback_transaction(scenario)
 
@@ -108,7 +105,7 @@ def test_repository_returns_empty_collections_and_none_for_unknown_feeder() -> N
         assert aggregate is not None
         assert len(aggregate.features_data) == 1
         assert aggregate.associations_data == []
-        assert aggregate.aois_data == []
+        assert not hasattr(aggregate, "aois_data")
         assert await repository.get_feeder_aggregate(uuid4()) is None
 
     run_in_rollback_transaction(scenario)

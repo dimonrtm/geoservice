@@ -60,7 +60,6 @@ def aggregate_row() -> FeederAggregateRow:
         is_active=True,
         features_data=[feature_data()],
         associations_data=[association_data()],
-        aois_data=[],
     )
 
 
@@ -73,7 +72,7 @@ def test_get_feeder_maps_geojson_and_system_properties_take_precedence() -> None
     payload = response.model_dump(by_alias=True, mode="json")
 
     assert payload["id"] == str(FEEDER_ID)
-    assert payload["aois"] == {"type": "FeatureCollection", "features": []}
+    assert "aois" not in payload
     assert payload["network"]["features"][0]["properties"] == {
         "assetCode": "D-001",
         "featureType": "device",

@@ -7,7 +7,6 @@ from sqlalchemy.dialects.postgresql import JSONB, aggregate_order_by
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.utility_network import (
-    AOI,
     Feeder,
     NetworkAssociation,
     NetworkFeature,
@@ -22,7 +21,6 @@ class FeederAggregateRow:
     is_active: bool
     features_data: list[dict[str, Any]]
     associations_data: list[dict[str, Any]]
-    aois_data: list[dict[str, Any]]
 
 
 class UtilityNetworkRepository:
@@ -103,44 +101,6 @@ class UtilityNetworkRepository:
             .scalar_subquery()
         )
 
-        intersecting_feature_exists = (
-            select(literal(1))
-            .select_from(NetworkFeature)
-            .where(
-                NetworkFeature.feeder_id == Feeder.id,
-                func.ST_Intersects(AOI.geometry, NetworkFeature.geometry),
-            )
-            .correlate(Feeder, AOI)
-            .exists()
-        )
-        aoi_json = func.jsonb_build_object(
-            "id",
-            AOI.id,
-            "name",
-            AOI.name,
-            "description",
-            AOI.description,
-            "geometry_data",
-            cast(func.ST_AsGeoJSON(AOI.geometry), JSONB),
-        )
-        aois_data = (
-            select(
-                func.coalesce(
-                    func.jsonb_agg(
-                        aggregate_order_by(
-                            aoi_json,
-                            AOI.name,
-                            AOI.id,
-                        )
-                    ),
-                    empty_array,
-                )
-            )
-            .where(intersecting_feature_exists)
-            .correlate(Feeder)
-            .scalar_subquery()
-        )
-
         result = await self.session.execute(
             select(
                 Feeder.id,
@@ -149,7 +109,6 @@ class UtilityNetworkRepository:
                 Feeder.is_active,
                 features_data.label("features_data"),
                 associations_data.label("associations_data"),
-                aois_data.label("aois_data"),
             ).where(Feeder.id == feeder_id)
         )
         row = result.one_or_none()
@@ -162,5 +121,4 @@ class UtilityNetworkRepository:
             is_active=row.is_active,
             features_data=row.features_data,
             associations_data=row.associations_data,
-            aois_data=row.aois_data,
         )

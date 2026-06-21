@@ -6,7 +6,6 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.utility_network import (
-    AOI,
     Feeder,
     NetworkAssociation,
     NetworkFeature,
@@ -29,7 +28,6 @@ async def remove_canonical_dataset(session: AsyncSession) -> None:
     )
     await session.execute(delete(NetworkFeature).where(NetworkFeature.feeder_id == feeder_id))
     await session.execute(delete(Feeder).where(Feeder.id == feeder_id))
-    await session.execute(delete(AOI).where(AOI.id == UTILITY_DATASET_SPEC.aoi.id))
     await session.commit()
 
 
@@ -52,14 +50,9 @@ def test_seed_persists_complete_valid_dataset() -> None:
                 NetworkAssociation.feeder_id == result.feeder_id
             )
         )
-        aoi_count = await session.scalar(
-            select(func.count(AOI.id)).where(AOI.id == UTILITY_DATASET_SPEC.aoi.id)
-        )
-
         assert result.created is True
         assert feature_count == 19
         assert association_count == 9
-        assert aoi_count == 1
 
     run_in_rollback_transaction(scenario)
 

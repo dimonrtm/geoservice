@@ -9,7 +9,7 @@ from seeds.services.seed_work_order_service import (
     SeedWorkOrderDependencyError,
     SeedWorkOrderService,
 )
-from seeds.specs.seed_work_order_specs import SEED_WORK_ORDER_SPEC
+from seeds.specs.seed_work_order_specs import SEED_WORK_ORDER_AOI_SPEC, SEED_WORK_ORDER_SPEC
 
 
 class FakeSession:
@@ -25,7 +25,7 @@ class FakeSession:
 def dependency_objects() -> tuple[SimpleNamespace, SimpleNamespace, SimpleNamespace]:
     user = SimpleNamespace(id="user-id", email=SEED_WORK_ORDER_SPEC.assignee_email)
     feeder = SimpleNamespace(id="feeder-id", code=SEED_WORK_ORDER_SPEC.feeder_code)
-    aoi = SimpleNamespace(id="aoi-id", name="Район-1")
+    aoi = SimpleNamespace(id=SEED_WORK_ORDER_AOI_SPEC.id, name=SEED_WORK_ORDER_AOI_SPEC.name)
     return user, feeder, aoi
 
 
@@ -35,6 +35,7 @@ def test_seed_creates_work_order_when_absent_and_dependencies_exist() -> None:
     created = SimpleNamespace(id=SEED_WORK_ORDER_SPEC.id, code=SEED_WORK_ORDER_SPEC.code)
     work_order_repository = AsyncMock()
     work_order_repository.get_work_order_by_code.return_value = None
+    work_order_repository.ensure_aoi.return_value = aoi
     work_order_repository.create_work_order.return_value = created
     work_order_repository.ensure_default_state_for_work_order.return_value = SimpleNamespace(
         id="default-state-id"
@@ -43,7 +44,6 @@ def test_seed_creates_work_order_when_absent_and_dependencies_exist() -> None:
     user_repository.get_by_email.return_value = user
     utility_dataset_repository = AsyncMock()
     utility_dataset_repository.get_feeder_by_code.return_value = feeder
-    utility_dataset_repository.get_first_aoi.return_value = aoi
     service = SeedWorkOrderService(
         session,
         work_order_repository,
@@ -60,9 +60,10 @@ def test_seed_creates_work_order_when_absent_and_dependencies_exist() -> None:
     utility_dataset_repository.get_feeder_by_code.assert_awaited_once_with(
         SEED_WORK_ORDER_SPEC.feeder_code
     )
-    utility_dataset_repository.get_first_aoi.assert_awaited_once_with()
+    work_order_repository.ensure_aoi.assert_awaited_once_with()
     work_order_repository.create_work_order.assert_awaited_once_with(
         SEED_WORK_ORDER_SPEC,
+        aoi_id=aoi.id,
         assignee_user_id=user.id,
         created_by_user_id=user.id,
     )
@@ -74,10 +75,11 @@ def test_seed_creates_work_order_when_absent_and_dependencies_exist() -> None:
 
 def test_seed_is_noop_when_work_order_already_exists() -> None:
     session = FakeSession()
-    _, feeder, _ = dependency_objects()
+    _, feeder, aoi = dependency_objects()
     existing = SimpleNamespace(id=SEED_WORK_ORDER_SPEC.id, code=SEED_WORK_ORDER_SPEC.code)
     work_order_repository = AsyncMock()
     work_order_repository.get_work_order_by_code.return_value = existing
+    work_order_repository.ensure_aoi.return_value = aoi
     work_order_repository.ensure_default_state_for_work_order.return_value = SimpleNamespace(
         id="default-state-id"
     )
@@ -99,7 +101,7 @@ def test_seed_is_noop_when_work_order_already_exists() -> None:
     utility_dataset_repository.get_feeder_by_code.assert_awaited_once_with(
         SEED_WORK_ORDER_SPEC.feeder_code
     )
-    utility_dataset_repository.get_first_aoi.assert_not_awaited()
+    work_order_repository.ensure_aoi.assert_awaited_once_with()
     work_order_repository.create_work_order.assert_not_awaited()
     work_order_repository.ensure_default_state_for_work_order.assert_awaited_once_with(
         work_order_id=existing.id,
@@ -129,7 +131,7 @@ def test_seed_fails_with_clear_message_when_existing_work_order_feeder_is_missin
         f"Не найден feeder для seed WorkOrder: {SEED_WORK_ORDER_SPEC.feeder_code}"
     )
     user_repository.get_by_email.assert_not_awaited()
-    utility_dataset_repository.get_first_aoi.assert_not_awaited()
+    work_order_repository.ensure_aoi.assert_not_awaited()
     work_order_repository.create_work_order.assert_not_awaited()
     work_order_repository.ensure_default_state_for_work_order.assert_not_awaited()
 
@@ -145,7 +147,6 @@ def test_seed_fails_with_clear_message_when_existing_work_order_feeder_is_missin
             "feeder",
             f"Не найден feeder для seed WorkOrder: {SEED_WORK_ORDER_SPEC.feeder_code}",
         ),
-        ("aoi", "Не найден AOI для seed WorkOrder."),
     ],
 )
 def test_seed_fails_when_required_dependency_is_missing(
@@ -156,15 +157,13 @@ def test_seed_fails_when_required_dependency_is_missing(
     user, feeder, aoi = dependency_objects()
     work_order_repository = AsyncMock()
     work_order_repository.get_work_order_by_code.return_value = None
+    work_order_repository.ensure_aoi.return_value = aoi
     work_order_repository.ensure_default_state_for_work_order.return_value = None
     user_repository = AsyncMock()
     user_repository.get_by_email.return_value = None if missing_dependency == "user" else user
     utility_dataset_repository = AsyncMock()
     utility_dataset_repository.get_feeder_by_code.return_value = (
         None if missing_dependency == "feeder" else feeder
-    )
-    utility_dataset_repository.get_first_aoi.return_value = (
-        None if missing_dependency == "aoi" else aoi
     )
     service = SeedWorkOrderService(
         session,
@@ -177,4 +176,5 @@ def test_seed_fails_when_required_dependency_is_missing(
         asyncio.run(service.ensure_work_order())
 
     assert expected_message in str(exc_info.value)
+    work_order_repository.ensure_aoi.assert_not_awaited()
     work_order_repository.create_work_order.assert_not_awaited()

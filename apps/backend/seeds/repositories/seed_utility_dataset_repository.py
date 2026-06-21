@@ -3,7 +3,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.utility_network import (
-    AOI,
     Feeder,
     NetworkAssociation,
     NetworkFeature,
@@ -19,17 +18,7 @@ class SeedUtilityDatasetRepository:
         result = await self.session.execute(select(Feeder).where(Feeder.code == code))
         return result.scalars().one_or_none()
 
-    async def get_first_aoi(self) -> AOI | None:
-        result = await self.session.execute(select(AOI).order_by(AOI.name, AOI.id).limit(1))
-        return result.scalars().one_or_none()
-
     async def create_dataset(self, spec: SeedUtilityDatasetSpec) -> Feeder:
-        aoi = AOI(
-            id=spec.aoi.id,
-            name=spec.aoi.name,
-            description=spec.aoi.description,
-            geometry=WKTElement(spec.aoi.geometry_wkt, srid=4326),
-        )
         feeder = Feeder(
             id=spec.feeder.id,
             code=spec.feeder.code,
@@ -50,7 +39,7 @@ class SeedUtilityDatasetRepository:
             )
             for feature in spec.features
         ]
-        self.session.add_all([aoi, feeder, *features])
+        self.session.add_all([feeder, *features])
         await self.session.flush()
 
         associations = [

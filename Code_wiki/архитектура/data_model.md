@@ -3,8 +3,8 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-20
-source: repository-change:2026-06-20
+updated: 2026-06-21
+source: repository-change:2026-06-21
 tags: [database, postgis, sqlalchemy, geojson]
 ---
 
@@ -17,18 +17,19 @@ tags: [database, postgis, sqlalchemy, geojson]
 - `user.users`: `id`, `email`, `password_hash`, `role`, `created_at`.
 - `layers`: `id`, `name`, `title`, `geometry_type`, `srid`, `storage_table`.
 - Feature tables: `feature_points`, `feature_lines`, `feature_polygons`, `feature_multipoints`, `feature_multilines`, `feature_multipolygons`.
-- Utility schema `utility_network`: `aois`, `feeders`, `network_features`,
+- Utility schema `utility_network`: `feeders`, `network_features`,
   `network_associations`, `network_states`, per-WorkOrder `default_states`,
   `default_state_features`, `default_state_associations`.
-- Work-order schema `work_order`: `work_orders`, `edit_versions`,
+- Work-order schema `work_order`: `aois`, `work_orders`, `edit_versions`,
   `edit_version_features`, `edit_version_associations`.
 
 `utility_network` хранит актуальную инженерную сеть и baseline-срезы для
-конкретных work orders. `work_order` хранит агрегат задачи и рабочую копию
-этого baseline. Cross-schema связи между будущими сервисными границами не
+конкретных work orders, но не владеет AOI. `work_order` хранит агрегат задачи,
+`scope.aoi` и рабочую копию baseline. Cross-schema связи между будущими сервисными границами не
 закрепляются внешними ключами: идентификаторы пользователя, work order и
 сетевого baseline связываются через repositories/application layer. Внутри одной
 схемы FK остаются допустимы для внутренних таблиц агрегата или baseline-среза.
+`work_order.work_orders.aoi_id` имеет FK только на `work_order.aois.id`.
 
 Каждая feature table содержит:
 
@@ -50,10 +51,16 @@ tags: [database, postgis, sqlalchemy, geojson]
 
 Pagination использует `id > after_id`, сортировку `id ASC`, лимит `limit + 1` и `next_cursor` как id последней возвращенной строки, если результат был truncated.
 
-`UtilityNetworkRepository.get_feeder_aggregate` читает весь feeder одним SQL
-statement. Features, associations и AOI формируются независимыми correlated
-JSONB subqueries; AOI проверяют наличие пересекающего feature через
-`EXISTS`/`ST_Intersects`.
+`UtilityNetworkRepository.get_feeder_aggregate` читает feeder одним SQL statement
+и возвращает его features/associations без AOI: рабочая область больше не часть
+`utility_network`.
+
+`WorkOrderRepository.get_workspace_aggregate` читает workspace для пары
+`work_order_id`/`edit_version_id`: `WorkOrder`, `EditVersion`, `work_order.AOI`,
+features из `edit_version_features`, пересекающие AOI через `ST_Intersects`, и
+associations, у которых оба endpoint feature попали в рабочую область. Geometry
+возвращается как GeoJSON через `ST_AsGeoJSON(...).cast(JSONB)`, AOI дополнительно
+возвращает extent.
 
 ## Миграции И Seed
 
@@ -81,11 +88,19 @@ Alembic migrations лежат в
   `base_network_revision`, статус `open` и partial unique index
   `uq_edit_versions_open_work_order` для запрета двух открытых версий одного
   work order.
-- `f2b3c4d5e6a7_sprint1_schema_boundaries.py` является repair-миграцией для
-  уже поднятых dev volumes: создает схемы `user`/`work_order`, переносит
+- `f2b3c4d5e6a7_sprint1_schema_boundaries.py` является schema-boundary миграцией:
+  создает схемы `user`/`work_order`, переносит
   `public.users` в `user.users` при необходимости, удаляет legacy
-  `utility_network.work_orders`/`utility_network.edit_versions` и создает
-  новую схему таблиц без compatibility views.
+  `utility_network.work_orders`/`utility_network.edit_versions`/`utility_network.aois`,
+  создает `work_order.aois`, `work_order.work_orders` с обязательным `aoi_id`
+  и новую схему таблиц без compatibility views.
+- `c9d0e1f2a3b4_repair_work_order_aoi_scope.py` является repair-миграцией для
+  dev/CI volumes, где `alembic_version` уже помечен как `f2b3c4d5e6a7`, но
+  физическая таблица `work_order.work_orders` осталась без `aoi_id`. Миграция
+  создает `work_order.aois` при необходимости, переносит строки из legacy
+  `utility_network.aois`, добавляет `work_orders.aoi_id`, backfill'ит
+  отсутствующий scope fallback AOI, восстанавливает `fk_work_orders_aoi` и
+  `ix_work_orders_aoi_id`, затем удаляет legacy `utility_network.aois`.
 
 `DefaultState.base_network_revision` должен совпадать с актуальной версией
 сети, от которой сделан срез. При `post` несовпадение этой версии с текущей
@@ -98,17 +113,17 @@ operation state и версии.
 После migrations backend запускает module runners demo users и utility
 dataset. `synthetic_utility_feeder_01` создаётся атомарно только при отсутствии
 feeder с этим code; существующий aggregate не синхронизируется и не
-перезаписывается.
+перезаписывается. Utility dataset seed больше не создаёт AOI.
 
 `seed_work_order_specs.py` и `SeedWorkOrderService` задают create-once seed
 `WO-001`: задача назначается `alexey.editor@example.local`, а feeder
 `synthetic_utility_feeder_01` используется только как источник сетевого среза
 для `DefaultState`. Assignee читается через `SeedUserRepository`, feeder
 dependencies читаются через `SeedUtilityDatasetRepository`, а
-`SeedWorkOrderRepository` отвечает за work-order-specific операции и создание
-per-WorkOrder `DefaultState`. Если `WO-001` уже существует, seed не меняет
-assignee, status, title или description, но гарантирует наличие активного
-`DefaultState` для этого work order.
+`SeedWorkOrderRepository` отвечает за work-order-specific операции, создание
+`work_order.AOI` scope и per-WorkOrder `DefaultState`. Если `WO-001` уже существует, seed не меняет
+assignee, status, title или description, но гарантирует наличие `work_order.AOI`
+и активного `DefaultState` для этого work order.
 
 ## Связанные Ноды
 

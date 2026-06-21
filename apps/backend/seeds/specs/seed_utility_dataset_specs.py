@@ -13,14 +13,6 @@ UTILITY_FEEDER_CODE = "synthetic_utility_feeder_01"
 
 
 @dataclass(frozen=True)
-class SeedAOISpec:
-    id: UUID
-    name: str
-    description: str
-    geometry_wkt: str
-
-
-@dataclass(frozen=True)
 class SeedFeederSpec:
     id: UUID
     code: str
@@ -50,7 +42,6 @@ class SeedNetworkAssociationSpec:
 
 @dataclass(frozen=True)
 class SeedUtilityDatasetSpec:
-    aoi: SeedAOISpec
     feeder: SeedFeederSpec
     features: tuple[SeedNetworkFeatureSpec, ...]
     associations: tuple[SeedNetworkAssociationSpec, ...]
@@ -273,15 +264,6 @@ ASSOCIATION_EDGES = (
 
 
 UTILITY_DATASET_SPEC = SeedUtilityDatasetSpec(
-    aoi=SeedAOISpec(
-        id=stable_uuid("0100"),
-        name="Район-1",
-        description="Рабочая область демонстрационного фидера.",
-        geometry_wkt=(
-            "POLYGON ((65.495 44.795, 65.545 44.795, "
-            "65.545 44.835, 65.495 44.835, 65.495 44.795))"
-        ),
-    ),
     feeder=SeedFeederSpec(
         id=UTILITY_FEEDER_ID,
         code=UTILITY_FEEDER_CODE,

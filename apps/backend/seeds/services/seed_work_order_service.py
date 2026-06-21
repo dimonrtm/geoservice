@@ -47,6 +47,7 @@ class SeedWorkOrderService:
                     raise SeedWorkOrderDependencyError(
                         f"Не найден feeder для seed WorkOrder: {SEED_WORK_ORDER_SPEC.feeder_code}"
                     )
+                await self.repository.ensure_aoi()
                 await self.repository.ensure_default_state_for_work_order(
                     work_order_id=existing.id,
                     feeder_id=feeder.id,
@@ -78,12 +79,11 @@ class SeedWorkOrderService:
                     f"Не найден feeder для seed WorkOrder: {SEED_WORK_ORDER_SPEC.feeder_code}"
                 )
 
-            aoi = await self.utility_dataset_repository.get_first_aoi()
-            if aoi is None:
-                raise SeedWorkOrderDependencyError("Не найден AOI для seed WorkOrder.")
+            aoi = await self.repository.ensure_aoi()
 
             work_order = await self.repository.create_work_order(
                 SEED_WORK_ORDER_SPEC,
+                aoi_id=aoi.id,
                 assignee_user_id=assignee.id,
                 created_by_user_id=assignee.id,
             )

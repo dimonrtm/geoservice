@@ -22,6 +22,12 @@ def upgrade() -> None:
 
     op.execute(sa.text("DROP TABLE IF EXISTS utility_network.edit_versions CASCADE"))
     op.execute(sa.text("DROP TABLE IF EXISTS utility_network.work_orders CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.aois CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_version_associations CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_version_features CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_versions CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.work_orders CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.aois CASCADE"))
 
     op.execute(
         sa.text(
@@ -59,19 +65,56 @@ def upgrade() -> None:
     op.execute(
         sa.text(
             """
+            CREATE TABLE IF NOT EXISTS work_order.aois (
+                id uuid PRIMARY KEY,
+                name varchar(200) NOT NULL,
+                description text NULL,
+                geometry geometry(GEOMETRY, 4326) NOT NULL,
+                created_at timestamptz NOT NULL DEFAULT now(),
+                updated_at timestamptz NOT NULL DEFAULT now(),
+                CONSTRAINT ck_aois_geometry_not_empty
+                    CHECK (NOT ST_IsEmpty(geometry)),
+                CONSTRAINT ck_aois_geometry_valid
+                    CHECK (ST_IsValid(geometry)),
+                CONSTRAINT ck_aois_geometry_srid
+                    CHECK (ST_SRID(geometry) = 4326),
+                CONSTRAINT ck_aois_geometry_type
+                    CHECK (GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON'))
+            )
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
+            CREATE INDEX IF NOT EXISTS ix_aois_geometry
+            ON work_order.aois
+            USING gist (geometry)
+            """
+        )
+    )
+
+    op.execute(
+        sa.text(
+            """
             CREATE TABLE IF NOT EXISTS work_order.work_orders (
                 id uuid PRIMARY KEY,
                 code varchar(100) NOT NULL,
                 title varchar(200) NOT NULL,
                 description text NULL,
                 status varchar(16) NOT NULL DEFAULT 'assigned',
+                aoi_id uuid NOT NULL,
                 assignee_user_id uuid NOT NULL,
                 created_by_user_id uuid NOT NULL,
                 created_at timestamptz NOT NULL DEFAULT now(),
                 updated_at timestamptz NOT NULL DEFAULT now(),
                 CONSTRAINT uq_work_orders_code UNIQUE (code),
                 CONSTRAINT ck_work_orders_status
-                    CHECK (status IN ('assigned', 'in_progress'))
+                    CHECK (status IN ('assigned', 'in_progress')),
+                CONSTRAINT fk_work_orders_aoi
+                    FOREIGN KEY (aoi_id)
+                    REFERENCES work_order.aois(id)
+                    ON DELETE RESTRICT
             )
             """
         )
@@ -81,6 +124,14 @@ def upgrade() -> None:
             """
             CREATE INDEX IF NOT EXISTS ix_work_orders_assignee_user_id
             ON work_order.work_orders (assignee_user_id)
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
+            CREATE INDEX IF NOT EXISTS ix_work_orders_aoi_id
+            ON work_order.work_orders (aoi_id)
             """
         )
     )
@@ -334,4 +385,12 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    pass
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_version_associations CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_version_features CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.edit_versions CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_state_associations CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_state_features CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.default_states CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.network_states CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.work_orders CASCADE"))
+    op.execute(sa.text("DROP TABLE IF EXISTS work_order.aois CASCADE"))

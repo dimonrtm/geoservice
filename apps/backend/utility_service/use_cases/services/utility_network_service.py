@@ -53,23 +53,11 @@ class UtilityNetworkService:
                 )
                 for feature in aggregate.features_data
             ]
-            aoi_features = [
-                UtilityGeoJSONFeatureOut(
-                    id=aoi["id"],
-                    geometry=aoi["geometry_data"],
-                    properties={
-                        "name": aoi["name"],
-                        "description": aoi["description"],
-                    },
-                )
-                for aoi in aggregate.aois_data
-            ]
             return UtilityFeederOut(
                 id=aggregate.id,
                 code=aggregate.code,
                 name=aggregate.name,
                 is_active=aggregate.is_active,
-                aois=UtilityFeatureCollectionOut(features=aoi_features),
                 network=UtilityFeatureCollectionOut(features=network_features),
                 associations=[
                     UtilityAssociationOut(**association)

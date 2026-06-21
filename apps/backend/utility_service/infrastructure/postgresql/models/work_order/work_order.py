@@ -8,6 +8,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     Enum as SAEnum,
+    ForeignKey,
     Index,
     String,
     Text,
@@ -15,9 +16,10 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from utility_service.infrastructure.postgresql.models.base import Base
+from utility_service.infrastructure.postgresql.models.work_order.aoi import AOI
 
 
 class WorkOrderStatus(str, enum.Enum):
@@ -34,6 +36,7 @@ class WorkOrder(Base):
             name="ck_work_orders_status",
         ),
         Index("ix_work_orders_assignee_user_id", "assignee_user_id"),
+        Index("ix_work_orders_aoi_id", "aoi_id"),
         Index("ix_work_orders_created_by_user_id", "created_by_user_id"),
         Index("ix_work_orders_status", "status"),
         {"schema": "work_order"},
@@ -61,6 +64,15 @@ class WorkOrder(Base):
         default=WorkOrderStatus.ASSIGNED,
         server_default=WorkOrderStatus.ASSIGNED.value,
     )
+    aoi_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey(
+            "work_order.aois.id",
+            name="fk_work_orders_aoi",
+            ondelete="RESTRICT",
+        ),
+        nullable=False,
+    )
     assignee_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     created_by_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -74,3 +86,4 @@ class WorkOrder(Base):
         server_default=func.now(),
         onupdate=func.now(),
     )
+    aoi: Mapped[AOI] = relationship()

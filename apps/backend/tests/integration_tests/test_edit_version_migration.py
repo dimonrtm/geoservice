@@ -13,6 +13,8 @@ from tests.integration_tests.network_db_support import require_db_tests
 APP_ROOT = Path(__file__).resolve().parents[2]
 PREVIOUS_REVISION = "e4b7a9c2d5f8"
 EDIT_VERSION_REVISION = "a8c1f2d3e4b5"
+SCHEMA_BOUNDARY_REVISION = "f2b3c4d5e6a7"
+SCHEMA_REPAIR_REVISION = "c9d0e1f2a3b4"
 NETWORK_SCHEMA = "utility_network"
 WORK_ORDER_SCHEMA = "work_order"
 UTILITY_BASELINE_TABLES = {
@@ -22,6 +24,8 @@ UTILITY_BASELINE_TABLES = {
     "default_state_associations",
 }
 EDIT_VERSION_TABLES = {
+    "aois",
+    "work_orders",
     "edit_versions",
     "edit_version_features",
     "edit_version_associations",
@@ -32,6 +36,11 @@ REQUIRED_CONSTRAINTS = {
     "uq_default_states_work_order",
     "ck_default_states_base_network_revision_positive",
     "fk_default_states_network_state",
+    "ck_aois_geometry_not_empty",
+    "ck_aois_geometry_valid",
+    "ck_aois_geometry_srid",
+    "ck_aois_geometry_type",
+    "fk_work_orders_aoi",
     "fk_edit_versions_work_order",
     "ck_edit_versions_base_network_revision_positive",
     "ck_edit_versions_status",
@@ -97,12 +106,49 @@ def read_indexes(schema_name: str) -> set[str]:
     )
 
 
+def column_exists(schema_name: str, table_name: str, column_name: str) -> bool:
+    return (
+        asyncio.run(
+            scalar_set(
+                """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = :schema_name
+              AND table_name = :table_name
+              AND column_name = :column_name
+            """,
+                {
+                    "schema_name": schema_name,
+                    "table_name": table_name,
+                    "column_name": column_name,
+                },
+            )
+        )
+        == {column_name}
+    )
+
+
+def utility_network_aoi_exists() -> bool:
+    return (
+        asyncio.run(
+            scalar_set(
+                """
+            SELECT to_regclass('utility_network.aois')::text
+            """
+            )
+        )
+        != {None}
+    )
+
+
 def assert_edit_version_schema_contract() -> None:
     assert read_tables(NETWORK_SCHEMA, UTILITY_BASELINE_TABLES) == UTILITY_BASELINE_TABLES
     assert read_tables(WORK_ORDER_SCHEMA, EDIT_VERSION_TABLES) == EDIT_VERSION_TABLES
+    assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is True
     constraints = read_constraints(NETWORK_SCHEMA) | read_constraints(WORK_ORDER_SCHEMA)
     assert REQUIRED_CONSTRAINTS.issubset(constraints)
     assert REQUIRED_INDEXES.issubset(read_indexes(WORK_ORDER_SCHEMA))
+    assert utility_network_aoi_exists() is False
 
 
 def assert_edit_version_schema_absent() -> None:
@@ -115,19 +161,36 @@ def test_edit_version_migration_upgrade_downgrade_upgrade_cycle() -> None:
     config = alembic_config()
 
     try:
-        command.upgrade(config, EDIT_VERSION_REVISION)
+        command.upgrade(config, SCHEMA_REPAIR_REVISION)
         assert_edit_version_schema_contract()
 
         command.downgrade(config, PREVIOUS_REVISION)
         assert_edit_version_schema_absent()
 
-        command.upgrade(config, EDIT_VERSION_REVISION)
+        command.upgrade(config, SCHEMA_REPAIR_REVISION)
         assert_edit_version_schema_contract()
 
         command.downgrade(config, PREVIOUS_REVISION)
         assert_edit_version_schema_absent()
 
+        command.upgrade(config, SCHEMA_REPAIR_REVISION)
+        assert_edit_version_schema_contract()
+    finally:
+        command.upgrade(config, "head")
+
+
+def test_schema_repair_migration_handles_stamped_boundary_without_aoi_id() -> None:
+    require_db_tests()
+    config = alembic_config()
+
+    try:
+        command.downgrade(config, PREVIOUS_REVISION)
         command.upgrade(config, EDIT_VERSION_REVISION)
+        assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is False
+
+        command.stamp(config, SCHEMA_BOUNDARY_REVISION)
+        command.upgrade(config, SCHEMA_REPAIR_REVISION)
+
         assert_edit_version_schema_contract()
     finally:
         command.upgrade(config, "head")
@@ -140,6 +203,7 @@ WITH demo_work_order AS (
         code,
         title,
         status,
+        aoi_id,
         assignee_user_id,
         created_by_user_id
     )
@@ -148,6 +212,7 @@ WITH demo_work_order AS (
         'WO-EDIT-VERSION-CONCURRENCY',
         'EditVersion uniqueness check',
         'assigned',
+        '55555555-5555-4555-8555-555555555554',
         '22222222-2222-4222-8222-222222222222',
         '22222222-2222-4222-8222-222222222222'
     )
@@ -181,17 +246,35 @@ VALUES
     )
 """
 
+OPEN_VERSION_AOI_SQL = """
+INSERT INTO work_order.aois (
+    id,
+    name,
+    geometry
+)
+VALUES (
+    '55555555-5555-4555-8555-555555555554',
+    'EditVersion uniqueness AOI',
+    ST_GeomFromText(
+        'POLYGON ((65.495 44.795, 65.545 44.795, 65.545 44.835, 65.495 44.835, 65.495 44.795))',
+        4326
+    )
+)
+ON CONFLICT (id) DO NOTHING
+"""
+
 
 def test_open_edit_version_partial_unique_index_blocks_duplicates() -> None:
     require_db_tests()
     config = alembic_config()
-    command.upgrade(config, EDIT_VERSION_REVISION)
+    command.upgrade(config, SCHEMA_REPAIR_REVISION)
 
     async def insert_duplicates() -> str:
         engine = create_async_engine(os.environ["DATABASE_URL"])
         try:
             try:
                 async with engine.begin() as connection:
+                    await connection.execute(text(OPEN_VERSION_AOI_SQL))
                     await connection.execute(text(OPEN_VERSION_DUPLICATE_SQL))
             except Exception as exc:
                 return str(exc)

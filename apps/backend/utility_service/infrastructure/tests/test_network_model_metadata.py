@@ -3,7 +3,6 @@ from sqlalchemy.orm import configure_mappers
 
 from utility_service.infrastructure.postgresql.models.user import User
 from utility_service.infrastructure.postgresql.models.utility_network import (
-    AOI,
     AssociationType,
     DefaultState,
     DefaultStateAssociation,
@@ -16,6 +15,7 @@ from utility_service.infrastructure.postgresql.models.utility_network import (
     NetworkState,
 )
 from utility_service.infrastructure.postgresql.models.work_order import (
+    AOI,
     EditVersion,
     EditVersionAssociation,
     EditVersionFeature,
@@ -44,7 +44,6 @@ def test_utility_network_package_exports_public_contract() -> None:
     from utility_service.infrastructure.postgresql.models import utility_network
 
     assert set(utility_network.__all__) == {
-        "AOI",
         "AssociationType",
         "DefaultState",
         "DefaultStateAssociation",
@@ -62,6 +61,7 @@ def test_work_order_package_exports_public_contract() -> None:
     from utility_service.infrastructure.postgresql.models import work_order
 
     assert set(work_order.__all__) == {
+        "AOI",
         "EditVersion",
         "EditVersionAssociation",
         "EditVersionFeature",
@@ -77,6 +77,7 @@ def test_user_model_uses_user_schema() -> None:
 
 
 def test_work_order_models_use_work_order_schema() -> None:
+    assert AOI.__table__.schema == "work_order"
     assert WorkOrder.__table__.schema == "work_order"
     assert EditVersion.__table__.schema == "work_order"
     assert EditVersionFeature.__table__.schema == "work_order"
@@ -91,7 +92,7 @@ def test_new_utility_baseline_models_use_utility_network_schema() -> None:
 
 
 def test_work_order_has_no_cross_schema_foreign_keys() -> None:
-    assert foreign_key_targets(WorkOrder) == set()
+    assert foreign_key_targets(WorkOrder) == {"work_order.aois.id"}
     assert foreign_key_targets(EditVersion) == {"work_order.work_orders.id"}
     assert foreign_key_targets(EditVersionFeature) == {"work_order.edit_versions.id"}
     assert foreign_key_targets(EditVersionAssociation) == {
@@ -106,9 +107,9 @@ def test_default_state_uses_plain_work_order_reference() -> None:
     assert "work_order.work_orders.id" not in foreign_key_targets(DefaultState)
 
 
-def test_aoi_metadata_contains_geometry_guards() -> None:
+def test_work_order_aoi_metadata_contains_geometry_guards() -> None:
     assert AOI.__tablename__ == "aois"
-    assert AOI.__table__.schema == "utility_network"
+    assert AOI.__table__.schema == "work_order"
     assert {column.name for column in AOI.__table__.columns} == {
         "id",
         "name",
@@ -294,13 +295,16 @@ def test_work_order_metadata_contains_aggregate_guards() -> None:
         "title",
         "description",
         "status",
+        "aoi_id",
         "assignee_user_id",
         "created_by_user_id",
         "created_at",
         "updated_at",
     }
+    assert WorkOrder.__table__.c.aoi_id.nullable is False
     assert {
         "uq_work_orders_code",
+        "fk_work_orders_aoi",
         "ck_work_orders_status",
     }.issubset(constraint_names(WorkOrder))
     assert any(
@@ -317,6 +321,7 @@ def test_work_order_declares_lookup_indexes() -> None:
     }
 
     assert indexes == {
+        "ix_work_orders_aoi_id": ("aoi_id",),
         "ix_work_orders_assignee_user_id": ("assignee_user_id",),
         "ix_work_orders_created_by_user_id": ("created_by_user_id",),
         "ix_work_orders_status": ("status",),

@@ -31,7 +31,7 @@ class AOI(Base):
             name="ck_aois_geometry_type",
         ),
         Index("ix_aois_geometry", "geometry", postgresql_using="gist"),
-        {"schema": "utility_network"},
+        {"schema": "work_order"},
     )
 
     id: Mapped[uuid.UUID] = mapped_column(

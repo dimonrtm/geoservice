@@ -35,6 +35,10 @@ def test_seed_creates_complete_dataset_when_feeder_is_absent() -> None:
     repository.create_dataset.assert_awaited_once_with(UTILITY_DATASET_SPEC)
 
 
+def test_utility_dataset_spec_no_longer_contains_aoi() -> None:
+    assert not hasattr(UTILITY_DATASET_SPEC, "aoi")
+
+
 def test_seed_is_noop_when_feeder_already_exists() -> None:
     session = FakeSession()
     existing = SimpleNamespace(

@@ -7,13 +7,13 @@ from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.utility_network import (
-    AOI,
     AssociationType,
     Feeder,
     FeatureType,
     NetworkAssociation,
     NetworkFeature,
 )
+from utility_service.infrastructure.postgresql.models.work_order import AOI
 from tests.integration_tests.network_db_support import run_in_rollback_transaction
 
 
@@ -121,10 +121,10 @@ def test_utility_tables_are_isolated_from_public_schema() -> None:
             )
         )
         assert set(result) == {
-            ("utility_network", "aois"),
             ("utility_network", "feeders"),
             ("utility_network", "network_associations"),
             ("utility_network", "network_features"),
+            ("work_order", "aois"),
         }
 
     run_in_rollback_transaction(scenario)

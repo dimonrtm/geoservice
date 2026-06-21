@@ -38,7 +38,6 @@ from utility_service.infrastructure.postgresql.models.feature_polygon import (  
 from utility_service.infrastructure.postgresql.models.layer import Layer  # noqa: E402, F401
 from utility_service.infrastructure.postgresql.models.user import User  # noqa: E402, F401
 from utility_service.infrastructure.postgresql.models.utility_network import (  # noqa: E402, F401
-    AOI,
     AssociationType,
     DefaultState,
     DefaultStateAssociation,
@@ -51,6 +50,7 @@ from utility_service.infrastructure.postgresql.models.utility_network import (  
     NetworkState,
 )
 from utility_service.infrastructure.postgresql.models.work_order import (  # noqa: E402, F401
+    AOI,
     EditVersion,
     EditVersionAssociation,
     EditVersionFeature,

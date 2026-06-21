@@ -25,6 +25,7 @@ from utility_service.use_cases.services.realtime_connection_manager import (
 )
 from utility_service.use_cases.services.utility_network_service import UtilityNetworkService
 from utility_service.use_cases.services.work_order_service import WorkOrderService
+from utility_service.use_cases.services.workspace_service import WorkspaceService
 
 
 def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
@@ -74,6 +75,16 @@ def get_edit_version_service(
         UserRepository(session),
         WorkOrderRepository(session),
         DefaultStateRepository(session),
+    )
+
+
+def get_workspace_service(
+    session: AsyncSession = Depends(get_session),
+) -> WorkspaceService:
+    return WorkspaceService(
+        session,
+        UserRepository(session),
+        WorkOrderRepository(session),
     )
 
 

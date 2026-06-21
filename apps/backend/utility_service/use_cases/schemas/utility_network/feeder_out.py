@@ -15,6 +15,5 @@ class UtilityFeederOut(BaseModel):
     code: str
     name: str
     is_active: bool = Field(serialization_alias="isActive")
-    aois: UtilityFeatureCollectionOut
     network: UtilityFeatureCollectionOut
     associations: list[UtilityAssociationOut]
