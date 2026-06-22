@@ -54,7 +54,7 @@ migrations -> demo users seed -> utility dataset seed -> work orders seed
 ### Не входит
 
 - публичные endpoints `/api/v1/work-orders/...`;
-- frontend `My Work Orders`;
+- frontend `Мои наряды`;
 - `EditVersion` model или API;
 - workspace API;
 - reviewer queue, approve/reject и post;
@@ -195,7 +195,7 @@ user, feeder или AOI внутри work order seed.
 
 - День 6 превращает результаты Дней 2-5 в проверяемую backend цепочку перед следующими
   интенсивными днями.
-- Следующий backend этап сможет добавлять `My Work Orders` или `EditVersion` поверх проверенных
+- Следующий backend этап сможет добавлять `Мои наряды` или `EditVersion` поверх проверенных
   seed и FK relationships.
 - Minimal startup wiring допустим только для существующего work order seed; любые новые
   пользовательские workflow остаются вне scope.

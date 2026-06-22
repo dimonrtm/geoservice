@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-06-21
-source: repository-change:2026-06-21
+updated: 2026-06-22
+source: repository-change:2026-06-22
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -47,6 +47,14 @@ Frontend хранит token в `localStorage`, добавляет `Authorization
 
 ## Work Orders API
 
+- `GET /api/v1/work-orders/assigned-to-me` возвращает текущему активному
+  `Editor` список всех назначенных ему work orders. Endpoint не открывает
+  `EditVersion`, не меняет `WorkOrder.status` и нужен для shell `Мои наряды`
+  после login.
+- Response имеет компактную форму `{ "workOrders": [...] }`, где каждый элемент
+  содержит только `id`, `code`, `title`, `description`, `status`; audit/internal
+  date fields не публикуются. Backend сортирует список по внутреннему
+  `updated_at DESC`, затем `code ASC` для стабильного порядка.
 - `POST /api/v1/work-orders/{work_order_id}/edit-versions` открывает edit
   version для назначенного work order текущего `Editor`.
 - При первом открытии endpoint создает `EditVersion` как deep copy активного

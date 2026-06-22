@@ -3,8 +3,8 @@ title: Local Development
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-20
-source: repository-change:2026-06-20
+updated: 2026-06-22
+source: repository-change:2026-06-22
 tags: [dev-setup, docker, backend, frontend]
 ---
 
@@ -63,8 +63,10 @@ per-WorkOrder `DefaultState`, скопированный из текущего
 `synthetic_utility_feeder_01`.
 
 Legacy credentials `editor@example.com` и `viewer@example.com` удалены.
-`Editor` видит существующий map/editor workspace. `Reviewer` видит отдельный
-placeholder без editor workspace; reviewer queue ещё не реализована.
+После login `Editor` попадает на экран `Мои наряды`: список назначенных ему work
+orders и пустую карту с basemap. Выбор work order только подсвечивает строку в
+списке; `EditVersion` не открывается до отдельного явного workflow. `Reviewer`
+видит отдельный placeholder без editor workspace; reviewer queue ещё не реализована.
 
 ## Переменные
 

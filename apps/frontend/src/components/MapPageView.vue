@@ -4,7 +4,7 @@ import MapView from "./MapView.vue";
 
 <template>
   <div class="appRoot">
-    <MapView class="mapSlot" />
+    <MapView class="mapSlot" mode="editing" />
   </div>
 </template>
 <style scoped>

@@ -39,7 +39,7 @@
    но публично будет использован только при создании `EditVersion` в
    следующем backend-этапе.
 
-Такой подход не смешивает День 5 с будущими `EditVersion` и `My Work Orders`,
+Такой подход не смешивает День 5 с будущими `EditVersion` и `Мои наряды`,
 но оставляет проверяемую модель для следующего вертикального шага.
 
 ## Граница Scope
@@ -58,7 +58,7 @@
 ### Не Входит
 
 - HTTP endpoints `/api/v1/work-orders/...`;
-- frontend `My Work Orders`;
+- frontend `Мои наряды`;
 - `EditVersion` model или API;
 - workspace API;
 - reviewer queue, approve/reject и post;

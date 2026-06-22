@@ -84,7 +84,7 @@ Backlog определяет порядок реализации Спринта 
 - повторный запуск не создает дубли;
 - integrity test подтверждает связи и стабильные codes.
 
-## S1-05. My Work Orders API И Assignment Authorization
+## S1-05. Мои наряды API И Assignment Authorization
 
 Результат: `Editor` получает только назначенные ему work orders.
 
@@ -128,7 +128,7 @@ Backlog определяет порядок реализации Спринта 
 - чужая version не раскрывается;
 - contract tests покрывают AC-04, AC-05, AC-06 и AC-07.
 
-## S1-08. Frontend My Work Orders
+## S1-08. Frontend Мои наряды
 
 Результат: после login `Editor` видит русскоязычный список назначенных задач.
 

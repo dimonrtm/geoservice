@@ -9,9 +9,11 @@ from fastapi.testclient import TestClient
 from utility_service.use_cases.deps import (
     get_auth_service,
     get_edit_version_service,
+    get_work_order_service,
     get_workspace_service,
 )
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
+from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut, WorkOrderSummaryOut
 from utility_service.use_cases.schemas.workspace import (
     WorkspaceAoiOut,
     WorkspaceEditVersionOut,
@@ -30,6 +32,7 @@ def build_app(
     auth_service: object,
     edit_version_service: object,
     workspace_service: object | None = None,
+    work_order_service: object | None = None,
 ) -> FastAPI:
     app = FastAPI()
     install_exception_handlers(app)
@@ -38,6 +41,8 @@ def build_app(
     app.dependency_overrides[get_edit_version_service] = lambda: edit_version_service
     if workspace_service is not None:
         app.dependency_overrides[get_workspace_service] = lambda: workspace_service
+    if work_order_service is not None:
+        app.dependency_overrides[get_work_order_service] = lambda: work_order_service
     return app
 
 
@@ -64,6 +69,20 @@ def edit_version(work_order_id, owner_user_id):
         base_network_revision=12,
         created_at=now,
         last_opened_at=now,
+    )
+
+
+def work_order_summary(
+    *,
+    code: str = "WO-001",
+    status: str = "assigned",
+):
+    return SimpleNamespace(
+        id=uuid4(),
+        code=code,
+        title=f"Наряд {code}",
+        description=f"Описание {code}",
+        status=SimpleNamespace(value=status),
     )
 
 
@@ -118,6 +137,137 @@ def test_open_edit_version_returns_201_when_created() -> None:
     assert response.json()["editVersion"]["status"] == "open"
     assert response.json()["editVersion"]["baseNetworkRevision"] == 12
     edit_version_service.open_for_work_order.assert_awaited_once_with(work_order_id, user_id)
+
+
+def test_list_assigned_to_me_returns_compact_work_orders_without_audit_fields() -> None:
+    auth_service, token, user_id = auth_context("editor")
+    edit_version_service = AsyncMock()
+    work_order_service = AsyncMock()
+    assigned = work_order_summary(code="WO-002", status="in_progress")
+    work_order_service.list_assigned_to_editor.return_value = AssignedWorkOrdersOut(
+        work_orders=[
+            WorkOrderSummaryOut(
+                id=assigned.id,
+                code=assigned.code,
+                title=assigned.title,
+                description=assigned.description,
+                status=assigned.status.value,
+            )
+        ]
+    )
+
+    response = TestClient(
+        build_app(
+            auth_service,
+            edit_version_service,
+            work_order_service=work_order_service,
+        )
+    ).get(
+        "/api/v1/work-orders/assigned-to-me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload == {
+        "workOrders": [
+            {
+                "id": str(assigned.id),
+                "code": "WO-002",
+                "title": "Наряд WO-002",
+                "description": "Описание WO-002",
+                "status": "in_progress",
+            }
+        ]
+    }
+    assert "updatedAt" not in payload["workOrders"][0]
+    assert "createdAt" not in payload["workOrders"][0]
+    work_order_service.list_assigned_to_editor.assert_awaited_once_with(user_id)
+
+
+def test_list_assigned_to_me_returns_empty_list() -> None:
+    auth_service, token, user_id = auth_context("editor")
+    edit_version_service = AsyncMock()
+    work_order_service = AsyncMock()
+    work_order_service.list_assigned_to_editor.return_value = AssignedWorkOrdersOut(work_orders=[])
+
+    response = TestClient(
+        build_app(
+            auth_service,
+            edit_version_service,
+            work_order_service=work_order_service,
+        )
+    ).get(
+        "/api/v1/work-orders/assigned-to-me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"workOrders": []}
+    work_order_service.list_assigned_to_editor.assert_awaited_once_with(user_id)
+
+
+def test_reviewer_is_denied_before_assigned_work_orders_service_call() -> None:
+    auth_service, token, _ = auth_context("reviewer")
+    edit_version_service = AsyncMock()
+    work_order_service = AsyncMock()
+
+    response = TestClient(
+        build_app(
+            auth_service,
+            edit_version_service,
+            work_order_service=work_order_service,
+        )
+    ).get(
+        "/api/v1/work-orders/assigned-to-me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["code"] == "ROLE_NOT_ALLOWED"
+    work_order_service.list_assigned_to_editor.assert_not_awaited()
+
+
+def test_list_assigned_to_me_preserves_service_order() -> None:
+    auth_service, token, _ = auth_context("editor")
+    edit_version_service = AsyncMock()
+    work_order_service = AsyncMock()
+    first = work_order_summary(code="WO-002", status="in_progress")
+    second = work_order_summary(code="WO-001", status="assigned")
+    work_order_service.list_assigned_to_editor.return_value = AssignedWorkOrdersOut(
+        work_orders=[
+            WorkOrderSummaryOut(
+                id=first.id,
+                code=first.code,
+                title=first.title,
+                description=first.description,
+                status=first.status.value,
+            ),
+            WorkOrderSummaryOut(
+                id=second.id,
+                code=second.code,
+                title=second.title,
+                description=second.description,
+                status=second.status.value,
+            ),
+        ]
+    )
+
+    response = TestClient(
+        build_app(
+            auth_service,
+            edit_version_service,
+            work_order_service=work_order_service,
+        )
+    ).get(
+        "/api/v1/work-orders/assigned-to-me",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert [item["code"] for item in response.json()["workOrders"]] == [
+        "WO-002",
+        "WO-001",
+    ]
 
 
 def test_open_edit_version_returns_200_when_reopened() -> None:

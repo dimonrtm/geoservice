@@ -22,7 +22,7 @@ Related files:
 ## Context
 
 Acceptance охватывает путь
-`Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace` и
+`Login -> Мои наряды -> Create/Open EditVersion -> Edit Workspace` и
 защитные проверки чужого `WorkOrder`, неверной роли, дублирования активной
 version и поврежденного доменного контекста. Editing, validation, reconcile,
 review и post не входят в Спринт 1.

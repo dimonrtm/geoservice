@@ -25,6 +25,8 @@
 - [EditVersion от Default Дня 8](2026-06-19-sprint-1-day-8-edit-version-from-default-design.md)
 - [Workspace API и AOI в контексте WorkOrder Дня 10](2026-06-21-sprint-1-day-10-workspace-api-design.md)
 - [План реализации Workspace API и AOI в контексте WorkOrder Дня 10](2026-06-21-sprint-1-day-10-workspace-api-implementation-plan.md)
+- [Мои наряды Интенсива 11](2026-06-22-sprint-1-day-11-my-work-orders-design.md)
+- [План реализации Мои наряды Интенсива 11](2026-06-22-sprint-1-day-11-my-work-orders-implementation-plan.md)
 
 ## Исторические Материалы
 

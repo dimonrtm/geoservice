@@ -9,6 +9,7 @@ import pytest
 from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import WorkOrderStatus
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
+from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut
 from utility_service.use_cases.services.work_order_service import WorkOrderService
 
 
@@ -24,6 +25,8 @@ def work_order(
     return SimpleNamespace(
         id=uuid4(),
         code="WO-001",
+        title="Проверка участка",
+        description="Описание наряда",
         assignee_user_id=assignee_user_id,
         status=status,
     )
@@ -62,6 +65,59 @@ def test_get_assigned_work_order_allows_active_assigned_editor() -> None:
     assert result is assigned
     user_repository.get_by_id.assert_awaited_once_with(actor.id)
     work_order_repository.get_by_id.assert_awaited_once_with(assigned.id)
+
+
+def test_list_assigned_to_editor_loads_actor_and_returns_assigned_work_orders_out() -> None:
+    actor = user()
+    assigned = [
+        work_order(actor.id, status=WorkOrderStatus.IN_PROGRESS),
+        work_order(actor.id, status=WorkOrderStatus.ASSIGNED),
+    ]
+    work_order_repository = AsyncMock()
+    work_order_repository.list_assigned_to_user.return_value = assigned
+    user_repository = AsyncMock()
+    user_repository.get_by_id.return_value = actor
+    service = WorkOrderService(
+        session=None,
+        repository=work_order_repository,
+        user_repository=user_repository,
+    )
+
+    result = asyncio.run(service.list_assigned_to_editor(actor.id))
+
+    assert isinstance(result, AssignedWorkOrdersOut)
+    assert [item.id for item in result.work_orders] == [item.id for item in assigned]
+    assert [item.code for item in result.work_orders] == ["WO-001", "WO-001"]
+    assert [item.title for item in result.work_orders] == [
+        "Проверка участка",
+        "Проверка участка",
+    ]
+    assert [item.description for item in result.work_orders] == [
+        "Описание наряда",
+        "Описание наряда",
+    ]
+    assert [item.status for item in result.work_orders] == ["in_progress", "assigned"]
+    user_repository.get_by_id.assert_awaited_once_with(actor.id)
+    work_order_repository.list_assigned_to_user.assert_awaited_once_with(actor.id)
+
+
+def test_list_assigned_to_editor_rejects_reviewer() -> None:
+    actor = user(UserRole.REVIEWER)
+    work_order_repository = AsyncMock()
+    user_repository = AsyncMock()
+    user_repository.get_by_id.return_value = actor
+    service = WorkOrderService(
+        session=None,
+        repository=work_order_repository,
+        user_repository=user_repository,
+    )
+
+    with pytest.raises(WorkOrderApiError) as exc_info:
+        asyncio.run(service.list_assigned_to_editor(actor.id))
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "ROLE_NOT_ALLOWED"
+    work_order_repository.list_assigned_to_user.assert_not_awaited()
 
 
 @pytest.mark.parametrize(

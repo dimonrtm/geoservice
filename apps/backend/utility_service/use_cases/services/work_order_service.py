@@ -12,6 +12,7 @@ from utility_service.infrastructure.postgresql.repositories.work_order_repositor
 )
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
+from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut, WorkOrderSummaryOut
 
 
 class WorkOrderService:
@@ -25,9 +26,21 @@ class WorkOrderService:
         self.repository = repository
         self.user_repository = user_repository
 
-    async def list_assigned_to_editor(self, actor_id: UUID) -> list[WorkOrder]:
+    async def list_assigned_to_editor(self, actor_id: UUID) -> AssignedWorkOrdersOut:
         actor = await self.get_actor(actor_id)
-        return await self.repository.list_assigned_to_user(actor.id)
+        work_orders = await self.repository.list_assigned_to_user(actor.id)
+        return AssignedWorkOrdersOut(
+            work_orders=[
+                WorkOrderSummaryOut(
+                    id=work_order.id,
+                    code=work_order.code,
+                    title=work_order.title,
+                    description=work_order.description,
+                    status=getattr(work_order.status, "value", work_order.status),
+                )
+                for work_order in work_orders
+            ]
+        )
 
     async def get_assigned_work_order(self, work_order_id: UUID, actor_id: UUID) -> WorkOrder:
         actor = await self.get_actor(actor_id)

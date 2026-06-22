@@ -51,7 +51,7 @@ class WorkOrderRepository:
         result = await self.session.execute(
             select(WorkOrder)
             .where(WorkOrder.assignee_user_id == user_id)
-            .order_by(WorkOrder.created_at, WorkOrder.code)
+            .order_by(WorkOrder.updated_at.desc(), WorkOrder.code.asc())
         )
         return list(result.scalars().all())
 

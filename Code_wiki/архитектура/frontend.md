@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-05-30
-source: repository-snapshot:2026-05-30
+updated: 2026-06-22
+source: repository-change:2026-06-22
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -15,19 +15,26 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 ## Входные Точки
 
 - `src/main.ts` подключает MapLibre CSS, общий CSS, Pinia и монтирует `App.vue`.
-- `src/App.vue` восстанавливает auth session, показывает `LoginScreen` или авторизованную страницу с `MapPageView`.
-- `src/components/MapView.vue` является основным рабочим экраном карты, выбора слоя, сохранения/удаления и realtime-индикатора.
+- `src/App.vue` восстанавливает auth session, показывает `LoginScreen` или role-specific авторизованную страницу: `EditorWorkOrdersView` для `Editor`, reviewer home для `Reviewer`.
+- `src/components/EditorWorkOrdersView.vue` является стартовым экраном `Editor` после login: слева показывает панель `Мои наряды`, справа пустую карту с basemap.
+- `src/components/MapView.vue` является основным рабочим экраном карты, выбора слоя, сохранения/удаления и realtime-индикатора. В `mode="empty"` компонент создает только MapLibre basemap без layers/features/realtime/editing overlay.
 
 ## State И API
 
 - `src/stores/auth.ts` хранит token/user в `localStorage`, восстанавливает сессию через `/api/v1/auth/me`, очищает состояние при 401.
 - `src/stores/edit.ts` хранит polygon edit session, dirty-state, validation errors и version conflict handling.
+- `src/stores/workOrders.ts` хранит назначенные текущему `Editor` work orders, loading/error state и локальный `selectedWorkOrderId`; выбор в списке только подсвечивает строку и не открывает edit version.
 - `src/api/http.ts` централизует axios base URL и добавляет Bearer token из Pinia.
 - `src/api/layers.ts` оборачивает layer/feature HTTP API и превращает HTTP failures в `HttpError`.
+- `src/api/workOrders.ts` вызывает `GET /api/v1/work-orders/assigned-to-me` и использует компактный response contract без audit/internal date fields.
 
 ## Карта И Загрузка Данных
 
 MapLibre создается в `src/composables/map/useMapInstance.ts` с центром `[70.1902, 52.937]` и zoom `8`.
+
+`MapPageView` передает `MapView mode="editing"` для существующего editor workspace.
+`EditorWorkOrdersView` передает `MapView mode="empty"`, поэтому карта показывает только
+подложку и не инициирует загрузку слоев, features, realtime connection или polygon editing.
 
 Основные composables:
 

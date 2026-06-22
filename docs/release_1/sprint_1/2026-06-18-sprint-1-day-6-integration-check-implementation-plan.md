@@ -342,7 +342,7 @@ Expected: PASS. If the local machine has no configured PostgreSQL/PostGIS test d
 Run from repo root:
 
 ```powershell
-rg -n "work-orders|EditVersion|My Work Orders|reviewer queue|approve|reject|post" apps\frontend apps\backend\utility_service\web_api docs\release_1\sprint_1\2026-06-18-sprint-1-day-6-integration-check-implementation-plan.md
+rg -n "work-orders|EditVersion|Мои наряды|reviewer queue|approve|reject|post" apps\frontend apps\backend\utility_service\web_api docs\release_1\sprint_1\2026-06-18-sprint-1-day-6-integration-check-implementation-plan.md
 ```
 
 Expected: matches are limited to documentation text or existing files; no new Work Orders public API, frontend, `EditVersion`, reviewer workflow, or post behavior is introduced by Day 6 implementation.

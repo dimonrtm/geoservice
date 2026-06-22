@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <div class="toolbar">
+    <div v-if="props.mode === 'editing'" class="toolbar">
       <div class="modal">
         <h3>Выберите слой</h3>
         <select v-model="activeLayerId" @change="onChangeLayer">
@@ -18,7 +18,11 @@
 
     <div class="mapRoot">
       <div class="badge">{{ labelText }}</div>
-      <div class="realtimeBadge" :class="realtimeBadgeClass">
+      <div
+        v-if="props.mode === 'editing'"
+        class="realtimeBadge"
+        :class="realtimeBadgeClass"
+      >
         {{ realtimeStatusText }}
       </div>
       <div ref="mapEl" class="mapCanvas"></div>
@@ -37,6 +41,14 @@ import { useLayerSelection } from "@/composables/map/useLayerSelection";
 import { useMapInstance } from "@/composables/map/useMapInstance";
 import { usePolygonEditing } from "@/composables/map/usePolygonEditing";
 
+const props = withDefaults(
+  defineProps<{
+    mode?: "empty" | "editing";
+  }>(),
+  {
+    mode: "editing",
+  },
+);
 const mapEl = ref<HTMLDivElement | null>(null);
 const auth = useAuthStore();
 const { map, createMap, destroyMap } = useMapInstance(mapEl);
@@ -136,6 +148,11 @@ onMounted(async () => {
   try {
     const currentMap = await createMap();
     if (!currentMap) {
+      return;
+    }
+
+    if (props.mode === "empty") {
+      labelText.value = "Карта готова. Выберите наряд в списке.";
       return;
     }
 

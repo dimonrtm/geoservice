@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 
+import EditorWorkOrdersView from "./components/EditorWorkOrdersView.vue";
 import LoginScreen from "./components/LoginScreen.vue";
-import MapPageView from "./components/MapPageView.vue";
 import ReviewerHome from "./components/ReviewerHome.vue";
 import { getRoleLabel, isEditorRole } from "@/domain/authRole";
 import { useAuthStore } from "@/stores/auth";
@@ -71,7 +71,7 @@ onMounted(() => {
       </div>
 
       <div class="content">
-        <MapPageView v-if="showEditorWorkspace" class="mapSlot" />
+        <EditorWorkOrdersView v-if="showEditorWorkspace" class="mapSlot" />
         <ReviewerHome v-else />
       </div>
     </div>

@@ -18,7 +18,7 @@ reconcile или post. Результатом является documentation bas
 
 | Область | Проверенный источник | Итог сверки | Решение |
 |---|---|---|---|
-| Acceptance | `2026-06-12-sprint-1-day-1-acceptance-design.md` | Цель Спринта 1 остается `Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace`. Дни 2-6 закрывают backend prerequisites, но еще не реализуют пользовательский путь целиком. | Считать Дни 8-12 ответственными за `EditVersion`, workspace API и frontend. |
+| Acceptance | `2026-06-12-sprint-1-day-1-acceptance-design.md` | Цель Спринта 1 остается `Login -> Мои наряды -> Create/Open EditVersion -> Edit Workspace`. Дни 2-6 закрывают backend prerequisites, но еще не реализуют пользовательский путь целиком. | Считать Дни 8-12 ответственными за `EditVersion`, workspace API и frontend. |
 | API | `2026-06-12-sprint-1-day-1-api-contract-design.md` | Дневной baseline сохраняет error `code`, HTTP semantics и русскоязычный `message`. День 2 сознательно уточнил `WORK_ORDER_NOT_ASSIGNED` для локальной диагностики. | Перед добавлением routes нужно явно выбрать, где маскировать чужой `WorkOrder` как `404`, а где оставлять доменный `403 WORK_ORDER_NOT_ASSIGNED`. |
 | Roles | `2026-06-13-sprint-1-day-2-roles-access-design.md` | `Editor` и `Reviewer` разделены; `Reviewer` входит в систему, но не получает editor workspace и не становится assignee. | Reviewer queue, approve/reject и post остаются вне Sprint 1. |
 | Network Data | `2026-06-14-sprint-1-day-3-network-model-design.md`, `2026-06-15-sprint-1-day-4-utility-dataset-design.md` | `AOI`, `Feeder`, `NetworkFeature` и `NetworkAssociation` дают read-only основу будущего workspace. | Не добавлять editing, validation, topology recalculation или clipping behavior в День 8. |

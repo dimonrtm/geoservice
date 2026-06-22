@@ -5,15 +5,32 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
 
-from utility_service.use_cases.deps import get_edit_version_service, get_workspace_service
+from utility_service.use_cases.deps import (
+    get_edit_version_service,
+    get_work_order_service,
+    get_workspace_service,
+)
 from utility_service.use_cases.schemas.edit_version import EditVersionOut, OpenEditVersionOut
+from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut
 from utility_service.use_cases.schemas.workspace import WorkspaceOut
 from utility_service.use_cases.services.edit_version_service import EditVersionService
+from utility_service.use_cases.services.work_order_service import WorkOrderService
 from utility_service.use_cases.services.workspace_service import WorkspaceService
 from utility_service.web_api.api.auth import require_editor
 
 
 work_orders_router = APIRouter(prefix="/api/v1/work-orders", tags=["work-orders"])
+
+
+@work_orders_router.get(
+    "/assigned-to-me",
+    response_model=AssignedWorkOrdersOut,
+)
+async def list_assigned_to_me(
+    user: Any = Depends(require_editor),
+    work_order_service: WorkOrderService = Depends(get_work_order_service),
+) -> AssignedWorkOrdersOut:
+    return await work_order_service.list_assigned_to_editor(user.id)
 
 
 @work_orders_router.post(

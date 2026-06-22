@@ -14,7 +14,7 @@ Related files:
 
 ## Context
 
-Спринт создает первый рабочий участок utility workflow: `Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace`. Выбран вертикальный подход, чтобы backend, seed, API и frontend проверялись совместно до конца спринта.
+Спринт создает первый рабочий участок utility workflow: `Login -> Мои наряды -> Create/Open EditVersion -> Edit Workspace`. Выбран вертикальный подход, чтобы backend, seed, API и frontend проверялись совместно до конца спринта.
 
 ## Actions
 

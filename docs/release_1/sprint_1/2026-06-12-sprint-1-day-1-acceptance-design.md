@@ -9,7 +9,7 @@
 участка Спринта 1:
 
 ```text
-Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace
+Login -> Мои наряды -> Create/Open EditVersion -> Edit Workspace
 ```
 
 Сценарий подтверждает, что назначенный `Editor` может открыть изолированный
@@ -38,7 +38,7 @@ reconcile, review и post остаются за границей Спринта 
 
 1. `alexey.editor` входит в систему.
 2. Система выдает Bearer token.
-3. Пользователь открывает `My Work Orders`.
+3. Пользователь открывает `Мои наряды`.
 4. Система показывает только назначенные ему work orders, включая `WO-001`.
 
 Критерии:

@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-20
-source: repository-change:2026-06-20
+updated: 2026-06-22
+source: repository-change:2026-06-22
 tags: [ci, tests, lint, build]
 ---
 
@@ -66,6 +66,9 @@ Frontend jobs используют Node 20 и `npm ci` в `apps/frontend`, за�
 - `npm run build`
 
 Frontend unit tests лежат рядом с TypeScript modules как `*.test.ts`.
+Vitest использует `jsdom`, поэтому CI покрывает не только store/contract modules,
+но и Vue component shell tests для `App.vue`, `EditorWorkOrdersView.vue` и
+`MapView.vue`.
 
 ## Wiki Checks
 

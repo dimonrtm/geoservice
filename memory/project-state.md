@@ -24,10 +24,10 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/lint-wiki`: 2026-06-22, через bundled Python найдены ожидаемые `missing_frontmatter` для 25 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний `/ingest repository-change`: 2026-06-22, существующие ноды
-  `Code_wiki` синхронизированы с переносом AOI в `work_order`, nested
-  Workspace API `/api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}/workspace`,
-  отсутствием AOI в Utility Network API, seed ownership через `SeedWorkOrderRepository`
-  и repair/idempotent migration contract для schema-boundary откатов.
+  `Code_wiki` синхронизированы с экраном `Мои наряды`: Editor-only
+  `GET /api/v1/work-orders/assigned-to-me`, compact response без audit/date
+  fields, backend сортировка `updated_at DESC`, `code ASC`, frontend shell
+  `EditorWorkOrdersView`, `MapView mode="empty"` и jsdom component tests.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
@@ -38,7 +38,7 @@ GeoService - исследовательский pet-проект на стади
 - Необработанные RAW inputs: не обнаружены; все 26 RAW sources отражены в `RAW_inputs/index.md`.
 - Новые RAW inputs с прошлого `/sync-vision`: не обнаружены.
 - Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-22-geometry-association-conflict-f5]].
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; обновлены существующие ноды [[../Code_wiki/архитектура/data_model]], [[../Code_wiki/архитектура/api_and_realtime]] и [[../Code_wiki/состояние_проекта/repository_change_ingest]] после repository-change ingest 2026-06-21/22.
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; обновлены существующие ноды [[../Code_wiki/архитектура/data_model]], [[../Code_wiki/архитектура/api_and_realtime]], [[../Code_wiki/архитектура/frontend]], [[../Code_wiki/dev_setup/local_development]], [[../Code_wiki/сборка/ci_and_quality]], [[../Code_wiki/правила_и_стиль/testing_strategy]] и [[../Code_wiki/состояние_проекта/repository_change_ingest]] после repository-change ingest 2026-06-21/22.
 - Stale-ноды: не обнаружены.
 - Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 24 RAW Markdown files, product validation `FU-2026-06-13-002` и Release 2 user validation `FU-2026-06-14-001`; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
 - Открытые follow-up'ы: 12.
@@ -57,7 +57,7 @@ GeoService - исследовательский pet-проект на стади
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.
 - Нужно отдельной implementation/docs-задачей согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset script, demo сценарий, troubleshooting, `PostGIS seed`, `auth`.
-- Нужно продолжить Спринт 1 после готовых roles/access, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder` и создания `EditVersion` из per-WorkOrder `DefaultState`; следующий scope - frontend shell и дальнейшие шаги workflow.
+- Нужно продолжить Спринт 1 после готовых roles/access, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создания `EditVersion` из per-WorkOrder `DefaultState` и экрана `Мои наряды`; следующий scope - явный переход из выбранного work order к дальнейшим шагам workflow.
 - Нужно реализовать audit/reset contract: audit переживает restart и обычный reset; `full-clean` удаляет всё; обязательны healthcheck, logs, correlation ID и понятные UI errors.
 - Нужно выполнить repeatable benchmark P50/P95 для draft performance targets на reference hardware.
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.

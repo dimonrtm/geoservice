@@ -8,7 +8,7 @@
 Сформировать доменную основу нового Release 1 и реализовать первый рабочий участок сценария:
 
 ```text
-Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace
+Login -> Мои наряды -> Create/Open EditVersion -> Edit Workspace
 ```
 
 К концу спринта `Editor` входит в систему, видит назначенный `WorkOrder`, создает или открывает связанную `EditVersion` и просматривает соответствующий участок utility network.
@@ -33,7 +33,7 @@ Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace
 - `WorkOrder`, назначение исполнителю и список назначенных задач;
 - создание и повторное открытие `EditVersion`;
 - workspace API;
-- frontend `My Work Orders`;
+- frontend `Мои наряды`;
 - начальный `Edit Workspace` с AOI, сетью и состоянием version;
 - интеграционная и демонстрационная проверка первого участка workflow.
 
@@ -67,7 +67,7 @@ Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace
 | 8    | Интенсивный | Edit versions              | Реализовано создание `EditVersion` от определенного состояния `Default`.                |
 | 9    | Интенсивный | Повторное открытие version | Повторный вход открывает существующую `EditVersion` без создания дублей.                |
 | 10   | Интенсивный | Workspace API              | API возвращает work order, AOI, version и рабочий участок сети.                         |
-| 11   | Интенсивный | `My Work Orders`           | После login `Editor` видит только назначенные ему work orders.                          |
+| 11   | Интенсивный | `Мои наряды`               | После login `Editor` видит только назначенные ему work orders.                          |
 | 12   | Интенсивный | `Edit Workspace`           | Переход из work order открывает карту с AOI, сетью и состоянием version.                |
 | 13   | Облегченный | End-to-end интеграция      | Проверен полный путь `login -> work order -> edit version -> workspace`.                |
 | 14   | Облегченный | Приемка и резерв           | Проведены demo и регрессия, исправлены блокеры, зафиксированы результаты и ограничения. |

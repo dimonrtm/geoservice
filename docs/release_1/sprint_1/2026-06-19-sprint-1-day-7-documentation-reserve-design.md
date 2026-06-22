@@ -58,7 +58,7 @@ frontend scope, но снижает риск обнаружить несовме
 - публичные endpoints `/api/v1/work-orders/...`;
 - `EditVersion` model или API;
 - workspace API;
-- frontend `My Work Orders` или `Edit Workspace`;
+- frontend `Мои наряды` или `Edit Workspace`;
 - reviewer queue, approve/reject, validation, reconcile или post;
 - reset/full-clean для demo dataset;
 - repository-change ingest как обязательный шаг.
@@ -69,7 +69,7 @@ frontend scope, но снижает риск обнаружить несовме
 
 | Область | Источник Истинности | Что Сверить | Результат |
 |---|---|---|---|
-| Acceptance | `2026-06-12-sprint-1-day-1-acceptance-design.md` | `Login -> My Work Orders -> Create/Open EditVersion -> Edit Workspace` остается целью Спринта 1, но Дни 2-6 покрывают только backend foundation | Не расширять День 7 до пользовательского workflow |
+| Acceptance | `2026-06-12-sprint-1-day-1-acceptance-design.md` | `Login -> Мои наряды -> Create/Open EditVersion -> Edit Workspace` остается целью Спринта 1, но Дни 2-6 покрывают только backend foundation | Не расширять День 7 до пользовательского workflow |
 | API | `2026-06-12-sprint-1-day-1-api-contract-design.md` | Error `code`, HTTP semantics и masking policy не противоречат новым role/work-order ошибкам | Уточнения оформить как documentation alignment, не как новый endpoint |
 | Roles | `2026-06-13-sprint-1-day-2-roles-access-design.md` | `Editor` и `Reviewer` существуют, separation of duties сохраняется | `Reviewer` не становится assignee и не получает workflow в Sprint 1 |
 | Network Data | `2026-06-14-sprint-1-day-3-network-model-design.md`, `2026-06-15-sprint-1-day-4-utility-dataset-design.md` | `AOI`, `Feeder`, features и associations остаются read-only baseline для workspace | Не добавлять editing, validation или topology recalculation |

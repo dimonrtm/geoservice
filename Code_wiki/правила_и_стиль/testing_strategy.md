@@ -3,8 +3,8 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-20
-source: repository-change:2026-06-20
+updated: 2026-06-22
+source: repository-change:2026-06-22
 tags: [testing, backend, frontend, quality]
 ---
 
@@ -47,6 +47,9 @@ Backend integration tests лежат в `apps/backend/tests/integration_tests`.
 - edit version metadata, aggregate `WorkOrderRepository`, `DefaultState`
   repository lookup, `EditVersionService` rules, Work Orders API open/reopen
   behavior, `baseNetworkRevision` response contract и structured errors;
+- Work Orders `assigned-to-me` API contract, Editor-only access, compact response
+  without audit/date fields, service delegation и repository sorting by
+  `updated_at DESC`, `code ASC`;
 - PostGIS persistence, spatial AOI intersection и single-query feeder aggregate;
 - migration integration test для `a8c1f2d3e4b5_edit_versions.py`, включая
   upgrade/downgrade/upgrade cycle, `utility_network.network_states`,
@@ -61,14 +64,20 @@ Frontend tests находятся рядом с TypeScript modules:
 
 - `stores/auth.test.ts`
 - `stores/edit.test.ts`
+- `stores/workOrders.test.ts`
 - `contracts/geojson.test.ts`
 - `contracts/realtime.test.ts`
 - `map/feature-grid.test.ts`
+- `App.test.ts`
+- `components/EditorWorkOrdersView.test.ts`
+- `components/MapView.test.ts`
 - `composables/map/useFeatureTileCache.test.ts`
 - `composables/map/useLayerRealtime.test.ts`
 
-Тесты покрывают contract guards, auth/edit stores, feature grid/tile cache и realtime
-reconnect/event parsing.
+Тесты покрывают contract guards, auth/edit/workOrders stores, feature grid/tile
+cache, realtime reconnect/event parsing, role-specific app shell, пустой режим
+карты для экрана `Мои наряды` и локальную подсветку выбранного work order. Vitest
+использует `jsdom`, чтобы Vue component tests могли монтировать DOM.
 
 ## Pipeline Tests
 

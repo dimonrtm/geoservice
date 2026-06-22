@@ -11,7 +11,7 @@
 Цель дня - добавить минимальную, но настоящую доменную основу для участка workflow:
 
 ```text
-Login -> My Work Orders -> Create/Open EditVersion
+Login -> Мои наряды -> Create/Open EditVersion
 ```
 
 День 8 не создает workspace API и не добавляет редактирование сети. `EditVersion` в этом design является изолированным рабочим контейнером и фиксирует revision boundary, но не материализует snapshot признаков сети.
@@ -222,7 +222,7 @@ Web API:
 ## Не Входит В День 8
 
 - `GET /api/v1/edit-versions/{editVersionId}/workspace`;
-- frontend `My Work Orders` и `Edit Workspace`;
+- frontend `Мои наряды` и `Edit Workspace`;
 - snapshot сети;
 - change set;
 - редактирование `NetworkFeature` или `NetworkAssociation`;
