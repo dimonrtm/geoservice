@@ -33,9 +33,8 @@ describe("EditorWorkOrdersView", () => {
     ];
     store.loadAssigned = loadAssignedMock;
 
-    const { default: EditorWorkOrdersView } = await import(
-      "@/components/EditorWorkOrdersView.vue"
-    );
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
     expect(loadAssignedMock).toHaveBeenCalledTimes(1);
@@ -60,9 +59,8 @@ describe("EditorWorkOrdersView", () => {
     ];
     store.loadAssigned = loadAssignedMock;
 
-    const { default: EditorWorkOrdersView } = await import(
-      "@/components/EditorWorkOrdersView.vue"
-    );
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
     await wrapper.get('[data-test="work-order-wo-1"]').trigger("click");

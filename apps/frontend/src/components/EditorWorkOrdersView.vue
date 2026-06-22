@@ -64,7 +64,9 @@ function statusLabel(status: string): string {
           >
             <span class="workOrderCode">{{ workOrder.code }}</span>
             <span class="workOrderTitle">{{ workOrder.title }}</span>
-            <span class="workOrderStatus">{{ statusLabel(workOrder.status) }}</span>
+            <span class="workOrderStatus">{{
+              statusLabel(workOrder.status)
+            }}</span>
             <span v-if="workOrder.description" class="workOrderDescription">
               {{ workOrder.description }}
             </span>
