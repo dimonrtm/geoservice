@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-20
+updated: 2026-06-22
 source: null
 tags: [code-wiki, technical-knowledge]
 ---
@@ -31,9 +31,9 @@ tags: [code-wiki, technical-knowledge]
 
 - [[архитектура/backend]] - backend FastAPI, auth, services, repositories и PostGIS.
 - [[архитектура/frontend]] - Vue/MapLibre приложение, state, map composables и polygon editing.
-- [[архитектура/api_and_realtime]] - REST endpoints, WebSocket endpoint, contracts и ошибки.
+- [[архитектура/api_and_realtime]] - REST endpoints, WebSocket endpoint, Workspace API, contracts и ошибки.
 - [[архитектура/api_contract_first_release_requirements]] - desired API contract Release 1 из RAW source.
-- [[архитектура/data_model]] - tables, feature registry, spatial queries, migrations.
+- [[архитектура/data_model]] - tables, feature registry, spatial queries, schema boundaries, AOI scope и migration contracts.
 - [[dev_setup/local_development]] - локальный Docker Compose сценарий и demo users.
 - [[deployment/docker_compose]] - Dockerfile targets и Compose services.
 - [[сборка/ci_and_quality]] - CI jobs, build/test/lint gates и wiki checks.
@@ -43,3 +43,8 @@ tags: [code-wiki, technical-knowledge]
 - [Code compliance matrix](../docs/requirements/release-1-utility-code-compliance.md) - фактические foundation/gap/superseded статусы перед реализацией.
 - [Крупноуровневый план по спринтам](../docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md) - семь двухнедельных продуктовых инкрементов нового Release 1.
 - [Документы Спринта 1](../docs/release_1/sprint_1/README.md) - календарный план, контракты Дня 1, design/implementation plans Дней 2-4, backend foundation Work Orders Дня 5, EditVersion from Default Дня 8 и отделенные исторические generic-планы.
+
+## Свежие Repository-Change Знания
+
+- 2026-06-21: [[архитектура/api_and_realtime]] и [[архитектура/data_model]] отражают Workspace API `GET /api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}/workspace`, перенос AOI в `work_order` и чтение workspace из edit version с фильтрацией по `WorkOrder.scope.aoi`.
+- 2026-06-22: [[архитектура/data_model]] отражает repair/idempotent migration contract для `c9d0e1f2a3b4`, `f2b3c4d5e6a7`, `a8c1f2d3e4b5`, `e4b7a9c2d5f8` и `d3a01f4e9c21`.

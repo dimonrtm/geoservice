@@ -3,8 +3,8 @@ title: Release 2 Conflict Explanation
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-20
-source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md"
+updated: 2026-06-22
+source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f5.md"
 tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-network]
 ---
 
@@ -30,6 +30,13 @@ order, field evidence, screenshots и notes.
 вокруг `medium-voltage line / midspan tap / high-side terminal of transformer`,
 где terminal-aware connectivity association делает сетевое последствие видимым
 лучше, чем чистый geometry conflict.
+
+Ф5 research/design input уточняет rollout: первое demo остается internal
+developer demo, появляется после reconcile и до review/post как decision
+package, а не отдельный dashboard. Главный value signal - меньше внешних
+проверок и быстреее уверенное go/no-go решение; audit quality важен как второй
+эффект, а снижение unsafe/stale post risk остается гипотезой до live
+validation.
 
 Текущий Release 1 не меняется.
 
@@ -115,6 +122,16 @@ MVP boundary:
 - no own topology engine;
 - no full resolve/post workflow parity.
 
+Rollout boundary:
+
+- встроенный step после reconcile и до review/post;
+- один canonical transformer terminal case как основной demo;
+- stale/pre-post failure sidecar как обязательный negative case;
+- no separate dashboard, batch review queue или SLA orchestration в первом
+  rollout;
+- no live ERP/EAM/OMS/ADMS integration, full mobile/offline stack или
+  production-grade external GIS replacement.
+
 Первый `conflict package` содержит:
 
 - `Current / Target / Common Ancestor` или эквивалентные `Mine / Default /
@@ -194,6 +211,12 @@ rule/terminal/controller impact может оставаться `High`.
 
 - UX должен раскрывать детали постепенно и не начинаться с полной таблицы
   атрибутов.
+- Implementation contract должен описать state machine, API/events, audit
+  schema и demo fixtures для consequence package.
+- Support package для developer demo должен включать фиксированный сценарий,
+  fixtures, troubleshooting по dirty/stale/invalid subnetwork, calibration
+  notes по risk tiers, audit examples, known limitations и negative fixture с
+  blocked `post`.
 - Batch review ограничивается однотипными `Simple/Normal` случаями без network
   impact.
 - Queue sorting учитывает `Critical`, SLA, affected service, trace impact,
@@ -216,6 +239,7 @@ rule/terminal/controller impact может оставаться `High`.
 - [[../chats/2026-06-17-geometry-association-conflict-f1]]
 - [[../chats/2026-06-18-geometry-association-conflict-f2]]
 - [[../chats/2026-06-20-geometry-association-conflict-f4]]
+- [[../chats/2026-06-22-geometry-association-conflict-f5]]
 - [[conflict_resolution_routing]]
 - [[conflicts/2026-06-14-trace-risk-tier-boundary]]
 - [[risk_assumption_log]]

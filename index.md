@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-20
+updated: 2026-06-22
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -81,6 +81,11 @@ tags: [knowledge, index, geoservice]
 - 2026-06-20: Выполнен `/sync-vision`; новых RAW inputs и новых Vision/Code_wiki нод нет, обновления Code_wiki от repository-change ingest отражены в индексе и [[memory/project-state]], открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 22 неизменяемых RAW Markdown files.
 - 2026-06-20: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f4.md`; Ф4 сузила Release 2 demo до transformer terminal association scenario, read-only consequence package, routing/audit object и stale/failure case.
 - 2026-06-20: Обработан RAW source `RAW_inputs/documents/UtilityGisEditorRole.md`; уточнена реальная практика роли как owner/editor of authoritative utility network changes, два основных tooling stacks, field sync, topology QA, training и KPI.
+- 2026-06-21: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с переносом AOI в bounded context `work_order`, Workspace API и фильтрацией edit-version workspace по `WorkOrder.scope.aoi`.
+- 2026-06-22: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с repair/idempotent migration contract для schema-boundary откатов и stamped dev/CI volumes.
+- 2026-06-22: Выполнен `/sync-vision`; новых RAW inputs, новых Vision нод и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 24 неизменяемых RAW Markdown files.
+- 2026-06-22: `/discover --context "geometry/association conflict" --phase Ф5` зафиксировал internal developer demo rollout для Release 2 и следующий артефакт `implementation contract`.
+- 2026-06-22: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f5.md`; Ф5 уточнила value signal, placement after reconcile, rollout roles, support package и допустимые claims для Release 2 `geometry/association conflict`.
 
 ## Открытые Вопросы
 
