@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-22
+updated: 2026-06-23
 source: null
 tags: [project-state, geoservice]
 ---
@@ -18,10 +18,10 @@ GeoService - исследовательский pet-проект на стади
 
 ## Состояние Pipeline
 
-- Последний `/discover`: 2026-06-22, Ф5 по `geometry/association conflict` сузила Release 2 rollout до internal developer demo: decision maker, first user и budget owner - `разработчик demo`; следующий артефакт - `implementation contract`.
-- Последний `/ingest`: 2026-06-22, `RAW_inputs/meetings/geometry_association_conflict_f5.md` обработан как Ф5 research/design input для Release 2; уточнены value signal, workflow placement after reconcile, rollout roles, required integrations, non-goals, false-confidence risk, support package, acceptable claims и first rollout scenario.
-- Последний `/sync-vision`: 2026-06-22 18:08 +05:00, корневой индекс, `Code_wiki/index.md` и live state синхронизированы после repository-change ingest 2026-06-21/22; новых RAW inputs и stale-нод нет.
-- Последний `/lint-wiki`: 2026-06-22, через bundled Python найдены ожидаемые `missing_frontmatter` для 25 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/discover`: 2026-06-23, подготовлен checklist Ф6 по `geometry/association conflict` для ограничений и NFR Release 2 `implementation contract`; ответы еще не записаны в RAW.
+- Последний `/ingest`: 2026-06-23, `RAW_inputs/meetings/geometry_association_conflict_f6.md` обработан как Ф6 research/design input для Release 2; уточнены implementation contract boundary, computed vs fixture evidence, state machine, stale rules, hard blockers, audit object, API/events, P95 targets, observability, access constraints и future ADR candidates.
+- Последний `/sync-vision`: 2026-06-23 19:10 +05:00, корневой индекс и live state синхронизированы после ingest `RAW_inputs/meetings/geometry_association_conflict_f5.md`; новых необработанных RAW inputs и stale-нод нет.
+- Последний `/lint-wiki`: 2026-06-23, через bundled Python найдены ожидаемые `missing_frontmatter` для 26 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний `/ingest repository-change`: 2026-06-22, существующие ноды
   `Code_wiki` синхронизированы с экраном `Мои наряды`: Editor-only
@@ -33,15 +33,15 @@ GeoService - исследовательский pet-проект на стади
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
   завершение плана или commit не являются триггерами.
 
-## Состояние Wiki На 2026-06-22
+## Состояние Wiki На 2026-06-23
 
-- Необработанные RAW inputs: не обнаружены; все 26 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs с прошлого `/sync-vision`: не обнаружены.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-22-geometry-association-conflict-f5]].
-- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; обновлены существующие ноды [[../Code_wiki/архитектура/data_model]], [[../Code_wiki/архитектура/api_and_realtime]], [[../Code_wiki/архитектура/frontend]], [[../Code_wiki/dev_setup/local_development]], [[../Code_wiki/сборка/ci_and_quality]], [[../Code_wiki/правила_и_стиль/testing_strategy]] и [[../Code_wiki/состояние_проекта/repository_change_ingest]] после repository-change ingest 2026-06-21/22.
+- Необработанные RAW inputs: не обнаружены; все 27 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: `RAW_inputs/meetings/geometry_association_conflict_f5.md` и `RAW_inputs/meetings/geometry_association_conflict_f6.md`; оба источника уже обработаны через `/ingest`.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-22-geometry-association-conflict-f5]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f6-checklist]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f6]].
+- Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 24 RAW Markdown files, product validation `FU-2026-06-13-002` и Release 2 user validation `FU-2026-06-14-001`; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
-- Открытые follow-up'ы: 12.
+- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 26 RAW Markdown files, product validation `FU-2026-06-13-002`, Release 2 user validation `FU-2026-06-14-001` и implementation contract `FU-2026-06-23-001`; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
+- Открытые follow-up'ы: 13.
 
 ## Открытые Вопросы
 
@@ -66,7 +66,7 @@ GeoService - исследовательский pet-проект на стади
 - Для Release 2 Ф4 demo нужно проверить canonical transformer terminal association scenario, read-only consequence package, `Normal/High/Critical` без преждевременного `Simple`, stale/failure case и audit object.
 - Нужно проверить с реальными представителями роли, подтверждается ли описание `Utility GIS editor` как owner/editor of authoritative utility network changes, включая topology QA, version governance, field/office sync, import cleanup и operational integrations.
 - Для Release 2 нужно сравнить unified evidence context против `ArcGIS native + SOP + expert handoff` и custom internal overlay: измерить внешние trace/check opens, notes/screenshots, handoff и time-to-confident-decision.
-- До implementation contract нужно превратить Release 2 reviewer decision policy и Ф4 consequence package в state machine, API/events, audit schema и demo fixtures.
+- До implementation contract нужно превратить Release 2 reviewer decision policy, Ф4 consequence package и Ф6 package boundary в frozen canonical dataset, state machine, API/events, hard blockers, audit schema, P95/observability и future ADR list.
 - Ф5 rollout подтвердил, что следующий шаг по Release 2 `geometry/association conflict` - именно `implementation contract` для developer demo, а не commercial/on-prem go-to-market.
 - `Operational Utility GIS` хранится только как справочная карта рынка; vendor claims до внешнего использования требуют проверки.
 - Нужно снять manual baseline на 10-20 work orders и затем провести 200-work-order product evaluation с 7-дневным correction window.

@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-22
+updated: 2026-06-23
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -86,6 +86,9 @@ tags: [knowledge, index, geoservice]
 - 2026-06-22: Выполнен `/sync-vision`; новых RAW inputs, новых Vision нод и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 24 неизменяемых RAW Markdown files.
 - 2026-06-22: `/discover --context "geometry/association conflict" --phase Ф5` зафиксировал internal developer demo rollout для Release 2 и следующий артефакт `implementation contract`.
 - 2026-06-22: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f5.md`; Ф5 уточнила value signal, placement after reconcile, rollout roles, support package и допустимые claims для Release 2 `geometry/association conflict`.
+- 2026-06-23: Выполнен `/sync-vision`; RAW source Ф5 уже обработан и отражен в индексах, новых необработанных RAW inputs и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 25 неизменяемых RAW Markdown files.
+- 2026-06-23: `/discover --context "geometry/association conflict" --phase Ф6` подготовил checklist ограничений и NFR для Release 2 `implementation contract`; ответы еще не записаны в RAW.
+- 2026-06-23: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f6.md`; Ф6 уточнила implementation contract boundary, computed evidence, state machine, stale rules, hard blockers, audit object, API/events, P95 и observability для Release 2 `geometry/association conflict`.
 
 ## Открытые Вопросы
 
@@ -99,7 +102,7 @@ tags: [knowledge, index, geoservice]
 - Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить planned policy: package approval vs technical `post`, routing по специализации, совмещение ролей, обязательность approve comment и user validation trace-boundary.
 - Для Release 2 нужно проверить, снижает ли consequence-first explanation внешние проверки и time-to-confident-decision по `geometry/association conflict`, и не дублирует ли UI обычный Conflicts view.
 - Для Release 2 Ф4 demo нужно проверить canonical transformer terminal association scenario, package evidence, `Normal/High/Critical` tiers без преждевременного `Simple`, stale decision handling и audit object.
-- До implementation contract нужно превратить Release 2 reviewer decision policy в state machine, API/events и audit schema.
+- До implementation contract нужно превратить Release 2 reviewer decision policy и Ф6 package boundary в frozen canonical dataset, state machine, API/events, hard blockers, audit schema, P95/observability и future ADR list.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 

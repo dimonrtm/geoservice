@@ -3,8 +3,8 @@ title: Architecture Vision
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-20
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; user answers to /discover --phase Ф8, 2026-06-11; RAW_inputs/meetings/geometry_association_conflict_f4.md"
+updated: 2026-06-23
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; user answers to /discover --phase Ф8, 2026-06-11; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f6.md"
 tags: [solution, architecture, release-1]
 ---
 
@@ -137,6 +137,27 @@ Canonical demo scenario: `medium-voltage line / midspan tap / high-side terminal
 of transformer`, где terminal-aware connectivity association делает trace и
 subnetwork consequence видимыми.
 
+## Release 2 Ф6 Implementation Boundary
+
+Ф6 уточняет implementation contract для first developer demo:
+
+| Component | Responsibility | Boundary |
+|---|---|---|
+| Package API | `GET package summary`, `GET package details`, `POST recompute package`, `POST reviewer decision`, `GET audit record`, `GET package status` или push updates | Не раскрывать raw reconcile/validate/trace/update subnetwork как stable user-facing API в первом demo. |
+| Internal orchestration | version/conflict adapter, diff normalizer, association extractor, dirty area/validation reader, trace executor, subnetwork-status reader, risk-tier classifier, stale detector, audit writer, demo-fixture resolver | Может меняться без breaking frontend contract. |
+| State machine | `draft package`, `ready for review`, `approved`, `stale`, `blocked post`, `escalated`, `repeated review` | Не вводить full production workflow и SLA orchestration. |
+| Evidence split | Core evidence вычисляется из текущей модели; contextual evidence может быть fixture/reference | Frozen replay обязан быть явно маркирован как frozen dataset/checksum. |
+| Audit | Package/version identifiers, evidence refs/hashes, decision block, stale block, final outcome | Audit не зависит только от native conflict-resolution history. |
+
+Hard blockers для Release 2 package:
+
+- unresolved conflicts или post-time re-reconcile required;
+- error dirty areas / network errors в affected scope;
+- dirty areas на claimed trace path или недостоверный trace basis;
+- dirty/invalid affected subnetwork;
+- unresolved association delta, влияющий на connectivity, containment,
+  structural attachment или locatability.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
@@ -144,6 +165,7 @@ subnetwork consequence видимыми.
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - `Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md`
 - `Vision_wiki/chats/2026-06-20-geometry-association-conflict-f4.md`
+- `RAW_inputs/meetings/geometry_association_conflict_f6.md`
 - [[../../Code_wiki/архитектура/api_contract_first_release_requirements]]
 - [[../decisions/release_1_utility_workflow]]
 - [[../chats/2026-06-11-phase-f8-release-1-closeout]]

@@ -3,8 +3,8 @@ title: Constraints
 type: decision
 status: draft
 created: 2026-06-05
-updated: 2026-06-06
-source: "Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md"
+updated: 2026-06-23
+source: "Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; RAW_inputs/meetings/geometry_association_conflict_f6.md"
 tags: [constraints, rollout, demo, discovery]
 ---
 
@@ -64,10 +64,44 @@ tags: [constraints, rollout, demo, discovery]
 - интеграции с external GIS;
 - доказанный commercial ROI.
 
+## Release 2 Geometry/Association Constraints
+
+| Область | Ограничение |
+|---|---|
+| Demo environment | Только local Docker Compose на reference hardware. |
+| MVP boundary | Read-only `conflict package` + consequence explanation + blocker verdict + audit write. |
+| Native workflow | Не заменять native conflict editor, replace/reconcile/post actions остаются outside scope или stub/native workflow. |
+| Core scenario | Для developer demo достаточно canonical transformer terminal/service-device connectivity case и stale/pre-post failure sidecar. |
+| Product acceptance | Один scenario и один sidecar недостаточны для claims о реальном product acceptance. |
+| Evidence model | Core evidence должно вычисляться из текущей модели; contextual evidence можно имитировать fixture-данными. |
+| Fixture mode | Frozen replay допустим только с явной маркировкой контрольной версии/checksum. |
+| Stale handling | Stale/failure sidecar обязательнее красивого happy path. |
+
+## Release 2 Access Constraints
+
+- Protected `Default` - целевой operating mode.
+- `Editor` и `Reviewer` могут читать package и сохранять review.
+- Actual `post` остается у version administrator / publishing role.
+- Audit write append-only: решения и rationale добавляются, но не
+  переписывают историю.
+- Work order attachments и field evidence требуют scoped access.
+
+## Release 2 Future ADR Candidates
+
+- Собственный topology engine.
+- Deep external GIS integration beyond current authoritative source.
+- Batch review queue.
+- SLA orchestration.
+- Object storage strategy для evidence snapshots.
+- Production on-prem/security hardening.
+- Multi-scenario routing calibration.
+- Production-grade specialist workflow.
+
 ## Связи
 
 - [[../chats/2026-06-05-phase-f5-business-rollout]]
 - [[../chats/2026-06-06-phase-f6-constraints-and-nfr]]
+- [[../chats/2026-06-23-geometry-association-conflict-f6]]
 - [[../solution/roadmap]]
 - [[../solution/nfr]]
 - [[risk_assumption_log]]

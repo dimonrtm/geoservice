@@ -3,8 +3,8 @@ title: Release 2 Conflict Explanation
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-22
-source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f5.md"
+updated: 2026-06-23
+source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f5.md; RAW_inputs/meetings/geometry_association_conflict_f6.md"
 tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-network]
 ---
 
@@ -37,6 +37,10 @@ package, а не отдельный dashboard. Главный value signal - м�
 проверок и быстреее уверенное go/no-go решение; audit quality важен как второй
 эффект, а снижение unsafe/stale post risk остается гипотезой до live
 validation.
+
+Ф6 research/design input уточняет implementation contract: первый demo должен
+иметь read-only package, вычисляемое core evidence, stale rules, hard blockers,
+минимальный audit object, внешний package API и internal orchestration boundary.
 
 Текущий Release 1 не меняется.
 
@@ -207,6 +211,57 @@ rule/terminal/controller impact может оставаться `High`.
   untrustworthy trace/subnetwork делают прежнее reviewer decision stale;
   система блокирует `post` и требует пересборку decision package.
 
+## Ф6 Implementation Contract
+
+Первый package обязан содержать:
+
+- `Base / Mine / Default`;
+- geometry diff;
+- association delta;
+- dirty areas и validation/network errors;
+- trace evidence для affected path, если package заявляет network consequence;
+- subnetwork status, если конфликт затрагивает controller, feeder, tier
+  boundary или subnetwork semantics;
+- work order и field evidence как contextual evidence.
+
+State machine:
+
+- `draft package`;
+- `ready for review`;
+- `approved`;
+- `stale`;
+- `blocked post`;
+- `escalated`;
+- `repeated review`.
+
+Package/approval становится stale после topology-relevant changes named
+version, нового reconcile, изменения `Default`, validate after reconcile,
+update subnetwork или изменения risk-relevant evidence: trace path, blockers,
+subnetwork status, error set, association delta.
+
+Ф6 уточняет hard blockers:
+
+- unresolved conflicts или re-reconcile required перед `post`;
+- error dirty areas / network errors в affected scope;
+- dirty areas на claimed trace path;
+- dirty/invalid affected subnetwork;
+- unresolved association delta, влияющий на connectivity, containment,
+  structural attachment или locatability.
+
+Минимальный внешний API первого demo:
+
+- `GET package summary`;
+- `GET package details`;
+- `POST recompute package`;
+- `POST reviewer decision`;
+- `GET audit record`;
+- `GET package status` или push updates;
+- optional `POST pre-post check`.
+
+Реальные reconcile/replace/post actions остаются вне первого demo или за
+stub/native workflow. Ценность Release 2 - объяснить сетевое последствие и
+отфильтровать false-safe decisions, а не дублировать native conflict editor.
+
 ## Последствия
 
 - UX должен раскрывать детали постепенно и не начинаться с полной таблицы
@@ -240,6 +295,7 @@ rule/terminal/controller impact может оставаться `High`.
 - [[../chats/2026-06-18-geometry-association-conflict-f2]]
 - [[../chats/2026-06-20-geometry-association-conflict-f4]]
 - [[../chats/2026-06-22-geometry-association-conflict-f5]]
+- [[../chats/2026-06-23-geometry-association-conflict-f6]]
 - [[conflict_resolution_routing]]
 - [[conflicts/2026-06-14-trace-risk-tier-boundary]]
 - [[risk_assumption_log]]
