@@ -3,8 +3,8 @@ title: Roadmap
 type: solution
 status: active
 created: 2026-05-30
-updated: 2026-06-20
-source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; user answers to /discover --phase Ф8, 2026-06-11; RAW_inputs/meetings/geometry_association_conflict_f4.md"
+updated: 2026-06-23
+source: "RAW_inputs/documents/спринт 1.odt; Vision_wiki/chats/2026-06-04-phase-f4-solution-scope.md; RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md; Vision_wiki/chats/2026-06-05-phase-f5-business-rollout.md; Vision_wiki/chats/2026-06-06-phase-f6-constraints-and-nfr.md; Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md; user answers to /discover --phase Ф8, 2026-06-11; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f7.md; RAW_inputs/meetings/geometry_association_conflict_f8.md"
 tags: [solution, roadmap, release-1]
 ---
 
@@ -95,6 +95,40 @@ Scope creep сигнал: появление новых незапланиров
 | Next | Live validation с реальными `Editor`/`Reviewer`, сравнение с `ArcGIS native + SOP + expert handoff`, проверка language/UI comprehension | Измерены external trace/check opens, notes/screenshots, handoff и time-to-confident-decision |
 | Later | `Simple` tier, batch review, SLA queue, dual-control workflow и production-grade utility rules | Возвращаться только после validation, что consequence package реально снижает uncertainty и не создает false-safe decisions |
 
+## Release 2 Ф7 Experiment Roadmap
+
+Этот раздел фиксирует порядок проверки consequence package после Ф7. Он не
+создает внешний product claim до реальных `Editor`/`Reviewer`.
+
+| Порядок | Эксперимент | Критерий |
+|---:|---|---|
+| 1 | Scripted golden walkthrough canonical transformer terminal case | Package объясняет network consequence, affected path, association delta, dirty/validation state, subnetwork status и safe next step за 1-2 минуты scripted review. |
+| 2 | 10 deterministic repeats canonical scenario | `contract readiness pass rate` проходит по package build, evidence completeness, blocker detection, stale detection и audit completeness; `false-safe verdict count = 0`. |
+| 3 | 10 mutated stale / blocker / pre-post failure variants | Previous package/approval становится stale, `post` blocked, пользователь видит reason/delta, repeat review идет от нового delta-context; false-block не появляется на clean native state. |
+| 4 | Optional 30 automated runs | Проверена стабильность package build, blocker detection, P95 и run-data schema для developer confidence. |
+| 5 | Manual baseline и user validation | Сравнить с `ArcGIS native Conflicts view + SOP + expert handoff`; реальные `Editor`/`Reviewer` проверяют risk tier, evidence sufficiency, blocker trust, sample review для `Normal`, specialist escalation и audit usefulness. |
+
+Course-change criteria: package не объясняет consequence за 1-2 минуты, человек
+сразу уходит во внешний GIS или expert handoff, blockers не воспроизводятся из
+authoritative state, audit не помогает repeat review после stale или появляется
+хотя бы один false-safe на hard-block case.
+
+## Release 2 Ф8 Closeout Roadmap
+
+Этот раздел фиксирует следующий план после закрытия discovery Ф1-Ф8 по
+`geometry/association conflict`.
+
+| Порядок | Артефакт / шаг | Критерий |
+|---:|---|---|
+| 1 | Implementation contract v0.1 | ADR-style Markdown contract с machine-readable appendices: scope, actors, states, events, package schema, audit schema, blockers, stale rules, non-goals, acceptance gates, API/events, fixture manifest, P95 targets и observability fields. |
+| 2 | Canonical walking skeleton | Один transformer/service-device association case плюс stale/pre-post failure sidecar; computed evidence, hard blockers, `approve package` / `can post` и audit object воспроизводимы. |
+| 3 | Real validation mini-round | Отдельный checklist с `Editor`/`Reviewer` проверяет risk wording, authority matrix, sample review для `Normal`, evidence sufficiency, repeat-review UX и trust к blocker verdict. |
+
+Первый implementation contract не должен включать новый topology engine, full
+ArcGIS parity, full in-product conflict editing UI, batch review/SLA routing,
+production-grade on-prem hardening или claims про authoritative-safe `post` без
+real validation.
+
 ## Источники
 
 - `RAW_inputs/documents/спринт 1.odt`
@@ -104,6 +138,8 @@ Scope creep сигнал: появление новых незапланиров
 - `RAW_inputs/documents/utility_gis_editor_walking_skeleton_and_dataset.md`
 - `Vision_wiki/chats/2026-06-07-phase-f7-metrics-and-risks.md`
 - `Vision_wiki/chats/2026-06-20-geometry-association-conflict-f4.md`
+- `Vision_wiki/chats/2026-06-23-geometry-association-conflict-f7.md`
+- `Vision_wiki/chats/2026-06-23-geometry-association-conflict-f8.md`
 - [[USM]]
 - [[../concepts/first_release_mvp]]
 - [[../decisions/release_1_utility_workflow]]

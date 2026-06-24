@@ -1,0 +1,61 @@
+{
+  "runId": "run-r2-gac-001",
+  "scenarioId": "r2-gac-transformer-terminal-001",
+  "packageId": "pkg-r2-gac-001",
+  "seedChecksum": "11dafec127236ddf45fcf6ba8ea9d27777b11bf76e89c9c5a4e55f0e3387f541",
+  "startedAt": "2026-06-23T10:17:00Z",
+  "completedAt": "2026-06-23T10:18:12Z",
+  "blockers": [],
+  "riskTier": "High",
+  "decisionOutcome": {
+    "actorRole": "Reviewer",
+    "decision": "approved",
+    "decisionAt": "2026-06-23T10:18:00Z",
+    "canPost": false,
+    "canPostReason": "Проверка pre-post еще не выполнена."
+  },
+  "staleEventLog": [
+    {
+      "eventId": "stale-r2-gac-001",
+      "detectedAt": "2026-06-23T10:19:10Z",
+      "reason": "DEFAULT_CHANGED_AFTER_RECONCILE",
+      "previousPackageId": "pkg-r2-gac-001",
+      "newPackageId": "pkg-r2-gac-001-r1",
+      "deltaSummary": "Target Default получил конкурирующее обновление association после approval."
+    }
+  ],
+  "auditObject": {
+    "auditId": "audit-r2-gac-001",
+    "packageId": "pkg-r2-gac-001",
+    "scenarioId": "r2-gac-transformer-terminal-001",
+    "seedChecksum": "11dafec127236ddf45fcf6ba8ea9d27777b11bf76e89c9c5a4e55f0e3387f541",
+    "sourceSnapshotIds": {
+      "base": "snapshot-base-r2-gac-001",
+      "mine": "snapshot-mine-r2-gac-001",
+      "default": "snapshot-default-r2-gac-001"
+    },
+    "riskTier": "High",
+    "blockers": [],
+    "traceConsistency": "consistent",
+    "subnetworkStatus": "valid",
+    "evidenceCompleteness": true,
+    "actorRole": "Reviewer",
+    "decision": "approved",
+    "timestamps": {
+      "packageCreatedAt": "2026-06-23T10:17:00Z",
+      "decisionAt": "2026-06-23T10:18:00Z",
+      "auditSavedAt": "2026-06-23T10:18:02Z"
+    },
+    "staleEvents": ["stale-r2-gac-001"],
+    "manualChecksCount": 1,
+    "finalPostOutcome": "not_posted_stale",
+    "technicalLogRef": "logs/reconcile/run-r2-gac-001.log"
+  },
+  "timingMetrics": {
+    "packageBuildMs": 1280,
+    "evidenceLoadMs": 620,
+    "staleInvalidationMs": 410,
+    "auditSaveMs": 180,
+    "prePostCheckMs": 0
+  }
+}

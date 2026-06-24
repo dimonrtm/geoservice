@@ -11,6 +11,8 @@ from pathlib import Path
 
 
 WIKI_ROOTS = (
+    "Wiki",
+    "DDD_Wiki",
     "Vision_wiki",
     "Code_wiki",
     "RAW_inputs",
@@ -18,6 +20,7 @@ WIKI_ROOTS = (
     "Общие_принципы",
     "docs/knowledge-pipeline",
 )
+DOMAIN_ROOTS = {"Wiki", "DDD_Wiki"}
 REQUIRED_FRONTMATTER = (
     "title",
     "type",
@@ -27,6 +30,23 @@ REQUIRED_FRONTMATTER = (
     "source",
     "tags",
 )
+DOMAIN_METADATA_REQUIRED = ("confidence", "related")
+DOMAIN_SECTION_RULES = {
+    ("Wiki", "commands"): ("## Actor", "## Target", "## Preconditions", "## Outcome"),
+    (
+        "Wiki",
+        "domain_events",
+    ): ("## Source Aggregate", "## Happened In The Past", "## Downstream Reactions"),
+    ("Wiki", "policies"): ("## Rule", "## Decision Outcome"),
+    ("Wiki", "specifications"): ("## Predicate", "## Failure Meaning"),
+    ("Wiki", "value_objects"): ("## Equality", "## Immutability"),
+    ("DDD_Wiki", "bounded_contexts"): ("## Ubiquitous Language Boundary",),
+    ("DDD_Wiki", "subdomains"): ("## Classification",),
+    (
+        "DDD_Wiki",
+        "context_map",
+    ): ("## Upstream Downstream", "## Integration Pattern"),
+}
 SOURCE_REQUIRED_TYPES = {
     "adr",
     "api-endpoint",
@@ -105,6 +125,8 @@ def lint(root: Path | str) -> list[Issue]:
                     )
                 )
 
+        issues.extend(validate_domain_node(relative, frontmatter, body))
+
     return issues
 
 
@@ -172,7 +194,69 @@ def source_required(node_type: str, relative: Path) -> bool:
     return node_type in SOURCE_REQUIRED_TYPES or relative.parts[0] in {
         "Vision_wiki",
         "Code_wiki",
+        "Wiki",
+        "DDD_Wiki",
     }
+
+
+def validate_domain_node(
+    relative: Path, frontmatter: dict[str, str], body: str
+) -> list[Issue]:
+    if not relative.parts or relative.parts[0] not in DOMAIN_ROOTS:
+        return []
+    if "_templates" in relative.parts:
+        return []
+    if relative.name in {"index.md", "_info.md"}:
+        return []
+
+    issues: list[Issue] = []
+    missing_metadata = [
+        key
+        for key in DOMAIN_METADATA_REQUIRED
+        if frontmatter.get(key) in {None, "", "null", "~"}
+    ]
+    if missing_metadata:
+        issues.append(
+            Issue(
+                "missing_domain_metadata",
+                relative,
+                f"Missing domain metadata: {', '.join(missing_metadata)}.",
+            )
+        )
+
+    section_rule = domain_section_rule(relative)
+    if section_rule:
+        missing_sections = [section for section in section_rule if section not in body]
+        if missing_sections:
+            issues.append(
+                Issue(
+                    domain_section_issue_code(relative),
+                    relative,
+                    f"Missing sections: {', '.join(missing_sections)}.",
+                )
+            )
+
+    return issues
+
+
+def domain_section_rule(relative: Path) -> tuple[str, ...]:
+    if len(relative.parts) < 2:
+        return ()
+    return DOMAIN_SECTION_RULES.get((relative.parts[0], relative.parts[1]), ())
+
+
+def domain_section_issue_code(relative: Path) -> str:
+    if len(relative.parts) < 2:
+        return "incomplete_domain_node"
+    if relative.parts[0] == "DDD_Wiki":
+        return "incomplete_ddd_projection"
+    return {
+        "commands": "incomplete_command",
+        "domain_events": "incomplete_domain_event",
+        "policies": "incomplete_policy",
+        "specifications": "incomplete_specification",
+        "value_objects": "incomplete_value_object",
+    }.get(relative.parts[1], "incomplete_domain_node")
 
 
 def wikilink_exists(link: str, file_index: set[str]) -> bool:

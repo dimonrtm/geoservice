@@ -1,0 +1,72 @@
+datasetVersion: "0.1"
+scenarioId: "r2-gac-transformer-terminal-001"
+name: "Конфликт ассоциации терминала трансформатора"
+network:
+  utilityDomain: "electric"
+  feederId: "feeder-alpha"
+  subnetworkId: "subnetwork-feeder-alpha"
+  voltageLevel: "medium_voltage"
+objects:
+  lines:
+    - id: "line-mv-100"
+      label: "Сегмент фидера среднего напряжения"
+      role: "medium_voltage_line"
+      geometry:
+        type: "LineString"
+        coordinates:
+          - [76.900000, 43.250000]
+          - [76.900800, 43.250200]
+  junctions:
+    - id: "junction-tap-200"
+      label: "Точка ответвления в середине пролета"
+      role: "tap_point"
+      geometry:
+        type: "Point"
+        coordinates: [76.900420, 43.250105]
+  devices:
+    - id: "device-transformer-300"
+      label: "Сервисный трансформатор"
+      role: "transformer"
+      terminals:
+        - id: "terminal-high-1"
+          label: "Терминал высокой стороны"
+        - id: "terminal-low-1"
+          label: "Терминал низкой стороны"
+associations:
+  base:
+    - id: "assoc-base-001"
+      type: "connectivity"
+      from: "junction-tap-200"
+      to: "device-transformer-300:terminal-high-1"
+      rule: "tap_to_transformer_high_terminal"
+  mine:
+    - id: "assoc-mine-001"
+      type: "connectivity"
+      from: "junction-tap-200"
+      to: "device-transformer-300:terminal-high-1"
+      rule: "tap_to_transformer_high_terminal"
+      change: "retained_with_geometry_adjustment"
+  default:
+    - id: "assoc-default-001"
+      type: "connectivity"
+      from: "junction-tap-200"
+      to: "device-transformer-300:terminal-low-1"
+      rule: "invalid_terminal_for_mv_tap"
+      change: "competing_terminal_assignment"
+workOrder:
+  id: "wo-r2-gac-001"
+  code: "WO-R2-GAC-001"
+  title: "Проверить конфликт ассоциации с учетом терминала"
+expectedRisk:
+  tier: "High"
+  rationale:
+    - "Цель connectivity association отличается между Mine и Default."
+    - "Интерпретация трассировки/subnetwork может измениться."
+expectedBlockers:
+  primary: []
+  sidecar:
+    - "STALE_APPROVAL"
+    - "DEFAULT_CHANGED_AFTER_RECONCILE"
+nonGoals:
+  - "Не эмулировать production topology engine."
+  - "Не заменять штатный редактор конфликтов."

@@ -1,0 +1,113 @@
+{
+  "packageId": "pkg-r2-gac-001",
+  "scenarioId": "r2-gac-transformer-terminal-001",
+  "status": "ready_for_review",
+  "createdAt": "2026-06-23T10:17:00Z",
+  "versionIds": {
+    "base": "version-base-common-ancestor",
+    "mine": "version-editor-mine",
+    "default": "version-target-default"
+  },
+  "snapshotIds": {
+    "base": "snapshot-base-r2-gac-001",
+    "mine": "snapshot-mine-r2-gac-001",
+    "default": "snapshot-default-r2-gac-001"
+  },
+  "workOrder": {
+    "id": "wo-r2-gac-001",
+    "code": "WO-R2-GAC-001",
+    "title": "Проверить конфликт ассоциации с учетом терминала"
+  },
+  "geometryDiff": {
+    "changedFeatures": [
+      {
+        "featureId": "line-mv-100",
+        "changeType": "geometry_adjusted",
+        "summary": "Mine сохраняет конечную точку линии выровненной с ответвлением в середине пролета; Default содержит конкурирующее размещение конечной точки.",
+        "bbox": [76.900000, 43.250000, 76.900800, 43.250200]
+      }
+    ]
+  },
+  "associationDelta": {
+    "deltas": [
+      {
+        "associationId": "assoc-terminal-conflict-001",
+        "type": "connectivity",
+        "base": "junction-tap-200 -> device-transformer-300:terminal-high-1",
+        "mine": "junction-tap-200 -> device-transformer-300:terminal-high-1",
+        "default": "junction-tap-200 -> device-transformer-300:terminal-low-1",
+        "semanticImpact": "terminal_path_changed"
+      }
+    ]
+  },
+  "dirtyAreaSnapshot": {
+    "hasDirtyAreas": false,
+    "dirtyAreaIds": [],
+    "validatedTopology": true,
+    "validatedAt": "2026-06-23T10:16:00Z"
+  },
+  "validationResult": {
+    "status": "passed",
+    "errors": [],
+    "warnings": [
+      {
+        "code": "TERMINAL_ASSIGNMENT_DIFF",
+        "message": "Mine и Default выбирают разные терминалы трансформатора для connectivity association."
+      }
+    ]
+  },
+  "traceResult": {
+    "traceId": "trace-r2-gac-001",
+    "consistency": "consistent",
+    "freshness": "fresh",
+    "before": {
+      "reachableDevices": ["device-transformer-300"],
+      "subnetworkId": "subnetwork-feeder-alpha"
+    },
+    "afterMine": {
+      "reachableDevices": ["device-transformer-300"],
+      "subnetworkId": "subnetwork-feeder-alpha"
+    },
+    "afterDefault": {
+      "reachableDevices": [],
+      "subnetworkId": "subnetwork-feeder-alpha",
+      "note": "Назначение терминала в Default не проводит ожидаемую connectivity среднего напряжения."
+    }
+  },
+  "subnetworkStatus": {
+    "subnetworkId": "subnetwork-feeder-alpha",
+    "status": "valid",
+    "updatedAt": "2026-06-23T10:16:30Z"
+  },
+  "riskTier": {
+    "tier": "High",
+    "confidence": "medium",
+    "rationale": [
+      "Connectivity association отличается терминалом.",
+      "Интерпретация trace отличается между Mine и Default."
+    ]
+  },
+  "blockers": [],
+  "evidenceCompleteness": {
+    "baseMineDefault": true,
+    "geometryDiff": true,
+    "associationDelta": true,
+    "dirtyAreas": true,
+    "validationResult": true,
+    "traceResult": true,
+    "subnetworkStatus": true,
+    "fieldEvidence": false,
+    "fieldEvidenceRequired": false
+  },
+  "decisionRecommendation": {
+    "nextStep": "send_to_reviewer",
+    "allowedActions": ["approve_package", "return_to_editor", "escalate"],
+    "canPost": false,
+    "canPostReason": "Требуются approval от Reviewer и проверка pre-post."
+  },
+  "freshness": {
+    "packageFresh": true,
+    "targetChangedAfterReconcile": false,
+    "staleReasons": []
+  }
+}

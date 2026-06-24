@@ -86,6 +86,10 @@ tags: [vision-wiki, product]
 - [[chats/2026-06-22-geometry-association-conflict-f5]] - research/design input Ф5: internal developer demo rollout, value signal, workflow placement after reconcile, support package и следующий артефакт `implementation contract`.
 - [[chats/2026-06-23-geometry-association-conflict-f6-checklist]] - planned checklist Ф6: ограничения и NFR для Release 2 `implementation contract` перед записью ответов в RAW.
 - [[chats/2026-06-23-geometry-association-conflict-f6]] - research/design input Ф6: implementation contract boundary, evidence package, stale rules, hard blockers, audit, API/events, P95 и observability для Release 2 demo.
+- [[chats/2026-06-23-geometry-association-conflict-f7-checklist]] - planned checklist Ф7: метрики, risks, experiments и guardrails для проверки Release 2 consequence package.
+- [[chats/2026-06-23-geometry-association-conflict-f7]] - research/design input Ф7: `contract readiness pass rate`, zero false-safe guardrail, secondary metrics, stale/pre-post sidecar experiment, run data, manual baseline и course-change criteria для Release 2 demo.
+- [[chats/2026-06-23-geometry-association-conflict-f8-checklist]] - planned checklist Ф8: closeout Release 2 `geometry/association conflict`, ready-to-implement decisions, remaining blockers, RAW artifacts, wiki updates и следующие шаги.
+- [[chats/2026-06-23-geometry-association-conflict-f8]] - research/design closeout Ф8: pre-post decision-support scope, ready-to-implement contract decisions, remaining validation hypotheses, acceptance gates, non-goals и следующий implementation contract v0.1.
 - [[chats/2026-06-14-utility-gis-editor-market-research]] - доверенное market research по полному Use Case, vendors и product families.
 - [[chats/2026-06-20-utility-gis-editor-role-research]] - research source о реальной работе роли: authoritative network change owner/editor, ArcGIS и QGIS/PostGIS/QField/GISwater stacks, field sync, topology QA, training и KPI.
 - [[concepts/operational_utility_gis]] - справочная рыночная категория из network editor, field execution и integration hub.

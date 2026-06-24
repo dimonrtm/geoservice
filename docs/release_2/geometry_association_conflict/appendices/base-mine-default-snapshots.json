@@ -1,0 +1,33 @@
+{
+  "scenarioId": "r2-gac-transformer-terminal-001",
+  "snapshotSetId": "bmd-r2-gac-001",
+  "createdAt": "2026-06-23T00:00:00Z",
+  "snapshots": {
+    "base": {
+      "snapshotId": "snapshot-base-r2-gac-001",
+      "versionId": "version-base-common-ancestor",
+      "label": "Base / общий предок",
+      "networkRevision": "network-rev-100",
+      "summary": "Терминал высокой стороны трансформатора подключен к точке ответвления в середине пролета."
+    },
+    "mine": {
+      "snapshotId": "snapshot-mine-r2-gac-001",
+      "versionId": "version-editor-mine",
+      "label": "Mine / версия правки Editor",
+      "networkRevision": "network-rev-101-mine",
+      "summary": "Правка geometry от Editor сохраняет association терминала высокой стороны трансформатора."
+    },
+    "default": {
+      "snapshotId": "snapshot-default-r2-gac-001",
+      "versionId": "version-target-default",
+      "label": "Default / Target",
+      "networkRevision": "network-rev-101-default",
+      "summary": "Default содержит конкурирующее назначение терминала для той же connectivity между ответвлением и трансформатором."
+    }
+  },
+  "freshness": {
+    "reconciledAt": "2026-06-23T10:15:00Z",
+    "targetChangedAfterReconcile": false,
+    "validatedAt": "2026-06-23T10:16:00Z"
+  }
+}

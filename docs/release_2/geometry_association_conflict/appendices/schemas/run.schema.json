@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://geoservice.local/schemas/release-2/geometry-association-conflict/run.schema.json",
+  "title": "Release 2: запуск решения для конфликта геометрии/ассоциации",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runId",
+    "scenarioId",
+    "packageId",
+    "seedChecksum",
+    "startedAt",
+    "completedAt",
+    "blockers",
+    "riskTier",
+    "decisionOutcome",
+    "staleEventLog",
+    "auditObject",
+    "timingMetrics"
+  ],
+  "properties": {
+    "runId": { "type": "string" },
+    "scenarioId": { "type": "string" },
+    "packageId": { "type": "string" },
+    "seedChecksum": { "type": "string" },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" },
+    "blockers": { "type": "array", "items": { "type": "string" } },
+    "riskTier": { "type": "string", "enum": ["Normal", "High", "Critical"] },
+    "decisionOutcome": {
+      "type": "object",
+      "required": ["actorRole", "decision", "decisionAt", "canPost"],
+      "properties": {
+        "actorRole": { "type": "string" },
+        "decision": { "type": "string" },
+        "decisionAt": { "type": "string", "format": "date-time" },
+        "canPost": { "type": "boolean" },
+        "canPostReason": { "type": "string" }
+      }
+    },
+    "staleEventLog": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "auditObject": { "type": "object" },
+    "timingMetrics": { "type": "object" }
+  }
+}

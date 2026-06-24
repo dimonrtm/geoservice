@@ -21,7 +21,9 @@ Do not store secrets, full chats, temporary logs, or unverified guesses.
 This repository also contains a broader project knowledge wiki:
 
 - `RAW_inputs/` stores raw source materials.
-- `Vision_wiki/` stores product knowledge, decisions, conflicts, assumptions, stakeholders, and follow-ups.
+- `Wiki/` stores canonical domain entities, concepts, actors, commands, events, policies, specifications, conflicts, questions, and registries.
+- `DDD_Wiki/` stores the DDD domain model: domains, subdomains, bounded contexts, context maps, aggregates, invariants, state machines, use cases, integration patterns, and model health.
+- `Vision_wiki/` stores legacy/source product knowledge, decisions, conflicts, assumptions, stakeholders, and follow-ups.
 - `Code_wiki/` stores technical knowledge, architecture notes, runbooks, ADRs, API notes, and repository-change ingest entries.
 - `memory/` stores live wiki state and LLM-wiki method files.
 - `Общие_принципы/` stores reusable discovery and meeting methodology.
@@ -32,12 +34,13 @@ Human-readable wiki content, implementation plans, runbooks, follow-ups, and sta
 Manual wiki workflow:
 
 1. Morning: run `/sync-vision`, check `memory/project-state.md`, check new files in `RAW_inputs/`, then run `/ingest` for new raw inputs.
-2. Before a meeting: run `/discover --context ... --phase ...`, prepare 10-15 questions, and prepare a checklist.
-3. After a meeting: put the transcript in `RAW_inputs/meetings/`, run `/ingest`, update `Vision_wiki`, record conflicts/follow-ups, and update `memory/project-state.md`.
-4. Weekly: run `/lint-wiki`, run `/sync-vision`, and produce a wiki health report.
-5. Weekly: run `/audit-memory`; present cleanup candidates and wait for confirmation before deleting or merging anything.
+2. Before a model discovery meeting: run `/discover --context ... --phase ...`; it must inspect the current `Wiki/DDD_Wiki` model and conflicts, generate 150 candidate questions internally, then present the top 15.
+3. Before sprint planning: run `/plan-sprint`; it must inspect current code, `Code_wiki`, `Wiki/DDD_Wiki`, conflicts, and the 14-day sprint frame, generate 150 planning questions internally, then present the top 15.
+4. After a meeting: put the transcript in `RAW_inputs/meetings/`, run `/ingest`, update `Wiki/DDD_Wiki` first, keep `Vision_wiki` as legacy/source knowledge, record conflicts/follow-ups, and update `memory/project-state.md`.
+5. Weekly: run `/lint-wiki`, run `/sync-vision`, and produce a wiki health report.
+6. Weekly: run `/audit-memory`; present cleanup candidates and wait for confirmation before deleting or merging anything.
 
-When `/ingest` is run without parameters, process 1-5 unambiguous new RAW inputs sequentially. If there are more than 5 RAW candidates or any ambiguity, list the candidates and ask for confirmation before processing. If there are no new RAW inputs, do not edit files; report that ingest was not performed and suggest an explicit path, `/ingest repository-snapshot`, or `/ingest repository-change` if appropriate.
+When `/ingest` is run without parameters, process 1-5 unambiguous newly added RAW inputs sequentially. Do not reread old already processed raw files automatically; changed old raw files are ambiguity and require confirmation. Process any new raw file, not only files with questions or answers. If there are more than 5 RAW candidates or any ambiguity, list the candidates and ask for confirmation before processing. If there are no new RAW inputs, do not edit files; report that ingest was not performed and suggest an explicit path, `/ingest repository-snapshot`, or `/ingest repository-change` if appropriate.
 
 Use `/ingest repository-snapshot` through `.agents/skills/source-command-ingest/SKILL.md` when existing unchanged repository content needs to be added to `Code_wiki`: initial technical inventory, large external changes, or stale Code_wiki. Snapshot writes only knowledge documentation and must not edit code, configuration, migrations, or tests.
 

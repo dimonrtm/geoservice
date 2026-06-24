@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-23
+updated: 2026-06-24
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -22,6 +22,8 @@ tags: [knowledge, index, geoservice]
 ## Области Знаний
 
 - [[RAW_inputs/index]] - сырые источники и исходные материалы проекта.
+- [[Wiki/index]] - канонические доменные сущности, concepts, actors, commands, events, policies, specifications, conflicts, questions и registry tables.
+- [[DDD_Wiki/index]] - DDD-модель: domains, subdomains, bounded contexts, context map, aggregates, invariants, use cases, integration patterns и model health.
 - [[Vision_wiki/index]] - продуктовые знания, решения, конфликты, follow-up'ы и заметки встреч.
 - [[Code_wiki/index]] - техническая wiki для архитектуры, разработки, deployment и состояния проекта.
 - [[memory/project-state]] - живое состояние проекта.
@@ -87,8 +89,12 @@ tags: [knowledge, index, geoservice]
 - 2026-06-22: `/discover --context "geometry/association conflict" --phase Ф5` зафиксировал internal developer demo rollout для Release 2 и следующий артефакт `implementation contract`.
 - 2026-06-22: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f5.md`; Ф5 уточнила value signal, placement after reconcile, rollout roles, support package и допустимые claims для Release 2 `geometry/association conflict`.
 - 2026-06-23: Выполнен `/sync-vision`; RAW source Ф5 уже обработан и отражен в индексах, новых необработанных RAW inputs и stale-нод нет, открыты 12 follow-up'ов, ожидаемый lint-конфликт остается на 25 неизменяемых RAW Markdown files.
-- 2026-06-23: `/discover --context "geometry/association conflict" --phase Ф6` подготовил checklist ограничений и NFR для Release 2 `implementation contract`; ответы еще не записаны в RAW.
+- 2026-06-23: `/discover --context "geometry/association conflict" --phase Ф6` подготовил checklist ограничений и NFR для Release 2 `implementation contract`.
 - 2026-06-23: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f6.md`; Ф6 уточнила implementation contract boundary, computed evidence, state machine, stale rules, hard blockers, audit object, API/events, P95 и observability для Release 2 `geometry/association conflict`.
+- 2026-06-23: `/discover --context "geometry/association conflict" --phase Ф7` подготовил checklist метрик, рисков, experiments и guardrails для проверки Release 2 consequence package.
+- 2026-06-23: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f7.md`; Ф7 зафиксировала `contract readiness pass rate`, zero false-safe guardrail, secondary metrics, stale/pre-post sidecar experiment, run data, manual baseline и course-change criteria для Release 2 `geometry/association conflict`.
+- 2026-06-23: `/discover --context "geometry/association conflict" --phase Ф8` подготовил closeout checklist для Release 2: ready-to-implement decisions, remaining blockers, RAW artifacts, wiki updates и следующие шаги перед implementation contract.
+- 2026-06-23: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f8.md`; Ф8 закрыла discovery Release 2 как pre-post decision-support layer, отделила contract-ready decisions от human-validation hypotheses и задала следующий артефакт implementation contract v0.1.
 
 ## Открытые Вопросы
 
@@ -102,7 +108,9 @@ tags: [knowledge, index, geoservice]
 - Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить planned policy: package approval vs technical `post`, routing по специализации, совмещение ролей, обязательность approve comment и user validation trace-boundary.
 - Для Release 2 нужно проверить, снижает ли consequence-first explanation внешние проверки и time-to-confident-decision по `geometry/association conflict`, и не дублирует ли UI обычный Conflicts view.
 - Для Release 2 Ф4 demo нужно проверить canonical transformer terminal association scenario, package evidence, `Normal/High/Critical` tiers без преждевременного `Simple`, stale decision handling и audit object.
-- До implementation contract нужно превратить Release 2 reviewer decision policy и Ф6 package boundary в frozen canonical dataset, state machine, API/events, hard blockers, audit schema, P95/observability и future ADR list.
+- До implementation contract нужно превратить Release 2 reviewer decision policy, Ф6 package boundary, Ф7 metrics contract и Ф8 closeout в ADR-style implementation contract v0.1: frozen canonical dataset, state machine, package schema/API/events, hard blockers, stale triggers, separation `approve package` / `can post`, audit schema, P95/observability, run schema, zero false-safe pass/fail criteria и future ADR list.
+- Для Release 2 Ф7 нужно подготовить measurement harness: scripted golden walkthrough, 10 deterministic repeats, 10 stale/blocker/pre-post mutations, optional 30 automated runs и manual baseline против `ArcGIS native Conflicts view + SOP + expert handoff`.
+- Для Release 2 нужно подготовить отдельный real validation checklist для `Editor`/`Reviewer`: risk wording, authority matrix, sample review для `Normal`, evidence sufficiency, repeat-review UX и trust к blocker verdict.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 
@@ -110,6 +118,7 @@ tags: [knowledge, index, geoservice]
 
 - Утро: запустить `/sync-vision`, прочитать `memory/project-state.md`, проверить новые файлы в `RAW_inputs/`, затем запустить `/ingest` для новых RAW inputs.
 - Перед встречей: запустить `/discover --context "планирование спринта" --phase "F2"` и подготовить чек-лист из 10-15 вопросов.
+- Планирование спринта: запустить `/plan-sprint`; команда использует текущий код, `Code_wiki`, `Wiki/DDD_Wiki`, конфликты модели, генерирует 150 planning questions и показывает top 15 для 14-дневного спринта.
 - После встречи: положить транскрипт в `RAW_inputs/meetings/`, запустить `/ingest`, обновить wiki-ноды, конфликты, follow-up'ы и project state.
 - Раз в неделю: запустить `/lint-wiki`, затем `/sync-vision`, затем проверить отчет о здоровье wiki.
 

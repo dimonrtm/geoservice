@@ -1,0 +1,36 @@
+manifestVersion: "0.1"
+release: "Release 2"
+feature: "geometry_association_conflict"
+scenarioId: "r2-gac-transformer-terminal-001"
+scenarioName: "Конфликт ассоциации терминала трансформатора"
+status: "draft_fixture"
+created: "2026-06-23"
+source:
+  - "RAW_inputs/meetings/geometry_association_conflict_f6.md"
+  - "RAW_inputs/meetings/geometry_association_conflict_f7.md"
+  - "RAW_inputs/meetings/geometry_association_conflict_f8.md"
+purpose: >
+  Детерминированная синтетическая фикстура для developer demo: пакет в стиле
+  consequence-first вокруг reconcile -> review -> pre-post decision support.
+checksum:
+  algorithm: "sha256"
+  value: "11dafec127236ddf45fcf6ba8ea9d27777b11bf76e89c9c5a4e55f0e3387f541"
+  note: "Детерминированный черновой checksum для scenario id и версии contract; пересчитать после материализации исполняемого seed."
+runtime:
+  mode: "локальный Docker Compose"
+  referenceHardware: "Asus TUF Gaming 2022, AMD Ryzen 7 5000 series, 16 GB RAM"
+  browser: "Chrome"
+versions:
+  base: "snapshot-base-r2-gac-001"
+  mine: "snapshot-mine-r2-gac-001"
+  default: "snapshot-default-r2-gac-001"
+expectedOutcomes:
+  primaryPackageState: "ready_for_review"
+  staleSidecarState: "stale"
+  hardBlockerSidecarState: "blocked_post"
+  falseSafeVerdictCount: 0
+files:
+  scenarioDataset: "appendices/canonical-scenario-dataset.yaml"
+  snapshots: "appendices/base-mine-default-snapshots.json"
+  evidencePackageExample: "appendices/evidence-package.example.json"
+  decisionRunExample: "appendices/decision-run.example.json"

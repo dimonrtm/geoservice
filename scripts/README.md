@@ -4,6 +4,8 @@
 
 ## `lint-wiki.py`
 
+Проверяет корни `Wiki/`, `DDD_Wiki/`, `Vision_wiki/`, `Code_wiki`, `RAW_inputs/`, `memory/`, `Общие_принципы/` и `docs/knowledge-pipeline/`. Для доменных узлов дополнительно проверяет `confidence`, `related` и обязательные DDD-секции.
+
 Проверяет Markdown wiki: frontmatter, wikilinks, пустые файлы, устаревшие ноды и обязательные `source`.
 
 ```powershell

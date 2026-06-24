@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://geoservice.local/schemas/release-2/geometry-association-conflict/audit.schema.json",
+  "title": "Release 2: объект аудита для конфликта геометрии/ассоциации",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "auditId",
+    "packageId",
+    "scenarioId",
+    "seedChecksum",
+    "sourceSnapshotIds",
+    "riskTier",
+    "blockers",
+    "traceConsistency",
+    "subnetworkStatus",
+    "evidenceCompleteness",
+    "actorRole",
+    "decision",
+    "timestamps",
+    "staleEvents",
+    "manualChecksCount",
+    "finalPostOutcome",
+    "technicalLogRef"
+  ],
+  "properties": {
+    "auditId": { "type": "string" },
+    "packageId": { "type": "string" },
+    "scenarioId": { "type": "string" },
+    "seedChecksum": { "type": "string" },
+    "sourceSnapshotIds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base", "mine", "default"],
+      "properties": {
+        "base": { "type": "string" },
+        "mine": { "type": "string" },
+        "default": { "type": "string" }
+      }
+    },
+    "riskTier": { "type": "string", "enum": ["Normal", "High", "Critical"] },
+    "blockers": { "type": "array", "items": { "type": "string" } },
+    "traceConsistency": { "type": "string" },
+    "subnetworkStatus": { "type": "string" },
+    "evidenceCompleteness": { "type": "boolean" },
+    "actorRole": { "type": "string", "enum": ["Editor", "Reviewer", "Specialist", "System"] },
+    "decision": { "type": "string" },
+    "timestamps": { "type": "object" },
+    "staleEvents": { "type": "array", "items": { "type": "string" } },
+    "manualChecksCount": { "type": "integer", "minimum": 0 },
+    "finalPostOutcome": { "type": "string" },
+    "technicalLogRef": { "type": "string" }
+  }
+}

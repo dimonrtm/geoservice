@@ -89,6 +89,59 @@ class LintWikiTests(unittest.TestCase):
 
         self.assertEqual([], issues)
 
+    def test_domain_wiki_roots_are_linted(self):
+        self.write("Wiki/entities/no-frontmatter.md", "# No Frontmatter\n")
+        self.write("DDD_Wiki/aggregates/no-frontmatter.md", "# No Frontmatter\n")
+
+        lint_wiki = load_module()
+        issues = lint_wiki.lint(self.root)
+
+        self.assertIssue(
+            issues, "missing_frontmatter", "Wiki/entities/no-frontmatter.md"
+        )
+        self.assertIssue(
+            issues, "missing_frontmatter", "DDD_Wiki/aggregates/no-frontmatter.md"
+        )
+
+    def test_domain_nodes_require_confidence_and_related(self):
+        self.write(
+            "Wiki/entities/work_order.md",
+            "---\ntitle: Work Order\ntype: entity\nstatus: active\ncreated: 2026-06-24\nupdated: 2026-06-24\nsource: RAW_inputs/example.md\ntags: []\n---\n\n# Work Order\n",
+        )
+
+        lint_wiki = load_module()
+        issues = lint_wiki.lint(self.root)
+
+        self.assertIssue(
+            issues, "missing_domain_metadata", "Wiki/entities/work_order.md"
+        )
+
+    def test_domain_event_requires_domain_sections(self):
+        self.write(
+            "Wiki/domain_events/review_package_approved.md",
+            "---\ntitle: Review Package Approved\ntype: domain-event\nstatus: active\ncreated: 2026-06-24\nupdated: 2026-06-24\nsource: RAW_inputs/example.md\ntags: []\nconfidence: high\nrelated: []\n---\n\n# Review Package Approved\n",
+        )
+
+        lint_wiki = load_module()
+        issues = lint_wiki.lint(self.root)
+
+        self.assertIssue(
+            issues,
+            "incomplete_domain_event",
+            "Wiki/domain_events/review_package_approved.md",
+        )
+
+    def test_valid_domain_event_is_clean(self):
+        self.write(
+            "Wiki/domain_events/review_package_approved.md",
+            "---\ntitle: Review Package Approved\ntype: domain-event\nstatus: active\ncreated: 2026-06-24\nupdated: 2026-06-24\nsource: RAW_inputs/example.md\ntags: []\nconfidence: high\nrelated: []\n---\n\n# Review Package Approved\n\n## Source Aggregate\n\nReview Package.\n\n## Happened In The Past\n\nYes.\n\n## Downstream Reactions\n\nNone documented.\n",
+        )
+
+        lint_wiki = load_module()
+        issues = lint_wiki.lint(self.root)
+
+        self.assertEqual([], issues)
+
     def assertIssue(self, issues, code, relative_path):
         found = [
             issue

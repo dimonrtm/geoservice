@@ -5,6 +5,24 @@ description: Ручная процедура /ingest для обработки R
 
 # /ingest
 
+## Текущая Нормативная Процедура
+
+Этот раздел является приоритетным для обычного `/ingest`. Более старые разделы ниже применяются только там, где они не противоречат этому разделу.
+
+Обычный `/ingest` работает только с сырыми файлами в `RAW_inputs/`. Отдельный режим `domain-bootstrap` не используется: первичная доменная модель для текущего репозитория строится отдельным проходом после создания skill'ов, а перенос на другой репозиторий выполняется через обработку первых raw-файлов. Режимы `/ingest repository-snapshot` и `/ingest repository-change` сохраняются только для `Code_wiki`.
+
+Перед ingest прочитать `Wiki/index.md`, нужные `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, `Vision_wiki/index.md`, `Code_wiki/index.md`, `RAW_inputs/index.md`, если он есть, `memory/llm-wiki-method.md` и `memory/project-state.md`.
+
+Если путь не указан, сканировать `RAW_inputs/` и выбирать только новые добавленные файлы, которые еще не встречаются как processed source в `RAW_inputs/index.md`, `Wiki/`, `DDD_Wiki/`, `Vision_wiki/`, `Code_wiki/` или `memory/project-state.md`. Старые уже обработанные raw-файлы второй раз автоматически не читать. Если старый raw-файл изменился, похож на новую версию уже обработанного документа или конфликтует с wiki, показать неоднозначность и ждать подтверждения пользователя.
+
+Обрабатывать любой новый raw-файл, а не только файлы с вопросами или ответами. Ответы на discovery уточняют `Wiki/`, `DDD_Wiki`, `Wiki/conflicts/` и `Wiki/questions/`. Ответы на sprint planning использовать как input для `/plan-sprint`; если в них есть устойчивое доменное знание, также уточнять `Wiki/DDD_Wiki`.
+
+Из каждого источника извлекать DDD-понятия, когда для них есть основания: ubiquitous language, domain, subdomain, core/supporting/generic classification, bounded context, context map, upstream/downstream, partnership, shared kernel, customer/supplier, conformist, anti-corruption layer, open host service, published language, separate ways, big ball of mud, entity, value object, domain service, application service, repository, factory, module/package, aggregate, aggregate root, consistency boundary, invariant, command, domain event, integration event, policy/process manager/saga, specification, business rule, constraint, eventual consistency, idempotency, transaction boundary, optional CQS/CQRS/read model.
+
+Сначала обновлять канонический доменный слой `Wiki/`: `glossary`, `concepts`, `actors`, `external_systems`, `entities`, `value_objects`, `commands`, `domain_events`, `system_events`, `policies`, `specifications`, `conflicts`, `questions`. Затем обновлять `DDD_Wiki/`: `domains`, `subdomains`, `bounded_contexts`, `context_map`, `aggregates`, `state_machines`, `invariants`, `use_cases`, `integration_patterns`, `model_health.md`. После этого обновлять `Vision_wiki/` как legacy/source слой и `Code_wiki/` только для технического знания.
+
+В конце обновить `RAW_inputs/index.md`, `Wiki/index.md`, `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, при необходимости `Vision_wiki/index.md`, `Code_wiki/index.md` и `memory/project-state.md`. Если lint падает только на старых RAW-файлах без frontmatter, не править RAW в рамках ingest.
+
 `/ingest` превращает сырой источник в атомарные wiki-ноды с источниками, связями и follow-up'ами. Он не должен менять код, конфигурацию, миграции или тесты.
 
 ## Обязательный Контекст

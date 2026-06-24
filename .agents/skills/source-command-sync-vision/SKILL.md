@@ -5,6 +5,14 @@ description: Ручная процедура /sync-vision для синхрон�
 
 # /sync-vision
 
+## Текущая Нормативная Процедура
+
+`/sync-vision` теперь синхронизирует не только legacy `Vision_wiki`, но весь knowledge graph: `Wiki/`, `DDD_Wiki/`, `Vision_wiki/`, `Code_wiki/`, `RAW_inputs/`, `memory/`, `Общие_принципы/` и `docs/knowledge-pipeline/`.
+
+При сборе изменений обязательно учитывать новые и измененные файлы в `Wiki/` и `DDD_Wiki/`. При обновлении индексов поддерживать `Wiki/index.md`, `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, корневой `index.md` и `memory/project-state.md`.
+
+`Vision_wiki` остается legacy/source слоем: не считать его единственной канонической моделью, если есть уточнения в `Wiki/DDD_Wiki`.
+
 `/sync-vision` синхронизирует состояние wiki. Он не переписывает смысл нод без отдельного запроса.
 
 ## Когда Запускать

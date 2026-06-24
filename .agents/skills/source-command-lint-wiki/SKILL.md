@@ -5,6 +5,14 @@ description: Ручная процедура /lint-wiki для проверки 
 
 # /lint-wiki
 
+## Текущая Нормативная Процедура
+
+`/lint-wiki` проверяет все wiki roots: `Wiki/`, `DDD_Wiki/`, `Vision_wiki/`, `Code_wiki/`, `RAW_inputs/`, `memory/`, `Общие_принципы/` и `docs/knowledge-pipeline/`.
+
+Для `Wiki/` и `DDD_Wiki/` дополнительно проверять доменную структуру: содержательные узлы должны иметь `source`, `confidence` и `related`; commands, domain events, policies, specifications, value objects, bounded contexts, subdomains и context maps должны иметь обязательные DDD-секции, которые проверяет `scripts/lint-wiki.py`.
+
+Ожидаемый известный долг: старые RAW Markdown-файлы могут падать на `missing_frontmatter`. Не исправлять `RAW_inputs/` как часть `/lint-wiki`; только сообщить, если это единственный класс проблем.
+
 `/lint-wiki` проверяет техническое и структурное здоровье wiki.
 
 Lifecycle agent memory проверяется отдельно через `/audit-memory`. `/lint-wiki`

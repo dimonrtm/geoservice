@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://geoservice.local/schemas/release-2/geometry-association-conflict/timing.schema.json",
+  "title": "Release 2: метрики времени для конфликта геометрии/ассоциации",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packageBuildMs",
+    "evidenceLoadMs",
+    "staleInvalidationMs",
+    "auditSaveMs"
+  ],
+  "properties": {
+    "packageBuildMs": { "type": "integer", "minimum": 0 },
+    "evidenceLoadMs": { "type": "integer", "minimum": 0 },
+    "staleInvalidationMs": { "type": "integer", "minimum": 0 },
+    "auditSaveMs": { "type": "integer", "minimum": 0 },
+    "prePostCheckMs": { "type": "integer", "minimum": 0 },
+    "targets": {
+      "type": "object",
+      "properties": {
+        "packageSummaryP95Ms": { "type": "integer", "minimum": 0 },
+        "packageDetailsP95Ms": { "type": "integer", "minimum": 0 },
+        "staleBlockResponseP95Ms": { "type": "integer", "minimum": 0 },
+        "auditSaveAckP95Ms": { "type": "integer", "minimum": 0 },
+        "auditReadableP95Ms": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

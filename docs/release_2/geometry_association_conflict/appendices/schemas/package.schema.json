@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://geoservice.local/schemas/release-2/geometry-association-conflict/package.schema.json",
+  "title": "Release 2: пакет для конфликта геометрии/ассоциации",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packageId",
+    "scenarioId",
+    "status",
+    "createdAt",
+    "versionIds",
+    "snapshotIds",
+    "workOrder",
+    "geometryDiff",
+    "associationDelta",
+    "dirtyAreaSnapshot",
+    "validationResult",
+    "traceResult",
+    "subnetworkStatus",
+    "riskTier",
+    "blockers",
+    "evidenceCompleteness",
+    "decisionRecommendation",
+    "freshness"
+  ],
+  "properties": {
+    "packageId": { "type": "string" },
+    "scenarioId": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft_package",
+        "ready_for_review",
+        "approved",
+        "post_authorized",
+        "blocked_post",
+        "stale",
+        "escalated",
+        "repeated_review",
+        "posted"
+      ]
+    },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "versionIds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base", "mine", "default"],
+      "properties": {
+        "base": { "type": "string" },
+        "mine": { "type": "string" },
+        "default": { "type": "string" }
+      }
+    },
+    "snapshotIds": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base", "mine", "default"],
+      "properties": {
+        "base": { "type": "string" },
+        "mine": { "type": "string" },
+        "default": { "type": "string" }
+      }
+    },
+    "workOrder": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "code", "title"],
+      "properties": {
+        "id": { "type": "string" },
+        "code": { "type": "string" },
+        "title": { "type": "string" }
+      }
+    },
+    "geometryDiff": { "type": "object" },
+    "associationDelta": { "type": "object" },
+    "dirtyAreaSnapshot": {
+      "type": "object",
+      "required": ["hasDirtyAreas", "validatedTopology"],
+      "properties": {
+        "hasDirtyAreas": { "type": "boolean" },
+        "dirtyAreaIds": { "type": "array", "items": { "type": "string" } },
+        "validatedTopology": { "type": "boolean" }
+      }
+    },
+    "validationResult": { "type": "object" },
+    "traceResult": { "type": "object" },
+    "subnetworkStatus": { "type": "object" },
+    "riskTier": {
+      "type": "object",
+      "required": ["tier"],
+      "properties": {
+        "tier": { "type": "string", "enum": ["Normal", "High", "Critical"] },
+        "confidence": { "type": "string" },
+        "rationale": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "evidenceCompleteness": { "type": "object" },
+    "decisionRecommendation": { "type": "object" },
+    "freshness": { "type": "object" }
+  }
+}

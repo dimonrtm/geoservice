@@ -5,6 +5,24 @@ description: Ручная процедура /discover для первичной
 
 # /discover
 
+## Текущая Нормативная Процедура
+
+Этот раздел является приоритетным для текущего `/discover`. Более старые разделы ниже применяются только там, где они не противоречат model-driven discovery.
+
+Перед выбором вопросов прочитать `Wiki/index.md`, `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, `Code_wiki/index.md`, релевантные `Code_wiki/архитектура/*.md`, `Vision_wiki/index.md`, `memory/project-state.md` и playbook'и из `Общие_принципы/`.
+
+Если проект не пустой, `/discover` не задает общий список вопросов. Он сначала исследует текущую доменную модель, DDD-покрытие, конфликты, gaps в `DDD_Wiki/model_health.md`, открытые вопросы в `Wiki/_registry/questions.md`, противоречия в `Wiki/conflicts/`, legacy-знание в `Vision_wiki/` и технические ограничения из `Code_wiki/`.
+
+Затем внутренне сгенерировать 150 candidate questions. Кандидаты должны покрывать: ubiquitous language, subdomains, bounded contexts, context map, entities, value objects, aggregates, commands, domain events, system events, policies, specifications, external systems, integration patterns, invariants, lifecycle/state machines, data model gaps, code/model mismatches, conflicts and sprint planning relevance.
+
+Из 150 кандидатов выбрать top 15 по критериям: насколько ответ разблокирует непротиворечивую модель, снижает риск неверного bounded context/aggregate, помогает разрешить конфликт, повышает confidence низкоуверенного узла, влияет на ближайшие 14 дней разработки, имеет понятного адресата и может быть отвечен пользователем.
+
+В ответе показать только top 15, сгруппированные по смыслу. Для каждого вопроса указать коротко: какой узел или конфликт он уточняет, почему сейчас важен, и как пользователь может ответить. Не показывать все 150, если пользователь явно не попросил.
+
+Пользователь может ответить прямо в чате или положить ответ новым файлом в `RAW_inputs/`. Если ответ появился как raw-файл, следующий `/ingest` должен обработать его как новый источник. Если ответ дан в чате и пользователь просит сохранить результат, создать trace-summary или обновить wiki только с явным source на этот chat/discovery result.
+
+Для `--phase` и `--context` сначала применить фильтр фазы/контекста, но всё равно строить вопросы из текущей модели и конфликтов. Обычный размер выдачи остается 10-15 вопросов, целевой размер для model-driven discovery - top 15.
+
 `/discover` запускает discovery-режим со стейкхолдером. Он не должен просто выдавать общий список вопросов: сначала нужно понять, это первый запуск wiki или подготовка к конкретной встрече.
 
 ## Обязательный Контекст

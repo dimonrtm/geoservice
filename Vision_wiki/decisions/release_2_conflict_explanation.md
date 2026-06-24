@@ -4,7 +4,7 @@ type: decision
 status: planned
 created: 2026-06-14
 updated: 2026-06-23
-source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f5.md; RAW_inputs/meetings/geometry_association_conflict_f6.md"
+source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f5.md; RAW_inputs/meetings/geometry_association_conflict_f6.md; RAW_inputs/meetings/geometry_association_conflict_f7.md; RAW_inputs/meetings/geometry_association_conflict_f8.md"
 tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-network]
 ---
 
@@ -42,11 +42,28 @@ validation.
 иметь read-only package, вычисляемое core evidence, stale rules, hard blockers,
 минимальный audit object, внешний package API и internal orchestration boundary.
 
+Ф7 research/design input уточняет измерительный контракт: developer demo
+доказывает не product adoption, а `contract readiness pass rate` при нулевом
+`false-safe` на hard-block scenarios; speed и external-check reduction остаются
+secondary demo indicators до реальных `Editor`/`Reviewer`.
+
+Ф8 closeout фиксирует Release 2 как pre-post decision-support/control layer
+вокруг `reconcile -> consequence package -> review -> post`, а не как новый
+conflict resolution engine. Implementation contract v0.1 должен заморозить
+states, package schema, blocker semantics, stale triggers, minimal audit object,
+acceptance gates и non-goals; human layer остается отдельной validation-задачей.
+
 Текущий Release 1 не меняется.
 
 ## Решение
 
 Conflict explanation строится как consequence-first карточка.
+
+Ф8 уточняет центральный scope: первичное решение Release 2 - `approval of
+change package as a pre-post gate`. `Editor` разрешает конфликт в native edit
+workflow, а GeoService собирает consequence package и помогает принять human
+decision, можно ли допускать пакет дальше. Routing/escalation является outcome,
+а не центральной сущностью первого контракта.
 
 `Reviewer decision` для Release 2 трактуется как approval of change package for
 post readiness. `Reviewer` принимает решение по пакету изменения, а не только по
@@ -62,6 +79,13 @@ Approval и `post authorization` разделяются:
   `Default` сейчас, после актуального reconcile и технических gates;
 - если между approval и `post` изменился `Default` или topology-relevant часть
   пакета, approval становится stale и требует repeat review.
+
+Ф8 вводит более явную пару состояний:
+
+- `approve package` - reviewer согласен с change package и объяснением
+  сетевого последствия;
+- `can post` - у пакета нет hard blockers, approval не stale, target/default
+  state не ушел вперед после reconcile/approval.
 
 Обязательный первый уровень:
 
@@ -262,6 +286,84 @@ subnetwork status, error set, association delta.
 stub/native workflow. Ценность Release 2 - объяснить сетевое последствие и
 отфильтровать false-safe decisions, а не дублировать native conflict editor.
 
+## Ф7 Metrics And Guardrails
+
+North Star для Release 2 package: помочь квалифицированному человеку быстро
+принять reviewable go/no-go решение по сетевому конфликту и сохранить, почему
+это решение было принято, не скрывая hard blockers и не обещая
+production-safe `post` без свежей проверки.
+
+Primary developer-demo metric:
+
+- `contract readiness pass rate` по canonical scenario и sidecar variants.
+
+Secondary metrics:
+
+- `package build success`;
+- `evidence completeness`;
+- `blocker detection`;
+- `stale detection`;
+- `audit completeness`;
+- `time-to-decision` и `external-check opens` только как internal demo
+  indicators.
+
+Absolute counter-metric:
+
+- `false-safe verdict count = 0`; один false-safe на dirty trace path, invalid
+  subnetwork, unresolved association delta, stale package/approval или missing
+  evidence проваливает demo независимо от aggregate metrics.
+
+Package считается дублирующим native Conflicts view, если он повторяет только
+`Current / Target / Common Ancestor`, не объясняет consequence, не дает clear
+next step, не создает durable audit object или заставляет reviewer сразу
+открывать внешний GIS/trace/expert handoff.
+
+## Ф8 Implementation Contract Closeout
+
+К implementation contract v0.1 готовы:
+
+- scope как pre-post decision-support layer;
+- handoff после reconcile и package build;
+- minimal package schema: `Base / Mine / Default`, geometry diff, association
+  delta, dirty areas, validation/topology status, trace consistency/freshness,
+  subnetwork status при затронутой subnetwork semantics, work order/change
+  request id, explanatory comments/history и field evidence для High/Critical
+  или неочевидного rationale;
+- separation `approve package` / `can post`;
+- absolute veto blockers: unresolved association delta, dirty trace path или
+  отсутствующая validated topology, invalid subnetwork/update-subnetwork
+  failure, stale approval, missing mandatory evidence для High/Critical,
+  unexplained unexpected trace impact;
+- stale triggers: geometry, association, network attributes, terminal
+  configuration, validation result, reconcile against changed target/default и
+  subnetwork status changes;
+- minimal audit object: package id, snapshot/version ids, risk tier, blockers,
+  evidence completeness flags, trace/subnetwork freshness, decision, actor
+  role, timestamps, stale events, final post outcome и ссылка на
+  reconcile/technical log;
+- canonical transformer/service-device association case plus stale/pre-post
+  failure sidecar.
+
+До real `Editor`/`Reviewer` validation остаются гипотезами:
+
+- точная calibration `Normal / High / Critical`;
+- authority matrix для High/Critical;
+- sample review policy для `Normal`;
+- field evidence sufficiency thresholds;
+- UX repeat review и `delta since previous approval`;
+- language of trust.
+
+Implementation contract реально блокируют: владелец финального решения для
+`Critical`, evidence matrix по tier, exact stale events, MVP boundary между
+read-only decision support и action buttons, а также гарантированно доступные
+demo/runtime integrations для work order, trace/subnetwork data и evidence.
+
+Первый implementation contract лучше делать как ADR-style Markdown contract с
+machine-readable YAML/JSON appendices: scope, actors, states, events, decision
+semantics, blockers, stale rules, non-goals и acceptance gates в основном
+документе; package schema, audit schema, API/events, fixture manifest, P95
+targets и observability fields - в приложениях.
+
 ## Последствия
 
 - UX должен раскрывать детали постепенно и не начинаться с полной таблицы
@@ -283,9 +385,20 @@ stub/native workflow. Ценность Release 2 - объяснить сетев
   consequence-first explanation предотвращает unsafe post, снижает review
   friction, устраняет открытие внешней GIS или позволяет безопасно переводить
   `Normal` в audit/sample review.
+- До user validation допустимый claim ограничен формулировкой: demo показывает
+  consequence-first package для reviewable go/no-go decision и воспроизводимого
+  stale/blocker handling на synthetic utility-network cases.
+- После Ф8 допустимый developer-demo claim формулируется еще уже: `В developer
+  demo Release 2 собирает consequence package для utility-network конфликта,
+  делает видимыми hard blockers и помогает сформировать более обоснованное
+  go/no-go решение перед post на synthetic scenario.`
 - Для первого Ф4 demo не вводить `Simple` как safe default: сначала нужно
   доказать отсутствие network consequence. `Simple` остается planned routing
   tier для будущей validation.
+- Первый implementation contract не должен строить новый topology engine,
+  достигать full ArcGIS parity, делать full in-product conflict editing UI,
+  batch review queue/SLA routing, production-grade on-prem hardening или
+  authoritative-safe post claims без real validation.
 
 ## Связи
 
@@ -296,6 +409,8 @@ stub/native workflow. Ценность Release 2 - объяснить сетев
 - [[../chats/2026-06-20-geometry-association-conflict-f4]]
 - [[../chats/2026-06-22-geometry-association-conflict-f5]]
 - [[../chats/2026-06-23-geometry-association-conflict-f6]]
+- [[../chats/2026-06-23-geometry-association-conflict-f7]]
+- [[../chats/2026-06-23-geometry-association-conflict-f8]]
 - [[conflict_resolution_routing]]
 - [[conflicts/2026-06-14-trace-risk-tier-boundary]]
 - [[risk_assumption_log]]

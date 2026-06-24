@@ -3,12 +3,27 @@ title: Project Knowledge Pipeline
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-05-30
+updated: 2026-06-24
 source: null
 tags: [knowledge-pipeline, runbook]
 ---
 
 # Project Knowledge Pipeline
+
+## Canonical Domain Layer
+
+Текущий канонический доменный слой состоит из:
+
+- `Wiki/` - атомарные сущности, concepts, actors, external systems, commands, domain events, system events, policies, specifications, conflicts, questions и registry tables.
+- `DDD_Wiki/` - DDD-проекция модели: domains, subdomains, bounded contexts, context map, aggregates, state machines, invariants, use cases, integration patterns и `model_health.md`.
+- `Vision_wiki/` - legacy/source слой продуктовых знаний и summary старых discovery/ingest.
+- `Code_wiki/` - техническая wiki; продолжает наполняться через `/ingest repository-snapshot` и `/ingest repository-change`.
+
+`/ingest` без параметров обрабатывает только новые добавленные файлы в `RAW_inputs/`, которых еще нет в processed source records. Старые обработанные raw-файлы второй раз автоматически не читаются. Измененный старый raw-файл считается неоднозначностью и требует подтверждения. Обрабатываются любые новые raw-файлы, не только вопросы или ответы.
+
+`/discover` для непустого проекта сначала исследует текущую `Wiki/DDD_Wiki` модель, `DDD_Wiki/model_health.md`, `Wiki/conflicts/`, registry questions, `Code_wiki` и legacy `Vision_wiki`, затем внутренне генерирует 150 candidate questions и показывает пользователю top 15.
+
+`/plan-sprint` планирует 14-дневный спринт на основе текущего кода, `Code_wiki`, `Wiki/DDD_Wiki`, конфликтов модели и принятых ответов. Он внутренне генерирует 150 planning questions и показывает top 15; ответы могут быть в чате или новым raw-файлом в `RAW_inputs/`.
 
 Wiki ведется на русском языке. Пути, команды, идентификаторы и имена файлов не переводятся.
 
