@@ -1,12 +1,12 @@
 ---
 title: Review Decision
 type: entity
-status: planned
+status: active
 created: 2026-06-24
 updated: 2026-06-24
-source: "Vision_wiki/decisions/release_2_conflict_explanation.md"
+source: "Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md"
 tags: [domain-knowledge, entity, review, release-2]
-confidence: medium
+confidence: high
 related: [Wiki/actors/reviewer, Wiki/policies/reviewer_post_policy, DDD_Wiki/aggregates/review_package]
 ---
 
@@ -14,16 +14,16 @@ related: [Wiki/actors/reviewer, Wiki/policies/reviewer_post_policy, DDD_Wiki/agg
 
 ## Identity
 
-`ReviewDecision` должен быть связан с package id, actor role, timestamps, risk tier, blockers, полнотой evidence и final post outcome.
+`ReviewDecision` связан с package id, actor role, timestamps, decision scope, rationale, risk tier, blockers, completeness flags, stale events и final post outcome.
 
 ## Lifecycle
 
-Release 2 вводит состояния package/approval: draft package, ready for review, approved, stale, blocked post, escalated, repeated review.
+Минимальная state machine различает `ready_for_review`, `approved_package`, `post_authorized`, `posted`, а также поперечные состояния `blocked`, `stale` и `escalated`.
 
 ## Responsibilities
 
 Фиксирует human decision по change package и отделяет `approve package` от технического `can post`.
 
-## Open Questions
+## Audit Boundary
 
-Нужна точная schema/API contract в implementation contract v0.1.
+Domain audit хранит package/work order/edit version ids, actor, role, decision, rationale, risk tier, blocker flags, stale events, evidence snapshot checksum, trace/subnetwork freshness verdict и final post outcome. Timings, correlation id и retry counters относятся к telemetry/debug.

@@ -4,9 +4,9 @@ type: state-machine
 status: active
 created: 2026-06-24
 updated: 2026-06-24
-source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md"
+source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md"
 tags: [domain-knowledge, ddd, state-machine]
-confidence: medium
+confidence: high
 related: [Wiki/entities/work_order, Wiki/entities/edit_version, DDD_Wiki/use_cases/utility_editor_workflow]
 ---
 
@@ -18,10 +18,12 @@ related: [Wiki/entities/work_order, Wiki/entities/edit_version, DDD_Wiki/use_cas
 Assigned -> InProgress
 ```
 
-## Full Release Direction
+## Canonical Review/Post Direction
 
-Release roadmap расширяет путь через editing, validation, reconcile, conflict resolution, review, post и audit. Точные имена состояний после `InProgress` остаются planned.
+Минимальный линейный путь после `InProgress`:
 
-## Open Questions
+```text
+editing -> validated -> reconciled -> ready_for_review -> approved_package -> post_authorized -> posted
+```
 
-Состояния review/post нужно согласовать с package state machine из Release 2, прежде чем считать их каноническими.
+Поперечные состояния: `blocked`, `stale`, `escalated`. `approve package` и `post_authorized` разделены намеренно: reviewer decision не равен техническому допуску к `PostToDefault`.

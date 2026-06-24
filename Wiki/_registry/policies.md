@@ -14,5 +14,5 @@ related: [Wiki/index]
 
 | Policy | Rule | Decision Outcome | Confidence | Source |
 | --- | --- | --- | --- | --- |
-| [[Wiki/policies/reviewer_post_policy]] | Разделять `approve package` и `can post`; эскалировать уровни риска. | approved/rejected/escalated/stale/blocked | medium | `Vision_wiki/decisions/release_2_conflict_explanation.md` |
-| [[Wiki/policies/stale_approval_policy]] | Изменения, значимые для топологии, делают approval устаревшим. | Повторная проверка или пересчет package | medium | `Vision_wiki/decisions/release_2_conflict_explanation.md` |
+| [[Wiki/policies/reviewer_post_policy]] | `Reviewer` approves package; `Publisher` / demo-system action выполняет technical post. | approved/rejected/escalated/stale/blocked | high | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |
+| [[Wiki/policies/stale_approval_policy]] | Изменения `Default`, geometry, association, network attribute, terminal config, validation, trace/subnetwork или evidence делают approval устаревшим. | Repeat review или recompute package | high | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |

@@ -14,5 +14,5 @@ related: [Wiki/index, DDD_Wiki/model_health]
 
 | Question | Domain Gap | Priority | Status | Answer Source |
 | --- | --- | --- | --- | --- |
-| `Publisher` - отдельная роль, ответственность data owner или техническая операция? | [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | high | open | pending |
-| Какие правила Release 2 про устаревание и блокеры должны влиять на следующий 14-дневный спринт? | [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | high | open | pending |
+| `Publisher` - отдельная роль, ответственность data owner или техническая операция? | [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | high | answered | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |
+| Какие правила Release 2 про устаревание и блокеры должны влиять на следующий 14-дневный спринт? | [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | high | answered | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |

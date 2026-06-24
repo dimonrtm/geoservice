@@ -14,7 +14,7 @@ tags: [project-state, geoservice]
 
 ## Кратко
 
-GeoService - исследовательский pet-проект на стадии идея / прототип. Цель: изучить алгоритмы совместного редактирования геометрии и проверить AI-first разработку сложной геоинформационной системы. Текущий Release 1 строится вокруг полного `Utility GIS editor` workflow от назначенного work order и изолированной edit version до validation, reconcile, review, authoritative post и audit.
+GeoService - исследовательский pet-проект на стадии идея / прототип. Цель: изучить алгоритмы совместного редактирования геометрии и проверить AI-first разработку сложной геоинформационной системы. Текущая доменная модель строится вокруг полного `Utility GIS editor` workflow от назначенного work order и изолированной edit version до validation, reconcile, review, authoritative post и audit.
 
 ## Состояние Pipeline
 
@@ -23,9 +23,9 @@ GeoService - исследовательский pet-проект на стади
 - `/plan-sprint` добавлен как workflow планирования 14-дневного спринта на основе текущего кода, `Code_wiki`, `Wiki/DDD_Wiki`, конфликтов и top 15 из 150 planning questions.
 
 - Последний `/discover`: 2026-06-23, подготовлен checklist Ф8 по `geometry/association conflict` для closeout Release 2: ready-to-implement decisions, remaining blockers, RAW artifacts, wiki updates и следующие шаги перед implementation contract.
-- Последний `/ingest`: 2026-06-23, `RAW_inputs/meetings/geometry_association_conflict_f8.md` обработан как Ф8 closeout для Release 2; уточнены pre-post decision-support scope, contract-ready decisions, human-validation hypotheses, acceptance gates, implementation contract v0.1, real validation checklist и non-goals.
+- Последний `/ingest`: 2026-06-24, `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` обработан как design/architecture input для review/post implementation contract; уточнены `Reviewer` как semantic approval, `Publisher` / demo-system action как technical post, `ReviewPackage` aggregate, canonical review/post state machine, risk tiers, stale events, hard blockers, audit boundary и ближайший vertical slice.
 - Последний `/sync-vision`: 2026-06-23 19:10 +05:00, корневой индекс и live state синхронизированы после ingest `RAW_inputs/meetings/geometry_association_conflict_f5.md`; новых необработанных RAW inputs и stale-нод нет.
-- Последний `/lint-wiki`: 2026-06-23, через bundled Python найдены ожидаемые `missing_frontmatter` для 28 неизменяемых RAW Markdown files; открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/lint-wiki`: 2026-06-24, через bundled Python найдены ожидаемые `missing_frontmatter` для 29 неизменяемых RAW Markdown files; новых lint-ошибок вне RAW source files не обнаружено, открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний `/ingest repository-change`: 2026-06-22, существующие ноды
   `Code_wiki` синхронизированы с экраном `Мои наряды`: Editor-only
@@ -37,14 +37,14 @@ GeoService - исследовательский pet-проект на стади
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
   завершение плана или commit не являются триггерами.
 
-## Состояние Wiki На 2026-06-23
+## Состояние Wiki На 2026-06-24
 
-- Необработанные RAW inputs: не обнаружены; все 29 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs с прошлого `/sync-vision`: `RAW_inputs/meetings/geometry_association_conflict_f5.md`, `RAW_inputs/meetings/geometry_association_conflict_f6.md`, `RAW_inputs/meetings/geometry_association_conflict_f7.md` и `RAW_inputs/meetings/geometry_association_conflict_f8.md`; все четыре источника уже обработаны через `/ingest`.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-22-geometry-association-conflict-f5]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f6-checklist]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f6]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f7-checklist]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f7]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f8-checklist]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f8]].
+- Необработанные RAW inputs: не обнаружены; все 30 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs с прошлого `/sync-vision`: `RAW_inputs/meetings/geometry_association_conflict_f5.md`, `RAW_inputs/meetings/geometry_association_conflict_f6.md`, `RAW_inputs/meetings/geometry_association_conflict_f7.md`, `RAW_inputs/meetings/geometry_association_conflict_f8.md`, `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; все пять источников уже обработаны через `/ingest`.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-22-geometry-association-conflict-f5]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f6-checklist]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f6]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f7-checklist]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f7]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f8-checklist]], [[../Vision_wiki/chats/2026-06-23-geometry-association-conflict-f8]], [[../Vision_wiki/chats/2026-06-24-implementation-contract-for-review-and-post]].
 - Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 28 RAW Markdown files, product validation `FU-2026-06-13-002`, Release 2 user validation `FU-2026-06-14-001`, implementation contract `FU-2026-06-23-001`, experiment design `FU-2026-06-23-002` и Release 2 real validation checklist `FU-2026-06-23-003`; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
+- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 29 RAW Markdown files, product validation `FU-2026-06-13-002`, Release 2/user validation `FU-2026-06-14-001`, review/post implementation contract `FU-2026-06-23-001`, experiment design `FU-2026-06-23-002` и Release 2 real validation checklist `FU-2026-06-23-003`; canonical `Wiki` conflicts [[../Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] и [[../Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] resolved новым RAW source; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
 - Открытые follow-up'ы: 15.
 
 ## Открытые Вопросы

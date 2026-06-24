@@ -1,12 +1,12 @@
 ---
 title: Publisher
 type: actor
-status: needs-review
+status: active
 created: 2026-06-24
 updated: 2026-06-24
-source: "Vision_wiki/concepts/utility_gis_editing_domain.md; Vision_wiki/decisions/release_2_conflict_explanation.md"
+source: "Vision_wiki/concepts/utility_gis_editing_domain.md; Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md"
 tags: [domain-knowledge, actor, conflict]
-confidence: medium
+confidence: high
 related: [Wiki/conflicts/2026-06-24-reviewer-vs-publisher, Wiki/commands/post_to_default, DDD_Wiki/bounded_contexts/review_post]
 ---
 
@@ -14,12 +14,12 @@ related: [Wiki/conflicts/2026-06-24-reviewer-vs-publisher, Wiki/commands/post_to
 
 ## Responsibility
 
-`Publisher` отвечает за финальную публикацию одобренного change set в authoritative `Default`.
+`Publisher` - отдельная техническая роль, которая отвечает за финальную интеграцию одобренного change set в authoritative `Default`.
 
 ## Permissions
 
-В полной модели может быть отдельной организационной ролью. В упрощенном Release 1 ответственность может временно нести `Reviewer`.
+В целевой модели владеет операцией `PostToDefault` и финальной технической проверкой freshness, blockers и прав на post. В ближайшем вертикальном срезе может быть представлен demo-system action после reviewer approval; это не делает `Reviewer` владельцем authoritative state.
 
-## Open Questions
+## Boundary
 
-Нужно подтвердить, является ли `Publisher` отдельной ролью, ответственностью data owner или технической операцией внутри reviewer/post workflow.
+`Data Owner` задает policy, risk matrix и делегирование полномочий, но не выполняет routine post. `Reviewer` принимает semantic package verdict, а `Publisher` / version administrator выполняет technical post gate.

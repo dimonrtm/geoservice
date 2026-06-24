@@ -20,4 +20,4 @@ related: [Wiki/index]
 | [[Wiki/entities/feeder]] | `id`, `code` | Граница utility network / work order | high | `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md` |
 | [[Wiki/entities/network_feature]] | `id`, `assetCode` | Utility network | high | `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md` |
 | [[Wiki/entities/network_association]] | `id`, endpoints, type | Utility network | high | `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md` |
-| [[Wiki/entities/review_decision]] | package id + actor + timestamp | [[DDD_Wiki/aggregates/review_package]] | medium | `Vision_wiki/decisions/release_2_conflict_explanation.md` |
+| [[Wiki/entities/review_decision]] | package id + actor + decision scope | [[DDD_Wiki/aggregates/review_package]] | high | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |

@@ -1,12 +1,12 @@
 ---
 title: Risk Tier
 type: value-object
-status: planned
+status: active
 created: 2026-06-24
 updated: 2026-06-24
-source: "Vision_wiki/decisions/release_2_conflict_explanation.md"
+source: "Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md"
 tags: [domain-knowledge, value-object, review, release-2]
-confidence: medium
+confidence: high
 related: [Wiki/entities/review_decision, Wiki/policies/reviewer_post_policy, DDD_Wiki/aggregates/review_package]
 ---
 
@@ -25,3 +25,9 @@ Risk tier должен фиксироваться в audit для конкрет
 ## Used By
 
 `ReviewerPostPolicy`, routing/escalation и consequence package для Release 2.
+
+## Classification Rules
+
+- `Normal`: нет association delta, terminal-sensitive asset, network attribute change, validation clean, dirty areas cleared, trace fixture unchanged или не требуется.
+- `High`: есть association delta или terminal-adjacent conflict, но нет подтвержденного изменения trace/subnetwork semantics.
+- `Critical`: меняется trace path, затронут subnetwork controller/critical device, меняется traversability через terminal/connectivity, появляется invalid/dirty subnetwork или меняется network attribute, используемый для condition barrier/flow logic.

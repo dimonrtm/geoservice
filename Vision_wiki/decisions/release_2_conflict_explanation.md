@@ -3,8 +3,8 @@ title: Release 2 Conflict Explanation
 type: decision
 status: planned
 created: 2026-06-14
-updated: 2026-06-23
-source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f5.md; RAW_inputs/meetings/geometry_association_conflict_f6.md; RAW_inputs/meetings/geometry_association_conflict_f7.md; RAW_inputs/meetings/geometry_association_conflict_f8.md"
+updated: 2026-06-24
+source: "RAW_inputs/meetings/release2_conflict_explanation_editor_reviewer_answers.md; RAW_inputs/meetings/Reviwer Decision.md; RAW_inputs/meetings/geometry_association_conflict_f1.md; RAW_inputs/meetings/geometry_association_conflict_f2.md; RAW_inputs/meetings/geometry_association_conflict_f4.md; RAW_inputs/meetings/geometry_association_conflict_f5.md; RAW_inputs/meetings/geometry_association_conflict_f6.md; RAW_inputs/meetings/geometry_association_conflict_f7.md; RAW_inputs/meetings/geometry_association_conflict_f8.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md"
 tags: [decision, release-2, conflict-explanation, editor, reviewer, utility-network]
 ---
 
@@ -198,6 +198,30 @@ Safe next steps:
   utility-network admin.
 - Владелец authoritative data / version administrator equivalent сохраняет
   финальное право publication в `Default` и право решения при разногласии.
+
+## Review/Post Implementation Contract
+
+`RAW_inputs/meetings/implementation_contract_for_review_and_post.md` уточняет
+contract boundary для ближайшего вертикального среза.
+
+- `Reviewer` выполняет semantic `approve package`, но не владеет technical
+  `PostToDefault`.
+- `Publisher` / version administrator является целевой технической ролью для
+  post в authoritative `Default`; в ближайшем срезе его может представлять
+  demo-system action после reviewer approval.
+- `Data Owner` задает policy, risk matrix и делегирование полномочий, но не
+  выполняет routine post.
+- Ближайший must-scope: узкий `ReviewPackage` aggregate, минимальный evidence
+  package, `Normal`/`High`/`Critical`, hard blockers с absolute veto,
+  ограниченная stale policy и audit с двумя решениями - `approve package` и
+  `can post`.
+- Ближайший vertical slice должен доходить до review/post end-to-end:
+  `work order -> named edit version -> validation -> reconcile -> package build
+  -> reviewer decision -> stale/blocker recheck -> simulated post -> audit
+  outcome`.
+- Out of scope остаются production-parity topology engine, full native conflict
+  resolver, batch review queue, SLA-механика и claims про production-safe post
+  без real validation.
 
 ## Разрешение Trace Boundary
 

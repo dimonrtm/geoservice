@@ -14,5 +14,5 @@ related: [Wiki/index, DDD_Wiki/model_health]
 
 | Conflict | Blocks | Status | Question | Source |
 | --- | --- | --- | --- | --- |
-| [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | Модель ролей и прав для финальной публикации | active | `Publisher` отделен от `Reviewer`? | `Vision_wiki/concepts/utility_gis_editing_domain.md` |
-| [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | Единая state machine review/post и границы спринта | active | Какие правила Release 2 входят в Release 1? | `Vision_wiki/decisions/release_2_conflict_explanation.md` |
+| [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | Модель ролей и прав для финальной публикации | resolved | `Publisher` - отдельная technical role; `Reviewer` - semantic approval | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |
+| [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | Единая state machine review/post и границы спринта | resolved | Must для ближайшего среза: `ReviewPackage`, evidence, risk tier, blockers, stale, audit | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |
