@@ -31,24 +31,39 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAuthStore } from "@/stores/auth";
 import type { LayerDto } from "@/contracts/api";
+import type { WorkspaceResponse } from "@/contracts/work-orders";
 import { useFeatureLoading } from "@/composables/map/useFeatureLoading";
 import { useLayerRealtime } from "@/composables/map/useLayerRealtime";
 import { useLayerSelection } from "@/composables/map/useLayerSelection";
 import { useMapInstance } from "@/composables/map/useMapInstance";
 import { usePolygonEditing } from "@/composables/map/usePolygonEditing";
+import {
+  ensureWorkspaceLayers,
+  fitWorkspaceToAoi,
+  setWorkspaceData,
+} from "@/map/workspace-layers";
 
 const props = withDefaults(
   defineProps<{
-    mode?: "empty" | "editing";
+    mode?: "empty" | "editing" | "workspace";
+    workspace?: WorkspaceResponse | null;
+    workspaceKey?: string | null;
+    shouldFitWorkspace?: boolean;
   }>(),
   {
     mode: "editing",
+    workspace: null,
+    workspaceKey: null,
+    shouldFitWorkspace: false,
   },
 );
+const emit = defineEmits<{
+  workspaceFitted: [workspaceKey: string];
+}>();
 const mapEl = ref<HTMLDivElement | null>(null);
 const auth = useAuthStore();
 const { map, createMap, destroyMap } = useMapInstance(mapEl);
@@ -144,10 +159,33 @@ const realtimeBadgeClass = computed(() => ({
   isAuthError: isAuthError.value,
 }));
 
+function renderWorkspace(): void {
+  if (!map.value || !props.workspace) {
+    labelText.value = "Workspace не выбран";
+    return;
+  }
+
+  ensureWorkspaceLayers(map.value);
+  setWorkspaceData(map.value, props.workspace);
+
+  const editVersion = props.workspace.workOrder.editVersion;
+  labelText.value = `${props.workspace.workOrder.code} | Версия: ${editVersion.status} | Базовая ревизия сети: ${editVersion.baseNetworkRevision} | Объекты: ${editVersion.features.features.length} | Связи: ${editVersion.associations.length}`;
+
+  if (props.shouldFitWorkspace && props.workspaceKey) {
+    fitWorkspaceToAoi(map.value, props.workspace);
+    emit("workspaceFitted", props.workspaceKey);
+  }
+}
+
 onMounted(async () => {
   try {
     const currentMap = await createMap();
     if (!currentMap) {
+      return;
+    }
+
+    if (props.mode === "workspace") {
+      renderWorkspace();
       return;
     }
 
@@ -172,6 +210,15 @@ onMounted(async () => {
     labelText.value = "Не удалось инициализировать карту";
   }
 });
+
+watch(
+  () => [props.mode, props.workspace, props.shouldFitWorkspace] as const,
+  () => {
+    if (props.mode === "workspace") {
+      renderWorkspace();
+    }
+  },
+);
 
 onBeforeUnmount(() => {
   map.value?.off("moveend", onMoveEnd);

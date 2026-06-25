@@ -27,6 +27,8 @@
 - [План реализации Workspace API и AOI в контексте WorkOrder Дня 10](2026-06-21-sprint-1-day-10-workspace-api-implementation-plan.md)
 - [Мои наряды Интенсива 11](2026-06-22-sprint-1-day-11-my-work-orders-design.md)
 - [План реализации Мои наряды Интенсива 11](2026-06-22-sprint-1-day-11-my-work-orders-implementation-plan.md)
+- [Edit Workspace Интенсива 12](2026-06-25-sprint-1-day-12-edit-workspace-design.md)
+- [План реализации Edit Workspace Интенсива 12](2026-06-25-sprint-1-day-12-edit-workspace-implementation-plan.md)
 
 ## Исторические Материалы
 
