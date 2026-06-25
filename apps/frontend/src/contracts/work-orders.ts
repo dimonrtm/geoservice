@@ -45,10 +45,7 @@ export type WorkspaceAoi = {
   extent: [number, number, number, number];
 };
 
-export type WorkspaceFeature = Feature<
-  Geometry,
-  Record<string, unknown>
-> & {
+export type WorkspaceFeature = Feature<Geometry, Record<string, unknown>> & {
   id: string;
 };
 
