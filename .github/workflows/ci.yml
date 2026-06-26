@@ -202,6 +202,12 @@ jobs:
             assert len(payload['workOrder']['editVersion']['associations'])==9; \
             print('workspace api ok')"
 
+      - name: Full path workspace API smoke
+        working-directory: infra
+        run: |
+          docker compose -f docker-compose.yml exec -T utility_service \
+            python tests/smoke/full_path_workspace_smoke.py
+
       - name: Teardown
         if: always()
         working-directory: infra

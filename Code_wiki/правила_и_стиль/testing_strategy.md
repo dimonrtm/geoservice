@@ -3,8 +3,8 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-22
-source: repository-change:2026-06-22
+updated: 2026-06-26
+source: repository-change:2026-06-26
 tags: [testing, backend, frontend, quality]
 ---
 
@@ -29,6 +29,11 @@ Backend integration tests лежат в `apps/backend/tests/integration_tests`.
 могут оставаться в `apps/backend/tests`; сейчас там находится архитектурная проверка импортных
 границ и sanity test.
 
+Live service smoke runners лежат в `apps/backend/tests/smoke`. Файлы runner не
+начинаются с `test_`, чтобы обычный `pytest` не требовал поднятый сервис. Их
+поведение покрывается unit tests в той же папке, а live-запуск выполняется
+отдельным CI/Compose step.
+
 Покрытые области:
 
 - auth service, `utility_service/utils/passwords.py` и demo user seed;
@@ -50,6 +55,9 @@ Backend integration tests лежат в `apps/backend/tests/integration_tests`.
 - Work Orders `assigned-to-me` API contract, Editor-only access, compact response
   without audit/date fields, service delegation и repository sorting by
   `updated_at DESC`, `code ASC`;
+- full path workspace smoke runner: login seeded `Editor`, получить `WO-001`
+  через `assigned-to-me`, открыть или переоткрыть `EditVersion`, загрузить
+  workspace и проверить AOI, 19 features и 9 associations;
 - PostGIS persistence, spatial AOI intersection и single-query feeder aggregate;
 - migration integration test для `a8c1f2d3e4b5_edit_versions.py`, включая
   upgrade/downgrade/upgrade cycle, `utility_network.network_states`,
@@ -99,6 +107,20 @@ cd apps/backend
 pytest
 black --check .
 ruff check .
+```
+
+Focused smoke-runner check:
+
+```powershell
+cd apps/backend
+pytest tests/smoke/test_full_path_workspace_smoke.py -q
+```
+
+Live Compose smoke после healthy `utility_service`:
+
+```powershell
+cd infra
+docker compose -f docker-compose.yml exec -T utility_service python tests/smoke/full_path_workspace_smoke.py
 ```
 
 Docker/CI-equivalent backend:

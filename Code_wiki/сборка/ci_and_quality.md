@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-22
-source: repository-change:2026-06-22
+updated: 2026-06-26
+source: repository-change:2026-06-26
 tags: [ci, tests, lint, build]
 ---
 
@@ -40,6 +40,17 @@ smoke CI повторно запускает `python -m seeds.runners.seed_utili
 `python -m seeds.runners.seed_work_orders`, если проверяется создание
 `DefaultState`/`EditVersion` для demo work order. Затем Editor login проверяет
 полный feeder response с 19 features и 9 associations.
+
+После Day 13 в `smoke_test` добавлен full path workspace API smoke:
+`python tests/smoke/full_path_workspace_smoke.py` внутри контейнера
+`utility_service`. Runner проверяет живой HTTP-путь
+`POST /api/v1/auth/login -> GET /api/v1/work-orders/assigned-to-me ->
+POST /api/v1/work-orders/{workOrderId}/edit-versions ->
+GET /api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}/workspace`.
+В отличие от прежнего hardcoded workspace smoke, этот gate берет `workOrderId`
+из assigned list и проверяет связку login/assignment/open/workspace на seeded
+`WO-001`, expected AOI, 19 features и 9 associations. Browser E2E tooling в
+этот gate не входит.
 
 Локальные настройки:
 

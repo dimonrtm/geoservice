@@ -3,7 +3,7 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-22
+updated: 2026-06-26
 source: docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md
 tags: [repository-change, code-wiki, ingest]
 ---
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-06-26 | [[сборка/ci_and_quality]] | Добавлен CI full path workspace API smoke: `smoke_test` запускает `python tests/smoke/full_path_workspace_smoke.py` внутри `utility_service` и проверяет живой путь `login -> assigned-to-me -> open/reopen EditVersion -> workspace` для seeded `WO-001`. | `.github/workflows/ci.yml`, `apps/backend/tests/smoke/full_path_workspace_smoke.py` |
+| 2026-06-26 | [[правила_и_стиль/testing_strategy]] | Зафиксирован новый слой `apps/backend/tests/smoke`: runner не собирается обычным `pytest`, его поведение покрыто unit tests, а live-запуск выполняется отдельным Compose/CI step. | `apps/backend/tests/smoke/full_path_workspace_smoke.py`, `apps/backend/tests/smoke/test_full_path_workspace_smoke.py` |
 | 2026-06-22 | [[архитектура/api_and_realtime]] | Добавлен Editor-only `GET /api/v1/work-orders/assigned-to-me`: список назначенных текущему Editor work orders без открытия `EditVersion`, без изменения статуса, с компактным response без audit/date fields и backend сортировкой `updated_at DESC`, `code ASC`. | `apps/backend/utility_service/web_api/api/work_orders.py`, `apps/backend/utility_service/use_cases/schemas/work_order/`, `apps/backend/utility_service/infrastructure/postgresql/repositories/work_order_repository.py` |
 | 2026-06-22 | [[архитектура/frontend]] | Зафиксирован новый Editor shell: `App.vue` ведет Editor в `EditorWorkOrdersView`, список использует `workOrders` store, выбор только подсвечивает строку, а `MapView mode="empty"` показывает basemap без layers/features/realtime/editing. | `apps/frontend/src/App.vue`, `apps/frontend/src/components/EditorWorkOrdersView.vue`, `apps/frontend/src/components/MapView.vue`, `apps/frontend/src/stores/workOrders.ts`, `apps/frontend/src/api/workOrders.ts` |
 | 2026-06-22 | [[правила_и_стиль/testing_strategy]] | Обновлено покрытие для `assigned-to-me` API, repository sort, workOrders store, role-specific app shell, `EditorWorkOrdersView` и empty map mode; Vitest component tests используют `jsdom`. | `apps/backend/utility_service/web_api/tests/test_work_orders_api.py`, `apps/backend/utility_service/use_cases/tests/test_work_order_service.py`, `apps/backend/utility_service/infrastructure/tests/test_work_order_repository.py`, `apps/frontend/src/App.test.ts`, `apps/frontend/src/components/EditorWorkOrdersView.test.ts`, `apps/frontend/src/components/MapView.test.ts`, `apps/frontend/src/stores/workOrders.test.ts`, `apps/frontend/vite.config.ts` |

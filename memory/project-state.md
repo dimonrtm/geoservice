@@ -27,11 +27,12 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-26 17:25 +05:00, корневой индекс и live state синхронизированы после ingest `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`, добавления `Wiki/DDD_Wiki` и уточнения доменной модели; следующий `/sync-vision` должен учесть ingest `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`.
 - Последний `/lint-wiki`: 2026-06-26, через bundled Python найдены ожидаемые `missing_frontmatter` для 30 неизменяемых RAW Markdown files; новых lint-ошибок вне RAW source files не обнаружено, открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-22, существующие ноды
-  `Code_wiki` синхронизированы с экраном `Мои наряды`: Editor-only
-  `GET /api/v1/work-orders/assigned-to-me`, compact response без audit/date
-  fields, backend сортировка `updated_at DESC`, `code ASC`, frontend shell
-  `EditorWorkOrdersView`, `MapView mode="empty"` и jsdom component tests.
+- Последний `/ingest repository-change`: 2026-06-26, существующие ноды
+  `Code_wiki` синхронизированы с Day 13 full path API smoke: CI запускает
+  `tests/smoke/full_path_workspace_smoke.py` внутри `utility_service` и
+  проверяет `login -> assigned-to-me -> open/reopen EditVersion -> workspace`
+  для seeded `WO-001`; smoke runner живет в `apps/backend/tests/smoke` и
+  покрыт focused unit tests.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;

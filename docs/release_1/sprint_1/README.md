@@ -29,6 +29,8 @@
 - [План реализации Мои наряды Интенсива 11](2026-06-22-sprint-1-day-11-my-work-orders-implementation-plan.md)
 - [Edit Workspace Интенсива 12](2026-06-25-sprint-1-day-12-edit-workspace-design.md)
 - [План реализации Edit Workspace Интенсива 12](2026-06-25-sprint-1-day-12-edit-workspace-implementation-plan.md)
+- [End-to-end интеграция Дня 13](2026-06-26-sprint-1-day-13-e2e-integration-design.md)
+- [План реализации End-to-end интеграции Дня 13](2026-06-26-sprint-1-day-13-e2e-integration-implementation-plan.md)
 
 ## Исторические Материалы
 
