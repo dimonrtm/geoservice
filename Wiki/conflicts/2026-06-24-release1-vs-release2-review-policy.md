@@ -3,8 +3,8 @@ title: Release 1 Vs Release 2 Review Policy
 type: conflict
 status: resolved
 created: 2026-06-24
-updated: 2026-06-24
-source: "docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md; Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md"
+updated: 2026-06-26
+source: "docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md; Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md"
 tags: [domain-knowledge, conflict, release-1, release-2]
 confidence: high
 related: [Wiki/policies/reviewer_post_policy, Wiki/policies/stale_approval_policy, DDD_Wiki/model_health]
@@ -31,4 +31,4 @@ Release 1 описывает end-to-end path до review/post как future prod
 
 ## Resolution
 
-Новый источник предлагает решать вопрос не по названию релиза, а через целевую operating model и ближайший вертикальный срез. В ближайшие 14 дней как `must` входят: узкий `ReviewPackage` aggregate, минимальный evidence package, трехуровневый `RiskTier`, hard blockers с absolute veto, ограниченная `StaleApprovalPolicy` и audit с двумя решениями `approve package` / `can post`. Later остаются rich routing, richer trace explanations, repeat-review UX, sample-review policy и полноценный human `Publisher` desk. Out of scope остаются production-parity topology engine, full native conflict resolver, batch review queue, SLA-механика и claims про production-safe post без real validation.
+Новые источники предлагают решать вопрос не по названию релиза, а через целевую operating model и ближайшие маленькие спринты. Следующий отдельный contract должен встраиваться в существующий `WorkOrder` / `EditVersion` flow и покрывать полный путь `submit_for_review -> reviewer decision -> computed can_post -> simulated post -> durable audit`. `ReviewPackage`, safety-complete blockers, stale invalidation, computed `can_post`, audit decision proof и zero false-safe gate входят в must-scope. Старый standalone Release 2 artifact остается legacy/reference; production-parity topology engine, full native conflict resolver, batch review queue, SLA-механика, websocket для stale events и claims про production-safe post остаются вне scope без real validation.

@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-24
+updated: 2026-06-26
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -95,6 +95,10 @@ tags: [knowledge, index, geoservice]
 - 2026-06-23: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f7.md`; Ф7 зафиксировала `contract readiness pass rate`, zero false-safe guardrail, secondary metrics, stale/pre-post sidecar experiment, run data, manual baseline и course-change criteria для Release 2 `geometry/association conflict`.
 - 2026-06-23: `/discover --context "geometry/association conflict" --phase Ф8` подготовил closeout checklist для Release 2: ready-to-implement decisions, remaining blockers, RAW artifacts, wiki updates и следующие шаги перед implementation contract.
 - 2026-06-23: Обработан RAW source `RAW_inputs/meetings/geometry_association_conflict_f8.md`; Ф8 закрыла discovery Release 2 как pre-post decision-support layer, отделила contract-ready decisions от human-validation hypotheses и задала следующий артефакт implementation contract v0.1.
+- 2026-06-24: Обработан RAW source `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; уточнены `Reviewer` как semantic approval, `Publisher` / demo-system action как technical post, `ReviewPackage`, state machine, risk tiers, stale policy, hard blockers и audit boundary.
+- 2026-06-24: Добавлен канонический доменный слой [[Wiki/index]] и DDD-модель [[DDD_Wiki/index]]; `Wiki/_registry` и [[DDD_Wiki/model_health]] отражают review/post model, active coverage и resolved conflicts.
+- 2026-06-26: Выполнен `/sync-vision`; все 30 RAW sources обработаны, `Wiki/_registry` совпадает с фактическими нодами, новых необработанных RAW inputs и stale-нод нет, открыты 15 follow-up'ов, ожидаемый lint-конфликт остается на 29 RAW Markdown files.
+- 2026-06-26: Обработан RAW source `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; новый review/post contract должен быть отдельным integrated artifact, старый Release 2 contract legacy/reference, ближайший путь: `submit_for_review -> reviewer decision -> computed can_post -> simulated post -> durable audit`, планирование маленькими спринтами.
 
 ## Открытые Вопросы
 
@@ -108,7 +112,7 @@ tags: [knowledge, index, geoservice]
 - Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить planned policy: package approval vs technical `post`, routing по специализации, совмещение ролей, обязательность approve comment и user validation trace-boundary.
 - Для Release 2 нужно проверить, снижает ли consequence-first explanation внешние проверки и time-to-confident-decision по `geometry/association conflict`, и не дублирует ли UI обычный Conflicts view.
 - Для Release 2 Ф4 demo нужно проверить canonical transformer terminal association scenario, package evidence, `Normal/High/Critical` tiers без преждевременного `Simple`, stale decision handling и audit object.
-- До implementation contract нужно превратить Release 2 reviewer decision policy, Ф6 package boundary, Ф7 metrics contract и Ф8 closeout в ADR-style implementation contract v0.1: frozen canonical dataset, state machine, package schema/API/events, hard blockers, stale triggers, separation `approve package` / `can post`, audit schema, P95/observability, run schema, zero false-safe pass/fail criteria и future ADR list.
+- Нужно подготовить отдельный integrated review/post implementation contract v0.1 для developer demo: `submit_for_review`, `ReviewPackage`, reviewer decision, computed `can_post`, pre-post check, simulated post, durable audit, system `post-gate`, safety-complete veto set, `DefaultChangedAfterReconcile`, zero false-safe gate и small-sprint rollout через существующий `WorkOrder` / `EditVersion` flow.
 - Для Release 2 Ф7 нужно подготовить measurement harness: scripted golden walkthrough, 10 deterministic repeats, 10 stale/blocker/pre-post mutations, optional 30 automated runs и manual baseline против `ArcGIS native Conflicts view + SOP + expert handoff`.
 - Для Release 2 нужно подготовить отдельный real validation checklist для `Editor`/`Reviewer`: risk wording, authority matrix, sample review для `Normal`, evidence sufficiency, repeat-review UX и trust к blocker verdict.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].

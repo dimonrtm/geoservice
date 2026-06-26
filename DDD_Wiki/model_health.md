@@ -3,8 +3,8 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-06-24
-source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md"
+updated: 2026-06-26
+source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md"
 tags: [domain-knowledge, ddd, health]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
@@ -14,20 +14,21 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 ## Current Summary
 
-Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и аудит. Review/post contract уточнен новым RAW source: `Reviewer` выполняет semantic `approve package`, `Publisher` / demo-system action владеет technical `PostToDefault`, а `ReviewPackage` становится отдельным aggregate для evidence, risk tier, blockers, stale status и audit.
+Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и audit. Текущий review/post contract должен быть отдельным integrated artifact, встроенным в существующий `WorkOrder` / `EditVersion` flow: `submit_for_review -> reviewer decision -> computed can_post -> simulated post -> durable audit`. Legacy standalone Release 2 contract остается reference для прежнего `geometry/association conflict` framing и не является source of truth для ближайшей реализации.
 
 ## Current Blocking Conflicts
 
 | Conflict | Blocks | Status | Next Question |
 | --- | --- | --- | --- |
-| Нет активных blocking conflicts после ingest `implementation_contract_for_review_and_post.md` | - | clear | Следующий вопрос - оформить implementation contract v0.1 и проверить human layer |
+| Нет активных blocking conflicts после ingest `ic_review_package_and_simulated_post.md` | - | clear | Следующий вопрос - оформить отдельный integrated review/post implementation contract и разложить его на маленькие спринты |
 
 ## Recently Resolved Conflicts
 
 | Conflict | Resolution Source | Result |
 | --- | --- | --- |
-| [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` | `Publisher` отделен от `Reviewer`; ближайший срез использует demo-system action для technical post. |
-| [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` | Must-scope ближайшего среза: `ReviewPackage`, evidence, `RiskTier`, hard blockers, stale policy и audit. |
+| [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` | `Publisher` отделен от `Reviewer`; developer demo использует system `post-gate` для simulated technical post после computed `can_post`. |
+| [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` | Must-scope ближайшего slice: `ReviewPackage`, evidence, `RiskTier`, absolute veto, stale policy, computed `can_post`, simulated post и audit. |
+| [[Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]] | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; user chat 2026-06-26 | Новый contract отдельный и integrated; старый Release 2 artifact остается legacy/reference. |
 
 ## Current Coverage
 
@@ -40,19 +41,19 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 | Aggregates | active | `WorkOrder`, `EditVersion` и `ReviewPackage` активны в доменной модели. |
 | Commands And Events | active | `OpenEditVersion` активна; команды review/post запланированы. |
 | Policies And Specifications | active | Проверка назначения, ready-for-review, post allowed, review/post и stale policies активны. |
-| Sprint Planning Inputs | active | `Wiki/_registry/questions.md` содержит первые приоритетные вопросы для планирования 14-дневного спринта. |
+| Sprint Planning Inputs | active | `Wiki/_registry/questions.md` содержит приоритетные вопросы для планирования маленьких спринтов. |
 
 ## Current Discovery Queue
 
-Следующий `/discover` должен сгенерировать 150 candidate questions на основе обновленной review/post модели, открытых validation hypotheses, реализации `Code_wiki` и оставшихся human-layer вопросов, затем выбрать top 15.
+Следующий `/discover` должен сфокусироваться на оставшихся human-layer вопросах и sprint-slicing: wording/trust для `Reviewer`, evidence sufficiency, policy-relevant `traceResult` / `subnetworkStatus`, и границы developer demo без production topology engine.
 
 ## Current Sprint Planning Queue
 
-Следующий `/plan-sprint` должен использовать 14-дневную рамку спринта и выбрать top 15 planning questions из 150 candidate questions. Самые важные стартовые вопросы:
+Следующий `/plan-sprint` должен использовать 14-дневную рамку, но мыслить маленькими вертикальными increments:
 
-- Должен ли следующий спринт продолжать frontend workflow для `WorkOrder`/`EditVersion` или начать укрепление модели review/post?
-- Как оформить implementation contract v0.1 для review/post slice без расширения в full topology engine?
-- Какие human-layer вопросы требуют real `Editor`/`Reviewer` validation: evidence sufficiency, trust wording, specialist confirmation для `Critical`?
+- Первый спринт создает `submit_for_review` и `ReviewPackage` без full topology engine.
+- Следующий спринт добавляет reviewer decision и computed `can_post` с negative fixture `DefaultChangedAfterReconcile`.
+- Следующий спринт закрывает simulated post, durable audit и zero false-safe gate.
 
 ## Superseded Draft Summary
 
