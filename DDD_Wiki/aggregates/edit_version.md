@@ -3,8 +3,8 @@ title: Edit Version Aggregate
 type: aggregate
 status: active
 created: 2026-06-24
-updated: 2026-06-24
-source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Code_wiki/архитектура/data_model.md"
+updated: 2026-06-27
+source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/increment_after_open_workspace.md"
 tags: [domain-knowledge, ddd, aggregate]
 confidence: high
 related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/entities/network_association]
@@ -18,10 +18,12 @@ related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/entiti
 
 ## Consistency Boundary
 
-Sprint 1 трактует workspace как read-only после открытия; последующие спринты добавляют persistence для change set и editing semantics.
+Текущий реализованный slice трактует workspace как read-only после открытия. Следующий обязательный slice добавляет persistence для change set: update существующего feature внутри open `EditVersion`, сохранение `operation=updated`, readback diff и draft validation flags. `ReviewPackage` и `submit_for_review` не должны появляться раньше persisted change set.
 
 ## Protected Invariants
 
 - `baseNetworkRevision` неизменяем после создания.
 - Workspace features фильтруются по `WorkOrder.scope.aoi`.
 - Associations включаются только когда присутствуют оба endpoint features.
+- Первая mutation сохраняет только разрешенный update существующего feature; create/delete и association mutation откладываются до отдельных rule checks.
+- Draft summary/evidence могут жить рядом с `EditVersion` до submit; durable review snapshot создается позже в `ReviewPackage`.

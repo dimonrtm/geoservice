@@ -3,8 +3,8 @@ title: Review Package Aggregate
 type: aggregate
 status: active
 created: 2026-06-24
-updated: 2026-06-26
-source: "Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md"
+updated: 2026-06-27
+source: "Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md"
 tags: [domain-knowledge, ddd, aggregate, review]
 confidence: high
 related: [Wiki/entities/review_decision, Wiki/value_objects/risk_tier, Wiki/policies/reviewer_post_policy]
@@ -22,7 +22,7 @@ Package snapshot, evidence, risk tier, blockers, approval и stale status дол
 
 ## V0.1 Slice
 
-Новый integrated contract должен проверять полный путь `submit_for_review -> reviewer decision -> computed can_post -> simulated post -> durable audit`, а не standalone package preview. `can_post` вычисляется на чтении; durable truth хранится в audit как snapshot pre-post check и simulated post outcome.
+`ReviewPackage v0.1` появляется только после persisted change set в `EditVersion`. Он должен быть materialized snapshot поверх `edit_version_features` / `edit_version_associations` с backrefs на исходные rows, а не live-ссылка на временное UI-состояние. После этого integrated contract проверяет путь `submit_for_review -> reviewer decision -> computed can_post -> simulated post -> durable audit`, а не standalone package preview. `can_post` вычисляется на чтении; durable truth хранится в audit как snapshot pre-post check и simulated post outcome.
 
 ## Minimal Required Fields
 

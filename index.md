@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-26
+updated: 2026-06-27
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -99,10 +99,11 @@ tags: [knowledge, index, geoservice]
 - 2026-06-24: Добавлен канонический доменный слой [[Wiki/index]] и DDD-модель [[DDD_Wiki/index]]; `Wiki/_registry` и [[DDD_Wiki/model_health]] отражают review/post model, active coverage и resolved conflicts.
 - 2026-06-26: Выполнен `/sync-vision`; все 30 RAW sources обработаны, `Wiki/_registry` совпадает с фактическими нодами, новых необработанных RAW inputs и stale-нод нет, открыты 15 follow-up'ов, ожидаемый lint-конфликт остается на 29 RAW Markdown files.
 - 2026-06-26: Обработан RAW source `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; новый review/post contract должен быть отдельным integrated artifact, старый Release 2 contract legacy/reference, ближайший путь: `submit_for_review -> reviewer decision -> computed can_post -> simulated post -> durable audit`, планирование маленькими спринтами.
+- 2026-06-27: Выполнен `/sync-vision`; учтены ingest `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` и Day 13 repository-change ingest, `Wiki/_registry` совпадает с фактическими нодами, новых необработанных RAW inputs и stale-нод нет, открыты 16 follow-up'ов, ожидаемый lint-конфликт остается на 30 RAW Markdown files.
 
 ## Открытые Вопросы
 
-- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder` и создание `EditVersion` из per-WorkOrder `DefaultState`; следующий scope - frontend shell и дальнейшие шаги workflow.
+- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - явный переход из выбранного work order к дальнейшим шагам workflow.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.

@@ -3,8 +3,8 @@ title: Authoritative Utility Workflow
 type: concept
 status: active
 created: 2026-06-24
-updated: 2026-06-24
-source: "Vision_wiki/decisions/release_1_utility_workflow.md; Vision_wiki/concepts/utility_gis_editing_domain.md"
+updated: 2026-06-27
+source: "Vision_wiki/decisions/release_1_utility_workflow.md; Vision_wiki/concepts/utility_gis_editing_domain.md; RAW_inputs/meetings/increment_after_open_workspace.md"
 tags: [domain-knowledge, concept, workflow]
 confidence: high
 related: [Wiki/glossary/utility_gis_editing, DDD_Wiki/use_cases/utility_editor_workflow]
@@ -19,5 +19,7 @@ Authoritative utility workflow - полный пользовательский �
 Этот concept отделяет продуктовый сценарий Release 1 от generic GIS CRUD: пользовательская ценность возникает в безопасном post в authoritative `Default`, а не в факте сохранения геометрии.
 
 ## Related Nodes
+
+Ближайший кодовый инкремент после открытия workspace должен сначала доказать настоящее редактирование версии: persisted update existing feature, readback diff и draft validation flags. Review/post нельзя планировать как первый слой, если в коде еще нет persisted change set.
 
 [[DDD_Wiki/use_cases/utility_editor_workflow]], [[DDD_Wiki/invariants/release1_safety_invariants]], [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]].

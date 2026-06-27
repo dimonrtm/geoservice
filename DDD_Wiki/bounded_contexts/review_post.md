@@ -3,8 +3,8 @@ title: Review Post Context
 type: bounded-context
 status: active
 created: 2026-06-24
-updated: 2026-06-26
-source: "Vision_wiki/decisions/release_2_conflict_explanation.md; docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md"
+updated: 2026-06-27
+source: "Vision_wiki/decisions/release_2_conflict_explanation.md; docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md"
 tags: [domain-knowledge, ddd, bounded-context, review]
 confidence: high
 related: [Wiki/entities/review_decision, Wiki/policies/reviewer_post_policy, Wiki/policies/stale_approval_policy]
@@ -22,8 +22,8 @@ related: [Wiki/entities/review_decision, Wiki/policies/reviewer_post_policy, Wik
 
 ## Interfaces
 
-Потребляет evidence из edit version/reconcile в [[DDD_Wiki/bounded_contexts/work_order]] и utility network facts из [[DDD_Wiki/bounded_contexts/utility_network]]; отправляет audit facts в [[DDD_Wiki/bounded_contexts/audit]].
+Потребляет persisted change set, draft validation outcome и evidence из edit version/reconcile в [[DDD_Wiki/bounded_contexts/work_order]], а также utility network facts из [[DDD_Wiki/bounded_contexts/utility_network]]; отправляет audit facts в [[DDD_Wiki/bounded_contexts/audit]].
 
 ## Nearest Vertical Slice
 
-Ближайший путь должен идти маленькими спринтами через существующий flow: `WorkOrder` -> `EditVersion` -> validation/reconcile -> `submit_for_review` -> package build -> reviewer decision -> computed `can_post` -> simulated post -> durable audit. Legacy standalone Release 2 contract не является source of truth для этого slice.
+Ближайший путь должен идти маленькими спринтами через существующий flow, но review/post не стартует первым слоем: `WorkOrder` -> `EditVersion` -> persisted feature update -> draft validation -> `submit_for_review` -> package build -> reviewer decision -> computed `can_post` -> simulated post -> durable audit. Legacy standalone Release 2 contract не является source of truth для этого slice.
