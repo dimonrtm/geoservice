@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-27
+updated: 2026-06-28
 source: null
 tags: [project-state, geoservice]
 ---
@@ -23,9 +23,9 @@ GeoService - исследовательский pet-проект на стади
 - `/plan-sprint` добавлен как workflow планирования 14-дневного спринта на основе текущего кода, `Code_wiki`, `Wiki/DDD_Wiki`, конфликтов и top 15 из 150 planning questions.
 
 - Последний `/discover`: 2026-06-23, подготовлен checklist Ф8 по `geometry/association conflict` для closeout Release 2: ready-to-implement decisions, remaining blockers, RAW artifacts, wiki updates и следующие шаги перед implementation contract.
-- Последний `/ingest`: 2026-06-27, `RAW_inputs/meetings/increment_after_open_workspace.md` обработан как code-aware design/architecture answers для ближайшего инкремента после открытия workspace; уточнено, что следующий sprint должен сначала дать persisted edit slice: `update existing feature -> operation=updated -> readback diff -> draft validation flags`, а `submit_for_review`, `ReviewPackage`, `can_post`, simulated post, full audit, trace/subnetwork evidence, risk tiers, reviewer queue и association mutation откладываются до появления change set.
-- Последний `/sync-vision`: 2026-06-27 20:55 +05:00, корневой индекс и live state синхронизированы после ingest `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` и repository-change ingest Day 13 full path API smoke; `Wiki/_registry` сверен с фактическими нодами, необработанных RAW inputs и stale-нод не обнаружено.
-- Последний `/lint-wiki`: 2026-06-27, через bundled Python найдены ожидаемые `missing_frontmatter` для 31 RAW Markdown file; новых lint-ошибок вне RAW source files не обнаружено, открытый follow-up `FU-2026-06-01-004` остается актуальным.
+- Последний `/ingest`: 2026-06-28, `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md` обработан как design/architecture input для first persisted edit slice; уточнено, что следующий sprint должен сначала дать `UpdateEditVersionFeatureGeometry`: geometry diff существующей line feature относительно baseline, readback persisted feature + diff, normalized `operation`, `DraftVersionToken` и basic draft validation flags.
+- Последний `/sync-vision`: 2026-06-28 22:01 +05:00, корневой индекс и live state синхронизированы после post-sync commit `b8f0740` / ingest `RAW_inputs/meetings/increment_after_open_workspace.md`; `Wiki/_registry` сверен с фактическими нодами, необработанных RAW inputs и stale-нод не обнаружено.
+- Последний `/lint-wiki`: 2026-06-28, через bundled Python найдены ожидаемые `missing_frontmatter` для 32 RAW Markdown files; новых lint-ошибок вне RAW source files не обнаружено, открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
 - Последний `/ingest repository-change`: 2026-06-26, существующие ноды
   `Code_wiki` синхронизированы с Day 13 full path API smoke: CI запускает
@@ -38,15 +38,15 @@ GeoService - исследовательский pet-проект на стади
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;
   завершение плана или commit не являются триггерами.
 
-## Состояние Wiki На 2026-06-27
+## Состояние Wiki На 2026-06-28
 
-- Необработанные RAW inputs: не обнаружены; все 32 RAW sources отражены в `RAW_inputs/index.md`.
-- Новые RAW inputs, учтенные после предыдущего `/sync-vision`: `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`, `RAW_inputs/meetings/increment_after_open_workspace.md`; источники обработаны через `/ingest`.
-- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-26-ic-review-package-and-simulated-post]], [[../Vision_wiki/chats/2026-06-27-increment-after-open-workspace]].
+- Необработанные RAW inputs: не обнаружены; все 33 RAW sources отражены в `RAW_inputs/index.md`.
+- Новые RAW inputs, учтенные после предыдущего `/sync-vision`: `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; источник обработан через `/ingest`.
+- Новые значимые Vision ноды с прошлого `/sync-vision`: [[../Vision_wiki/chats/2026-06-28-persisted-edit-slice-editversion]].
 - Новые значимые Code_wiki ноды с прошлого `/sync-vision`: новых нод нет; обновлены `Code_wiki/сборка/ci_and_quality.md`, `Code_wiki/правила_и_стиль/testing_strategy.md` и компактный реестр repository-change ingest для Day 13 full path API smoke.
-- Новые значимые Wiki/DDD_Wiki ноды с прошлого `/sync-vision`: добавлены [[../Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]], [[../Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]], [[../Wiki/commands/update_edit_version_feature]], [[../Wiki/specifications/edit_version_has_persisted_change_set]], [[../Wiki/domain_events/edit_version_feature_updated]]; обновлены review/post sequencing и [[../DDD_Wiki/model_health]] так, чтобы планирование шло от persisted edit slice.
+- Новые значимые Wiki/DDD_Wiki ноды с прошлого `/sync-vision`: добавлены [[../Wiki/commands/update_edit_version_feature_geometry]], [[../Wiki/domain_events/edit_version_change_set_persisted]], [[../Wiki/specifications/edit_version_basic_draft_validation]], [[../Wiki/value_objects/draft_version_token]] и [[../DDD_Wiki/invariants/edit_version_persisted_edit_invariants]]; старые generic first-slice узлы [[../Wiki/commands/update_edit_version_feature]] и [[../Wiki/domain_events/edit_version_feature_updated]] помечены superseded; [[../DDD_Wiki/model_health]] уточнен вокруг persisted geometry diff existing line feature.
 - Stale-ноды: не обнаружены.
-- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 30 RAW Markdown files, product validation `FU-2026-06-13-002`, Release 2/user validation `FU-2026-06-14-001`, review/post implementation contract `FU-2026-06-23-001`, experiment design `FU-2026-06-23-002`, Release 2 real validation checklist `FU-2026-06-23-003` и legacy contract docs cleanup `FU-2026-06-26-001`; canonical `Wiki` conflicts [[../Wiki/conflicts/2026-06-24-reviewer-vs-publisher]], [[../Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]], [[../Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]] и [[../Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]] resolved новым RAW source; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
+- Unresolved conflicts/follow-up items: process conflict `FU-2026-06-01-004` на 32 RAW Markdown files, product validation `FU-2026-06-13-002`, Release 2/user validation `FU-2026-06-14-001`, review/post implementation contract `FU-2026-06-23-001`, experiment design `FU-2026-06-23-002`, Release 2 real validation checklist `FU-2026-06-23-003` и legacy contract docs cleanup `FU-2026-06-26-001`; canonical `Wiki` conflicts [[../Wiki/conflicts/2026-06-24-reviewer-vs-publisher]], [[../Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]], [[../Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]] и [[../Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]] resolved новым RAW source; conflict-нода [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]] остается active как documented boundary до docs-синхронизации `FU-2026-06-11-002`.
 - Открытые follow-up'ы: 16.
 
 ## Открытые Вопросы
@@ -63,7 +63,7 @@ GeoService - исследовательский pet-проект на стади
 - Нужно добавить доступные URL для non-Esri vendor-specific утверждений из `RAW_inputs/documents/Ф2.md` и `RAW_inputs/documents/03.06.2026deep-research-report.md`.
 - Нужно отдельной implementation/docs-задачей согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset script, demo сценарий, troubleshooting, `PostGIS seed`, `auth`.
-- Нужно продолжить Спринт 1 после готовых roles/access, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создания `EditVersion` из per-WorkOrder `DefaultState`, экрана `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: update existing feature in workspace, `operation=updated`, readback diff и draft validation flags.
+- Нужно продолжить Спринт 1 после готовых roles/access, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создания `EditVersion` из per-WorkOrder `DefaultState`, экрана `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry diff существующей line feature, `UpdateEditVersionFeatureGeometry`, readback persisted feature + diff, normalized `operation`, `DraftVersionToken` и basic draft validation flags.
 - Нужно реализовать audit/reset contract: audit переживает restart и обычный reset; `full-clean` удаляет всё; обязательны healthcheck, logs, correlation ID и понятные UI errors.
 - Нужно выполнить repeatable benchmark P50/P95 для draft performance targets на reference hardware.
 - Нужно спроектировать/проверить понятный UI conflict review для developer demo.

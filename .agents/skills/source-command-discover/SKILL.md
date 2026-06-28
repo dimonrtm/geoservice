@@ -9,33 +9,36 @@ description: Ручная процедура /discover для первичной
 
 Этот раздел является приоритетным для текущего `/discover`. Более старые разделы ниже применяются только там, где они не противоречат model-driven discovery.
 
-Перед выбором вопросов прочитать `Wiki/index.md`, `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, `Code_wiki/index.md`, релевантные `Code_wiki/архитектура/*.md`, `memory/project-state.md` и playbook'и из `Общие_принципы/`. Затем обязательно проверить фактический текущий код через `rg --files` и `rg`: реализованные endpoints, services/use cases, domain/infrastructure models, migrations, frontend stores/components/API clients/contracts и tests/smoke вокруг выбранного контекста. `Code_wiki` полезен как карта, но не заменяет проверку кода.
+Перед выбором вопросов прочитать `Wiki/index.md`, `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, `Code_wiki/index.md`, релевантные `Code_wiki/архитектура/*.md`, `memory/project-state.md` и playbook'и из `Общие_принципы/`. Затем обязательно сделать компактный reality check фактического текущего кода через `rg --files` и `rg`: реализованные endpoints, services/use cases, domain/infrastructure models, migrations, frontend stores/components/API clients/contracts и tests/smoke вокруг выбранного контекста. `Code_wiki` полезен как карта, но не заменяет проверку кода.
 
 Если проект не пустой, `/discover` не задает общий список вопросов. Он сначала исследует текущую доменную модель, DDD-покрытие, конфликты, gaps в `DDD_Wiki/model_health.md`, открытые вопросы в `Wiki/_registry/questions.md`, противоречия в `Wiki/conflicts/`, технические ограничения из `Code_wiki/` и фактическое состояние кода: что уже реализовано, какие статусы/таблицы/API реально существуют, какие planned concepts еще отсутствуют в коде, какие tests/smoke уже закрепляют behavior.
 
+Главный центр тяжести `/discover` - доменная модель, язык, агрегаты, политики, инварианты и противоречия. Текущий код используется как проверка реальности и ограничитель ближайших вопросов, а не как структура ответа. Вопросы не должны превращаться в code review или список задач по файлам.
+
 `Vision_wiki/` является legacy/source knowledge. Обращаться к нему только в крайнем случае: когда актуальные `Wiki/`, `DDD_Wiki/`, `Code_wiki/`, `memory/project-state.md` и текущий код не дают ответа, когда нужно проверить происхождение старого решения, или когда есть явный конфликт с legacy-источником. Не использовать `Vision_wiki/` как равноправную основу для новых DDD-вопросов и не позволять legacy-формулировкам перебивать актуальную модель и код.
 
-## Обязательный Code Reality Check
+## Обязательный Code Reality Context
 
 Перед генерацией 150 candidate questions:
 
 1. Найти через `rg --files` и `rg -n` текущую реализацию по терминам контекста.
 2. Прочитать реализованные backend routes, use-case services, repositories/models/migrations, frontend stores/components/API clients/contracts и tests/smoke вокруг scope.
 3. Разделить найденное на `implemented`, `partially implemented`, `planned only`, `legacy/reference`.
-4. Формулировать вопросы от ближайшего кодового шага, а не от идеальной DDD-модели.
-5. Для каждого top-вопроса указать code anchor: файл, API, model/service, frontend component/store или test, который делает вопрос актуальным. Если code anchor отсутствует, явно отметить вопрос как planned gap without code yet.
-6. Штрафовать при выборе top 15 вопросы, которые требуют перескочить через несколько еще не реализованных слоев без понятного incremental path.
-7. Для sprint planning выбирать вопросы так, чтобы ответы помогали спланировать ближайшие 14 дней от текущего кода, а не строили оторванный от реализации backlog.
+4. Использовать найденное как reality context: какие доменные вопросы уже заземлены в реализации, какие остаются planned, где модель и код расходятся.
+5. Формулировать вопросы прежде всего от доменной модели и ближайшего доменного решения. Код должен ограничивать прыжки через несколько слоев, но не должен становиться главным объектом вопроса.
+6. Не выводить в top-вопросах ссылки на файлы, номера строк, code anchors, API route anchors, component/store names или test file anchors. Если нужно упомянуть код, делать это обобщенно: "текущий backend уже открывает workspace", "write path пока не реализован", "smoke закрепляет только read-only путь".
+7. Штрафовать при выборе top 15 вопросы, которые требуют перескочить через несколько еще не реализованных слоев без понятного incremental path.
+8. Для sprint planning выбирать вопросы так, чтобы ответы помогали спланировать ближайшие 14 дней от текущей реализации, но оставались вопросами о языке, инвариантах, поведении, границах агрегатов и пользовательском смысле.
 
-Затем внутренне сгенерировать 150 candidate questions. Кандидаты должны покрывать: ubiquitous language, subdomains, bounded contexts, context map, entities, value objects, aggregates, commands, domain events, system events, policies, specifications, external systems, integration patterns, invariants, lifecycle/state machines, data model gaps, implemented endpoints/services/models/frontend/tests, code/model mismatches, conflicts, incremental path from current code and sprint planning relevance.
+Затем внутренне сгенерировать 150 candidate questions. Основной вес отдать доменной модели: ubiquitous language, subdomains, bounded contexts, context map, entities, value objects, aggregates, commands, domain events, system events, policies, specifications, external systems, integration patterns, invariants, lifecycle/state machines, conflicts и model health gaps. Дополнительно учесть data model gaps, implemented/partially implemented/planned code reality, code/model mismatches и incremental path from current implementation, но не делать их форматом ответа.
 
-Из 150 кандидатов выбрать top 15 по критериям: насколько ответ разблокирует непротиворечивую модель, снижает риск неверного bounded context/aggregate, помогает разрешить конфликт, повышает confidence низкоуверенного узла, привязан к текущему коду, минимизирует drift между DDD и реализацией, влияет на ближайшие 14 дней разработки, имеет понятного адресата и может быть отвечен пользователем.
+Из 150 кандидатов выбрать top 15 по критериям: насколько ответ разблокирует непротиворечивую модель, снижает риск неверного bounded context/aggregate, помогает разрешить конфликт, повышает confidence низкоуверенного узла, уточняет доменный язык или инвариант, согласован с текущей реализацией, минимизирует drift между DDD и кодом, влияет на ближайшие 14 дней разработки, имеет понятного адресата и может быть отвечен пользователем.
 
-В ответе показать только top 15, сгруппированные по смыслу. Для каждого вопроса указать коротко: какой узел или конфликт он уточняет, code anchor или planned gap, почему сейчас важен, и как пользователь может ответить. Не показывать все 150, если пользователь явно не попросил.
+В ответе показать только top 15, сгруппированные по смыслу. Для каждого вопроса указать коротко: какой доменный узел, конфликт, инвариант, policy/specification или gap он уточняет; почему сейчас важен; как пользователь может ответить. Не показывать file paths, line numbers, code anchors или списки файлов. Не показывать все 150, если пользователь явно не попросил.
 
 Пользователь может ответить прямо в чате или положить ответ новым файлом в `RAW_inputs/`. Если ответ появился как raw-файл, следующий `/ingest` должен обработать его как новый источник. Если ответ дан в чате и пользователь просит сохранить результат, создать trace-summary или обновить wiki только с явным source на этот chat/discovery result.
 
-Для `--phase` и `--context` сначала применить фильтр фазы/контекста, но всё равно строить вопросы из текущей модели, конфликтов и Code Reality Check. Обычный размер выдачи остается 10-15 вопросов, целевой размер для model-driven discovery - top 15.
+Для `--phase` и `--context` сначала применить фильтр фазы/контекста, но всё равно строить вопросы из текущей модели, конфликтов и Code Reality Context. Обычный размер выдачи остается 10-15 вопросов, целевой размер для model-driven discovery - top 15.
 
 `/discover` запускает discovery-режим со стейкхолдером. Он не должен просто выдавать общий список вопросов: сначала нужно понять, это первый запуск wiki или подготовка к конкретной встрече.
 
@@ -131,5 +134,7 @@ description: Ручная процедура /discover для первичной
 - Не давать продуктовые советы до закрытия базовых фаз Ф1-Ф3.
 - Не копировать факты из donor-репозитория.
 - Не строить discovery-вопросы только от DDD/wiki: если вопрос влияет на план спринта, он должен учитывать текущий код и ближайший incremental path от него.
+- Не строить discovery-вопросы как code review: код учитывать, но вопросы формулировать через доменные решения, инварианты, события, policy/specification и границы модели.
+- Не выводить в вопросах ссылки на файлы, номера строк, code anchors, API route anchors, component/store/test anchors.
 - Не использовать legacy `Vision_wiki/` как основной источник для новых вопросов, если актуальные `Wiki/`, `DDD_Wiki/`, `Code_wiki/` и текущий код уже дают достаточный контекст.
 - Wiki-контент вести на русском языке; пути, команды, API и имена файлов не переводить.

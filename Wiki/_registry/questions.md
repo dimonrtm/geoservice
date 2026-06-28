@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-27
+updated: 2026-06-28
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -21,3 +21,7 @@ related: [Wiki/index, DDD_Wiki/model_health]
 | `can_post` должен быть persisted state или computed specification? | [[Wiki/specifications/post_allowed]] | high | answered | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
 | Какой ближайший полноценный инкремент после открытия workspace? | [[Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]] | high | answered | `RAW_inputs/meetings/increment_after_open_workspace.md` |
 | Что должно предшествовать `ReviewPackage` в текущем кодовом flow? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/increment_after_open_workspace.md` |
+| Что считать первым persisted change в `EditVersion`? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md` |
+| Как должна называться первая команда сохранения feature change? | [[Wiki/commands/update_edit_version_feature_geometry]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md` |
+| Какие инварианты и validation flags обязательны для first save? | [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md` |
+| Где stop-line перед review/post после открытия workspace? | [[DDD_Wiki/use_cases/utility_editor_workflow]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md` |

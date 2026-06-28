@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-27
+updated: 2026-06-28
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -100,10 +100,13 @@ tags: [knowledge, index, geoservice]
 - 2026-06-26: Выполнен `/sync-vision`; все 30 RAW sources обработаны, `Wiki/_registry` совпадает с фактическими нодами, новых необработанных RAW inputs и stale-нод нет, открыты 15 follow-up'ов, ожидаемый lint-конфликт остается на 29 RAW Markdown files.
 - 2026-06-26: Обработан RAW source `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; новый review/post contract должен быть отдельным integrated artifact, старый Release 2 contract legacy/reference, ближайший путь: `submit_for_review -> reviewer decision -> computed can_post -> simulated post -> durable audit`, планирование маленькими спринтами.
 - 2026-06-27: Выполнен `/sync-vision`; учтены ingest `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` и Day 13 repository-change ingest, `Wiki/_registry` совпадает с фактическими нодами, новых необработанных RAW inputs и stale-нод нет, открыты 16 follow-up'ов, ожидаемый lint-конфликт остается на 30 RAW Markdown files.
+- 2026-06-27: Обработан RAW source `RAW_inputs/meetings/increment_after_open_workspace.md`; ближайший sprint начинается с persisted edit slice, добавлены [[Wiki/commands/update_edit_version_feature]], [[Wiki/specifications/edit_version_has_persisted_change_set]], [[Wiki/domain_events/edit_version_feature_updated]] и resolved conflict [[Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]].
+- 2026-06-28: Выполнен `/sync-vision`; учтено post-sync изменение `b8f0740`, `Wiki/_registry` совпадает с фактическими нодами, новых необработанных RAW inputs и stale-нод нет, открыты 16 follow-up'ов, ожидаемый lint-конфликт остается на 31 RAW Markdown files.
+- 2026-06-28: Обработан RAW source `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; first persisted edit slice уточнен до geometry diff существующей line feature, добавлены [[Wiki/commands/update_edit_version_feature_geometry]], [[Wiki/domain_events/edit_version_change_set_persisted]], [[Wiki/specifications/edit_version_basic_draft_validation]], [[Wiki/value_objects/draft_version_token]] и [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]].
 
 ## Открытые Вопросы
 
-- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - явный переход из выбранного work order к дальнейшим шагам workflow.
+- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry diff существующей line feature, `UpdateEditVersionFeatureGeometry`, readback persisted feature + diff, normalized `operation`, `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
