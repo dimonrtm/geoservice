@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 
 from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import (
@@ -80,6 +81,36 @@ class FakeSession:
             self.in_transaction = False
 
 
+class _FakeIntegrityDiag:
+    def __init__(self, constraint_name: str | None) -> None:
+        self.constraint_name = constraint_name
+
+
+class _FakeIntegrityOriginal:
+    def __init__(
+        self,
+        *,
+        sqlstate: str = "23505",
+        constraint_name: str | None = "uq_edit_versions_open_work_order",
+    ) -> None:
+        self.sqlstate = sqlstate
+        self.pgcode = sqlstate
+        self.diag = _FakeIntegrityDiag(constraint_name)
+        self.constraint_name = constraint_name
+
+
+def integrity_error(
+    *,
+    sqlstate: str = "23505",
+    constraint_name: str | None = "uq_edit_versions_open_work_order",
+) -> IntegrityError:
+    return IntegrityError(
+        "insert failed",
+        {},
+        _FakeIntegrityOriginal(sqlstate=sqlstate, constraint_name=constraint_name),
+    )
+
+
 def repository(**methods):
     fake = SimpleNamespace()
     for name, return_value in methods.items():
@@ -100,6 +131,7 @@ def build_service(
         work_order_repository=work_order_repository
         or repository(
             get_by_id=None,
+            get_by_id_for_update=None,
             get_open_edit_version=None,
             create_open_edit_version=None,
             touch_edit_version=None,
@@ -108,6 +140,24 @@ def build_service(
         default_state_repository=default_state_repository
         or repository(get_active_aggregate_by_work_order_id=None),
     )
+
+
+def test_open_edit_version_unique_violation_matches_constraint() -> None:
+    error = integrity_error()
+
+    assert EditVersionService.is_open_edit_version_unique_violation(error) is True
+
+
+def test_open_edit_version_unique_violation_rejects_other_constraint() -> None:
+    error = integrity_error(constraint_name="uq_edit_version_features_edit_version_asset_code")
+
+    assert EditVersionService.is_open_edit_version_unique_violation(error) is False
+
+
+def test_open_edit_version_unique_violation_rejects_other_sqlstate() -> None:
+    error = integrity_error(sqlstate="23503", constraint_name="uq_edit_versions_open_work_order")
+
+    assert EditVersionService.is_open_edit_version_unique_violation(error) is False
 
 
 def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -> None:
@@ -123,7 +173,7 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
     session = FakeSession()
     user_repository = repository(get_by_id=actor)
     work_order_repository = repository(
-        get_by_id=assigned,
+        get_by_id_for_update=assigned,
         get_open_edit_version=None,
         create_open_edit_version=created,
         touch_edit_version=None,
@@ -159,12 +209,45 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
     work_order_repository.save.assert_awaited_once_with(assigned)
 
 
+def test_open_reads_work_order_with_row_lock() -> None:
+    actor = user()
+    assigned = work_order(actor.id)
+    created = edit_version(assigned.id, actor.id)
+    baseline = default_state(assigned.id, base_network_revision=12)
+    baseline_aggregate = SimpleNamespace(
+        state=baseline,
+        features=[default_feature(baseline.id)],
+        associations=[default_association(baseline.id)],
+    )
+    work_order_repository = repository(
+        get_by_id=assigned,
+        get_by_id_for_update=assigned,
+        get_open_edit_version=None,
+        create_open_edit_version=created,
+        touch_edit_version=None,
+        save=None,
+    )
+    service = build_service(
+        user_repository=repository(get_by_id=actor),
+        work_order_repository=work_order_repository,
+        default_state_repository=repository(
+            get_active_aggregate_by_work_order_id=baseline_aggregate,
+        ),
+    )
+
+    result = asyncio.run(service.open_for_work_order(assigned.id, actor.id))
+
+    assert result.created is True
+    work_order_repository.get_by_id_for_update.assert_awaited_once_with(assigned.id)
+    work_order_repository.get_by_id.assert_not_awaited()
+
+
 def test_open_in_progress_work_order_returns_existing_edit_version() -> None:
     actor = user()
     started = work_order(actor.id, status=WorkOrderStatus.IN_PROGRESS)
     existing = edit_version(started.id, actor.id)
     work_order_repository = repository(
-        get_by_id=started,
+        get_by_id_for_update=started,
         get_open_edit_version=existing,
         create_open_edit_version=None,
         touch_edit_version=None,
@@ -184,6 +267,85 @@ def test_open_in_progress_work_order_returns_existing_edit_version() -> None:
     work_order_repository.create_open_edit_version.assert_not_awaited()
 
 
+def test_open_recovers_unique_violation_as_existing_edit_version() -> None:
+    actor = user()
+    assigned = work_order(actor.id)
+    started = work_order(actor.id, status=WorkOrderStatus.IN_PROGRESS)
+    started.id = assigned.id
+    existing = edit_version(assigned.id, actor.id)
+    baseline = default_state(assigned.id, base_network_revision=12)
+    baseline_aggregate = SimpleNamespace(
+        state=baseline,
+        features=[default_feature(baseline.id)],
+        associations=[default_association(baseline.id)],
+    )
+    session = FakeSession()
+    work_order_repository = repository(
+        get_by_id_for_update=None,
+        get_open_edit_version=None,
+        create_open_edit_version=None,
+        touch_edit_version=None,
+        save=None,
+    )
+    work_order_repository.get_by_id_for_update.side_effect = [assigned, started]
+    work_order_repository.get_open_edit_version.side_effect = [None, existing]
+    work_order_repository.create_open_edit_version.side_effect = integrity_error()
+    service = build_service(
+        session=session,
+        user_repository=repository(get_by_id=actor),
+        work_order_repository=work_order_repository,
+        default_state_repository=repository(
+            get_active_aggregate_by_work_order_id=baseline_aggregate,
+        ),
+    )
+
+    result = asyncio.run(service.open_for_work_order(assigned.id, actor.id))
+
+    assert result.created is False
+    assert result.edit_version is existing
+    assert session.begin_calls == 2
+    assert work_order_repository.get_by_id_for_update.await_count == 2
+    assert work_order_repository.get_open_edit_version.await_count == 2
+    work_order_repository.touch_edit_version.assert_awaited_once_with(existing)
+    work_order_repository.save.assert_not_awaited()
+
+
+def test_open_does_not_recover_other_integrity_error() -> None:
+    actor = user()
+    assigned = work_order(actor.id)
+    baseline = default_state(assigned.id, base_network_revision=12)
+    baseline_aggregate = SimpleNamespace(
+        state=baseline,
+        features=[default_feature(baseline.id)],
+        associations=[default_association(baseline.id)],
+    )
+    session = FakeSession()
+    work_order_repository = repository(
+        get_by_id_for_update=assigned,
+        get_open_edit_version=None,
+        create_open_edit_version=None,
+        touch_edit_version=None,
+        save=None,
+    )
+    work_order_repository.create_open_edit_version.side_effect = integrity_error(
+        constraint_name="uq_edit_version_features_edit_version_asset_code",
+    )
+    service = build_service(
+        session=session,
+        user_repository=repository(get_by_id=actor),
+        work_order_repository=work_order_repository,
+        default_state_repository=repository(
+            get_active_aggregate_by_work_order_id=baseline_aggregate,
+        ),
+    )
+
+    with pytest.raises(IntegrityError):
+        asyncio.run(service.open_for_work_order(assigned.id, actor.id))
+
+    assert session.begin_calls == 1
+    work_order_repository.touch_edit_version.assert_not_awaited()
+
+
 @pytest.mark.parametrize(
     "actor",
     [
@@ -192,7 +354,7 @@ def test_open_in_progress_work_order_returns_existing_edit_version() -> None:
     ],
 )
 def test_open_rejects_non_active_editor(actor: SimpleNamespace) -> None:
-    work_order_repository = repository(get_by_id=None, save=None)
+    work_order_repository = repository(get_by_id_for_update=None, save=None)
     service = build_service(
         user_repository=repository(get_by_id=actor),
         work_order_repository=work_order_repository,
@@ -203,7 +365,7 @@ def test_open_rejects_non_active_editor(actor: SimpleNamespace) -> None:
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "ROLE_NOT_ALLOWED"
-    work_order_repository.get_by_id.assert_not_awaited()
+    work_order_repository.get_by_id_for_update.assert_not_awaited()
 
 
 def test_open_masks_wrong_assignee_as_not_found() -> None:
@@ -211,7 +373,7 @@ def test_open_masks_wrong_assignee_as_not_found() -> None:
     assigned_to_other = work_order(uuid4())
     service = build_service(
         user_repository=repository(get_by_id=actor),
-        work_order_repository=repository(get_by_id=assigned_to_other, save=None),
+        work_order_repository=repository(get_by_id_for_update=assigned_to_other, save=None),
     )
 
     with pytest.raises(WorkOrderApiError) as exc_info:
@@ -227,7 +389,7 @@ def test_open_rejects_missing_default_state() -> None:
     service = build_service(
         user_repository=repository(get_by_id=actor),
         work_order_repository=repository(
-            get_by_id=assigned,
+            get_by_id_for_update=assigned,
             get_open_edit_version=None,
             save=None,
         ),
@@ -248,7 +410,7 @@ def test_open_rejects_assigned_work_order_with_existing_open_version() -> None:
     service = build_service(
         user_repository=repository(get_by_id=actor),
         work_order_repository=repository(
-            get_by_id=assigned,
+            get_by_id_for_update=assigned,
             get_open_edit_version=existing,
             create_open_edit_version=None,
             touch_edit_version=None,
@@ -269,7 +431,7 @@ def test_open_rejects_in_progress_work_order_without_existing_open_version() -> 
     service = build_service(
         user_repository=repository(get_by_id=actor),
         work_order_repository=repository(
-            get_by_id=started,
+            get_by_id_for_update=started,
             get_open_edit_version=None,
             save=None,
         ),

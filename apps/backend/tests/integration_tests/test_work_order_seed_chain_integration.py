@@ -1,5 +1,8 @@
+import asyncio
+import os
+
 from sqlalchemy import delete, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from seeds.repositories.seed_user_repository import SeedUserRepository
 from seeds.repositories.seed_utility_dataset_repository import (
@@ -15,7 +18,10 @@ from seeds.specs.seed_utility_dataset_specs import (
     UTILITY_FEEDER_CODE,
 )
 from seeds.specs.seed_work_order_specs import SEED_WORK_ORDER_AOI_SPEC, SEED_WORK_ORDER_SPEC
-from tests.integration_tests.network_db_support import run_in_rollback_transaction
+from tests.integration_tests.network_db_support import (
+    require_db_tests,
+    run_in_rollback_transaction,
+)
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
 from utility_service.infrastructure.postgresql.models.utility_network import (
     DefaultState,
@@ -307,3 +313,75 @@ def test_reopening_seeded_edit_version_returns_existing_version_without_duplicat
         assert second_result.edit_version.last_opened_at >= first_last_opened_at
 
     run_in_rollback_transaction(scenario)
+
+
+def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopened() -> None:
+    require_db_tests()
+
+    async def scenario() -> None:
+        engine = create_async_engine(os.environ["DATABASE_URL"])
+        Session = async_sessionmaker(
+            bind=engine,
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
+        try:
+            async with Session() as setup_session:
+                await remove_canonical_seed_chain(setup_session)
+                await run_seed_chain(setup_session)
+
+            assignee_id = next(
+                spec.id
+                for spec in SEED_DEMO_USER_SPECS
+                if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
+            )
+
+            async def open_once():
+                async with Session() as session:
+                    return await EditVersionService(
+                        session,
+                        UserRepository(session),
+                        WorkOrderRepository(session),
+                        DefaultStateRepository(session),
+                    ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+
+            first_result, second_result = await asyncio.gather(open_once(), open_once())
+            created_flags = sorted([first_result.created, second_result.created])
+            edit_version_ids = {first_result.edit_version.id, second_result.edit_version.id}
+            edit_version_id = next(iter(edit_version_ids))
+
+            async with Session() as verify_session:
+                open_version_count = await verify_session.scalar(
+                    select(func.count(EditVersion.id)).where(
+                        EditVersion.work_order_id == SEED_WORK_ORDER_SPEC.id,
+                        EditVersion.status == EditVersionStatus.OPEN,
+                    )
+                )
+                edit_feature_count = await verify_session.scalar(
+                    select(func.count(EditVersionFeature.feature_id)).where(
+                        EditVersionFeature.edit_version_id == edit_version_id
+                    )
+                )
+                edit_association_count = await verify_session.scalar(
+                    select(func.count(EditVersionAssociation.association_id)).where(
+                        EditVersionAssociation.edit_version_id == edit_version_id
+                    )
+                )
+                work_order_status = await verify_session.scalar(
+                    select(WorkOrder.status).where(WorkOrder.id == SEED_WORK_ORDER_SPEC.id)
+                )
+
+            assert created_flags == [False, True]
+            assert len(edit_version_ids) == 1
+            assert open_version_count == 1
+            assert edit_feature_count == 19
+            assert edit_association_count == 9
+            assert work_order_status is WorkOrderStatus.IN_PROGRESS
+        finally:
+            try:
+                async with Session() as cleanup_session:
+                    await remove_canonical_seed_chain(cleanup_session)
+            finally:
+                await engine.dispose()
+
+    asyncio.run(scenario())

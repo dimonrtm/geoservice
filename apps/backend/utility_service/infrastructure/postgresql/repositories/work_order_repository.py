@@ -43,6 +43,12 @@ class WorkOrderRepository:
         result = await self.session.execute(select(WorkOrder).where(WorkOrder.id == work_order_id))
         return result.scalars().one_or_none()
 
+    async def get_by_id_for_update(self, work_order_id: UUID) -> WorkOrder | None:
+        result = await self.session.execute(
+            select(WorkOrder).where(WorkOrder.id == work_order_id).with_for_update()
+        )
+        return result.scalars().one_or_none()
+
     async def get_by_code(self, code: str) -> WorkOrder | None:
         result = await self.session.execute(select(WorkOrder).where(WorkOrder.code == code))
         return result.scalars().one_or_none()
