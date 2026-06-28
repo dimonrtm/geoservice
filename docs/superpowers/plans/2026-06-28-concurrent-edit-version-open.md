@@ -40,7 +40,7 @@ No API schema, frontend file, Alembic migration, or database model change is req
 - Modify: `apps/backend/utility_service/infrastructure/tests/test_work_order_repository.py`
 - Modify: `apps/backend/utility_service/infrastructure/postgresql/repositories/work_order_repository.py`
 
-- [ ] **Step 1: Write the failing repository SQL test**
+- [x] **Step 1: Write the failing repository SQL test**
 
 In `apps/backend/utility_service/infrastructure/tests/test_work_order_repository.py`, add the PostgreSQL dialect import and extend the fake scalar result so `get_by_id_for_update()` can call `one_or_none()`:
 
@@ -80,7 +80,7 @@ def test_get_by_id_for_update_locks_work_order_row() -> None:
     assert "FOR UPDATE" in compiled
 ```
 
-- [ ] **Step 2: Run the new repository test and verify it fails**
+- [x] **Step 2: Run the new repository test and verify it fails**
 
 Run from `C:\Repositories\geoservice`:
 
@@ -90,7 +90,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: FAIL with `AttributeError: 'WorkOrderRepository' object has no attribute 'get_by_id_for_update'`.
 
-- [ ] **Step 3: Implement the locked repository read**
+- [x] **Step 3: Implement the locked repository read**
 
 In `apps/backend/utility_service/infrastructure/postgresql/repositories/work_order_repository.py`, add this method immediately after `get_by_id()`:
 
@@ -102,7 +102,7 @@ In `apps/backend/utility_service/infrastructure/postgresql/repositories/work_ord
         return result.scalars().one_or_none()
 ```
 
-- [ ] **Step 4: Run the repository tests**
+- [x] **Step 4: Run the repository tests**
 
 Run:
 
@@ -120,7 +120,7 @@ Expected: PASS for both repository tests.
 - Modify: `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`
 - Modify: `apps/backend/utility_service/use_cases/services/edit_version_service.py`
 
-- [ ] **Step 1: Write the failing use-case test for locked read**
+- [x] **Step 1: Write the failing use-case test for locked read**
 
 In `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`, update `build_service()` so the default fake repository exposes `get_by_id_for_update`:
 
@@ -172,7 +172,7 @@ def test_open_reads_work_order_with_row_lock() -> None:
     work_order_repository.get_by_id.assert_not_awaited()
 ```
 
-- [ ] **Step 2: Run the new use-case test and verify it fails**
+- [x] **Step 2: Run the new use-case test and verify it fails**
 
 Run:
 
@@ -182,7 +182,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: FAIL because `get_by_id_for_update` was not awaited and ordinary `get_by_id` was awaited.
 
-- [ ] **Step 3: Change service visibility lookup to use the locked method**
+- [x] **Step 3: Change service visibility lookup to use the locked method**
 
 In `apps/backend/utility_service/use_cases/services/edit_version_service.py`, replace the body of `get_visible_work_order()` with:
 
@@ -198,7 +198,7 @@ In `apps/backend/utility_service/use_cases/services/edit_version_service.py`, re
         return work_order
 ```
 
-- [ ] **Step 4: Update existing service tests to provide the locked method**
+- [x] **Step 4: Update existing service tests to provide the locked method**
 
 In `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`, update existing fake repositories so the service can call `get_by_id_for_update`.
 
@@ -238,7 +238,7 @@ For `test_open_rejects_non_active_editor`, use this repository fake and assertio
     work_order_repository.get_by_id_for_update.assert_not_awaited()
 ```
 
-- [ ] **Step 5: Run all EditVersionService unit tests**
+- [x] **Step 5: Run all EditVersionService unit tests**
 
 Run:
 
@@ -256,7 +256,7 @@ Expected: PASS.
 - Modify: `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`
 - Modify: `apps/backend/utility_service/use_cases/services/edit_version_service.py`
 
-- [ ] **Step 1: Write classifier tests**
+- [x] **Step 1: Write classifier tests**
 
 In `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`, add the import:
 
@@ -318,7 +318,7 @@ def test_open_edit_version_unique_violation_rejects_other_sqlstate() -> None:
     assert EditVersionService.is_open_edit_version_unique_violation(error) is False
 ```
 
-- [ ] **Step 2: Run classifier tests and verify they fail**
+- [x] **Step 2: Run classifier tests and verify they fail**
 
 Run:
 
@@ -328,7 +328,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: FAIL because `EditVersionService.is_open_edit_version_unique_violation` does not exist.
 
-- [ ] **Step 3: Implement the classifier**
+- [x] **Step 3: Implement the classifier**
 
 In `apps/backend/utility_service/use_cases/services/edit_version_service.py`, add the import:
 
@@ -362,7 +362,7 @@ Add this static method inside `EditVersionService`, near the bottom before `rais
         )
 ```
 
-- [ ] **Step 4: Run classifier tests**
+- [x] **Step 4: Run classifier tests**
 
 Run:
 
@@ -380,7 +380,7 @@ Expected: PASS.
 - Modify: `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`
 - Modify: `apps/backend/utility_service/use_cases/services/edit_version_service.py`
 
-- [ ] **Step 1: Write recovery and propagation tests**
+- [x] **Step 1: Write recovery and propagation tests**
 
 In `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`, add these tests after `test_open_in_progress_work_order_returns_existing_edit_version`:
 
@@ -464,7 +464,7 @@ def test_open_does_not_recover_other_integrity_error() -> None:
     work_order_repository.touch_edit_version.assert_not_awaited()
 ```
 
-- [ ] **Step 2: Run recovery tests and verify they fail**
+- [x] **Step 2: Run recovery tests and verify they fail**
 
 Run:
 
@@ -474,7 +474,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: first test FAILS because `IntegrityError` is not recovered. The second test may already pass; keep it as regression coverage.
 
-- [ ] **Step 3: Refactor service into locked path and recovery path**
+- [x] **Step 3: Refactor service into locked path and recovery path**
 
 In `apps/backend/utility_service/use_cases/services/edit_version_service.py`, replace `open_for_work_order()` with:
 
@@ -568,7 +568,7 @@ Add these methods below `open_for_work_order()`:
 
 Keep `get_actor()`, `get_visible_work_order()`, `require_active_editor()`, `is_open_edit_version_unique_violation()`, and `raise_context_invalid()` after these methods.
 
-- [ ] **Step 4: Run all EditVersionService unit tests**
+- [x] **Step 4: Run all EditVersionService unit tests**
 
 Run:
 
@@ -585,7 +585,7 @@ Expected: PASS.
 **Files:**
 - Modify: `apps/backend/tests/integration_tests/test_work_order_seed_chain_integration.py`
 
-- [ ] **Step 1: Write the DB-gated concurrent open test**
+- [x] **Step 1: Write the DB-gated concurrent open test**
 
 In `apps/backend/tests/integration_tests/test_work_order_seed_chain_integration.py`, add imports at the top:
 
@@ -614,6 +614,21 @@ Add this test after `test_reopening_seeded_edit_version_returns_existing_version
 ```python
 def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopened() -> None:
     require_db_tests()
+
+    async def assert_demo_users_restored() -> None:
+        engine = create_async_engine(os.environ["DATABASE_URL"])
+        Session = async_sessionmaker(
+            bind=engine,
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
+        try:
+            async with Session() as session:
+                emails = (await session.execute(select(User.email))).scalars().all()
+        finally:
+            await engine.dispose()
+
+        assert set(emails) == {spec.email for spec in SEED_DEMO_USER_SPECS}
 
     async def scenario() -> None:
         engine = create_async_engine(os.environ["DATABASE_URL"])
@@ -678,13 +693,15 @@ def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopene
             try:
                 async with Session() as cleanup_session:
                     await remove_canonical_seed_chain(cleanup_session)
+                    await run_seed_chain(cleanup_session)
             finally:
                 await engine.dispose()
 
     asyncio.run(scenario())
+    asyncio.run(assert_demo_users_restored())
 ```
 
-- [ ] **Step 2: Run the integration test**
+- [x] **Step 2: Run the integration test**
 
 Run from `C:\Repositories\geoservice\infra` with the compose stack already running:
 
@@ -694,7 +711,7 @@ docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 
 
 Expected: PASS. If it fails with a real race defect, inspect the assertion output before changing the test.
 
-- [ ] **Step 3: Run the full work-order seed-chain integration file**
+- [x] **Step 3: Run the full work-order seed-chain integration file**
 
 Run from `C:\Repositories\geoservice\infra`:
 
@@ -715,7 +732,7 @@ Expected: PASS.
 - Verify: `apps/backend/utility_service/use_cases/tests/test_edit_version_service.py`
 - Verify: `apps/backend/tests/integration_tests/test_work_order_seed_chain_integration.py`
 
-- [ ] **Step 1: Run focused fast unit tests**
+- [x] **Step 1: Run focused fast unit tests**
 
 Run from `C:\Repositories\geoservice`:
 
@@ -725,7 +742,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: PASS.
 
-- [ ] **Step 2: Run backend formatting check**
+- [x] **Step 2: Run backend formatting check**
 
 Run:
 
@@ -735,7 +752,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: PASS with all listed files left unchanged.
 
-- [ ] **Step 3: Run backend lint on changed files**
+- [x] **Step 3: Run backend lint on changed files**
 
 Run:
 
@@ -745,7 +762,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: PASS with `All checks passed!`.
 
-- [ ] **Step 4: Run full backend unit test suite**
+- [x] **Step 4: Run full backend unit test suite**
 
 Run:
 
@@ -755,7 +772,7 @@ docker run --rm -v C:\Repositories\geoservice\apps\backend:/app -w /app --entryp
 
 Expected: PASS. Integration tests without `RUN_DB_TESTS=1` should skip as they do today.
 
-- [ ] **Step 5: Run DB integration regression in compose**
+- [x] **Step 5: Run DB integration regression in compose**
 
 Run from `C:\Repositories\geoservice\infra`:
 
@@ -765,7 +782,7 @@ docker compose -f docker-compose.yml exec -T utility_service env RUN_DB_TESTS=1 
 
 Expected: PASS, including `test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopened`.
 
-- [ ] **Step 6: Inspect diff**
+- [x] **Step 6: Inspect diff**
 
 Run:
 
@@ -775,7 +792,11 @@ git diff -- apps/backend/utility_service/infrastructure/postgresql/repositories/
 
 Expected: diff only contains the row-lock repository method, use-case recovery logic, and tests described in this plan.
 
-- [ ] **Step 7: Decide whether knowledge docs need update**
+- [x] **Step 7: Decide whether knowledge docs need update**
+
+Решение: `/ingest repository-change` не нужен; поведение SQLAlchemy/asyncpg
+при recovery и риск cleanup seed-состояния в CI уже закреплены кодом, тестами
+и этим планом.
 
 Do not run `/ingest repository-change` automatically. Decide after implementation:
 

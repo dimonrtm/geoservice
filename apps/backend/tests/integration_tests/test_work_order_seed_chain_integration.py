@@ -318,6 +318,21 @@ def test_reopening_seeded_edit_version_returns_existing_version_without_duplicat
 def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopened() -> None:
     require_db_tests()
 
+    async def assert_demo_users_restored() -> None:
+        engine = create_async_engine(os.environ["DATABASE_URL"])
+        Session = async_sessionmaker(
+            bind=engine,
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
+        try:
+            async with Session() as session:
+                emails = (await session.execute(select(User.email))).scalars().all()
+        finally:
+            await engine.dispose()
+
+        assert set(emails) == {spec.email for spec in SEED_DEMO_USER_SPECS}
+
     async def scenario() -> None:
         engine = create_async_engine(os.environ["DATABASE_URL"])
         Session = async_sessionmaker(
@@ -381,7 +396,9 @@ def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopene
             try:
                 async with Session() as cleanup_session:
                     await remove_canonical_seed_chain(cleanup_session)
+                    await run_seed_chain(cleanup_session)
             finally:
                 await engine.dispose()
 
     asyncio.run(scenario())
+    asyncio.run(assert_demo_users_restored())
