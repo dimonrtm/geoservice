@@ -83,6 +83,17 @@ function workspaceResponse(workOrderId = "wo-1", editVersionId = "ev-1") {
   };
 }
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+
+  return { promise, resolve, reject };
+}
+
 describe("work orders store", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -112,6 +123,49 @@ describe("work orders store", () => {
     expect(store.items[0]).toMatchObject({ code: "WO-001" });
     expect(store.isLoading).toBe(false);
     expect(store.errorMessage).toBeNull();
+  });
+
+  it("resets user-scoped state and invalidates pending requests", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Assigned work",
+        description: "Old user work order",
+        status: "assigned",
+      },
+    ];
+    store.isLoading = true;
+    store.errorMessage = "load failed";
+    store.selectedWorkOrderId = "wo-1";
+    store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    store.workspace = workspaceResponse();
+    store.isOpeningWorkspace = true;
+    store.openWorkspaceErrorByWorkOrderId = {
+      "wo-1": "open failed",
+    };
+    store.lastFittedWorkspaceKey = "wo-1:ev-1";
+    store.openWorkspaceRequestSeq = 7;
+    store.loadAssignedRequestSeq = 11;
+
+    store.reset();
+
+    expect(store.items).toEqual([]);
+    expect(store.isLoading).toBe(false);
+    expect(store.errorMessage).toBeNull();
+    expect(store.selectedWorkOrderId).toBeNull();
+    expect(store.openedWorkOrderId).toBeNull();
+    expect(store.openedEditVersionId).toBeNull();
+    expect(store.workspace).toBeNull();
+    expect(store.isOpeningWorkspace).toBe(false);
+    expect(store.openWorkspaceErrorByWorkOrderId).toEqual({});
+    expect(store.lastFittedWorkspaceKey).toBeNull();
+    expect(store.openWorkspaceRequestSeq).toBe(8);
+    expect(store.loadAssignedRequestSeq).toBe(12);
   });
 
   it("selects a work order locally without API calls", async () => {
@@ -239,5 +293,69 @@ describe("work orders store", () => {
     expect(store.openedWorkOrderId).toBeNull();
     expect(store.activeWorkspace).toBeNull();
     expect(store.openWorkspaceErrorByWorkOrderId["wo-1"]).toBeUndefined();
+  });
+
+  it("ignores assigned work orders response after reset", async () => {
+    const assignedResponse = {
+      workOrders: [
+        {
+          id: "wo-1",
+          code: "WO-001",
+          title: "Old user work order",
+          description: null,
+          status: "assigned" as const,
+        },
+      ],
+    };
+    const assignedDeferred = createDeferred<typeof assignedResponse>();
+    fetchAssignedWorkOrdersMock.mockReturnValue(assignedDeferred.promise);
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+
+    const loading = store.loadAssigned();
+    expect(store.isLoading).toBe(true);
+
+    store.reset();
+    assignedDeferred.resolve(assignedResponse);
+    await loading;
+
+    expect(store.items).toEqual([]);
+    expect(store.isLoading).toBe(false);
+    expect(store.errorMessage).toBeNull();
+  });
+
+  it("ignores open workspace response after reset", async () => {
+    const openResponse = openEditVersionResponse();
+    const openDeferred = createDeferred<typeof openResponse>();
+    openEditVersionMock.mockReturnValue(openDeferred.promise);
+    fetchWorkspaceMock.mockResolvedValue(workspaceResponse());
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Old user work order",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectWorkOrder("wo-1");
+
+    const opening = store.openSelectedWorkOrder();
+    expect(store.isOpeningWorkspace).toBe(true);
+
+    store.reset();
+    openDeferred.resolve(openResponse);
+    await opening;
+
+    expect(fetchWorkspaceMock).not.toHaveBeenCalled();
+    expect(store.items).toEqual([]);
+    expect(store.openedWorkOrderId).toBeNull();
+    expect(store.openedEditVersionId).toBeNull();
+    expect(store.workspace).toBeNull();
+    expect(store.isOpeningWorkspace).toBe(false);
   });
 });

@@ -22,11 +22,12 @@ type WorkOrdersState = {
   isOpeningWorkspace: boolean;
   openWorkspaceErrorByWorkOrderId: Record<string, string | undefined>;
   lastFittedWorkspaceKey: string | null;
+  loadAssignedRequestSeq: number;
   openWorkspaceRequestSeq: number;
 };
 
-export const useWorkOrdersStore = defineStore("workOrders", {
-  state: (): WorkOrdersState => ({
+function createInitialWorkOrdersState(): WorkOrdersState {
+  return {
     items: [],
     isLoading: false,
     errorMessage: null,
@@ -37,8 +38,13 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     isOpeningWorkspace: false,
     openWorkspaceErrorByWorkOrderId: {},
     lastFittedWorkspaceKey: null,
+    loadAssignedRequestSeq: 0,
     openWorkspaceRequestSeq: 0,
-  }),
+  };
+}
+
+export const useWorkOrdersStore = defineStore("workOrders", {
+  state: createInitialWorkOrdersState,
   getters: {
     selectedWorkOrder: (state) =>
       state.items.find((item) => item.id === state.selectedWorkOrderId) ?? null,
@@ -72,11 +78,27 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     },
   },
   actions: {
+    reset(): void {
+      const nextLoadAssignedRequestSeq = this.loadAssignedRequestSeq + 1;
+      const nextOpenWorkspaceRequestSeq = this.openWorkspaceRequestSeq + 1;
+
+      Object.assign(this, {
+        ...createInitialWorkOrdersState(),
+        loadAssignedRequestSeq: nextLoadAssignedRequestSeq,
+        openWorkspaceRequestSeq: nextOpenWorkspaceRequestSeq,
+      });
+    },
     async loadAssigned() {
+      const requestSeq = this.loadAssignedRequestSeq + 1;
+      this.loadAssignedRequestSeq = requestSeq;
       this.isLoading = true;
       this.errorMessage = null;
       try {
         const result = await fetchAssignedWorkOrders();
+        if (this.loadAssignedRequestSeq !== requestSeq) {
+          return;
+        }
+
         this.items = result.workOrders;
         if (
           this.selectedWorkOrderId &&
@@ -92,11 +114,17 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           this.clearOpenedWorkspace();
         }
       } catch {
+        if (this.loadAssignedRequestSeq !== requestSeq) {
+          return;
+        }
+
         this.items = [];
         this.errorMessage =
           "Не удалось загрузить назначенные наряды. Попробуйте ещё раз.";
       } finally {
-        this.isLoading = false;
+        if (this.loadAssignedRequestSeq === requestSeq) {
+          this.isLoading = false;
+        }
       }
     },
     selectWorkOrder(workOrderId: string) {
@@ -122,6 +150,13 @@ export const useWorkOrdersStore = defineStore("workOrders", {
 
       try {
         const openResult = await openEditVersion(workOrderId);
+        if (
+          this.openWorkspaceRequestSeq !== requestSeq ||
+          this.selectedWorkOrderId !== workOrderId
+        ) {
+          return;
+        }
+
         this.updateWorkOrderStatus(workOrderId, "in_progress");
 
         const editVersionId = openResult.editVersion.id;

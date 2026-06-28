@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import axios from "axios";
 
 import { fetchMe, login, type AuthUser } from "@/api/auth";
+import { useWorkOrdersStore } from "@/stores/workOrders";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const AUTH_USER_KEY = "auth_user";
@@ -32,6 +33,21 @@ function readStoredUser(): AuthUser | null {
   }
 }
 
+function authUserId(user: AuthUser | null): string | null {
+  return user?.id ?? null;
+}
+
+function resetWorkOrdersIfUserIdChanged(
+  previousUserId: string | null,
+  nextUserId: string | null,
+): void {
+  if (previousUserId === nextUserId) {
+    return;
+  }
+
+  useWorkOrdersStore().reset();
+}
+
 export const useAuthStore = defineStore(
   "auth",
 
@@ -48,19 +64,26 @@ export const useAuthStore = defineStore(
     },
     actions: {
       setAuth(token: string, user: AuthUser) {
+        const previousUserId = authUserId(this.user);
+
         this.token = token;
         this.user = user;
         this.sessionError = null;
         localStorage.setItem(ACCESS_TOKEN_KEY, token);
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+        resetWorkOrdersIfUserIdChanged(previousUserId, user.id);
       },
       setUser(user: AuthUser | null) {
+        const previousUserId = authUserId(this.user);
+
         this.user = user;
         if (user) {
           localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
-          return;
+        } else {
+          localStorage.removeItem(AUTH_USER_KEY);
         }
-        localStorage.removeItem(AUTH_USER_KEY);
+
+        resetWorkOrdersIfUserIdChanged(previousUserId, authUserId(user));
       },
       async loginWithPassword(email: string, password: string) {
         const result = await login(email, password);
@@ -100,6 +123,8 @@ export const useAuthStore = defineStore(
         }
       },
       logout() {
+        const previousUserId = authUserId(this.user);
+
         this.token = null;
         this.user = null;
         this.sessionError = null;
@@ -107,6 +132,7 @@ export const useAuthStore = defineStore(
         this.isRestoring = false;
         localStorage.removeItem(ACCESS_TOKEN_KEY);
         localStorage.removeItem(AUTH_USER_KEY);
+        resetWorkOrdersIfUserIdChanged(previousUserId, null);
       },
     },
   },
