@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 
+import type { WorkspaceResponse } from "@/contracts/work-orders";
+
 const fetchAssignedWorkOrdersMock = vi.fn();
 const openEditVersionMock = vi.fn();
 const fetchWorkspaceMock = vi.fn();
@@ -26,7 +28,10 @@ function openEditVersionResponse(workOrderId = "wo-1") {
   };
 }
 
-function workspaceResponse(workOrderId = "wo-1", editVersionId = "ev-1") {
+function workspaceResponse(
+  workOrderId = "wo-1",
+  editVersionId = "ev-1",
+): WorkspaceResponse {
   return {
     workOrder: {
       id: workOrderId,
