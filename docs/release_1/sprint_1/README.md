@@ -31,6 +31,8 @@
 - [План реализации Edit Workspace Интенсива 12](2026-06-25-sprint-1-day-12-edit-workspace-implementation-plan.md)
 - [End-to-end интеграция Дня 13](2026-06-26-sprint-1-day-13-e2e-integration-design.md)
 - [План реализации End-to-end интеграции Дня 13](2026-06-26-sprint-1-day-13-e2e-integration-implementation-plan.md)
+- [Глубокое ревью кода Спринта 1](2026-06-28-sprint-1-deep-code-review.md)
+- [Backlog исправлений по ревью Спринта 1](2026-06-28-sprint-1-review-fix-backlog.md)
 
 ## Исторические Материалы
 
