@@ -3,8 +3,8 @@ title: Draft Version Token
 type: value-object
 status: planned
 created: 2026-06-28
-updated: 2026-06-28
-source: RAW_inputs/meetings/persisted_edit_slice_EditVersion.md
+updated: 2026-06-29
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md"
 tags: [domain-knowledge, value-object, edit-version, concurrency]
 confidence: high
 related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, DDD_Wiki/aggregates/edit_version]
@@ -20,7 +20,7 @@ related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_
 
 ## Not A Baseline Fact
 
-`DraftVersionToken` не является `baseNetworkRevision` и не описывает authoritative `Default`. Drift `Default` относительно baseline обрабатывается позже на reconcile/post boundary.
+`DraftVersionToken` / `networkVersion` не является `baseNetworkRevision`, не описывает authoritative `Default` и не доказывает свежесть относительно Default. Drift `Default` относительно baseline обрабатывается позже на reconcile/post boundary; stale draft token должен отклоняться или требовать refresh уже на first save.
 
 ## Immutability
 

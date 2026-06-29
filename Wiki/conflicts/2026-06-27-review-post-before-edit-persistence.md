@@ -3,8 +3,8 @@ title: Review/Post Before Edit Persistence
 type: conflict
 status: resolved
 created: 2026-06-27
-updated: 2026-06-28
-source: "RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md"
+updated: 2026-06-29
+source: "RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md"
 tags: [domain-knowledge, conflict, sprint-planning, review, edit-version]
 confidence: high
 related: [DDD_Wiki/model_health, DDD_Wiki/use_cases/utility_editor_workflow, Wiki/commands/update_edit_version_feature_geometry, Wiki/commands/submit_for_review]
@@ -22,7 +22,7 @@ related: [DDD_Wiki/model_health, DDD_Wiki/use_cases/utility_editor_workflow, Wik
 
 ## Resolution
 
-Ближайший вертикальный срез должен идти так: workspace -> update geometry существующей line feature in named/edit version -> persist diff relative to baseline -> readback persisted feature + diff -> basic draft validation flags. `ReviewPackage`, reviewer decision, `can_post`, simulated post, full audit, trace/subnetwork evidence, automated risk tiers, reviewer queue, association mutation, endpoint rewiring и create/delete откладываются до появления устойчивого persisted change set.
+Ближайший вертикальный срез должен идти так: workspace -> update geometry существующей line feature in named/edit version -> persist diff relative to baseline -> readback persisted feature + explicit baseline diff -> basic draft validation flags. `ReviewPackage`, reviewer decision, `can_post`, simulated post, full audit, trace/subnetwork evidence, automated risk tiers, reviewer queue, association mutation, endpoint rewiring и create/delete откладываются до появления устойчивого persisted change set.
 
 ## Consequences
 

@@ -3,8 +3,8 @@ title: Edit Version Change Set Persisted
 type: domain-event
 status: planned
 created: 2026-06-28
-updated: 2026-06-28
-source: RAW_inputs/meetings/persisted_edit_slice_EditVersion.md
+updated: 2026-06-29
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md"
 tags: [domain-knowledge, domain-event, edit-version, workspace]
 confidence: high
 related: [Wiki/commands/update_edit_version_feature_geometry, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_basic_draft_validation, DDD_Wiki/aggregates/edit_version]
@@ -18,7 +18,7 @@ related: [Wiki/commands/update_edit_version_feature_geometry, Wiki/specification
 
 ## Happened In The Past
 
-`UpdateEditVersionFeatureGeometry` успешно сохранил ненулевой geometry diff существующей линии относительно baseline внутри open `EditVersion`. В версии появился persisted change set, а не только UI draft или техническая квитанция save.
+`UpdateEditVersionFeatureGeometry` успешно сохранил ненулевой geometry diff существующей линии относительно baseline внутри open `EditVersion`. В версии появился persisted change set, а не только UI draft или техническая квитанция save. Событие не должно подменять audit history: если diff нормализован обратно к baseline и стал пустым, source рекомендует не эмитить это событие.
 
 ## Suggested Payload
 

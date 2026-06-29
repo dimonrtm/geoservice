@@ -3,8 +3,8 @@ title: Update Edit Version Feature Geometry
 type: command
 status: planned
 created: 2026-06-28
-updated: 2026-06-28
-source: RAW_inputs/meetings/persisted_edit_slice_EditVersion.md
+updated: 2026-06-29
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md"
 tags: [domain-knowledge, command, edit-version, workspace, geometry]
 confidence: high
 related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_basic_draft_validation, Wiki/domain_events/edit_version_change_set_persisted, DDD_Wiki/aggregates/edit_version]
@@ -22,7 +22,7 @@ related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/specif
 
 ## Intent
 
-Сохранить geometry diff существующей линии относительно baseline этой `EditVersion`. Первый deterministic case - сдвиг внутренней вершины линии без изменения endpoints и `NetworkAssociation`.
+Сохранить geometry diff существующей линии относительно baseline этой `EditVersion`. Первый deterministic case - сдвиг внутренней вершины линии без изменения endpoints и `NetworkAssociation`; команда не является generic update для любых feature changes.
 
 ## Preconditions
 
@@ -36,7 +36,7 @@ related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/specif
 
 ## Outcome
 
-Система сохраняет geometry diff в persisted draft state, нормализует `operation` как текущее отличие от baseline, возвращает readback persisted feature и diff, вычисляет базовые draft validation flags и фиксирует [[Wiki/domain_events/edit_version_change_set_persisted]], если diff ненулевой.
+Система сохраняет geometry diff в persisted draft state, нормализует `operation` как текущее отличие от baseline, возвращает readback persisted feature вместе с explicit baseline diff, вычисляет базовые draft validation flags и фиксирует [[Wiki/domain_events/edit_version_change_set_persisted]], если diff ненулевой. Если геометрия возвращена к baseline, persisted projection должна стать `unchanged`, а не хранить `updated` только из-за прошлого save.
 
 ## Out Of Scope
 

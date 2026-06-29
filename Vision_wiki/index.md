@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-28
+updated: 2026-06-29
 source: null
 tags: [vision-wiki, product]
 ---
@@ -94,6 +94,7 @@ tags: [vision-wiki, product]
 - [[chats/2026-06-26-ic-review-package-and-simulated-post]] - design/architecture input для отдельного integrated review/post contract: `submit_for_review`, reviewer decision, computed `can_post`, simulated post, durable audit, system `post-gate`, safety-complete veto set и small-sprint framing.
 - [[chats/2026-06-27-increment-after-open-workspace]] - code-aware discovery answers: ближайший инкремент после открытия workspace должен быть persisted edit slice, а review/post начинается только после change set.
 - [[chats/2026-06-28-persisted-edit-slice-editversion]] - design/architecture input: first persisted edit slice уточнен до geometry diff существующей line feature, `UpdateEditVersionFeatureGeometry`, `EditVersionChangeSetPersisted`, `DraftVersionToken` и basic draft validation.
+- [[chats/2026-06-29-persisted-edit-slice-for-editversion]] - design/architecture input: first persisted edit slice уточнен как saved geometry diff относительно baseline с readback persisted object + baseline diff, event only for non-empty diff, `DraftVersionToken` как draft concurrency token и stop-line до review/post.
 - [[chats/2026-06-14-utility-gis-editor-market-research]] - доверенное market research по полному Use Case, vendors и product families.
 - [[chats/2026-06-20-utility-gis-editor-role-research]] - research source о реальной работе роли: authoritative network change owner/editor, ArcGIS и QGIS/PostGIS/QField/GISwater stacks, field sync, topology QA, training и KPI.
 - [[concepts/operational_utility_gis]] - справочная рыночная категория из network editor, field execution и integration hub.
