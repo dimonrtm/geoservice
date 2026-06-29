@@ -317,11 +317,18 @@ def test_service_error_becomes_structured_response() -> None:
 
     response = TestClient(build_app(auth_service, edit_version_service)).post(
         f"/api/v1/work-orders/{work_order_id}/edit-versions",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={
+            "Authorization": f"Bearer {token}",
+            "X-Correlation-ID": "workflow-correlation-id",
+        },
     )
 
     assert response.status_code == 422
-    assert response.json()["code"] == "WORK_ORDER_CONTEXT_INVALID"
+    assert response.json() == {
+        "code": "WORK_ORDER_CONTEXT_INVALID",
+        "message": "Контекст рабочей задачи поврежден или неполон.",
+        "correlationId": "workflow-correlation-id",
+    }
 
 
 def test_get_workspace_returns_nested_work_order_payload() -> None:
@@ -366,8 +373,15 @@ def test_workspace_service_404_is_structured() -> None:
 
     response = TestClient(build_app(auth_service, edit_version_service, workspace_service)).get(
         f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}/workspace",
-        headers={"Authorization": f"Bearer {token}"},
+        headers={
+            "Authorization": f"Bearer {token}",
+            "X-Correlation-ID": "workspace-correlation-id",
+        },
     )
 
     assert response.status_code == 404
-    assert response.json()["code"] == "EDIT_VERSION_NOT_FOUND"
+    assert response.json() == {
+        "code": "EDIT_VERSION_NOT_FOUND",
+        "message": "Рабочая версия не найдена.",
+        "correlationId": "workspace-correlation-id",
+    }

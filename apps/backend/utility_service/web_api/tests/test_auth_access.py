@@ -126,5 +126,10 @@ def test_reviewer_gets_structured_403_from_editor_endpoint() -> None:
     )
 
     assert response.status_code == 403
-    assert response.json()["code"] == "ROLE_NOT_ALLOWED"
-    assert response.json()["message"] == ("Операция доступна только пользователю с ролью Editor.")
+    body = response.json()
+    assert body["code"] == "ROLE_NOT_ALLOWED"
+    assert body["message"] == ("Операция доступна только пользователю с ролью Editor.")
+    assert isinstance(body["correlationId"], str)
+    assert body["correlationId"]
+    assert "detail" not in body
+    assert "details" not in body

@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-06-22
-source: repository-change:2026-06-22
+updated: 2026-06-29
+source: repository-change:2026-06-29
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -80,14 +80,20 @@ Frontend хранит token в `localStorage`, добавляет `Authorization
 
 ## Ошибки
 
-- Auth errors возвращают `code`, `message`, `correlationId`, `details`; активные
-  коды Дня 2: `AUTH_REQUIRED`, `USER_INACTIVE`, `ROLE_NOT_ALLOWED`.
+- `AuthApiError`, `UtilityNetworkApiError` и `WorkOrderApiError` сериализуются
+  единым strict structured contract `{code, message, correlationId}` без
+  `detail` и `details`. `correlationId` берётся из `X-Correlation-ID`, а при
+  отсутствии header генерируется backend-ом.
+- Неверные email/password в `POST /api/v1/auth/login` возвращают
+  `401 INVALID_CREDENTIALS` с сообщением `Неверная электронная почта или пароль`.
+- Остальные активные auth-коды: `AUTH_REQUIRED`, `USER_INACTIVE`,
+  `ROLE_NOT_ALLOWED`.
 - Utility read errors используют тот же structured contract; повреждённый
   aggregate возвращает `500 UTILITY_DATASET_INVALID`.
-- Work Orders errors используют structured contract `code`, `message`,
-  `correlationId`, `details`: `WORK_ORDER_NOT_FOUND` для отсутствующего или
-  чужого work order, `WORK_ORDER_CONTEXT_INVALID` для рассинхрона work order и
-  edit version, `WORK_ORDER_STATE_CONFLICT` для несовместимого статуса.
+- Work Orders errors используют тот же structured contract:
+  `WORK_ORDER_NOT_FOUND` для отсутствующего или чужого work order,
+  `WORK_ORDER_CONTEXT_INVALID` для рассинхрона work order и edit version,
+  `WORK_ORDER_STATE_CONFLICT` для несовместимого статуса.
 - Workspace errors используют тот же structured contract: `EDIT_VERSION_NOT_FOUND`
   маскирует отсутствующую, чужую или не связанную с work order edit version,
   `EDIT_VERSION_STATE_CONFLICT` возвращается для неподходящего состояния

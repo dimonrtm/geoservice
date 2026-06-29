@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
-from fastapi import HTTPException
 
 from utility_service.utils.passwords import hash_password
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
@@ -71,11 +70,12 @@ def test_authenticate_user_raises_401_for_unknown_email() -> None:
     repository.get_by_email.return_value = None
     service = AuthService(session=None, user_repository=repository)
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(AuthApiError) as exc_info:
         asyncio.run(service.authenticate_user("missing@example.com", "editor-password"))
 
     assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Неверная электронная почта или пароль"
+    assert exc_info.value.code == "INVALID_CREDENTIALS"
+    assert exc_info.value.message == "Неверная электронная почта или пароль"
 
 
 def test_authenticate_user_raises_401_for_wrong_password() -> None:
@@ -90,11 +90,12 @@ def test_authenticate_user_raises_401_for_wrong_password() -> None:
     repository.get_by_email.return_value = user
     service = AuthService(session=None, user_repository=repository)
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(AuthApiError) as exc_info:
         asyncio.run(service.authenticate_user("editor@example.com", "wrong-password"))
 
     assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Неверная электронная почта или пароль"
+    assert exc_info.value.code == "INVALID_CREDENTIALS"
+    assert exc_info.value.message == "Неверная электронная почта или пароль"
 
 
 def test_authenticate_user_raises_401_when_password_hash_is_none() -> None:
@@ -109,7 +110,7 @@ def test_authenticate_user_raises_401_when_password_hash_is_none() -> None:
     repository.get_by_email.return_value = user
     service = AuthService(session=None, user_repository=repository)
 
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(AuthApiError) as exc_info:
         asyncio.run(
             service.authenticate_user(
                 "marina.reviewer@example.local",
@@ -118,7 +119,8 @@ def test_authenticate_user_raises_401_when_password_hash_is_none() -> None:
         )
 
     assert exc_info.value.status_code == 401
-    assert exc_info.value.detail == "Неверная электронная почта или пароль"
+    assert exc_info.value.code == "INVALID_CREDENTIALS"
+    assert exc_info.value.message == "Неверная электронная почта или пароль"
 
 
 def test_authenticate_user_rejects_inactive_user() -> None:

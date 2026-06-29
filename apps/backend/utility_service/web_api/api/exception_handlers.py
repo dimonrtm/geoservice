@@ -27,18 +27,31 @@ from utility_service.use_cases.schemas.feature.patch_feature_conflict_response i
 )
 
 
+def structured_error_response(
+    request: Request,
+    status_code: int,
+    code: str,
+    message: str,
+) -> JSONResponse:
+    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "code": code,
+            "message": message,
+            "correlationId": correlation_id,
+        },
+    )
+
+
 def install_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(AuthApiError)
     async def auth_api_error(request: Request, error: AuthApiError):
-        correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
-        return JSONResponse(
-            status_code=error.status_code,
-            content={
-                "code": error.code,
-                "message": error.message,
-                "correlationId": correlation_id,
-                "details": {},
-            },
+        return structured_error_response(
+            request,
+            error.status_code,
+            error.code,
+            error.message,
         )
 
     @app.exception_handler(UtilityNetworkApiError)
@@ -46,28 +59,20 @@ def install_exception_handlers(app: FastAPI) -> None:
         request: Request,
         error: UtilityNetworkApiError,
     ):
-        correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
-        return JSONResponse(
-            status_code=error.status_code,
-            content={
-                "code": error.code,
-                "message": error.message,
-                "correlationId": correlation_id,
-                "details": {},
-            },
+        return structured_error_response(
+            request,
+            error.status_code,
+            error.code,
+            error.message,
         )
 
     @app.exception_handler(WorkOrderApiError)
     async def work_order_api_error(request: Request, error: WorkOrderApiError):
-        correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
-        return JSONResponse(
-            status_code=error.status_code,
-            content={
-                "code": error.code,
-                "message": error.message,
-                "correlationId": correlation_id,
-                "details": {},
-            },
+        return structured_error_response(
+            request,
+            error.status_code,
+            error.code,
+            error.message,
         )
 
     @app.exception_handler(FeatureNotFoundException)

@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-26
-source: repository-change:2026-06-26
+updated: 2026-06-29
+source: repository-change:2026-06-29
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -46,6 +46,10 @@ tags: [code-wiki, technical-knowledge]
 
 ## Свежие Repository-Change Знания
 
+- 2026-06-29: [[архитектура/api_and_realtime]] и [[архитектура/frontend]]
+  отражают strict structured error contract `{code, message, correlationId}`
+  без `detail`/`details` для auth/utility/workflow ошибок; invalid login
+  возвращает `INVALID_CREDENTIALS`, а `LoginScreen` читает только `message`.
 - 2026-06-21: [[архитектура/api_and_realtime]] и [[архитектура/data_model]] отражают Workspace API `GET /api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}/workspace`, перенос AOI в `work_order` и чтение workspace из edit version с фильтрацией по `WorkOrder.scope.aoi`.
 - 2026-06-22: [[архитектура/data_model]] отражает repair/idempotent migration contract для `c9d0e1f2a3b4`, `f2b3c4d5e6a7`, `a8c1f2d3e4b5`, `e4b7a9c2d5f8` и `d3a01f4e9c21`.
 - 2026-06-22: [[архитектура/api_and_realtime]], [[архитектура/frontend]], [[dev_setup/local_development]], [[сборка/ci_and_quality]] и [[правила_и_стиль/testing_strategy]] отражают экран `Мои наряды`: Editor-only assigned list API, frontend shell с пустой basemap, локальную подсветку строки без открытия `EditVersion` и jsdom component tests.

@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-26
-source: docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md
+updated: 2026-06-29
+source: repository-change:2026-06-29
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-06-29 | [[архитектура/api_and_realtime]] | Уточнён strict structured error contract для `AuthApiError`, `UtilityNetworkApiError` и `WorkOrderApiError`: HTTP body содержит только `{code, message, correlationId}` без `detail`/`details`; invalid login возвращает `401 INVALID_CREDENTIALS`. | `apps/backend/utility_service/web_api/api/exception_handlers.py`, `apps/backend/utility_service/use_cases/services/auth_service.py`, `apps/backend/utility_service/web_api/tests/test_auth_api.py`, `apps/backend/utility_service/web_api/tests/test_exception_handlers.py`, `apps/backend/utility_service/web_api/tests/test_work_orders_api.py` |
+| 2026-06-29 | [[архитектура/frontend]] | Зафиксировано login error behavior: `LoginScreen` показывает `message` из structured 401 error и не выводит legacy `detail`, если structured `message` отсутствует. | `apps/frontend/src/components/LoginScreen.vue`, `apps/frontend/src/components/LoginScreen.test.ts` |
 | 2026-06-26 | [[сборка/ci_and_quality]] | Добавлен CI full path workspace API smoke: `smoke_test` запускает `python tests/smoke/full_path_workspace_smoke.py` внутри `utility_service` и проверяет живой путь `login -> assigned-to-me -> open/reopen EditVersion -> workspace` для seeded `WO-001`. | `.github/workflows/ci.yml`, `apps/backend/tests/smoke/full_path_workspace_smoke.py` |
 | 2026-06-26 | [[правила_и_стиль/testing_strategy]] | Зафиксирован новый слой `apps/backend/tests/smoke`: runner не собирается обычным `pytest`, его поведение покрыто unit tests, а live-запуск выполняется отдельным Compose/CI step. | `apps/backend/tests/smoke/full_path_workspace_smoke.py`, `apps/backend/tests/smoke/test_full_path_workspace_smoke.py` |
 | 2026-06-22 | [[архитектура/api_and_realtime]] | Добавлен Editor-only `GET /api/v1/work-orders/assigned-to-me`: список назначенных текущему Editor work orders без открытия `EditVersion`, без изменения статуса, с компактным response без audit/date fields и backend сортировкой `updated_at DESC`, `code ASC`. | `apps/backend/utility_service/web_api/api/work_orders.py`, `apps/backend/utility_service/use_cases/schemas/work_order/`, `apps/backend/utility_service/infrastructure/postgresql/repositories/work_order_repository.py` |

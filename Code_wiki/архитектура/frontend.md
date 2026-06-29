@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-06-22
-source: repository-change:2026-06-22
+updated: 2026-06-29
+source: repository-change:2026-06-29
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -22,6 +22,9 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 ## State И API
 
 - `src/stores/auth.ts` хранит token/user в `localStorage`, восстанавливает сессию через `/api/v1/auth/me`, очищает состояние при 401.
+- `LoginScreen` для HTTP 401 показывает только `message` из structured error
+  `{code, message, correlationId}`; legacy `detail` не выводится пользователю,
+  если structured `message` отсутствует, используется общий fallback.
 - `src/stores/edit.ts` хранит polygon edit session, dirty-state, validation errors и version conflict handling.
 - `src/stores/workOrders.ts` хранит назначенные текущему `Editor` work orders, loading/error state и локальный `selectedWorkOrderId`; выбор в списке только подсвечивает строку и не открывает edit version.
 - `src/api/http.ts` централизует axios base URL и добавляет Bearer token из Pinia.

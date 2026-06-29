@@ -2,12 +2,14 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.domain.exceptions.business_validation_exception import (
     BusinessValidationException,
 )
 from utility_service.use_cases.domain.exceptions.utility_network_api_error import (
     UtilityNetworkApiError,
 )
+from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
 
 
 def create_test_app() -> FastAPI:
@@ -25,6 +27,18 @@ def create_test_app() -> FastAPI:
     @app.get("/utility-not-found")
     def utility_not_found() -> None:
         raise UtilityNetworkApiError(404, "FEEDER_NOT_FOUND", "Фидер не найден.")
+
+    @app.get("/auth-required")
+    def auth_required() -> None:
+        raise AuthApiError(401, "AUTH_REQUIRED", "Требуется вход в систему.")
+
+    @app.get("/work-order-context")
+    def work_order_context() -> None:
+        raise WorkOrderApiError(
+            422,
+            "WORK_ORDER_CONTEXT_INVALID",
+            "Контекст рабочей задачи поврежден или неполон.",
+        )
 
     return app
 
@@ -59,5 +73,41 @@ def test_utility_network_api_error_returns_structured_response() -> None:
         "code": "FEEDER_NOT_FOUND",
         "message": "Фидер не найден.",
         "correlationId": "test-correlation-id",
-        "details": {},
     }
+    assert "details" not in response.json()
+
+
+def test_auth_api_error_returns_strict_structured_response() -> None:
+    client = TestClient(create_test_app(), raise_server_exceptions=False)
+
+    response = client.get(
+        "/auth-required",
+        headers={"X-Correlation-ID": "auth-correlation-id"},
+    )
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "code": "AUTH_REQUIRED",
+        "message": "Требуется вход в систему.",
+        "correlationId": "auth-correlation-id",
+    }
+    assert "detail" not in response.json()
+    assert "details" not in response.json()
+
+
+def test_work_order_api_error_returns_strict_structured_response() -> None:
+    client = TestClient(create_test_app(), raise_server_exceptions=False)
+
+    response = client.get(
+        "/work-order-context",
+        headers={"X-Correlation-ID": "workflow-correlation-id"},
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {
+        "code": "WORK_ORDER_CONTEXT_INVALID",
+        "message": "Контекст рабочей задачи поврежден или неполон.",
+        "correlationId": "workflow-correlation-id",
+    }
+    assert "detail" not in response.json()
+    assert "details" not in response.json()

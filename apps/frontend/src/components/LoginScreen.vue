@@ -61,13 +61,13 @@ async function onSubmit() {
   } catch (error: unknown) {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
-      const detail =
-        typeof error.response?.data?.detail === "string"
-          ? error.response.data.detail
+      const message =
+        typeof error.response?.data?.message === "string"
+          ? error.response.data.message
           : "";
 
-      if (status === 401 && detail) {
-        errorMessage.value = detail;
+      if (status === 401 && message) {
+        errorMessage.value = message;
       } else {
         errorMessage.value =
           "Сейчас не удалось выполнить вход. Попробуйте ещё раз.";
