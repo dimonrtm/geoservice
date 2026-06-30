@@ -297,9 +297,7 @@ describe("EditorWorkOrdersView", () => {
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    const openError = wrapper.get(
-      '[data-test="open-work-order-error-wo-1"]',
-    );
+    const openError = wrapper.get('[data-test="open-work-order-error-wo-1"]');
     expect(openError.text()).toContain("Не удалось открыть рабочую версию");
     expect(openError.attributes("role")).toBe("alert");
   });

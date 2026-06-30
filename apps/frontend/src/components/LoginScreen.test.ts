@@ -35,7 +35,8 @@ describe("LoginScreen", () => {
       },
     });
 
-    const { default: LoginScreen } = await import("@/components/LoginScreen.vue");
+    const { default: LoginScreen } =
+      await import("@/components/LoginScreen.vue");
     const wrapper = mount(LoginScreen);
 
     await fillAndSubmitLoginForm(wrapper);
@@ -60,7 +61,8 @@ describe("LoginScreen", () => {
       },
     });
 
-    const { default: LoginScreen } = await import("@/components/LoginScreen.vue");
+    const { default: LoginScreen } =
+      await import("@/components/LoginScreen.vue");
     const wrapper = mount(LoginScreen);
 
     await fillAndSubmitLoginForm(wrapper);
