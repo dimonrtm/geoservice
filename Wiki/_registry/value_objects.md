@@ -3,7 +3,7 @@ title: Value Objects Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-29
+updated: 2026-06-30
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, value-object]
 confidence: n/a
@@ -15,5 +15,5 @@ related: [Wiki/index]
 | Value Object | Equality | Used By | Confidence | Source |
 | --- | --- | --- | --- | --- |
 | [[Wiki/value_objects/aoi]] | scope id + geometry в контексте `WorkOrder` | [[Wiki/entities/work_order]] | high | `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md` |
-| [[Wiki/value_objects/draft_version_token]] | token/moment текущего draft state; не baseline/Default freshness | [[Wiki/entities/edit_version]] | high | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
+| [[Wiki/value_objects/draft_version_token]] | opaque version всего aggregate `EditVersion`; не baseline/Default freshness и не idempotency key | [[Wiki/entities/edit_version]] | high | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md` |
 | [[Wiki/value_objects/risk_tier]] | Значение tier + подтверждающие факты | [[Wiki/entities/review_decision]] | high | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |

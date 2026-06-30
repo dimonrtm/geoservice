@@ -3,8 +3,8 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-06-29
-source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md"
+updated: 2026-06-30
+source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md"
 tags: [domain-knowledge, ddd, health]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
@@ -14,7 +14,7 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 ## Current Summary
 
-Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и audit. Ближайшая реализация должна сначала доказать persisted edit slice в существующем `WorkOrder` / `EditVersion` flow: workspace -> `UpdateEditVersionFeatureGeometry` -> persisted geometry diff существующей line feature относительно baseline -> readback persisted feature + explicit baseline diff -> basic draft validation flags. `operation` - текущая проекция diff, а не след прошлого save; event возникает только для ненулевого persisted diff. Review/post остается отдельным downstream context: `submit_for_review`, `ReviewPackage`, reviewer decision, computed `can_post`, simulated post и durable audit добавляются после того, как есть устойчивый change set. Legacy standalone Release 2 contract остается reference для прежнего `geometry/association conflict` framing и не является source of truth для ближайшей реализации.
+Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и audit. Ближайшая реализация должна сначала доказать persisted edit slice в существующем `WorkOrder` / `EditVersion` flow: workspace -> `UpdateEditVersionFeatureGeometry` -> geometry-only изменение существующей line feature относительно baseline -> persisted resulting feature snapshot -> readback resulting feature + новый `DraftVersionToken` + `hasPersistedChangeSet` + basic draft validation flags. Diff относительно baseline вычисляется из baseline/current snapshots и не является обязательной persisted формой первого slice. `operation` - текущая проекция diff, а не след прошлого save; event возникает при первом переходе `unchanged -> updated`. Review/post остается отдельным downstream context: `submit_for_review`, `ReviewPackage`, reviewer decision, computed `can_post`, simulated post и durable audit добавляются после того, как есть устойчивый change set. Legacy standalone Release 2 contract остается reference для прежнего `geometry/association conflict` framing и не является source of truth для ближайшей реализации.
 
 ## Current Blocking Conflicts
 
@@ -40,19 +40,19 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 | Bounded Contexts | active | Выделены контексты Work Order, Utility Network, Review Post, Audit и Auth. |
 | Context Map | active | [[DDD_Wiki/context_map/geoservice_context_map]] описывает upstream/downstream и границу application layer. |
 | Aggregates | active | `WorkOrder`, `EditVersion` и `ReviewPackage` активны в доменной модели. |
-| Commands And Events | active | `OpenEditVersion` активна; first write command уточнен как `UpdateEditVersionFeatureGeometry`, событие - `EditVersionChangeSetPersisted`; команды review/post запланированы downstream. |
+| Commands And Events | active | `OpenEditVersion` активна; first write command уточнен как `UpdateEditVersionFeatureGeometry`, событие - `EditVersionChangeSetPersisted` при первом ненулевом change set; команды review/post запланированы downstream. |
 | Policies And Specifications | active | Проверка назначения, persisted change set, basic draft validation, ready-for-review, post allowed, review/post и stale policies активны. |
 | Sprint Planning Inputs | active | `Wiki/_registry/questions.md` содержит приоритетные вопросы для планирования маленьких спринтов. |
 
 ## Current Discovery Queue
 
-Следующий `/discover` должен оставаться code-aware, но центрировать доменную модель: вопросы строятся от текущего workspace/open `EditVersion` к persisted geometry edit slice. Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevant `traceResult` / `subnetworkStatus` и developer demo границам важны только после фиксации change set и basic draft validation path.
+Следующий `/discover` должен оставаться code-aware, но центрировать доменную модель: вопросы строятся от текущего workspace/open `EditVersion` к persisted geometry edit slice, включая snapshot-vs-diff, internal-vertex mutation, AOI containment, aggregate-level `DraftVersionToken` и state-based readback proof. Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevant `traceResult` / `subnetworkStatus` и developer demo границам важны только после фиксации change set и basic draft validation path.
 
 ## Current Sprint Planning Queue
 
 Следующий `/plan-sprint` должен использовать 14-дневную рамку, но мыслить маленькими вертикальными increments:
 
-- Первый спринт после открытия workspace создает version-scoped geometry update existing line feature path: persist diff relative to baseline, readback persisted feature + explicit baseline diff, normalized `operation`, event only for non-empty diff и basic draft validation flags.
+- Первый спринт после открытия workspace создает version-scoped geometry update existing line feature path: persist full resulting geometry snapshot relative to baseline, compute diff from baseline/current snapshots, readback resulting feature + new `DraftVersionToken` + `hasPersistedChangeSet` + validation flags, normalize `operation`, emit event only on first non-empty change set.
 - Следующий спринт добавляет `submit_for_review` и `ReviewPackage v0.1` как materialized snapshot поверх persisted `edit_version_features`, с backrefs на исходные rows и editor summary/evidence.
 - Следующий спринт добавляет reviewer detail view одного package, reviewer decision и computed `can_post`; simulated post, durable audit, trace/subnetwork evidence, risk tiers, reviewer queue и association mutation не должны стартовать раньше persisted change set.
 

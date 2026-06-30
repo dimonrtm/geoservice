@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-29
+updated: 2026-06-30
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -106,10 +106,12 @@ tags: [knowledge, index, geoservice]
 - 2026-06-29: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с единым strict structured error contract `{code, message, correlationId}` без `detail`/`details` для auth/utility/workflow ошибок; invalid login возвращает `INVALID_CREDENTIALS`, а `LoginScreen` читает только `message`.
 - 2026-06-29: Выполнен `/sync-vision`; корневой индекс и [[memory/project-state]] синхронизированы после repository-change ingest `964ec4a`, новых RAW inputs и stale-нод нет, открыты 16 follow-up'ов, ожидаемый lint-конфликт на RAW Markdown files сохранялся.
 - 2026-06-29: Обработан RAW source `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; first persisted edit slice уточнен как persisted geometry diff существующей линии относительно baseline с readback persisted object + explicit baseline diff, event only for non-empty diff, `DraftVersionToken` как draft concurrency token и stop-line до review/post.
+- 2026-06-30: Выполнен `/sync-vision`; новых RAW inputs, новых wiki-нод и stale-нод нет, открыты 16 follow-up'ов, ожидаемый lint-конфликт на 33 RAW Markdown files сохраняется.
+- 2026-06-30: Обработан RAW source `RAW_inputs/meetings/first_save_edit_version.md`; first save `EditVersion` уточнен как geometry-only internal-vertex edit существующей line feature, persisted resulting snapshot + computed diff, state-based readback proof, aggregate-level `DraftVersionToken`, AOI containment и stop-line до review/post.
 
 ## Открытые Вопросы
 
-- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry diff существующей line feature, `UpdateEditVersionFeatureGeometry`, readback persisted feature + explicit baseline diff, normalized `operation`, `DraftVersionToken` и basic draft validation flags.
+- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.

@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-29
+updated: 2026-06-30
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -21,9 +21,12 @@ related: [Wiki/index, DDD_Wiki/model_health]
 | `can_post` должен быть persisted state или computed specification? | [[Wiki/specifications/post_allowed]] | high | answered | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
 | Какой ближайший полноценный инкремент после открытия workspace? | [[Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]] | high | answered | `RAW_inputs/meetings/increment_after_open_workspace.md` |
 | Что должно предшествовать `ReviewPackage` в текущем кодовом flow? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/increment_after_open_workspace.md` |
-| Что считать первым persisted change в `EditVersion`? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
-| Как должна называться первая команда сохранения feature change? | [[Wiki/commands/update_edit_version_feature_geometry]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
-| Какие инварианты и validation flags обязательны для first save? | [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
-| Где stop-line перед review/post после открытия workspace? | [[DDD_Wiki/use_cases/utility_editor_workflow]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
-| Что доказывает successful first save/readback? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
-| Что означает `DraftVersionToken` / `networkVersion`? | [[Wiki/value_objects/draft_version_token]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
+| Что считать первым persisted change в `EditVersion`? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md` |
+| Как должна называться первая команда сохранения feature change? | [[Wiki/commands/update_edit_version_feature_geometry]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md` |
+| Какие инварианты и validation flags обязательны для first save? | [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md` |
+| Где stop-line перед review/post после открытия workspace? | [[DDD_Wiki/use_cases/utility_editor_workflow]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md` |
+| Что доказывает successful first save/readback? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md` |
+| Что означает `DraftVersionToken` / `networkVersion`? | [[Wiki/value_objects/draft_version_token]] | high | answered | `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md` |
+| Должен ли explicit baseline diff быть обязательным minimum proof первого save? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/first_save_edit_version.md` |
+| Что хранить как source of truth для first save: full geometry snapshot или pure diff? | [[DDD_Wiki/aggregates/edit_version]] | high | answered | `RAW_inputs/meetings/first_save_edit_version.md` |
+| Как отличать optimistic concurrency от idempotent retry в first save? | [[Wiki/value_objects/draft_version_token]] | medium | answered | `RAW_inputs/meetings/first_save_edit_version.md` |
