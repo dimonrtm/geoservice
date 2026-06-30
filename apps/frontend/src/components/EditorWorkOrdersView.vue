@@ -50,12 +50,17 @@ function openError(workOrderId: string): string | null {
         </button>
       </div>
 
-      <div v-if="workOrders.isLoading" class="panelState">
+      <div
+        v-if="workOrders.isLoading"
+        class="panelState"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         Загружаем назначенные наряды...
       </div>
 
       <div v-else-if="workOrders.errorMessage" class="panelState isError">
-        <span>{{ workOrders.errorMessage }}</span>
+        <span role="alert">{{ workOrders.errorMessage }}</span>
         <button
           class="retryButton"
           type="button"
@@ -65,7 +70,12 @@ function openError(workOrderId: string): string | null {
         </button>
       </div>
 
-      <div v-else-if="workOrders.items.length === 0" class="panelState">
+      <div
+        v-else-if="workOrders.items.length === 0"
+        class="panelState"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         Назначенных нарядов нет.
       </div>
 
@@ -80,6 +90,11 @@ function openError(workOrderId: string): string | null {
             <button
               class="workOrderButton"
               type="button"
+              :aria-current="
+                workOrders.selectedWorkOrderId === workOrder.id
+                  ? 'true'
+                  : undefined
+              "
               :data-test="`work-order-${workOrder.id}`"
               @click="workOrders.selectWorkOrder(workOrder.id)"
             >
@@ -96,6 +111,7 @@ function openError(workOrderId: string): string | null {
             <div
               v-if="openError(workOrder.id)"
               class="workOrderError"
+              role="alert"
               :data-test="`open-work-order-error-${workOrder.id}`"
             >
               {{ openError(workOrder.id) }}

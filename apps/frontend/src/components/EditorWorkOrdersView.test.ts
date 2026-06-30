@@ -65,6 +65,38 @@ describe("EditorWorkOrdersView", () => {
     );
   });
 
+  it("announces list loading state politely", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.isLoading = true;
+    store.loadAssigned = loadAssignedMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+
+    const state = wrapper.get(".panelState");
+    expect(state.text()).toContain("Загружаем назначенные наряды");
+    expect(state.attributes("aria-live")).toBe("polite");
+    expect(state.attributes("aria-atomic")).toBe("true");
+  });
+
+  it("announces the empty assigned list politely", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [];
+    store.loadAssigned = loadAssignedMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+
+    const state = wrapper.get(".panelState");
+    expect(state.text()).toContain("Назначенных нарядов нет.");
+    expect(state.attributes("aria-live")).toBe("polite");
+    expect(state.attributes("aria-atomic")).toBe("true");
+  });
+
   it("selects and highlights a work order locally", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
@@ -92,6 +124,53 @@ describe("EditorWorkOrdersView", () => {
         .element.closest(".workOrderCard")
         ?.classList.contains("isSelected"),
     ).toBe(true);
+  });
+
+  it("marks list load errors as alerts", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.errorMessage =
+      "Не удалось загрузить назначенные наряды. Попробуйте ещё раз.";
+    store.loadAssigned = loadAssignedMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+
+    const errorMessage = wrapper.get(".panelState.isError span");
+    expect(errorMessage.text()).toContain(
+      "Не удалось загрузить назначенные наряды",
+    );
+    expect(errorMessage.attributes("role")).toBe("alert");
+  });
+
+  it("exposes the selected work order as current without pressed state", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      assignedWorkOrder(),
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Второй наряд",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectedWorkOrderId = "wo-1";
+    store.loadAssigned = loadAssignedMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+
+    const selected = wrapper.get('[data-test="work-order-wo-1"]');
+    const unselected = wrapper.get('[data-test="work-order-wo-2"]');
+
+    expect(selected.attributes("aria-current")).toBe("true");
+    expect(selected.attributes("aria-pressed")).toBeUndefined();
+    expect(unselected.attributes("aria-current")).toBeUndefined();
+    expect(unselected.attributes("aria-pressed")).toBeUndefined();
   });
 
   it("shows start action only for selected assigned work order", async () => {
@@ -218,8 +297,10 @@ describe("EditorWorkOrdersView", () => {
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    expect(
-      wrapper.get('[data-test="open-work-order-error-wo-1"]').text(),
-    ).toContain("Не удалось открыть рабочую версию");
+    const openError = wrapper.get(
+      '[data-test="open-work-order-error-wo-1"]',
+    );
+    expect(openError.text()).toContain("Не удалось открыть рабочую версию");
+    expect(openError.attributes("role")).toBe("alert");
   });
 });
