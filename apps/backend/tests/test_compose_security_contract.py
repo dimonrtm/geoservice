@@ -1,12 +1,26 @@
 from pathlib import Path
 
+import pytest
 
-# tests/... is under apps/backend, so parents[3] is the repository root.
-REPO_ROOT = Path(__file__).resolve().parents[3]
-INFRA_ROOT = REPO_ROOT / "infra"
+
+def find_repo_root(start: Path) -> Path | None:
+    for candidate in (start, *start.parents):
+        if (candidate / "infra" / "docker-compose.yml").exists():
+            return candidate
+    return None
+
+
+REPO_ROOT = find_repo_root(Path(__file__).resolve())
+INFRA_ROOT = REPO_ROOT / "infra" if REPO_ROOT is not None else None
+
+pytestmark = pytest.mark.skipif(
+    INFRA_ROOT is None,
+    reason="Repository infra files are not available in the backend-only Docker image.",
+)
 
 
 def read_infra_file(filename: str) -> str:
+    assert INFRA_ROOT is not None
     return (INFRA_ROOT / filename).read_text(encoding="utf-8")
 
 
@@ -81,4 +95,5 @@ def test_demo_env_is_explicitly_demo_only() -> None:
 
 
 def test_auto_loaded_override_file_is_not_present() -> None:
+    assert INFRA_ROOT is not None
     assert not (INFRA_ROOT / "docker-compose.override.yml").exists()
