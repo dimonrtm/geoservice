@@ -69,18 +69,18 @@ scripts/
 
 ### Demo login через Docker Compose
 
-Backend при старте теперь делает:
-
-1. `alembic upgrade head`
-2. idempotent seed demo-пользователей
-3. запуск `uvicorn`
-
-Запуск:
+Локальный demo/dev запуск выполняется явно через demo env и demo compose layer:
 
 ```bash
 cd infra
-docker compose --profile dev up --build
+docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev up --build
 ```
+
+Если после смены demo env `utility_service` становится unhealthy, а в логах
+есть `password authentication failed for user "postgres"`, локальный Docker
+volume `infra_geo_pgdata` был создан с другим паролем. Для disposable demo DB
+пересоздайте его командой `docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml down -v`
+и затем повторите запуск. Команда удаляет локальные данные Postgres.
 
 Demo credentials:
 
@@ -115,8 +115,9 @@ Backend-конфигурация централизована в [settings.py](C
 
 Важно:
 
-- `DEV_MODE` управляет доступностью dev-login на backend;
-- `VITE_ENABLE_DEV_AUTH` управляет отображением dev auth panel на frontend;
+- production-safe `infra/docker-compose.yml` требует `JWT_SECRET` и DB env через окружение или `infra/.env`;
+- `infra/demo.env` содержит public demo-only значения для локального сценария;
+- `DEV_MODE` больше не включает `/api/v1/auth/dev-login`;
 - `VITE_API_BASE_URL` задаёт базовый URL API для frontend.
 
 ## Документация

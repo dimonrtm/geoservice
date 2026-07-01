@@ -16,7 +16,6 @@ Backend публикует REST API под `/api/v1` и WebSocket endpoint дл�
 
 - `POST /api/v1/auth/login` принимает email/password и возвращает `access_token`, `token_type` и user DTO.
 - `GET /api/v1/auth/me` возвращает текущего пользователя по Bearer token.
-- `POST /api/v1/auth/dev-login` доступен только при `DEV_MODE=true`.
 
 Frontend хранит token в `localStorage`, добавляет `Authorization: Bearer ...` в axios interceptor и вызывает logout при HTTP 401.
 

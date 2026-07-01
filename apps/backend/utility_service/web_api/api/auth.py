@@ -19,7 +19,6 @@ from utility_service.use_cases.schemas.auth.auth_login_in import AuthLoginIn
 from utility_service.use_cases.schemas.auth.auth_me_out import AuthMeOut
 from utility_service.use_cases.schemas.auth.auth_success_out import AuthSuccessOut
 from utility_service.use_cases.schemas.auth.auth_user_out import AuthUserOut
-from utility_service.use_cases.schemas.auth.dev_login_in import DevLoginIn
 from utility_service.use_cases.services.auth_service import AuthService
 from utility_service.utils.settings import settings
 
@@ -105,17 +104,6 @@ def require_reviewer(user: Any = Depends(get_current_user)) -> Any:
             "Операция доступна только пользователю с ролью Reviewer.",
         )
     return user
-
-
-if settings.dev_auth_enabled:
-
-    @auth_router.post("/dev-login")
-    async def dev_login(
-        body: DevLoginIn, auth_service: AuthService = Depends(get_auth_service)
-    ) -> dict[str, Any]:
-        user = await auth_service.get_dev_user(body)
-        token = create_access_token(str(user.id), _role_value(user))
-        return {"access_token": token, "token_type": "bearer"}
 
 
 @auth_router.post("/login", response_model=AuthSuccessOut)

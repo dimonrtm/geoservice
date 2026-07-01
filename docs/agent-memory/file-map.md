@@ -89,7 +89,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 ## Infra
 
 - ci workflows: `.github/workflows/ci.yml`
-- docker compose local dev: `infra/docker-compose.yml`, `infra/docker-compose.override.yml`, `infra/dev-up.cmd`, `scripts/dev.cmd`
+- docker compose local dev and production-safe defaults: `infra/docker-compose.yml`, `infra/docker-compose.demo.yml`, `infra/demo.env`, `infra/dev-up.cmd`, `infra/ci-up.cmd`, `scripts/dev.cmd`
 - postgis init: `infra/docker/postgis/init/01-postgis.sql`
 - frontend tooling config: `apps/frontend/package.json`, `apps/frontend/vite.config.ts`, `apps/frontend/tsconfig.json`, `apps/frontend/tsconfig.app.json`, `apps/frontend/tsconfig.node.json`
 - backend tooling config: `apps/backend/pyproject.toml`

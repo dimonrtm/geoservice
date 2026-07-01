@@ -120,7 +120,8 @@ HTTP auth использует JWT Bearer:
 
 - `/api/v1/auth/login` выдает token и user payload.
 - `/api/v1/auth/me` валидирует token и перечитывает пользователя из БД.
-- `/api/v1/auth/dev-login` регистрируется только при включенном `DEV_MODE`.
+- `/api/v1/auth/dev-login` удален; пользовательский вход поддерживается через
+  `/api/v1/auth/login` и `/api/v1/auth/me`.
 
 Роли:
 

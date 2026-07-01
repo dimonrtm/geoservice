@@ -21,5 +21,4 @@ Frontend GeoService собран на `Vue 3 + TypeScript + Vite`.
 
 ## Переменные окружения
 
-- `VITE_API_BASE_URL` — адрес backend API
-- `VITE_ENABLE_DEV_AUTH` — показывает или скрывает dev auth panel
+- `VITE_API_BASE_URL` — базовый URL backend API.

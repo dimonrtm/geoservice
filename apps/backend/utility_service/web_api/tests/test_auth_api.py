@@ -46,3 +46,15 @@ def test_login_invalid_credentials_returns_strict_structured_error() -> None:
         "missing@example.local",
         "wrong-password",
     )
+
+
+def test_dev_login_route_is_not_registered() -> None:
+    auth_service = AsyncMock()
+
+    response = TestClient(build_auth_app(auth_service)).post(
+        "/api/v1/auth/dev-login",
+        json={"email": "new@example.local", "role": "editor"},
+    )
+
+    assert response.status_code == 404
+    assert not auth_service.mock_calls

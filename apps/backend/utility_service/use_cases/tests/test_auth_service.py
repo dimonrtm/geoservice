@@ -145,3 +145,7 @@ def test_authenticate_user_rejects_inactive_user() -> None:
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "USER_INACTIVE"
+
+
+def test_auth_service_has_no_passwordless_dev_user_path() -> None:
+    assert not hasattr(AuthService, "get_dev_user")

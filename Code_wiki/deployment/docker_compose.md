@@ -37,23 +37,24 @@ Build context для backend: `apps/backend`.
 ## Compose Services
 
 `infra/docker-compose.yml` описывает `postgis`, `migrate`, `utility_service`,
-`frontend-dev`, `frontend-prod` и volume `geo_pgdata`.
+`frontend-prod` и volume `geo_pgdata`.
 
 Важные детали:
 
 - `postgis` имеет healthcheck через `pg_isready`.
 - `migrate` собирается из `../apps/backend/` и запускает `alembic upgrade head`.
-- `utility_service` зависит от healthy `postgis` и запускает
-  `bash scripts/start_utility_service.sh`. Скрипт выполняет `alembic upgrade head`,
-  затем `python -m seeds.runners.seed_demo_users`,
-  `python -m seeds.runners.seed_utility_dataset`,
-  `python -m seeds.runners.seed_work_orders` и после seed запускает
-  `uvicorn utility_service.web_api.main:app --host 0.0.0.0 --port 8000`.
+- `infra/docker-compose.yml` является production-safe baseline: `utility_service`
+  собирается из backend target `prod`, получает `DEV_MODE=false`, требует
+  `JWT_SECRET` и DB env через `${VAR:?message}` и запускает
+  `bash scripts/start_api.sh` без demo seed chain.
+- `infra/docker-compose.demo.yml` является явным demo/dev layer. Он используется
+  вместе с `--env-file demo.env`, переопределяет backend target на `dev`, открывает
+  порты `5432`, `8000`, `5173`, подключает `frontend-dev` и запускает
+  `bash scripts/start_utility_service.sh`.
 - `utility_service` healthcheck дергает `http://localhost:8000/health`.
 - `frontend-dev` и `frontend-prod` зависят от healthy `utility_service`.
 
-`infra/docker-compose.override.yml` раскрывает порты `5432` и `8000` и ожидает переменные без
-default-значений. `infra/docker-compose.full.yml` на snapshot дату пустой.
+`infra/docker-compose.full.yml` на snapshot дату пустой.
 
 ## Связанные Ноды
 

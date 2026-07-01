@@ -3,50 +3,53 @@ services:
     image: postgis/postgis:16-3.4
     container_name: geo-postgis
     environment:
-      POSTGRES_DB: ${DB_NAME-geo}
-      POSTGRES_USER: ${DB_USER-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD-postgres}
+      POSTGRES_DB: ${DB_NAME:?DB_NAME is required}
+      POSTGRES_USER: ${DB_USER:?DB_USER is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
     volumes:
       - geo_pgdata:/var/lib/postgresql/data
       - ./docker/postgis/init:/docker-entrypoint-initdb.d/
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER-postgres} -d ${DB_NAME-geo}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:?DB_USER is required} -d ${DB_NAME:?DB_NAME is required}"]
       interval: 5s
       timeout: 3s
       retries: 20
     restart: unless-stopped
+
   migrate:
     build:
       context: ../apps/backend/
       dockerfile: Dockerfile
+      target: prod
     depends_on:
       postgis:
         condition: service_healthy
     environment:
-      DATABASE_URL: ${DATABASE_URL-postgresql+asyncpg://postgres:postgres@postgis:5432/geo}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
     command: ["bash", "-lc", "set -euo pipefail; alembic upgrade head"]
     restart: no
     profiles: ["migrate"]
+
   utility_service:
     container_name: utility_service
     build:
       context: ../apps/backend/
       dockerfile: Dockerfile
-      target: dev
+      target: prod
     environment:
-      DATABASE_URL: ${DATABASE_URL-postgresql+asyncpg://postgres:postgres@postgis:5432/geo}
-      DEV_MODE: "${DEV_MODE-true}"
-      JWT_SECRET: "${JWT_SECRET-CHANGE_ME_IN_ENV}"
-      JWT_ALG: "${JWT_ALG-HS256}"
-      ACCESS_TOKEN_TTL_MIN: "${ACCESS_TOKEN_TTL_MIN-30}"
-      CORS_ORIGINS: "${CORS_ORIGINS-http://localhost:5173,http://127.0.0.1:5173}"
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      DEV_MODE: "false"
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_ALG: ${JWT_ALG:-HS256}
+      ACCESS_TOKEN_TTL_MIN: ${ACCESS_TOKEN_TTL_MIN:-30}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080,http://127.0.0.1:8080}
       HOST: 0.0.0.0
       PORT: 8000
     command:
       [
         "bash",
         "-lc",
-        "bash scripts/start_utility_service.sh"
+        "bash scripts/start_api.sh"
       ]
     depends_on:
       postgis:
@@ -58,30 +61,6 @@ services:
       retries: 10
       start_period: 10s
     restart: unless-stopped
-  frontend-dev:
-    build:
-      context: ../apps/frontend/
-      dockerfile: Dockerfile
-      target: dev
-    environment:
-      - VITE_API_BASE_URL=http://localhost:8000
-    ports:
-      - "5173:5173"
-    depends_on:
-      utility_service:
-        condition: service_healthy
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "node -e \"const http=require('http');const req=http.get('http://127.0.0.1:5173',res=>process.exit(res.statusCode>=200&&res.statusCode<400?0:1));req.on('error',()=>process.exit(1));\""
-        ]
-      interval: 20s
-      timeout: 3s
-      retries: 10
-      start_period: 30s
-    restart: unless-stopped
-    profiles: ["dev"]
 
   frontend-prod:
     build:
@@ -101,5 +80,6 @@ services:
       start_period: 10s
     restart: unless-stopped
     profiles: ["prod"]
+
 volumes:
   geo_pgdata:

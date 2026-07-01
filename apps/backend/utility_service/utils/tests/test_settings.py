@@ -10,7 +10,7 @@ os.environ["JWT_SECRET"] = "local-dev-secret"
 from utility_service.utils.settings import Settings
 
 
-def test_settings_allow_dev_mode_with_local_secret() -> None:
+def test_settings_allow_dev_mode_with_explicit_local_runtime_marker() -> None:
     settings = Settings(
         DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
         DEV_MODE=True,

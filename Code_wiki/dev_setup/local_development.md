@@ -24,7 +24,7 @@ tags: [dev-setup, docker, backend, frontend]
 
 ```powershell
 cd infra
-docker compose --profile dev up --build
+docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev up --build
 ```
 
 Сервисы:
@@ -35,8 +35,11 @@ docker compose --profile dev up --build
 - `frontend-prod` - nginx build, порт `8080`, профиль `prod`.
 - `migrate` - отдельный profile service для `alembic upgrade head`.
 
-Backend в основном compose вызывает `bash scripts/start_utility_service.sh`.
-Этот script сам выполняет migrations, demo-user seed, utility dataset seed и
+Production-safe base compose `infra/docker-compose.yml` запускает
+`utility_service` через `bash scripts/start_api.sh` без demo seed chain.
+Явный demo/dev compose layer `infra/docker-compose.demo.yml` при запуске с
+`--env-file demo.env` стартует backend через `bash scripts/start_utility_service.sh`;
+этот script выполняет migrations, demo-user seed, utility dataset seed и
 WorkOrder seed при старте.
 
 ## Demo Users
@@ -83,7 +86,18 @@ Frontend:
 
 - `VITE_API_BASE_URL`
 
-В `infra/.env.example` есть пример DB-настроек, но он не покрывает все переменные backend/frontend.
+`infra/demo.env` содержит public demo-only значения для локального запуска.
+Production-safe `infra/docker-compose.yml` требует `DB_NAME`, `DB_USER`,
+`DB_PASSWORD`, `DATABASE_URL` и `JWT_SECRET` через private `.env`, shell
+environment или CI secrets.
+
+Если после перехода на `infra/demo.env` `utility_service` становится unhealthy,
+а `docker compose logs utility_service` показывает
+`password authentication failed for user "postgres"`, причина обычно в старом
+Docker volume `infra_geo_pgdata`, который уже был инициализирован с другим
+паролем. Для disposable demo DB выполните
+`docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml down -v`
+и затем повторите demo/dev запуск. Команда удаляет локальные данные Postgres.
 
 ## Связанные Ноды
 
