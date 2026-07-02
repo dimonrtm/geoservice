@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-29
-source: repository-change:2026-06-29
+updated: 2026-07-02
+source: repository-change:2026-07-02
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -46,6 +46,12 @@ tags: [code-wiki, technical-knowledge]
 
 ## Свежие Repository-Change Знания
 
+- 2026-07-02: [[архитектура/api_and_realtime]], [[архитектура/backend]],
+  [[архитектура/frontend]] и [[правила_и_стиль/testing_strategy]]
+  отражают WebSocket auth через short-lived single-use ticket:
+  HTTP Bearer выдает ticket, WebSocket принимает только `?ticket=...`,
+  backend consumes ticket атомарно, frontend запрашивает новый ticket на
+  initial connect/reconnect, а тесты проверяют отсутствие `token=`.
 - 2026-06-29: [[архитектура/api_and_realtime]] и [[архитектура/frontend]]
   отражают strict structured error contract `{code, message, correlationId}`
   без `detail`/`details` для auth/utility/workflow ошибок; invalid login

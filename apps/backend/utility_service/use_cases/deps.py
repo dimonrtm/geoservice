@@ -11,6 +11,9 @@ from utility_service.infrastructure.postgresql.repositories.user_repository impo
 from utility_service.infrastructure.postgresql.repositories.utility_network_repository import (
     UtilityNetworkRepository,
 )
+from utility_service.infrastructure.postgresql.repositories.websocket_ticket_repository import (
+    WebSocketTicketRepository,
+)
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
     WorkOrderRepository,
 )
@@ -24,6 +27,7 @@ from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
 )
 from utility_service.use_cases.services.utility_network_service import UtilityNetworkService
+from utility_service.use_cases.services.websocket_ticket_service import WebSocketTicketService
 from utility_service.use_cases.services.work_order_service import WorkOrderService
 from utility_service.use_cases.services.workspace_service import WorkspaceService
 
@@ -46,6 +50,17 @@ def get_feature_service(
 
 def get_layer_service(session: AsyncSession = Depends(get_session)) -> LayerService:
     return LayerService(session, LayerRepository(session))
+
+
+def get_websocket_ticket_service(
+    session: AsyncSession = Depends(get_session),
+) -> WebSocketTicketService:
+    return WebSocketTicketService(
+        session,
+        WebSocketTicketRepository(session),
+        LayerRepository(session),
+        UserRepository(session),
+    )
 
 
 def get_utility_network_service(

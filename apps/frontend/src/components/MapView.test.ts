@@ -36,7 +36,6 @@ vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
 vi.mock("@/stores/auth", () => ({
   useAuthStore: () => ({
     isAuthenticated: true,
-    token: "token-1",
   }),
 }));
 
@@ -188,6 +187,33 @@ describe("MapView", () => {
     expect(mocks.handleRealtimeLayerChange).not.toHaveBeenCalled();
     expect(mocks.enableEditingOverlaySync).not.toHaveBeenCalled();
     expect(wrapper.text()).toContain("Карта готова. Выберите наряд в списке.");
+  });
+
+  it("passes auth readiness to realtime without exposing a token", async () => {
+    const layer = {
+      id: "layer-1",
+      name: "power_lines",
+      title: "Power lines",
+    };
+    mocks.loadLayers.mockResolvedValue({
+      status: "ready",
+      total: 1,
+      layer,
+    });
+    const { default: MapView } = await import("@/components/MapView.vue");
+
+    mount(MapView, {
+      props: {
+        mode: "editing",
+      },
+    });
+    await flushPromises();
+
+    expect(mocks.handleRealtimeLayerChange).toHaveBeenCalledWith(layer, true);
+    expect(mocks.handleRealtimeLayerChange).not.toHaveBeenCalledWith(
+      layer,
+      expect.any(String),
+    );
   });
 });
 

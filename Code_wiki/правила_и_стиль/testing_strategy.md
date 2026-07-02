@@ -3,8 +3,8 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-26
-source: repository-change:2026-06-26
+updated: 2026-07-02
+source: repository-change:2026-07-02
 tags: [testing, backend, frontend, quality]
 ---
 
@@ -42,7 +42,7 @@ Live service smoke runners лежат в `apps/backend/tests/smoke`. Файлы 
 - exception handlers;
 - feature service CRUD/version behavior;
 - feature realtime publisher;
-- websocket auth, websocket role checks и layer websocket endpoint;
+- realtime WebSocket ticket auth: ticket issue, single-use consume, expired/reused/wrong-layer rejection и layer websocket endpoint;
 - realtime connection manager;
 - utility dataset specs, create-once/no-op service и rollback behavior;
 - work order model metadata, schema boundary checks for `user`,

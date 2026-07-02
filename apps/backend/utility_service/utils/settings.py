@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     jwt_secret: str = Field("CHANGE_ME_IN_ENV", alias="JWT_SECRET")
     jwt_alg: str = Field("HS256", alias="JWT_ALG")
     access_token_ttl_min: int = Field(30, alias="ACCESS_TOKEN_TTL_MIN")
+    websocket_ticket_ttl_seconds: int = Field(60, alias="WEBSOCKET_TICKET_TTL_SECONDS")
     dev_auth_enabled: bool = Field(False, alias="DEV_MODE")
 
     @model_validator(mode="after")

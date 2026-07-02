@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { http } from "@/api/http";
+import { requestLayerWebSocketTicket } from "@/api/realtime";
 import {
   parseLayerRealtimeEvent,
   type FeatureCreatedEvent,
@@ -39,22 +40,25 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
   const connectionError = ref<string | null>(null);
 
   const currentLayerId = ref<string | null>(null);
-  const currentToken = ref<string | null>(null);
+  const currentAuthReady = ref(false);
 
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   let reconnectAttempt = 0;
   let activeGeneration = 0;
   let intentionalCloseGeneration: number | null = null;
 
-  async function connectToLayer(layerId: string, token: string): Promise<void> {
-    if (!layerId || !token) {
+  async function connectToLayer(
+    layerId: string,
+    authReady = true,
+  ): Promise<void> {
+    currentAuthReady.value = authReady;
+    if (!layerId || !authReady) {
       disconnect();
       return;
     }
 
     const sameConnectionRequested =
       currentLayerId.value === layerId &&
-      currentToken.value === token &&
       socket.value !== null &&
       (socket.value.readyState === WebSocket.OPEN ||
         socket.value.readyState === WebSocket.CONNECTING);
@@ -63,26 +67,27 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
     }
 
     currentLayerId.value = layerId;
-    currentToken.value = token;
     reconnectAttempt = 0;
     clearReconnectTimer();
-    openSocket(layerId, token, false);
+    await openSocket(layerId, false);
   }
 
   async function handleLayerChange(
     layer: LayerDto | null,
-    token: string | null,
+    authReady: boolean,
   ): Promise<void> {
-    if (!layer || !token) {
+    currentAuthReady.value = authReady;
+    if (!layer || !authReady) {
       disconnect();
       return;
     }
 
-    await connectToLayer(layer.id, token);
+    await connectToLayer(layer.id, authReady);
   }
 
   function disconnect(): void {
     clearReconnectTimer();
+    activeGeneration += 1;
     isConnected.value = false;
     isReconnecting.value = false;
     isSyncingAfterReconnect.value = false;
@@ -91,7 +96,7 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
     connectionError.value = null;
     reconnectAttempt = 0;
     currentLayerId.value = null;
-    currentToken.value = null;
+    currentAuthReady.value = false;
 
     if (socket.value) {
       intentionalCloseGeneration = activeGeneration;
@@ -112,20 +117,39 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
     connectionError,
   };
 
-  function openSocket(layerId: string, token: string, isReconnect: boolean) {
+  async function openSocket(layerId: string, isReconnect: boolean) {
     clearReconnectTimer();
     closeActiveSocketIfNeeded();
 
-    const nextSocket = new WebSocket(buildLayerWebSocketUrl(layerId, token));
     activeGeneration += 1;
     const generation = activeGeneration;
-    socket.value = nextSocket;
     isConnected.value = false;
     isReconnecting.value = isReconnect;
     isSyncingAfterReconnect.value = false;
     hasStoppedReconnect.value = false;
     isAuthError.value = false;
     connectionError.value = null;
+
+    let ticket: string;
+    try {
+      const issued = await requestLayerWebSocketTicket(layerId);
+      ticket = issued.ticket;
+    } catch {
+      if (generation === activeGeneration) {
+        isReconnecting.value = false;
+        hasStoppedReconnect.value = true;
+        isAuthError.value = true;
+        connectionError.value = "Ошибка авторизации realtime";
+      }
+      return;
+    }
+
+    if (generation !== activeGeneration || currentLayerId.value !== layerId) {
+      return;
+    }
+
+    const nextSocket = new WebSocket(buildLayerWebSocketUrl(layerId, ticket));
+    socket.value = nextSocket;
 
     nextSocket.addEventListener("message", (event) => {
       if (generation !== activeGeneration) {
@@ -217,8 +241,7 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
     clearReconnectTimer();
 
     const nextLayerId = currentLayerId.value;
-    const nextToken = currentToken.value;
-    if (!nextLayerId || !nextToken) {
+    if (!nextLayerId || !currentAuthReady.value) {
       isReconnecting.value = false;
       return;
     }
@@ -236,7 +259,7 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
     connectionError.value = null;
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
-      openSocket(nextLayerId, nextToken, true);
+      void openSocket(nextLayerId, true);
     }, delay);
   }
 
@@ -270,10 +293,10 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
   }
 }
 
-function buildLayerWebSocketUrl(layerId: string, token: string): string {
+function buildLayerWebSocketUrl(layerId: string, ticket: string): string {
   const baseUrl = resolveWebSocketBaseUrl();
   const url = new URL(`/api/v1/ws/layers/${layerId}`, baseUrl);
-  url.searchParams.set("token", token);
+  url.searchParams.set("ticket", ticket);
   return url.toString();
 }
 

@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-06-20
-source: repository-change:2026-06-20
+updated: 2026-07-02
+source: repository-change:2026-07-02
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -122,6 +122,14 @@ HTTP auth использует JWT Bearer:
 - `/api/v1/auth/me` валидирует token и перечитывает пользователя из БД.
 - `/api/v1/auth/dev-login` удален; пользовательский вход поддерживается через
   `/api/v1/auth/login` и `/api/v1/auth/me`.
+
+WebSocket realtime не принимает JWT в query string. Клиент сначала получает
+short-lived ticket через `POST /api/v1/ws/layers/{layer_id}/ticket` с обычным
+Bearer auth, затем открывает `/api/v1/ws/layers/{layer_id}?ticket=...`.
+`WebSocketTicketService` хранит только SHA-256 hash ticket в
+`"user".websocket_tickets`; consume выполняется атомарным
+`UPDATE ... used_at IS NULL ... RETURNING`, чтобы один ticket нельзя было
+использовать повторно между несколькими backend instances.
 
 Роли:
 

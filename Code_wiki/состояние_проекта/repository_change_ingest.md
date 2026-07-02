@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-29
-source: repository-change:2026-06-29
+updated: 2026-07-02
+source: repository-change:2026-07-02
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-07-02 | [[архитектура/api_and_realtime]] | WebSocket realtime auth заменен с JWT query string на short-lived DB-backed single-use ticket: issue идет через Bearer HTTP endpoint, handshake принимает только `?ticket=...`, raw ticket не хранится, consume атомарно выставляет `used_at`. | `apps/backend/utility_service/web_api/api/ws_layers.py`, `apps/backend/utility_service/utils/websocket_ticket_auth.py`, `apps/backend/utility_service/use_cases/domain/exceptions/websocket_ticket_error.py`, `apps/backend/utility_service/use_cases/services/websocket_ticket_service.py`, `apps/backend/utility_service/infrastructure/postgresql/repositories/websocket_ticket_repository.py`, `apps/backend/utility_service/infrastructure/postgresql/models/websocket_ticket.py` |
+| 2026-07-02 | [[архитектура/frontend]], [[правила_и_стиль/testing_strategy]] | `useLayerRealtime` больше не принимает JWT и получает новый WebSocket ticket через `src/api/realtime.ts` перед initial connect/reconnect; frontend tests проверяют ticket URL и отсутствие `token=`. | `apps/frontend/src/api/realtime.ts`, `apps/frontend/src/composables/map/useLayerRealtime.ts`, `apps/frontend/src/composables/map/useLayerRealtime.test.ts`, `apps/frontend/src/components/MapView.vue`, `apps/frontend/src/components/MapView.test.ts` |
 | 2026-06-29 | [[архитектура/api_and_realtime]] | Уточнён strict structured error contract для `AuthApiError`, `UtilityNetworkApiError` и `WorkOrderApiError`: HTTP body содержит только `{code, message, correlationId}` без `detail`/`details`; invalid login возвращает `401 INVALID_CREDENTIALS`. | `apps/backend/utility_service/web_api/api/exception_handlers.py`, `apps/backend/utility_service/use_cases/services/auth_service.py`, `apps/backend/utility_service/web_api/tests/test_auth_api.py`, `apps/backend/utility_service/web_api/tests/test_exception_handlers.py`, `apps/backend/utility_service/web_api/tests/test_work_orders_api.py` |
 | 2026-06-29 | [[архитектура/frontend]] | Зафиксировано login error behavior: `LoginScreen` показывает `message` из structured 401 error и не выводит legacy `detail`, если structured `message` отсутствует. | `apps/frontend/src/components/LoginScreen.vue`, `apps/frontend/src/components/LoginScreen.test.ts` |
 | 2026-06-26 | [[сборка/ci_and_quality]] | Добавлен CI full path workspace API smoke: `smoke_test` запускает `python tests/smoke/full_path_workspace_smoke.py` внутри `utility_service` и проверяет живой путь `login -> assigned-to-me -> open/reopen EditVersion -> workspace` для seeded `WO-001`. | `.github/workflows/ci.yml`, `apps/backend/tests/smoke/full_path_workspace_smoke.py` |

@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-06-29
-source: repository-change:2026-06-29
+updated: 2026-07-02
+source: repository-change:2026-07-02
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -104,19 +104,27 @@ Frontend хранит token в `localStorage`, добавляет `Authorization
 
 ## WebSocket Realtime
 
-Endpoint: `GET /api/v1/ws/layers/{layer_id}?token=...`.
+Endpoint для выдачи ticket: `POST /api/v1/ws/layers/{layer_id}/ticket`.
+Endpoint подписки: `GET /api/v1/ws/layers/{layer_id}?ticket=...`.
 
 Server-side:
 
-- token проверяется через тот же JWT decode и перечитывание user из БД;
+- ticket issue endpoint требует обычный HTTP `Authorization: Bearer ...`;
+- raw ticket возвращается только клиенту и хранится в БД только как SHA-256 hash;
+- ticket короткоживущий, одноразовый и привязан к `layer_id`;
+- WebSocket handshake атомарно consumes ticket через `UPDATE ... used_at IS NULL ... RETURNING`;
+- missing/invalid/expired/reused/wrong-layer ticket отклоняется с policy violation `1008`;
+- старый `?token=<jwt>` больше не авторизует WebSocket;
 - роли `editor` и `reviewer` допускаются к read-only подписке;
-- inactive user и legacy/unsupported token role отклоняются с policy violation;
+- inactive user и unsupported role отклоняются с policy violation;
 - подписки группируются по `layer_id` в `WebSocketConnectionManager`;
 - feature create/update/delete публикуют события `feature_created`, `feature_updated`, `feature_deleted`.
 
 Client-side:
 
+- `useLayerRealtime` перед каждым initial connect и reconnect получает новый ticket через HTTP API;
 - `useLayerRealtime` строит `ws://` или `wss://` из `VITE_API_BASE_URL`;
+- WebSocket URL содержит `ticket=...` и не содержит JWT `token=...`;
 - событие `connected` переводит badge в connected-state;
 - при reconnect frontend вызывает forced reload активного слоя, чтобы синхронизировать состояние после разрыва.
 

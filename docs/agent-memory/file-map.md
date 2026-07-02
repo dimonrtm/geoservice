@@ -70,9 +70,9 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - demo user seed: `apps/backend/app/seed_demo_users.py`, `apps/backend/app/services/demo_user_seed_service.py`
 - layers API service repository: `apps/backend/app/api/layers.py`, `apps/backend/app/services/layer_service.py`, `apps/backend/app/repositories/layer_repository.py`, `apps/backend/app/models/layer.py`
 - feature CRUD storage: `apps/backend/app/services/feature_service.py`, `apps/backend/app/domain/feature_registry.py`, `apps/backend/app/models/feature_point.py`, `apps/backend/app/models/feature_line.py`, `apps/backend/app/models/feature_polygon.py`, `apps/backend/app/models/feature_multipoint.py`, `apps/backend/app/models/feature_multiline.py`, `apps/backend/app/models/feature_multipolygon.py`
-- websocket layer realtime auth: `apps/backend/app/api/ws_layers.py`, `apps/backend/app/api/websocket_auth.py`, `apps/backend/app/services/realtime_connection_manager.py`
+- websocket layer realtime auth: `apps/backend/utility_service/web_api/api/ws_layers.py`, `apps/backend/utility_service/utils/websocket_ticket_auth.py`, `apps/backend/utility_service/use_cases/domain/exceptions/websocket_ticket_error.py`, `apps/backend/utility_service/use_cases/services/websocket_ticket_service.py`, `apps/backend/utility_service/infrastructure/postgresql/repositories/websocket_ticket_repository.py`, `apps/backend/utility_service/infrastructure/postgresql/models/websocket_ticket.py`, `apps/backend/utility_service/use_cases/services/realtime_connection_manager.py`
 - realtime feature publishing: `apps/backend/app/services/feature_realtime_publisher.py`
-- backend tests auth realtime features: `apps/backend/app/tests/test_auth_service.py`, `apps/backend/app/tests/test_websocket_auth.py`, `apps/backend/app/tests/test_ws_layers.py`, `apps/backend/app/tests/test_feature_service.py`
+- backend tests auth realtime features: `apps/backend/utility_service/use_cases/tests/test_websocket_ticket_service.py`, `apps/backend/utility_service/infrastructure/tests/test_websocket_ticket_repository.py`, `apps/backend/utility_service/web_api/tests/test_ws_layers.py`, `apps/backend/utility_service/utils/tests/test_settings.py`, `apps/backend/utility_service/use_cases/tests/test_auth_service.py`, `apps/backend/utility_service/use_cases/tests/test_feature_service.py`
 
 ## Frontend
 
@@ -81,7 +81,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - map page composition: `apps/frontend/src/components/MapPageView.vue`, `apps/frontend/src/components/MapView.vue`
 - map instance style layers: `apps/frontend/src/composables/map/useMapInstance.ts`, `apps/frontend/src/composables/map/mapStyle.ts`, `apps/frontend/src/map/maplibrelayers.ts`
 - layer selection loading cache: `apps/frontend/src/composables/map/useLayerSelection.ts`, `apps/frontend/src/composables/map/useFeatureLoading.ts`, `apps/frontend/src/composables/map/useFeatureTileCache.ts`
-- frontend realtime websocket: `apps/frontend/src/composables/map/useLayerRealtime.ts`, `apps/frontend/src/contracts/realtime.ts`, `apps/frontend/src/contracts/map-cache.ts`
+- frontend realtime websocket: `apps/frontend/src/api/realtime.ts`, `apps/frontend/src/composables/map/useLayerRealtime.ts`, `apps/frontend/src/contracts/realtime.ts`, `apps/frontend/src/contracts/map-cache.ts`
 - polygon editing: `apps/frontend/src/composables/map/usePolygonEditing.ts`, `apps/frontend/src/map/polygon-editing.ts`, `apps/frontend/src/stores/edit.ts`
 - frontend API contracts: `apps/frontend/src/contracts/api.ts`, `apps/frontend/src/contracts/geojson.ts`, `apps/frontend/src/api/http.ts`, `apps/frontend/src/api/layers.ts`
 - frontend tests realtime auth editing: `apps/frontend/src/composables/map/useLayerRealtime.test.ts`, `apps/frontend/src/stores/auth.test.ts`, `apps/frontend/src/stores/edit.test.ts`

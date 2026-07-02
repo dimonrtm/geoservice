@@ -49,6 +49,9 @@ from utility_service.infrastructure.postgresql.models.utility_network import (  
     NetworkFeature,
     NetworkState,
 )
+from utility_service.infrastructure.postgresql.models.websocket_ticket import (  # noqa: E402, F401
+    WebSocketTicket,
+)
 from utility_service.infrastructure.postgresql.models.work_order import (  # noqa: E402, F401
     AOI,
     EditVersion,

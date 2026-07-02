@@ -265,12 +265,12 @@ async function saveFeature(): Promise<void> {
 }
 
 async function syncRealtimeLayer(layer: LayerDto | null): Promise<void> {
-  if (!layer || !auth.token || !auth.isAuthenticated) {
+  if (!layer || !auth.isAuthenticated) {
     disconnectRealtime();
     return;
   }
 
-  await handleRealtimeLayerChange(layer, auth.token);
+  await handleRealtimeLayerChange(layer, auth.isAuthenticated);
 }
 </script>
 

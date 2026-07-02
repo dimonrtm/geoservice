@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const apiMocks = vi.hoisted(() => ({
+  requestLayerWebSocketTicket: vi.fn(),
+}));
+
+vi.mock("@/api/realtime", () => ({
+  requestLayerWebSocketTicket: apiMocks.requestLayerWebSocketTicket,
+}));
+
 type MessageListener = (event: { data: string }) => void;
 type CloseListener = (event: { code: number; reason?: string }) => void;
 type OpenListener = () => void;
@@ -91,6 +99,10 @@ describe("useLayerRealtime", () => {
     vi.resetModules();
     FakeWebSocket.reset();
     vi.stubGlobal("WebSocket", FakeWebSocket);
+    apiMocks.requestLayerWebSocketTicket.mockResolvedValue({
+      ticket: "ticket-1",
+      expiresAt: "2026-07-02T10:00:00Z",
+    });
   });
 
   it("connects to the active layer and routes incoming feature events", async () => {
@@ -104,12 +116,26 @@ describe("useLayerRealtime", () => {
       onFeatureUpdated,
       onFeatureDeleted,
     });
+    apiMocks.requestLayerWebSocketTicket.mockImplementationOnce(
+      async (layerId: string) => {
+        expect(layerId).toBe("layer-1");
+        expect(FakeWebSocket.instances).toHaveLength(0);
+        return {
+          ticket: "ticket-1",
+          expiresAt: "2026-07-02T10:00:00Z",
+        };
+      },
+    );
 
-    await realtime.connectToLayer("layer-1", "token-1");
+    await realtime.connectToLayer("layer-1");
 
+    expect(apiMocks.requestLayerWebSocketTicket).toHaveBeenCalledWith(
+      "layer-1",
+    );
     const socket = getSocketAt(0);
     expect(socket.url).toContain("/api/v1/ws/layers/layer-1");
-    expect(socket.url).toContain("token=token-1");
+    expect(socket.url).toContain("ticket=ticket-1");
+    expect(socket.url).not.toContain("token=");
 
     socket.emitOpen();
     socket.emitMessage({ type: "connected", layerId: "layer-1" });
@@ -170,8 +196,20 @@ describe("useLayerRealtime", () => {
       onReconnectSynced,
     });
 
-    await realtime.connectToLayer("layer-1", "token-1");
+    apiMocks.requestLayerWebSocketTicket
+      .mockResolvedValueOnce({
+        ticket: "ticket-1",
+        expiresAt: "2026-07-02T10:00:00Z",
+      })
+      .mockResolvedValueOnce({
+        ticket: "ticket-2",
+        expiresAt: "2026-07-02T10:00:30Z",
+      });
+
+    await realtime.connectToLayer("layer-1");
     const firstSocket = getSocketAt(0);
+    expect(firstSocket.url).toContain("ticket=ticket-1");
+    expect(firstSocket.url).not.toContain("token=");
     firstSocket.emitOpen();
     firstSocket.emitMessage({ type: "connected", layerId: "layer-1" });
     await flushPromises();
@@ -182,8 +220,15 @@ describe("useLayerRealtime", () => {
     expect(realtime.isReconnecting.value).toBe(true);
 
     await vi.advanceTimersByTimeAsync(500);
+    await flushPromises();
 
     const secondSocket = getSocketAt(1);
+    expect(apiMocks.requestLayerWebSocketTicket).toHaveBeenNthCalledWith(
+      2,
+      "layer-1",
+    );
+    expect(secondSocket.url).toContain("ticket=ticket-2");
+    expect(secondSocket.url).not.toContain("token=");
     secondSocket.emitOpen();
     secondSocket.emitMessage({ type: "connected", layerId: "layer-1" });
     await flushPromises();
@@ -198,7 +243,7 @@ describe("useLayerRealtime", () => {
       await import("@/composables/map/useLayerRealtime");
     const realtime = useLayerRealtime();
 
-    await realtime.connectToLayer("layer-1", "token-1");
+    await realtime.connectToLayer("layer-1");
     const socket = getSocketAt(0);
     socket.emitOpen();
     socket.emitMessage({ type: "connected", layerId: "layer-1" });
@@ -215,7 +260,7 @@ describe("useLayerRealtime", () => {
       await import("@/composables/map/useLayerRealtime");
     const realtime = useLayerRealtime();
 
-    await realtime.connectToLayer("layer-1", "token-1");
+    await realtime.connectToLayer("layer-1");
     const socket = getSocketAt(0);
     socket.emitOpen();
     socket.emitMessage({
@@ -241,7 +286,7 @@ describe("useLayerRealtime", () => {
       await import("@/composables/map/useLayerRealtime");
     const realtime = useLayerRealtime();
 
-    await realtime.connectToLayer("layer-1", "token-1");
+    await realtime.connectToLayer("layer-1");
     const socket = getSocketAt(0);
     socket.emitOpen();
     socket.emitClose(1008);
@@ -251,5 +296,20 @@ describe("useLayerRealtime", () => {
     expect(realtime.hasStoppedReconnect.value).toBe(true);
     expect(realtime.isReconnecting.value).toBe(false);
     expect(FakeWebSocket.instances).toHaveLength(1);
+  });
+
+  it("does not open a websocket when ticket issue fails", async () => {
+    apiMocks.requestLayerWebSocketTicket.mockRejectedValueOnce(
+      new Error("401"),
+    );
+    const { useLayerRealtime } =
+      await import("@/composables/map/useLayerRealtime");
+    const realtime = useLayerRealtime();
+
+    await realtime.connectToLayer("layer-1");
+
+    expect(FakeWebSocket.instances).toHaveLength(0);
+    expect(realtime.isAuthError.value).toBe(true);
+    expect(realtime.hasStoppedReconnect.value).toBe(true);
   });
 });
