@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-07-02
-source: repository-change:2026-07-02
+updated: 2026-07-03
+source: repository-change:2026-07-03
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -21,13 +21,23 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 
 ## State И API
 
-- `src/stores/auth.ts` хранит token/user в `localStorage`, восстанавливает сессию через `/api/v1/auth/me`, очищает состояние при 401.
+- `src/stores/auth.ts` хранит `accessToken` и `user` только in-memory в Pinia,
+  не читает и не пишет `localStorage`, восстанавливает сессию через
+  `refreshSession()` и очищает локальное состояние при 401.
+- `src/api/auth.ts` вызывает `login`, `refreshSession` и `logoutSession` с
+  `withCredentials: true`, чтобы browser отправлял HttpOnly
+  `geoservice_session`; `fetchMe()` остается Bearer-only.
 - `LoginScreen` для HTTP 401 показывает только `message` из structured error
   `{code, message, correlationId}`; legacy `detail` не выводится пользователю,
   если structured `message` отсутствует, используется общий fallback.
 - `src/stores/edit.ts` хранит polygon edit session, dirty-state, validation errors и version conflict handling.
 - `src/stores/workOrders.ts` хранит назначенные текущему `Editor` work orders, loading/error state и локальный `selectedWorkOrderId`; выбор в списке только подсвечивает строку и не открывает edit version.
-- `src/api/http.ts` централизует axios base URL и добавляет Bearer token из Pinia.
+- `src/api/http.ts` централизует axios base URL, добавляет Bearer token из
+  Pinia и при HTTP 401 вызывает только local `clearLocalSession()`, чтобы не
+  запускать повторный backend logout из interceptor.
+- `logout()` в auth store очищает local state сразу, но держит app в not-ready
+  состоянии до завершения `/api/v1/auth/logout`, чтобы поздний ответ logout не
+  стер cookie от нового login.
 - `src/api/layers.ts` оборачивает layer/feature HTTP API и превращает HTTP failures в `HttpError`.
 - `src/api/workOrders.ts` вызывает `GET /api/v1/work-orders/assigned-to-me` и использует компактный response contract без audit/internal date fields.
 

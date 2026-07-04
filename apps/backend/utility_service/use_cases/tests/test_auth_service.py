@@ -26,6 +26,11 @@ class FakeReadSession:
             self.in_transaction = False
 
 
+def build_service(repository: AsyncMock) -> tuple[AuthService, FakeReadSession]:
+    session = FakeReadSession()
+    return AuthService(session=session, user_repository=repository), session
+
+
 def test_authenticate_user_returns_user_for_valid_credentials() -> None:
     user = SimpleNamespace(
         id=uuid4(),
@@ -36,11 +41,39 @@ def test_authenticate_user_returns_user_for_valid_credentials() -> None:
     )
     repository = AsyncMock()
     repository.get_by_email.return_value = user
-    service = AuthService(session=None, user_repository=repository)
+    service, _session = build_service(repository)
 
     result = asyncio.run(service.authenticate_user("editor@example.com", "editor-password"))
 
     assert result is user
+    repository.get_by_email.assert_awaited_once_with("editor@example.com")
+
+
+def test_authenticate_user_closes_read_transaction_before_session_reuse() -> None:
+    user = SimpleNamespace(
+        id=uuid4(),
+        email="editor@example.com",
+        role=SimpleNamespace(value="editor"),
+        password_hash=hash_password("editor-password"),
+        is_active=True,
+    )
+    repository = AsyncMock()
+    session = FakeReadSession()
+    get_by_email_in_transaction = []
+
+    async def get_by_email(_email: str):
+        get_by_email_in_transaction.append(session.in_transaction)
+        return user
+
+    repository.get_by_email.side_effect = get_by_email
+    service = AuthService(session=session, user_repository=repository)
+
+    result = asyncio.run(service.authenticate_user("editor@example.com", "editor-password"))
+
+    assert result is user
+    assert session.begin_calls == 1
+    assert session.in_transaction is False
+    assert get_by_email_in_transaction == [True]
     repository.get_by_email.assert_awaited_once_with("editor@example.com")
 
 
@@ -68,7 +101,7 @@ def test_get_user_by_id_closes_read_transaction_before_session_reuse() -> None:
 def test_authenticate_user_raises_401_for_unknown_email() -> None:
     repository = AsyncMock()
     repository.get_by_email.return_value = None
-    service = AuthService(session=None, user_repository=repository)
+    service, _session = build_service(repository)
 
     with pytest.raises(AuthApiError) as exc_info:
         asyncio.run(service.authenticate_user("missing@example.com", "editor-password"))
@@ -88,7 +121,7 @@ def test_authenticate_user_raises_401_for_wrong_password() -> None:
     )
     repository = AsyncMock()
     repository.get_by_email.return_value = user
-    service = AuthService(session=None, user_repository=repository)
+    service, _session = build_service(repository)
 
     with pytest.raises(AuthApiError) as exc_info:
         asyncio.run(service.authenticate_user("editor@example.com", "wrong-password"))
@@ -108,7 +141,7 @@ def test_authenticate_user_raises_401_when_password_hash_is_none() -> None:
     )
     repository = AsyncMock()
     repository.get_by_email.return_value = user
-    service = AuthService(session=None, user_repository=repository)
+    service, _session = build_service(repository)
 
     with pytest.raises(AuthApiError) as exc_info:
         asyncio.run(
@@ -133,7 +166,7 @@ def test_authenticate_user_rejects_inactive_user() -> None:
     )
     repository = AsyncMock()
     repository.get_by_email.return_value = user
-    service = AuthService(session=None, user_repository=repository)
+    service, _session = build_service(repository)
 
     with pytest.raises(AuthApiError) as exc_info:
         asyncio.run(

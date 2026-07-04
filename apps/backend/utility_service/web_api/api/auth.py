@@ -9,16 +9,17 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 
-from utility_service.use_cases.deps import get_auth_service
+from utility_service.use_cases.deps import get_auth_service, get_auth_session_service
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.schemas.auth.auth_login_in import AuthLoginIn
 from utility_service.use_cases.schemas.auth.auth_me_out import AuthMeOut
 from utility_service.use_cases.schemas.auth.auth_success_out import AuthSuccessOut
 from utility_service.use_cases.schemas.auth.auth_user_out import AuthUserOut
+from utility_service.use_cases.services.auth_session_service import AuthSessionService
 from utility_service.use_cases.services.auth_service import AuthService
 from utility_service.utils.settings import settings
 
@@ -28,6 +29,33 @@ auth_router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 EDITOR_ROLE = "editor"
 REVIEWER_ROLE = "reviewer"
 SUPPORTED_AUTH_ROLES = {EDITOR_ROLE, REVIEWER_ROLE}
+SESSION_COOKIE_PATH = "/api/v1/auth"
+
+
+def _cookie_max_age_seconds() -> int:
+    return settings.auth_session_ttl_hours * 60 * 60
+
+
+def set_session_cookie(response: Response, token: str) -> None:
+    response.set_cookie(
+        key=settings.auth_session_cookie_name,
+        value=token,
+        max_age=_cookie_max_age_seconds(),
+        httponly=True,
+        secure=settings.auth_session_cookie_secure,
+        samesite=settings.auth_session_cookie_samesite,
+        path=SESSION_COOKIE_PATH,
+    )
+
+
+def clear_session_cookie(response: Response) -> None:
+    response.delete_cookie(
+        key=settings.auth_session_cookie_name,
+        path=SESSION_COOKIE_PATH,
+        httponly=True,
+        secure=settings.auth_session_cookie_secure,
+        samesite=settings.auth_session_cookie_samesite,
+    )
 
 
 def _role_value(user: Any) -> str:
@@ -108,9 +136,14 @@ def require_reviewer(user: Any = Depends(get_current_user)) -> Any:
 
 @auth_router.post("/login", response_model=AuthSuccessOut)
 async def login(
-    body: AuthLoginIn, auth_service: AuthService = Depends(get_auth_service)
+    body: AuthLoginIn,
+    response: Response,
+    auth_service: AuthService = Depends(get_auth_service),
+    auth_session_service: AuthSessionService = Depends(get_auth_session_service),
 ) -> AuthSuccessOut:
     user = await auth_service.authenticate_user(body.email, body.password)
+    session = await auth_session_service.issue_session(user)
+    set_session_cookie(response, session.token)
     token = create_access_token(str(user.id), _role_value(user))
     return AuthSuccessOut(
         access_token=token,
@@ -121,6 +154,44 @@ async def login(
             role=_role_value(user),
         ),
     )
+
+
+@auth_router.post("/session/refresh", response_model=AuthSuccessOut)
+async def refresh_session(
+    response: Response,
+    session_token: str | None = Cookie(
+        default=None,
+        alias=settings.auth_session_cookie_name,
+    ),
+    auth_session_service: AuthSessionService = Depends(get_auth_session_service),
+) -> AuthSuccessOut:
+    session = await auth_session_service.refresh_session(session_token)
+    set_session_cookie(response, session.token)
+    user = session.user
+    token = create_access_token(str(user.id), _role_value(user))
+    return AuthSuccessOut(
+        access_token=token,
+        token_type="bearer",
+        user=AuthUserOut(
+            id=str(user.id),
+            email=user.email,
+            role=_role_value(user),
+        ),
+    )
+
+
+@auth_router.post("/logout")
+async def logout(
+    response: Response,
+    session_token: str | None = Cookie(
+        default=None,
+        alias=settings.auth_session_cookie_name,
+    ),
+    auth_session_service: AuthSessionService = Depends(get_auth_session_service),
+) -> dict[str, bool]:
+    await auth_session_service.revoke_session(session_token)
+    clear_session_cookie(response)
+    return {"ok": True}
 
 
 @auth_router.get("/me", response_model=AuthMeOut)

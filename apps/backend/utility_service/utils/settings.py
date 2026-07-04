@@ -21,18 +21,54 @@ class Settings(BaseSettings):
     jwt_alg: str = Field("HS256", alias="JWT_ALG")
     access_token_ttl_min: int = Field(30, alias="ACCESS_TOKEN_TTL_MIN")
     websocket_ticket_ttl_seconds: int = Field(60, alias="WEBSOCKET_TICKET_TTL_SECONDS")
+    auth_session_ttl_hours: int = Field(12, alias="AUTH_SESSION_TTL_HOURS")
+    auth_session_cookie_name: str = Field(
+        "geoservice_session",
+        alias="AUTH_SESSION_COOKIE_NAME",
+    )
+    auth_session_cookie_secure: bool = Field(
+        False,
+        alias="AUTH_SESSION_COOKIE_SECURE",
+    )
+    auth_session_cookie_samesite: str = Field(
+        "lax",
+        alias="AUTH_SESSION_COOKIE_SAMESITE",
+    )
     dev_auth_enabled: bool = Field(False, alias="DEV_MODE")
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> "Settings":
+        samesite = self.auth_session_cookie_samesite.strip().lower()
+        if samesite not in {"lax", "strict", "none"}:
+            raise ValueError(
+                "AUTH_SESSION_COOKIE_SAMESITE должно быть одним из значений: " "lax, strict, none"
+            )
+        self.auth_session_cookie_samesite = samesite
+
+        if samesite == "none" and not self.auth_session_cookie_secure:
+            raise ValueError(
+                "AUTH_SESSION_COOKIE_SECURE должно быть true, если "
+                "AUTH_SESSION_COOKIE_SAMESITE=none"
+            )
+
+        if "*" in self.cors_origins:
+            raise ValueError(
+                "CORS_ORIGINS не может содержать '*', когда CORS включен "
+                "с передачей учетных данных"
+            )
+
         if self.dev_auth_enabled:
             return self
 
         secret = self.jwt_secret.strip()
         if not secret or secret == "CHANGE_ME_IN_ENV":
             raise ValueError(
-                "JWT_SECRET must be explicitly set to a non-default value when DEV_MODE=false"
+                "JWT_SECRET должен быть явно задан и отличаться от значения "
+                "по умолчанию, если DEV_MODE=false"
             )
+
+        if not self.auth_session_cookie_secure:
+            raise ValueError("AUTH_SESSION_COOKIE_SECURE должно быть true, если DEV_MODE=false")
         return self
 
     @property

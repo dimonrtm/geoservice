@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-07-02
-source: repository-change:2026-07-02
+updated: 2026-07-03
+source: repository-change:2026-07-03
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -14,10 +14,28 @@ Backend публикует REST API под `/api/v1` и WebSocket endpoint дл�
 
 ## Auth API
 
-- `POST /api/v1/auth/login` принимает email/password и возвращает `access_token`, `token_type` и user DTO.
+- `POST /api/v1/auth/login` принимает email/password, возвращает
+  short-lived Bearer `access_token`, `token_type` и user DTO, а долгую
+  auth-сессию кладет только в HttpOnly cookie `geoservice_session`.
+- Auth session cookie ограничена `Path=/api/v1/auth`; raw session token не
+  попадает в JSON response и хранится в БД только как SHA-256 hash в
+  `user.auth_sessions`. TTL по умолчанию - 12 часов.
+- `POST /api/v1/auth/session/refresh` читает session cookie, атомарно
+  ротирует active session в БД, ставит новый HttpOnly cookie и возвращает
+  новый Bearer `access_token`. Missing/expired/revoked/replayed session
+  возвращает structured `401 AUTH_REQUIRED`; inactive user - `403 USER_INACTIVE`.
+- `POST /api/v1/auth/logout` идемпотентно отзывает active session по cookie и
+  очищает cookie.
 - `GET /api/v1/auth/me` возвращает текущего пользователя по Bearer token.
 
-Frontend хранит token в `localStorage`, добавляет `Authorization: Bearer ...` в axios interceptor и вызывает logout при HTTP 401.
+Auth session cookies требуют credentials-enabled CORS. Backend запрещает
+wildcard CORS origins, валидирует `AUTH_SESSION_COOKIE_SAMESITE`
+(`lax|strict|none`), требует `AUTH_SESSION_COOKIE_SECURE=True` при
+`DEV_MODE=false` и не допускает `SameSite=None` без `Secure`.
+
+Frontend не хранит `access_token`/user в `localStorage`: Pinia держит их
+только in-memory, `restoreSession()` выполняет cookie refresh, а axios 401
+interceptor очищает локальное состояние без дополнительного backend logout.
 
 ## Layers And Features API
 

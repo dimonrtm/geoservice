@@ -35,6 +35,9 @@ from utility_service.infrastructure.postgresql.models.feature_point import (  # 
 from utility_service.infrastructure.postgresql.models.feature_polygon import (  # noqa: E402, F401
     FeaturePolygon,
 )
+from utility_service.infrastructure.postgresql.models.auth_session import (  # noqa: E402, F401
+    AuthSession,
+)
 from utility_service.infrastructure.postgresql.models.layer import Layer  # noqa: E402, F401
 from utility_service.infrastructure.postgresql.models.user import User  # noqa: E402, F401
 from utility_service.infrastructure.postgresql.models.utility_network import (  # noqa: E402, F401

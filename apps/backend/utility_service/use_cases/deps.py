@@ -3,6 +3,9 @@ from __future__ import annotations
 from fastapi import Depends, Request, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from utility_service.infrastructure.postgresql.repositories.auth_session_repository import (
+    AuthSessionRepository,
+)
 from utility_service.infrastructure.postgresql.repositories.layer_repository import LayerRepository
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
     DefaultStateRepository,
@@ -18,6 +21,7 @@ from utility_service.infrastructure.postgresql.repositories.work_order_repositor
     WorkOrderRepository,
 )
 from utility_service.infrastructure.postgresql.session import engine, get_session
+from utility_service.use_cases.services.auth_session_service import AuthSessionService
 from utility_service.use_cases.services.auth_service import AuthService
 from utility_service.use_cases.services.edit_version_service import EditVersionService
 from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
@@ -34,6 +38,16 @@ from utility_service.use_cases.services.workspace_service import WorkspaceServic
 
 def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
     return AuthService(session, UserRepository(session))
+
+
+def get_auth_session_service(
+    session: AsyncSession = Depends(get_session),
+) -> AuthSessionService:
+    return AuthSessionService(
+        session,
+        AuthSessionRepository(session),
+        UserRepository(session),
+    )
 
 
 def get_feature_realtime_publisher(request: Request) -> FeatureRealtimePublisher:

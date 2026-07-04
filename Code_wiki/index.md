@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-02
-source: repository-change:2026-07-02
+updated: 2026-07-03
+source: repository-change:2026-07-03
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -46,6 +46,12 @@ tags: [code-wiki, technical-knowledge]
 
 ## Свежие Repository-Change Знания
 
+- 2026-07-03: [[архитектура/api_and_realtime]] и [[архитектура/frontend]]
+  отражают auth session strategy без долговременного `access_token` в
+  `localStorage`: backend выдает HttpOnly `geoservice_session`, хранит только
+  SHA-256 hash в `user.auth_sessions`, refresh атомарно ротирует session, а
+  frontend держит Bearer token только in-memory и восстанавливается через
+  cookie refresh.
 - 2026-07-02: [[архитектура/api_and_realtime]], [[архитектура/backend]],
   [[архитектура/frontend]] и [[правила_и_стиль/testing_strategy]]
   отражают WebSocket auth через short-lived single-use ticket:

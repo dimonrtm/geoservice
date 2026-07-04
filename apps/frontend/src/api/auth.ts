@@ -19,11 +19,30 @@ export type AuthMeResponse = {
 };
 
 export async function login(email: string, password: string) {
-  const response = await http.post<AuthLoginResponse>("/api/v1/auth/login", {
-    email,
-    password,
-  });
+  const response = await http.post<AuthLoginResponse>(
+    "/api/v1/auth/login",
+    {
+      email,
+      password,
+    },
+    { withCredentials: true },
+  );
   return response.data;
+}
+
+export async function refreshSession() {
+  const response = await http.post<AuthLoginResponse>(
+    "/api/v1/auth/session/refresh",
+    undefined,
+    { withCredentials: true },
+  );
+  return response.data;
+}
+
+export async function logoutSession() {
+  await http.post("/api/v1/auth/logout", undefined, {
+    withCredentials: true,
+  });
 }
 
 export async function fetchMe() {

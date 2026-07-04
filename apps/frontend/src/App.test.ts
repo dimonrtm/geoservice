@@ -75,4 +75,23 @@ describe("App", () => {
       false,
     );
   });
+
+  it("shows status screen instead of login while auth is not ready", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const auth = useAuthStore();
+    auth.token = null;
+    auth.user = null;
+    auth.isReady = false;
+    auth.isRestoring = true;
+
+    const { default: App } = await import("@/App.vue");
+    const wrapper = mount(App);
+
+    expect(wrapper.text()).toContain("Восстановление сессии");
+    expect(wrapper.find('[data-test="login-screen"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test="editor-work-orders-view"]').exists()).toBe(
+      false,
+    );
+    expect(wrapper.find('[data-test="reviewer-home"]').exists()).toBe(false);
+  });
 });

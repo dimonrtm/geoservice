@@ -22,7 +22,7 @@ http.interceptors.response.use(
     const auth = useAuthStore(pinia);
     const status = err?.response?.status;
     if (status === 401) {
-      auth.logout();
+      auth.clearLocalSession();
     }
 
     return Promise.reject(err);

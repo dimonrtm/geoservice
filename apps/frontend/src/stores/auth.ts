@@ -1,11 +1,13 @@
 import { defineStore } from "pinia";
 import axios from "axios";
 
-import { fetchMe, login, type AuthUser } from "@/api/auth";
+import {
+  login,
+  logoutSession,
+  refreshSession,
+  type AuthUser,
+} from "@/api/auth";
 import { useWorkOrdersStore } from "@/stores/workOrders";
-
-const ACCESS_TOKEN_KEY = "access_token";
-const AUTH_USER_KEY = "auth_user";
 
 type AuthState = {
   token: string | null;
@@ -14,24 +16,6 @@ type AuthState = {
   isRestoring: boolean;
   sessionError: string | null;
 };
-
-function readStoredToken(): string | null {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
-}
-
-function readStoredUser(): AuthUser | null {
-  const rawValue = localStorage.getItem(AUTH_USER_KEY);
-  if (!rawValue) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(rawValue) as AuthUser;
-  } catch {
-    localStorage.removeItem(AUTH_USER_KEY);
-    return null;
-  }
-}
 
 function authUserId(user: AuthUser | null): string | null {
   return user?.id ?? null;
@@ -53,8 +37,8 @@ export const useAuthStore = defineStore(
 
   {
     state: (): AuthState => ({
-      token: readStoredToken(),
-      user: readStoredUser(),
+      token: null,
+      user: null,
       isReady: false,
       isRestoring: false,
       sessionError: null,
@@ -69,21 +53,23 @@ export const useAuthStore = defineStore(
         this.token = token;
         this.user = user;
         this.sessionError = null;
-        localStorage.setItem(ACCESS_TOKEN_KEY, token);
-        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
         resetWorkOrdersIfUserIdChanged(previousUserId, user.id);
       },
       setUser(user: AuthUser | null) {
         const previousUserId = authUserId(this.user);
 
         this.user = user;
-        if (user) {
-          localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
-        } else {
-          localStorage.removeItem(AUTH_USER_KEY);
-        }
-
         resetWorkOrdersIfUserIdChanged(previousUserId, authUserId(user));
+      },
+      clearLocalSession() {
+        const previousUserId = authUserId(this.user);
+
+        this.token = null;
+        this.user = null;
+        this.sessionError = null;
+        this.isReady = true;
+        this.isRestoring = false;
+        resetWorkOrdersIfUserIdChanged(previousUserId, null);
       },
       async loginWithPassword(email: string, password: string) {
         const result = await login(email, password);
@@ -96,25 +82,19 @@ export const useAuthStore = defineStore(
         this.sessionError = null;
         this.isRestoring = true;
 
-        if (!this.token) {
-          this.setUser(null);
-          this.isReady = true;
-          this.isRestoring = false;
-          return;
-        }
-
         try {
-          const result = await fetchMe();
-          this.setUser(result.user);
+          const result = await refreshSession();
+          this.setAuth(result.access_token, result.user);
         } catch (error: unknown) {
           if (axios.isAxiosError(error)) {
             const status = error.response?.status;
             if (status === 401) {
-              this.logout();
+              this.clearLocalSession();
               return;
             }
           }
 
+          this.clearLocalSession();
           this.sessionError =
             "Сейчас не удалось восстановить сессию. Попробуйте ещё раз.";
         } finally {
@@ -122,17 +102,18 @@ export const useAuthStore = defineStore(
           this.isRestoring = false;
         }
       },
-      logout() {
-        const previousUserId = authUserId(this.user);
+      async logout() {
+        this.clearLocalSession();
+        this.isReady = false;
 
-        this.token = null;
-        this.user = null;
-        this.sessionError = null;
-        this.isReady = true;
-        this.isRestoring = false;
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(AUTH_USER_KEY);
-        resetWorkOrdersIfUserIdChanged(previousUserId, null);
+        try {
+          await logoutSession();
+        } catch {
+          // Local logout must still complete if the server is unavailable.
+        } finally {
+          this.isReady = true;
+          this.isRestoring = false;
+        }
       },
     },
   },

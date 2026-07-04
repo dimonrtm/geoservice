@@ -26,7 +26,8 @@ class AuthService:
         self.user_repository = user_repository
 
     async def authenticate_user(self, email: str, password: str) -> User:
-        user = await self.user_repository.get_by_email(email)
+        async with self.session.begin():
+            user = await self.user_repository.get_by_email(email)
         if user is None or not verify_password(password, user.password_hash):
             raise AuthApiError(
                 status_code=status.HTTP_401_UNAUTHORIZED,
