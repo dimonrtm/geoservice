@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-03
-source: repository-change:2026-07-03
+updated: 2026-07-04
+source: repository-change:2026-07-04
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -46,6 +46,10 @@ tags: [code-wiki, technical-knowledge]
 
 ## Свежие Repository-Change Знания
 
+- 2026-07-04: [[архитектура/frontend]] отражает reload restore для открытого
+  Editor workspace: frontend хранит в `sessionStorage` только
+  `workOrderId/editVersionId`, после `loadAssigned()` восстанавливает workspace
+  через `fetchWorkspace()` и не вызывает повторный `POST /edit-versions`.
 - 2026-07-03: [[архитектура/api_and_realtime]] и [[архитектура/frontend]]
   отражают auth session strategy без долговременного `access_token` в
   `localStorage`: backend выдает HttpOnly `geoservice_session`, хранит только

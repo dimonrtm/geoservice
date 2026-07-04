@@ -47,6 +47,7 @@ function createLocalStorageMock() {
 
 const SESSION_RETRY_MESSAGE =
   "Сейчас не удалось восстановить сессию. Попробуйте ещё раз.";
+const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
 
 function expectAuthLocalStorageNotUsed() {
   expect(localStorage.getItem).not.toHaveBeenCalled();
@@ -74,6 +75,14 @@ describe("auth store", () => {
 
     const localStorageMock = createLocalStorageMock();
     vi.stubGlobal("localStorage", localStorageMock);
+    sessionStorage.clear();
+    resetWorkOrdersMock.mockImplementation(
+      (options?: { preserveOpenedWorkspace?: boolean }) => {
+        if (!options?.preserveOpenedWorkspace) {
+          sessionStorage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
+        }
+      },
+    );
   });
 
   it("stores access token only in memory after successful login", async () => {
@@ -259,6 +268,34 @@ describe("auth store", () => {
     expect(localStorage.setItem).not.toHaveBeenCalled();
     expect(localStorage.removeItem).not.toHaveBeenCalled();
     expect(localStorage.clear).not.toHaveBeenCalled();
+  });
+
+  it("preserves opened workspace marker when restoreSession hydrates initial user", async () => {
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+    refreshSessionMock.mockResolvedValue({
+      access_token: "token-2",
+      token_type: "bearer",
+      user: {
+        id: "user-1",
+        email: "editor@example.com",
+        role: "editor",
+      },
+    });
+
+    const { useAuthStore } = await import("@/stores/auth");
+    const store = useAuthStore();
+
+    await store.restoreSession();
+
+    expect(resetWorkOrdersMock).toHaveBeenCalledWith({
+      preserveOpenedWorkspace: true,
+    });
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
   });
 
   it("does not reset work orders when restoreSession refreshes the same user id", async () => {

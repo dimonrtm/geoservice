@@ -6,8 +6,11 @@ import { useWorkOrdersStore } from "@/stores/workOrders";
 
 const workOrders = useWorkOrdersStore();
 
-onMounted(() => {
-  void workOrders.loadAssigned();
+onMounted(async () => {
+  await workOrders.loadAssigned();
+  if (!workOrders.errorMessage) {
+    await workOrders.restoreOpenedWorkspace();
+  }
 });
 
 function statusLabel(status: string): string {

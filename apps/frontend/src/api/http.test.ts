@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  authStoreMock,
-  axiosCreateMock,
-  responseUseMock,
-} = vi.hoisted(() => {
+const { authStoreMock, axiosCreateMock, responseUseMock } = vi.hoisted(() => {
   const responseUseMock = vi.fn();
   const axiosInstanceMock = {
     interceptors: {

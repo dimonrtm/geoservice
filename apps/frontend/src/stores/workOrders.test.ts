@@ -103,6 +103,7 @@ describe("work orders store", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
+    sessionStorage.clear();
     setActivePinia(createPinia());
   });
 
@@ -173,6 +174,32 @@ describe("work orders store", () => {
     expect(store.loadAssignedRequestSeq).toBe(12);
   });
 
+  it("can reset in-memory state while preserving opened workspace marker", async () => {
+    sessionStorage.setItem(
+      "geoservice:opened-workspace",
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.selectedWorkOrderId = "wo-1";
+    store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    store.workspace = workspaceResponse();
+
+    (store.reset as (options: { preserveOpenedWorkspace?: boolean }) => void)({
+      preserveOpenedWorkspace: true,
+    });
+
+    expect(store.selectedWorkOrderId).toBeNull();
+    expect(store.openedWorkOrderId).toBeNull();
+    expect(store.openedEditVersionId).toBeNull();
+    expect(store.workspace).toBeNull();
+    expect(sessionStorage.getItem("geoservice:opened-workspace")).toBe(
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+  });
+
   it("selects a work order locally without API calls", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
@@ -236,6 +263,87 @@ describe("work orders store", () => {
     expect(store.activeWorkspaceKey).toBe("wo-1:ev-1");
     expect(store.selectedOpenWorkspaceError).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
+  });
+
+  it("persists opened workspace identifiers after successful open", async () => {
+    openEditVersionMock.mockResolvedValue(openEditVersionResponse());
+    fetchWorkspaceMock.mockResolvedValue(workspaceResponse());
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Проверка участка фидера",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectWorkOrder("wo-1");
+
+    await store.openSelectedWorkOrder();
+
+    expect(sessionStorage.getItem("geoservice:opened-workspace")).toBe(
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+  });
+
+  it("restores opened workspace from session storage without opening edit version again", async () => {
+    sessionStorage.setItem(
+      "geoservice:opened-workspace",
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+    fetchWorkspaceMock.mockResolvedValue(workspaceResponse("wo-1", "ev-1"));
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Проверка участка фидера",
+        description: null,
+        status: "in_progress",
+      },
+    ];
+
+    await store.restoreOpenedWorkspace();
+
+    expect(openEditVersionMock).not.toHaveBeenCalled();
+    expect(fetchWorkspaceMock).toHaveBeenCalledWith("wo-1", "ev-1");
+    expect(store.selectedWorkOrderId).toBe("wo-1");
+    expect(store.openedWorkOrderId).toBe("wo-1");
+    expect(store.openedEditVersionId).toBe("ev-1");
+    expect(store.activeWorkspace?.workOrder.code).toBe("WO-001");
+    expect(store.activeWorkspaceKey).toBe("wo-1:ev-1");
+    expect(store.isOpeningWorkspace).toBe(false);
+  });
+
+  it("clears persisted workspace when saved work order is no longer assigned", async () => {
+    sessionStorage.setItem(
+      "geoservice:opened-workspace",
+      JSON.stringify({ workOrderId: "wo-missing", editVersionId: "ev-1" }),
+    );
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Проверка участка фидера",
+        description: null,
+        status: "assigned",
+      },
+    ];
+
+    await store.restoreOpenedWorkspace();
+
+    expect(fetchWorkspaceMock).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem("geoservice:opened-workspace")).toBeNull();
+    expect(store.selectedWorkOrderId).toBeNull();
+    expect(store.activeWorkspace).toBeNull();
   });
 
   it("keeps action retry available when workspace loading fails after open", async () => {

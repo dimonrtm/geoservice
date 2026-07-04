@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-07-03
-source: repository-change:2026-07-03
+updated: 2026-07-04
+source: repository-change:2026-07-04
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -31,7 +31,15 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
   `{code, message, correlationId}`; legacy `detail` не выводится пользователю,
   если structured `message` отсутствует, используется общий fallback.
 - `src/stores/edit.ts` хранит polygon edit session, dirty-state, validation errors и version conflict handling.
-- `src/stores/workOrders.ts` хранит назначенные текущему `Editor` work orders, loading/error state и локальный `selectedWorkOrderId`; выбор в списке только подсвечивает строку и не открывает edit version.
+- `src/stores/workOrders.ts` хранит назначенные текущему `Editor` work orders,
+  loading/error state и локальный `selectedWorkOrderId`; выбор в списке только
+  подсвечивает строку и не открывает edit version.
+- После успешного открытия workspace `src/stores/workOrders.ts` сохраняет в
+  `sessionStorage` только `{workOrderId, editVersionId}`. При reload
+  `EditorWorkOrdersView` сначала вызывает `loadAssigned()`, затем
+  `restoreOpenedWorkspace()`: store проверяет, что work order всё ещё назначен
+  текущему пользователю, и восстанавливает карту через `fetchWorkspace()` без
+  повторного `POST /edit-versions`.
 - `src/api/http.ts` централизует axios base URL, добавляет Bearer token из
   Pinia и при HTTP 401 вызывает только local `clearLocalSession()`, чтобы не
   запускать повторный backend logout из interceptor.

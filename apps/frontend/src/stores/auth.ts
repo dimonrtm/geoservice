@@ -7,7 +7,10 @@ import {
   refreshSession,
   type AuthUser,
 } from "@/api/auth";
-import { useWorkOrdersStore } from "@/stores/workOrders";
+import {
+  useWorkOrdersStore,
+  type ResetWorkOrdersOptions,
+} from "@/stores/workOrders";
 
 type AuthState = {
   token: string | null;
@@ -24,13 +27,18 @@ function authUserId(user: AuthUser | null): string | null {
 function resetWorkOrdersIfUserIdChanged(
   previousUserId: string | null,
   nextUserId: string | null,
+  options: ResetWorkOrdersOptions = {},
 ): void {
   if (previousUserId === nextUserId) {
     return;
   }
 
-  useWorkOrdersStore().reset();
+  useWorkOrdersStore().reset(options);
 }
+
+type SetAuthOptions = {
+  preserveOpenedWorkspaceOnInitialUser?: boolean;
+};
 
 export const useAuthStore = defineStore(
   "auth",
@@ -47,13 +55,17 @@ export const useAuthStore = defineStore(
       isAuthenticated: (state) => Boolean(state.token && state.user),
     },
     actions: {
-      setAuth(token: string, user: AuthUser) {
+      setAuth(token: string, user: AuthUser, options: SetAuthOptions = {}) {
         const previousUserId = authUserId(this.user);
 
         this.token = token;
         this.user = user;
         this.sessionError = null;
-        resetWorkOrdersIfUserIdChanged(previousUserId, user.id);
+        resetWorkOrdersIfUserIdChanged(previousUserId, user.id, {
+          preserveOpenedWorkspace:
+            options.preserveOpenedWorkspaceOnInitialUser === true &&
+            previousUserId === null,
+        });
       },
       setUser(user: AuthUser | null) {
         const previousUserId = authUserId(this.user);
@@ -84,7 +96,9 @@ export const useAuthStore = defineStore(
 
         try {
           const result = await refreshSession();
-          this.setAuth(result.access_token, result.user);
+          this.setAuth(result.access_token, result.user, {
+            preserveOpenedWorkspaceOnInitialUser: true,
+          });
         } catch (error: unknown) {
           if (axios.isAxiosError(error)) {
             const status = error.response?.status;

@@ -74,7 +74,7 @@ def test_settings_reads_auth_session_values_from_env_aliases() -> None:
 def test_settings_rejects_invalid_auth_session_cookie_samesite() -> None:
     with pytest.raises(
         ValidationError,
-        match="AUTH_SESSION_COOKIE_SAMESITE must be one of",
+        match="AUTH_SESSION_COOKIE_SAMESITE должно быть одним из значений",
     ):
         Settings(
             DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
@@ -98,7 +98,7 @@ def test_settings_normalizes_auth_session_cookie_samesite_to_lowercase() -> None
 def test_settings_rejects_insecure_auth_session_cookie_in_production() -> None:
     with pytest.raises(
         ValidationError,
-        match="AUTH_SESSION_COOKIE_SECURE must be true when DEV_MODE=false",
+        match="AUTH_SESSION_COOKIE_SECURE должно быть true, если DEV_MODE=false",
     ):
         Settings(
             DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
@@ -125,7 +125,9 @@ def test_settings_allows_secure_auth_session_cookie_in_production() -> None:
 def test_settings_rejects_samesite_none_without_secure_cookie() -> None:
     with pytest.raises(
         ValidationError,
-        match=("AUTH_SESSION_COOKIE_SECURE must be true when " "AUTH_SESSION_COOKIE_SAMESITE=none"),
+        match=(
+            "AUTH_SESSION_COOKIE_SECURE должно быть true, если " "AUTH_SESSION_COOKIE_SAMESITE=none"
+        ),
     ):
         Settings(
             DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
@@ -139,7 +141,7 @@ def test_settings_rejects_samesite_none_without_secure_cookie() -> None:
 def test_settings_rejects_wildcard_cors_origin_with_credentials() -> None:
     with pytest.raises(
         ValidationError,
-        match=r"CORS_ORIGINS cannot contain '\*' when credentialed CORS is enabled",
+        match=r"CORS_ORIGINS не может содержать '\*', когда CORS включен",
     ):
         Settings(
             DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
@@ -152,7 +154,7 @@ def test_settings_rejects_wildcard_cors_origin_with_credentials() -> None:
 def test_settings_rejects_wildcard_cors_origin_in_json_list_with_credentials() -> None:
     with pytest.raises(
         ValidationError,
-        match=r"CORS_ORIGINS cannot contain '\*' when credentialed CORS is enabled",
+        match=r"CORS_ORIGINS не может содержать '\*', когда CORS включен",
     ):
         Settings(
             DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
@@ -164,7 +166,7 @@ def test_settings_rejects_wildcard_cors_origin_in_json_list_with_credentials() -
 
 @pytest.mark.parametrize("jwt_secret", ["", "CHANGE_ME_IN_ENV"])
 def test_settings_reject_default_or_empty_secret_when_dev_mode_disabled(jwt_secret: str) -> None:
-    with pytest.raises(ValidationError, match="JWT_SECRET must be explicitly set"):
+    with pytest.raises(ValidationError, match="JWT_SECRET должен быть явно задан"):
         Settings(
             DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
             DEV_MODE=False,

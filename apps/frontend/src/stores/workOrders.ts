@@ -26,6 +26,89 @@ type WorkOrdersState = {
   openWorkspaceRequestSeq: number;
 };
 
+type StoredOpenedWorkspace = {
+  workOrderId: string;
+  editVersionId: string;
+};
+
+export type ResetWorkOrdersOptions = {
+  preserveOpenedWorkspace?: boolean;
+};
+
+const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
+
+function sessionStorageOrNull(): Storage | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+function readStoredOpenedWorkspace(): StoredOpenedWorkspace | null {
+  const storage = sessionStorageOrNull();
+  if (!storage) {
+    return null;
+  }
+
+  try {
+    const rawValue = storage.getItem(OPENED_WORKSPACE_STORAGE_KEY);
+    if (!rawValue) {
+      return null;
+    }
+
+    const parsed = JSON.parse(rawValue) as Partial<StoredOpenedWorkspace>;
+    if (
+      typeof parsed.workOrderId !== "string" ||
+      typeof parsed.editVersionId !== "string"
+    ) {
+      storage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
+      return null;
+    }
+
+    return {
+      workOrderId: parsed.workOrderId,
+      editVersionId: parsed.editVersionId,
+    };
+  } catch {
+    storage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
+    return null;
+  }
+}
+
+function storeOpenedWorkspace(openedWorkspace: StoredOpenedWorkspace): void {
+  const storage = sessionStorageOrNull();
+  if (!storage) {
+    return;
+  }
+
+  try {
+    storage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify(openedWorkspace),
+    );
+  } catch {
+    // The in-memory workspace remains valid even if browser storage is unavailable.
+  }
+}
+
+function clearStoredOpenedWorkspace(): void {
+  const storage = sessionStorageOrNull();
+  if (!storage) {
+    return;
+  }
+
+  try {
+    storage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
+  } catch {
+    // Nothing to clean up if browser storage is unavailable.
+  }
+}
+
 function createInitialWorkOrdersState(): WorkOrdersState {
   return {
     items: [],
@@ -78,7 +161,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     },
   },
   actions: {
-    reset(): void {
+    reset(options: ResetWorkOrdersOptions = {}): void {
       const nextLoadAssignedRequestSeq = this.loadAssignedRequestSeq + 1;
       const nextOpenWorkspaceRequestSeq = this.openWorkspaceRequestSeq + 1;
 
@@ -87,6 +170,9 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         loadAssignedRequestSeq: nextLoadAssignedRequestSeq,
         openWorkspaceRequestSeq: nextOpenWorkspaceRequestSeq,
       });
+      if (!options.preserveOpenedWorkspace) {
+        clearStoredOpenedWorkspace();
+      }
     },
     async loadAssigned() {
       const requestSeq = this.loadAssignedRequestSeq + 1;
@@ -172,6 +258,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         this.openedWorkOrderId = workOrderId;
         this.openedEditVersionId = editVersionId;
         this.workspace = workspace;
+        storeOpenedWorkspace({ workOrderId, editVersionId });
       } catch {
         if (
           this.openWorkspaceRequestSeq === requestSeq &&
@@ -181,6 +268,60 @@ export const useWorkOrdersStore = defineStore("workOrders", {
             ...this.openWorkspaceErrorByWorkOrderId,
             [workOrderId]:
               "Не удалось открыть рабочую версию. Обновите список или попробуйте еще раз.",
+          };
+        }
+      } finally {
+        if (this.openWorkspaceRequestSeq === requestSeq) {
+          this.isOpeningWorkspace = false;
+        }
+      }
+    },
+    async restoreOpenedWorkspace() {
+      const storedWorkspace = readStoredOpenedWorkspace();
+      if (!storedWorkspace || this.isOpeningWorkspace) {
+        return;
+      }
+
+      const workOrderId = storedWorkspace.workOrderId;
+      const editVersionId = storedWorkspace.editVersionId;
+      if (!this.items.some((item) => item.id === workOrderId)) {
+        clearStoredOpenedWorkspace();
+        return;
+      }
+
+      const requestSeq = this.openWorkspaceRequestSeq + 1;
+      this.openWorkspaceRequestSeq = requestSeq;
+      this.isOpeningWorkspace = true;
+      this.selectedWorkOrderId = workOrderId;
+      this.openWorkspaceErrorByWorkOrderId = {
+        ...this.openWorkspaceErrorByWorkOrderId,
+        [workOrderId]: undefined,
+      };
+
+      try {
+        const workspace = await fetchWorkspace(workOrderId, editVersionId);
+        if (
+          this.openWorkspaceRequestSeq !== requestSeq ||
+          this.selectedWorkOrderId !== workOrderId
+        ) {
+          return;
+        }
+
+        this.updateWorkOrderStatus(workOrderId, workspace.workOrder.status);
+        this.openedWorkOrderId = workOrderId;
+        this.openedEditVersionId = editVersionId;
+        this.workspace = workspace;
+        storeOpenedWorkspace({ workOrderId, editVersionId });
+      } catch {
+        if (
+          this.openWorkspaceRequestSeq === requestSeq &&
+          this.selectedWorkOrderId === workOrderId
+        ) {
+          this.clearOpenedWorkspace();
+          this.openWorkspaceErrorByWorkOrderId = {
+            ...this.openWorkspaceErrorByWorkOrderId,
+            [workOrderId]:
+              "Не удалось восстановить рабочую версию. Обновите список или попробуйте еще раз.",
           };
         }
       } finally {
@@ -214,6 +355,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       this.openedEditVersionId = null;
       this.workspace = null;
       this.lastFittedWorkspaceKey = null;
+      clearStoredOpenedWorkspace();
     },
   },
 });

@@ -1,4 +1,4 @@
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -14,6 +14,7 @@ vi.mock("@/components/MapView.vue", () => ({
 
 const loadAssignedMock = vi.fn();
 const openSelectedWorkOrderMock = vi.fn();
+const restoreOpenedWorkspaceMock = vi.fn();
 
 function assignedWorkOrder() {
   return {
@@ -63,6 +64,31 @@ describe("EditorWorkOrdersView", () => {
     expect(wrapper.get('[data-test="map-view"]').attributes("data-mode")).toBe(
       "empty",
     );
+  });
+
+  it("restores opened workspace after assigned work orders load", async () => {
+    const callOrder: string[] = [];
+    loadAssignedMock.mockImplementation(async () => {
+      callOrder.push("load");
+    });
+    restoreOpenedWorkspaceMock.mockImplementation(async () => {
+      callOrder.push("restore");
+    });
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [inProgressWorkOrder()];
+    store.loadAssigned = loadAssignedMock;
+    store.restoreOpenedWorkspace = restoreOpenedWorkspaceMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    mount(EditorWorkOrdersView);
+    await flushPromises();
+
+    expect(loadAssignedMock).toHaveBeenCalledTimes(1);
+    expect(restoreOpenedWorkspaceMock).toHaveBeenCalledTimes(1);
+    expect(callOrder).toEqual(["load", "restore"]);
   });
 
   it("announces list loading state politely", async () => {
