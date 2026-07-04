@@ -1,16 +1,18 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { fetchMe, login, logoutSession, refreshSession } from "@/api/auth";
-import { http } from "@/api/http";
+
+const { httpGetMock, httpPostMock } = vi.hoisted(() => ({
+  httpGetMock: vi.fn(),
+  httpPostMock: vi.fn(),
+}));
 
 vi.mock("@/api/http", () => ({
   http: {
-    get: vi.fn(),
-    post: vi.fn(),
+    get: httpGetMock,
+    post: httpPostMock,
   },
 }));
-
-const httpMock = vi.mocked(http);
 
 describe("auth api", () => {
   beforeEach(() => {
@@ -18,11 +20,11 @@ describe("auth api", () => {
   });
 
   it("sends credentials when logging in so the browser accepts the session cookie", async () => {
-    httpMock.post.mockResolvedValue({ data: makeLoginResponse() });
+    httpPostMock.mockResolvedValue({ data: makeLoginResponse() });
 
     await login("editor@example.com", "editor-password");
 
-    expect(httpMock.post).toHaveBeenCalledWith(
+    expect(httpPostMock).toHaveBeenCalledWith(
       "/api/v1/auth/login",
       {
         email: "editor@example.com",
@@ -34,11 +36,11 @@ describe("auth api", () => {
 
   it("refreshes the session with credentials and returns the auth response", async () => {
     const responseData = makeLoginResponse({ access_token: "new-token" });
-    httpMock.post.mockResolvedValue({ data: responseData });
+    httpPostMock.mockResolvedValue({ data: responseData });
 
     const result = await refreshSession();
 
-    expect(httpMock.post).toHaveBeenCalledWith(
+    expect(httpPostMock).toHaveBeenCalledWith(
       "/api/v1/auth/session/refresh",
       undefined,
       { withCredentials: true },
@@ -47,11 +49,11 @@ describe("auth api", () => {
   });
 
   it("logs out the session with credentials", async () => {
-    httpMock.post.mockResolvedValue({ data: undefined });
+    httpPostMock.mockResolvedValue({ data: undefined });
 
     await logoutSession();
 
-    expect(httpMock.post).toHaveBeenCalledWith(
+    expect(httpPostMock).toHaveBeenCalledWith(
       "/api/v1/auth/logout",
       undefined,
       { withCredentials: true },
@@ -66,11 +68,11 @@ describe("auth api", () => {
         role: "editor",
       },
     };
-    httpMock.get.mockResolvedValue({ data: responseData });
+    httpGetMock.mockResolvedValue({ data: responseData });
 
     const result = await fetchMe();
 
-    expect(httpMock.get).toHaveBeenCalledWith("/api/v1/auth/me");
+    expect(httpGetMock).toHaveBeenCalledWith("/api/v1/auth/me");
     expect(result).toEqual(responseData);
   });
 });
