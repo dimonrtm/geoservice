@@ -141,8 +141,9 @@ def test_issue_ticket_stores_hash_and_returns_raw_ticket() -> None:
     assert service.session.completed_begin_calls == 1
 
 
-def test_issue_ticket_rejects_role_not_allowed() -> None:
-    user = make_user(role="viewer")
+@pytest.mark.parametrize("role", ["viewer", "reviewer"])
+def test_issue_ticket_rejects_role_not_allowed(role: str) -> None:
+    user = make_user(role=role)
     layer = SimpleNamespace(id=uuid4())
     service, _repository = build_service(user, layer)
 
@@ -184,7 +185,7 @@ def test_issue_ticket_rejects_missing_layer_with_structured_404() -> None:
 
 
 def test_consume_ticket_returns_user_context_once() -> None:
-    user = make_user(role="reviewer")
+    user = make_user(role="editor")
     layer = SimpleNamespace(id=uuid4())
     service, _repository = build_service(user, layer)
     issued = asyncio.run(service.issue_ticket(user, layer.id))
@@ -193,7 +194,7 @@ def test_consume_ticket_returns_user_context_once() -> None:
 
     assert context.user_id == user.id
     assert context.email == user.email
-    assert context.role == "reviewer"
+    assert context.role == "editor"
     assert service.session.begin_calls == 2
     assert service.session.completed_begin_calls == 2
     assert service.user_repository.get_by_id_in_transaction == [False]
@@ -213,6 +214,31 @@ def test_consume_ticket_rejects_wrong_layer() -> None:
 
     with pytest.raises(WebSocketTicketError):
         asyncio.run(service.consume_ticket(issued.ticket, uuid4()))
+
+
+def test_consume_ticket_rejects_reviewer_user_after_ticket_row_exists() -> None:
+    user = make_user(role="reviewer")
+    layer = SimpleNamespace(id=uuid4())
+    repository = FakeTicketRepository()
+    service = WebSocketTicketService(
+        DummySession(),
+        repository,
+        FakeLayerRepository(layer),
+        FakeUserRepository(user),
+        ticket_ttl_seconds=60,
+    )
+    ticket = "reviewer-ticket"
+    repository.created.append(
+        SimpleNamespace(
+            ticket_hash=hash_websocket_ticket(ticket),
+            user_id=user.id,
+            layer_id=layer.id,
+            expires_at=datetime.now(timezone.utc) + timedelta(seconds=60),
+        )
+    )
+
+    with pytest.raises(WebSocketTicketError):
+        asyncio.run(service.consume_ticket(ticket, layer.id))
 
 
 def test_consume_ticket_rejects_inactive_user_after_issue() -> None:

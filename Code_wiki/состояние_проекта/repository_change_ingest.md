@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-07-04
-source: repository-change:2026-07-04
+updated: 2026-07-05
+source: repository-change:2026-07-05
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-07-05 | [[архитектура/api_and_realtime]] | Legacy GIS API `/api/v1/layers*` и ticket issue `/api/v1/ws/layers*/ticket` теперь описаны как compatibility surface: default `LEGACY_GIS_API_ENABLED=false`, disabled дает `LEGACY_GIS_API_DISABLED`, enabled допускает только активного `Editor`, а `Reviewer` не получает legacy layer realtime ticket. | repository-change:2026-07-05 legacy-gis-api-guard |
+| 2026-07-05 | [[архитектура/backend]] | Backend security boundary уточнен: `require_legacy_gis_editor` закрывает legacy layers/realtime ticket issue по feature flag и роли, а WebSocket handshake остается ticket-only. | repository-change:2026-07-05 legacy-gis-api-guard |
 | 2026-07-04 | [[архитектура/frontend]] | Открытый Editor workspace теперь переживает reload вкладки: store сохраняет в `sessionStorage` только `workOrderId/editVersionId`, после `loadAssigned()` восстанавливает workspace через `fetchWorkspace()` и не вызывает повторный `POST /edit-versions`. | `apps/frontend/src/stores/workOrders.ts`, `apps/frontend/src/components/EditorWorkOrdersView.vue`, `apps/frontend/src/api/workOrders.ts` |
 | 2026-07-03 | [[архитектура/api_and_realtime]] | Auth API переведен на in-memory/session strategy: login ставит HttpOnly `geoservice_session`, raw session token не возвращается в JSON и хранится только как SHA-256 hash в `user.auth_sessions`, refresh атомарно ротирует session, logout отзывает session и очищает cookie, а `/auth/me` остается Bearer-only. | `apps/backend/utility_service/web_api/api/auth.py`, `apps/backend/utility_service/use_cases/services/auth_session_service.py`, `apps/backend/utility_service/infrastructure/postgresql/repositories/auth_session_repository.py`, `apps/backend/utility_service/infrastructure/postgresql/models/auth_session.py`, `apps/backend/utility_service/utils/settings.py` |
 | 2026-07-03 | [[архитектура/frontend]] | Frontend больше не сохраняет `access_token`/user в `localStorage`: auth store держит их только in-memory, restore идет через cookie `refreshSession()`, login/refresh/logout используют `withCredentials`, а HTTP 401 interceptor очищает только локальное состояние. | `apps/frontend/src/stores/auth.ts`, `apps/frontend/src/api/auth.ts`, `apps/frontend/src/api/http.ts` |

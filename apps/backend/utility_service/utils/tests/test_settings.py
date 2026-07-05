@@ -41,6 +41,27 @@ def test_settings_reads_websocket_ticket_ttl_seconds_from_env_alias() -> None:
     assert settings.websocket_ticket_ttl_seconds == 45
 
 
+def test_settings_defaults_legacy_gis_api_enabled_to_false() -> None:
+    settings = Settings(
+        DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+        DEV_MODE=True,
+        JWT_SECRET="CHANGE_ME_IN_ENV",
+    )
+
+    assert settings.legacy_gis_api_enabled is False
+
+
+def test_settings_reads_legacy_gis_api_enabled_from_env_alias() -> None:
+    settings = Settings(
+        DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+        DEV_MODE=True,
+        JWT_SECRET="CHANGE_ME_IN_ENV",
+        LEGACY_GIS_API_ENABLED=True,
+    )
+
+    assert settings.legacy_gis_api_enabled is True
+
+
 def test_settings_defaults_auth_session_cookie_values() -> None:
     settings = Settings(
         DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",

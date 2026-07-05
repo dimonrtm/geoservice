@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
+from utility_service.web_api.api import auth as auth_api
 from utility_service.web_api.api.auth import create_access_token
 from utility_service.use_cases.deps import (
     get_auth_service,
@@ -69,15 +70,15 @@ class FakeWebSocketTicketService:
         return self.user_context
 
 
-@pytest.mark.parametrize("role", ["editor", "reviewer"])
-def test_ws_layer_ticket_issue_accepts_authenticated_realtime_roles(role: str) -> None:
+def test_ws_layer_ticket_issue_accepts_editor_when_legacy_enabled(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
     layer_id = uuid4()
     user_id = uuid4()
-    token = create_access_token(str(user_id), role)
+    token = create_access_token(str(user_id), "editor")
     user = SimpleNamespace(
         id=user_id,
-        email=f"{role}@example.com",
-        role=SimpleNamespace(value=role),
+        email="editor@example.com",
+        role=SimpleNamespace(value="editor"),
         is_active=True,
     )
 
@@ -87,7 +88,7 @@ def test_ws_layer_ticket_issue_accepts_authenticated_realtime_roles(role: str) -
     async def get_layer_by_id(_layer_id):
         return SimpleNamespace(id=layer_id)
 
-    ticket_service = FakeWebSocketTicketService(ticket=f"{role}-ticket")
+    ticket_service = FakeWebSocketTicketService(ticket="editor-ticket")
     app = create_test_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
         SimpleNamespace(get_layer_by_id=get_layer_by_id),
@@ -102,10 +103,82 @@ def test_ws_layer_ticket_issue_accepts_authenticated_realtime_roles(role: str) -
 
     assert response.status_code == 200
     assert response.json() == {
-        "ticket": f"{role}-ticket",
+        "ticket": "editor-ticket",
         "expiresAt": "2026-07-02T10:00:00Z",
     }
     assert ticket_service.issued == [(user, layer_id)]
+
+
+def test_ws_layer_ticket_issue_rejects_editor_when_legacy_disabled(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", False)
+    layer_id = uuid4()
+    user_id = uuid4()
+    token = create_access_token(str(user_id), "editor")
+    user = SimpleNamespace(
+        id=user_id,
+        email="editor@example.com",
+        role=SimpleNamespace(value="editor"),
+        is_active=True,
+    )
+
+    async def get_user_by_id(_user_id):
+        return user
+
+    async def get_layer_by_id(_layer_id):
+        return SimpleNamespace(id=layer_id)
+
+    ticket_service = FakeWebSocketTicketService(ticket="editor-ticket")
+    app = create_test_app(
+        SimpleNamespace(get_user_by_id=get_user_by_id),
+        SimpleNamespace(get_layer_by_id=get_layer_by_id),
+        ticket_service=ticket_service,
+    )
+
+    with TestClient(app) as client:
+        response = client.post(
+            f"/api/v1/ws/layers/{layer_id}/ticket",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 403
+    assert response.json()["code"] == "LEGACY_GIS_API_DISABLED"
+    assert ticket_service.issued == []
+
+
+def test_ws_layer_ticket_issue_rejects_reviewer_when_legacy_enabled(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
+    layer_id = uuid4()
+    user_id = uuid4()
+    token = create_access_token(str(user_id), "reviewer")
+    user = SimpleNamespace(
+        id=user_id,
+        email="reviewer@example.com",
+        role=SimpleNamespace(value="reviewer"),
+        is_active=True,
+    )
+
+    async def get_user_by_id(_user_id):
+        return user
+
+    async def get_layer_by_id(_layer_id):
+        return SimpleNamespace(id=layer_id)
+
+    ticket_service = FakeWebSocketTicketService(ticket="reviewer-ticket")
+    app = create_test_app(
+        SimpleNamespace(get_user_by_id=get_user_by_id),
+        SimpleNamespace(get_layer_by_id=get_layer_by_id),
+        ticket_service=ticket_service,
+    )
+
+    with TestClient(app) as client:
+        response = client.post(
+            f"/api/v1/ws/layers/{layer_id}/ticket",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+    assert response.status_code == 403
+    assert response.json()["code"] == "ROLE_NOT_ALLOWED"
+    assert ticket_service.issued == []
 
 
 def test_ws_layer_ticket_issue_rejects_missing_auth() -> None:
@@ -130,7 +203,8 @@ def test_ws_layer_ticket_issue_rejects_missing_auth() -> None:
     assert response.json()["code"] == "AUTH_REQUIRED"
 
 
-def test_ws_layer_ticket_issue_returns_structured_layer_not_found() -> None:
+def test_ws_layer_ticket_issue_returns_structured_layer_not_found(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
     layer_id = uuid4()
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
@@ -166,8 +240,8 @@ def test_ws_layer_ticket_issue_returns_structured_layer_not_found() -> None:
     assert response.json()["code"] == "LAYER_NOT_FOUND"
 
 
-@pytest.mark.parametrize("role", ["editor", "reviewer"])
-def test_ws_layer_subscription_accepts_authorized_users(role: str) -> None:
+def test_ws_layer_subscription_accepts_valid_editor_ticket() -> None:
+    role = "editor"
     layer_id = uuid4()
     ticket = f"{role}-ticket"
     ticket_service = FakeWebSocketTicketService(ticket=ticket)

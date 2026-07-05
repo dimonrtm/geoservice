@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-04
-source: repository-change:2026-07-04
+updated: 2026-07-05
+source: repository-change:2026-07-05
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -46,6 +46,11 @@ tags: [code-wiki, technical-knowledge]
 
 ## Свежие Repository-Change Знания
 
+- 2026-07-05: [[архитектура/api_and_realtime]] и [[архитектура/backend]]
+  отражают legacy GIS API guard: `/api/v1/layers*` и
+  `/api/v1/ws/layers*/ticket` выключены по умолчанию через
+  `LEGACY_GIS_API_ENABLED=false`; при явном включении доступ разрешен только
+  активному `Editor`, а `Reviewer` не получает legacy layers/realtime.
 - 2026-07-04: [[архитектура/frontend]] отражает reload restore для открытого
   Editor workspace: frontend хранит в `sessionStorage` только
   `workOrderId/editVersionId`, после `loadAssigned()` восстанавливает workspace

@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-07-02
-source: repository-change:2026-07-02
+updated: 2026-07-05
+source: repository-change:2026-07-05
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -112,9 +112,10 @@ cross-schema FK или прямые обращения к чужим модел�
 
 ## Конфигурация И Безопасность
 
-`apps/backend/utility_service/utils/settings.py` читает `.env` через `pydantic-settings`. При
-`DEV_MODE=false` `JWT_SECRET` обязан быть явно задан и не может оставаться
-`CHANGE_ME_IN_ENV`.
+`apps/backend/utility_service/utils/settings.py` читает `.env` через
+`pydantic-settings`. При `DEV_MODE=false` `JWT_SECRET` обязан быть явно задан
+и не может оставаться `CHANGE_ME_IN_ENV`. Legacy GIS API выключен по
+умолчанию через `LEGACY_GIS_API_ENABLED=false`.
 
 HTTP auth использует JWT Bearer:
 
@@ -131,10 +132,20 @@ Bearer auth, затем открывает `/api/v1/ws/layers/{layer_id}?ticket=
 `UPDATE ... used_at IS NULL ... RETURNING`, чтобы один ticket нельзя было
 использовать повторно между несколькими backend instances.
 
+`POST /api/v1/ws/layers/{layer_id}/ticket` входит в legacy GIS API surface:
+при выключенном `LEGACY_GIS_API_ENABLED` он возвращает
+`403 LEGACY_GIS_API_DISABLED`, а при включенном flag доступен только активному
+`Editor`. Сам WebSocket handshake остается ticket-only и не принимает роль,
+JWT или cookie напрямую.
+
 Роли:
 
-- `editor` и `reviewer` могут читать layers/features и подписываться на realtime.
-- Только `editor` может создавать, изменять и удалять features.
+- Legacy `/api/v1/layers*` и `/api/v1/ws/layers*/ticket` выключены по
+  умолчанию и при явном включении доступны только активному `Editor`.
+- `Reviewer` не может читать legacy layers/features и не получает legacy layer
+  realtime ticket.
+- `require_legacy_gis_editor` сначала проверяет feature flag, затем применяет
+  editor role guard.
 - `get_current_user` после JWT decode загружает актуального `User` из БД и проверяет
   `is_active`; роль из JWT не является source of truth.
 - `require_editor` и `require_reviewer` реализуют взаимоисключающие role guards без прямой

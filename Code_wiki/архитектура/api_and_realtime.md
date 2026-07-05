@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-07-03
-source: repository-change:2026-07-03
+updated: 2026-07-05
+source: repository-change:2026-07-05
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -39,12 +39,22 @@ interceptor очищает локальное состояние без допо
 
 ## Layers And Features API
 
+Legacy GIS API `/api/v1/layers*` является compatibility surface, а не
+основным Utility Workflow API. По умолчанию `LEGACY_GIS_API_ENABLED=false`, и
+все layer read/write endpoints возвращают structured
+`403 LEGACY_GIS_API_DISABLED`. Если flag включен явно, endpoints доступны
+только активному `Editor`; `Reviewer` получает `403 ROLE_NOT_ALLOWED`.
+
 - `GET /api/v1/layers` возвращает список layers.
-- `GET /api/v1/layers/{layer_id}/features?bbox=...&limit=...&after_id=...` возвращает GeoJSON FeatureCollection и `meta`.
-- `GET /api/v1/layers/{layer_id}/features/{feature_id}` возвращает одну feature.
-- `POST /api/v1/layers/{layer_id}/features` создает feature, требует `editor`.
-- `PATCH /api/v1/layers/{layer_id}/features/{feature_id}` обновляет feature по optimistic `version`, требует `editor`.
-- `DELETE /api/v1/layers/{layer_id}/features/{feature_id}` удаляет feature по optimistic `version`, требует `editor`.
+- `GET /api/v1/layers/{layer_id}/features?bbox=...&limit=...&after_id=...`
+  возвращает GeoJSON FeatureCollection и `meta`.
+- `GET /api/v1/layers/{layer_id}/features/{feature_id}` возвращает одну
+  feature.
+- `POST /api/v1/layers/{layer_id}/features` создает feature.
+- `PATCH /api/v1/layers/{layer_id}/features/{feature_id}` обновляет feature
+  по optimistic `version`.
+- `DELETE /api/v1/layers/{layer_id}/features/{feature_id}` удаляет feature по
+  optimistic `version`.
 
 `bbox` валидируется как четыре числа с диапазонами долготы/широты. `limit` нормализуется backend-ом в диапазон `1..5000`; frontend обычно запрашивает `500`.
 
@@ -127,13 +137,16 @@ Endpoint подписки: `GET /api/v1/ws/layers/{layer_id}?ticket=...`.
 
 Server-side:
 
-- ticket issue endpoint требует обычный HTTP `Authorization: Bearer ...`;
+- ticket issue endpoint относится к legacy GIS API: при
+  `LEGACY_GIS_API_ENABLED=false` он возвращает
+  `403 LEGACY_GIS_API_DISABLED`, а при включенном flag требует активного
+  `Editor`;
 - raw ticket возвращается только клиенту и хранится в БД только как SHA-256 hash;
 - ticket короткоживущий, одноразовый и привязан к `layer_id`;
 - WebSocket handshake атомарно consumes ticket через `UPDATE ... used_at IS NULL ... RETURNING`;
 - missing/invalid/expired/reused/wrong-layer ticket отклоняется с policy violation `1008`;
 - старый `?token=<jwt>` больше не авторизует WebSocket;
-- роли `editor` и `reviewer` допускаются к read-only подписке;
+- `Reviewer` не получает legacy layer realtime ticket;
 - inactive user и unsupported role отклоняются с policy violation;
 - подписки группируются по `layer_id` в `WebSocketConnectionManager`;
 - feature create/update/delete публикуют события `feature_created`, `feature_updated`, `feature_deleted`.

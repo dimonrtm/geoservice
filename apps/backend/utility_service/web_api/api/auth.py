@@ -28,6 +28,8 @@ bearer = HTTPBearer(auto_error=False)
 auth_router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 EDITOR_ROLE = "editor"
 REVIEWER_ROLE = "reviewer"
+LEGACY_GIS_API_DISABLED_CODE = "LEGACY_GIS_API_DISABLED"
+LEGACY_GIS_API_DISABLED_MESSAGE = "Legacy GIS API отключен."
 SUPPORTED_AUTH_ROLES = {EDITOR_ROLE, REVIEWER_ROLE}
 SESSION_COOKIE_PATH = "/api/v1/auth"
 
@@ -122,6 +124,16 @@ def require_editor(user: Any = Depends(get_current_user)) -> Any:
             "Операция доступна только пользователю с ролью Editor.",
         )
     return user
+
+
+def require_legacy_gis_editor(user: Any = Depends(get_current_user)) -> Any:
+    if not settings.legacy_gis_api_enabled:
+        raise AuthApiError(
+            status.HTTP_403_FORBIDDEN,
+            LEGACY_GIS_API_DISABLED_CODE,
+            LEGACY_GIS_API_DISABLED_MESSAGE,
+        )
+    return require_editor(user)
 
 
 def require_reviewer(user: Any = Depends(get_current_user)) -> Any:

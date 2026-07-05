@@ -77,6 +77,36 @@ def test_role_guards_are_mutually_exclusive() -> None:
         auth_api.require_reviewer(editor)
 
 
+def test_legacy_gis_guard_returns_feature_flag_error_when_disabled(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", False)
+    editor = SimpleNamespace(role=SimpleNamespace(value="editor"))
+
+    with pytest.raises(AuthApiError) as exc_info:
+        auth_api.require_legacy_gis_editor(editor)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "LEGACY_GIS_API_DISABLED"
+    assert exc_info.value.message == "Legacy GIS API отключен."
+
+
+def test_legacy_gis_guard_allows_editor_when_enabled(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
+    editor = SimpleNamespace(role=SimpleNamespace(value="editor"))
+
+    assert auth_api.require_legacy_gis_editor(editor) is editor
+
+
+def test_legacy_gis_guard_rejects_reviewer_when_enabled(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
+    reviewer = SimpleNamespace(role=SimpleNamespace(value="reviewer"))
+
+    with pytest.raises(AuthApiError) as exc_info:
+        auth_api.require_legacy_gis_editor(reviewer)
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.code == "ROLE_NOT_ALLOWED"
+
+
 def build_secure_app(auth_service: object) -> FastAPI:
     app = FastAPI()
     install_exception_handlers(app)

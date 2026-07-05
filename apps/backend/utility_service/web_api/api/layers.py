@@ -23,10 +23,12 @@ from utility_service.use_cases.services.feature_service import FeatureService
 from utility_service.use_cases.services.layer_service import LayerService
 from utility_service.domain_services.bbox import parse_bbox
 from uuid import UUID
-from .auth import get_current_user, require_editor
+from .auth import require_legacy_gis_editor
 
 layers_router = APIRouter(
-    prefix="/api/v1/layers", tags=["layers"], dependencies=[Depends(get_current_user)]
+    prefix="/api/v1/layers",
+    tags=["layers"],
+    dependencies=[Depends(require_legacy_gis_editor)],
 )
 
 
@@ -49,7 +51,6 @@ async def get_layer_features_from_bbox(
 
 @layers_router.post(
     "/{layer_id}/features",
-    dependencies=[Depends(require_editor)],
     status_code=status.HTTP_201_CREATED,
     response_model=FeatureOut,
 )
@@ -66,7 +67,6 @@ async def create_feature(
 
 @layers_router.patch(
     "/{layer_id}/features/{feature_id}",
-    dependencies=[Depends(require_editor)],
     response_model=PatchFeatureSuccesResponse,
 )
 async def update_feature(
@@ -81,7 +81,6 @@ async def update_feature(
 
 @layers_router.delete(
     "/{layer_id}/features/{feature_id}",
-    dependencies=[Depends(require_editor)],
     response_model=DeleteFeatureResponse,
 )
 async def delete_feature(

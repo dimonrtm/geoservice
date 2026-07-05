@@ -24,7 +24,7 @@ from utility_service.use_cases.services.realtime_connection_manager import WebSo
 from utility_service.utils.settings import settings
 
 
-ALLOWED_REALTIME_ROLES = {"editor", "reviewer"}
+ALLOWED_REALTIME_ROLES = {"editor"}
 
 
 def hash_websocket_ticket(ticket: str) -> str:

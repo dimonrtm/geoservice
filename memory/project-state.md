@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-06-30
+updated: 2026-07-05
 source: null
 tags: [project-state, geoservice]
 ---
@@ -27,11 +27,11 @@ GeoService - исследовательский pet-проект на стади
 - Последний `/sync-vision`: 2026-06-30 22:12 +05:00, корневой индекс и live state синхронизированы; новых RAW inputs, новых wiki-нод и stale-нод не обнаружено.
 - Последняя проверка wiki lint: 2026-06-30, `scripts/lint-wiki.py --root .` через bundled Python нашел ожидаемые `missing_frontmatter` для 34 RAW Markdown files; новых lint-ошибок вне RAW source files не обнаружено, открытый follow-up `FU-2026-06-01-004` остается актуальным.
 - Последний repository-snapshot ingest: 2026-05-30, первичная инвентаризация backend, frontend, API/realtime, data model, Docker/CI и tests.
-- Последний `/ingest repository-change`: 2026-06-29, существующие ноды
-  `Code_wiki` синхронизированы с единым strict structured error contract
-  `{code, message, correlationId}` без `detail`/`details` для
-  auth/utility/workflow ошибок; invalid login возвращает
-  `INVALID_CREDENTIALS`, а `LoginScreen` читает только `message`.
+- Последний `/ingest repository-change`: 2026-07-05, существующие ноды
+  `Code_wiki` синхронизированы с legacy GIS API guard:
+  `/api/v1/layers*` и `/api/v1/ws/layers*/ticket` выключены по умолчанию через
+  `LEGACY_GIS_API_ENABLED=false`, а при явном включении доступны только
+  активному `Editor`; `Reviewer` не получает legacy layers/realtime.
 - `/ingest repository-change` применяется только если завершённая работа
   содержит новое устойчивое техническое знание для `Code_wiki`. Сам ingest
   определяет нужные ноды, создаёт или обновляет их и пишет компактный реестр;

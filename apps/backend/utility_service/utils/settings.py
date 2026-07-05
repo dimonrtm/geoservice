@@ -35,6 +35,7 @@ class Settings(BaseSettings):
         alias="AUTH_SESSION_COOKIE_SAMESITE",
     )
     dev_auth_enabled: bool = Field(False, alias="DEV_MODE")
+    legacy_gis_api_enabled: bool = Field(False, alias="LEGACY_GIS_API_ENABLED")
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> "Settings":
