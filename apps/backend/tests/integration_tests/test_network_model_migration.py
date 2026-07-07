@@ -14,7 +14,6 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 PREVIOUS_REVISION = "b82a5f2d91c3"
 NETWORK_REVISION = "d3a01f4e9c21"
 NETWORK_TABLES = {
-    "aois",
     "feeders",
     "network_features",
     "network_associations",
@@ -29,11 +28,9 @@ REQUIRED_CONSTRAINTS = {
     "ck_network_associations_no_self_reference",
 }
 REQUIRED_INDEXES = {
-    "ix_aois_geometry",
     "ix_network_features_geometry",
 }
 EXPECTED_SPATIAL_INDEXES = {
-    ("aois", "geometry"): "ix_aois_geometry",
     ("network_features", "geometry"): "ix_network_features_geometry",
 }
 

@@ -3,8 +3,8 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-06-22
-source: repository-change:2026-06-22
+updated: 2026-07-07
+source: repository-change:2026-07-07
 tags: [database, postgis, sqlalchemy, geojson]
 ---
 
@@ -14,7 +14,7 @@ tags: [database, postgis, sqlalchemy, geojson]
 
 ## Основные Таблицы
 
-- `user.users`: `id`, `email`, `password_hash`, `role`, `created_at`.
+- `user.users`: `id`, `email`, `password_hash`, `role`, `is_active`, `created_at`.
 - `layers`: `id`, `name`, `title`, `geometry_type`, `srid`, `storage_table`.
 - Feature tables: `feature_points`, `feature_lines`, `feature_polygons`, `feature_multipoints`, `feature_multilines`, `feature_multipolygons`.
 - Utility schema `utility_network`: `feeders`, `network_features`,
@@ -71,47 +71,27 @@ Alembic migrations лежат в
 - `0d9dcd16a92c_add_all_types_features.py` добавляет остальные feature tables.
 - `7f4dbcd151ee_add_layers.py` создает и upsert'ит стартовые слои.
 - `c6cef6320f1d_create_users.py` создает схему `user` и таблицу
-  `user.users`.
+  `user.users` сразу в production-like виде: роли `editor`/`reviewer`,
+  `password_hash`, `created_at` и `is_active`.
+- `b82a5f2d91c3_editor_reviewer_roles.py` является compatibility checkpoint:
+  модель ролей уже задана в `c6cef6320f1d`, поэтому ревизия не удаляет данные.
 - `d3a01f4e9c21_network_model.py` создает utility schema, feeder graph,
-  geometry/FK/check constraints и spatial indexes. Downgrade этой ревизии
-  использует `DROP ... IF EXISTS`, потому что более поздние schema-boundary
-  ревизии могут уже удалить `utility_network.aois` и часть индексов при откате
-  `head -> b82a5f2d91c3` в migration-cycle тестах.
-- `e4b7a9c2d5f8_work_orders.py` добавляет
-  `work_order.work_orders` со статусами `assigned`/`in_progress`, уникальным
-  `code`, индексами для assignment/status lookups и plain UUID полями
-  `assignee_user_id`/`created_by_user_id` без FK на `user.users`. Downgrade
-  этой ревизии использует `DROP ... IF EXISTS`, потому что более поздняя
-  schema-boundary ревизия может уже удалить `work_order.work_orders` и его
-  индексы при откате `head -> d3a01f4e9c21` в migration-cycle тестах.
-- `a8c1f2d3e4b5_edit_versions.py` добавляет
-  `utility_network.network_states`, per-WorkOrder
-  `utility_network.default_states`, `default_state_features`,
+  geometry/FK/check constraints и spatial index для `network_features`.
+  `utility_network.aois` больше не создаётся.
+- `e4b7a9c2d5f8_work_orders.py` создает `work_order.aois` и
+  `work_order.work_orders` с обязательным `aoi_id`, `fk_work_orders_aoi`,
+  индексами assignment/status/AOI и plain UUID полями
+  `assignee_user_id`/`created_by_user_id` без FK на `user.users`.
+- `a8c1f2d3e4b5_edit_versions.py` добавляет `utility_network.network_states`,
+  per-WorkOrder `utility_network.default_states`, `default_state_features`,
   `default_state_associations`, а также `work_order.edit_versions`,
-  `edit_version_features` и `edit_version_associations`. `DefaultState`
-  ссылается на work order plain UUID, хранит `base_network_revision` текущей
-  сети и в первом шаге имеет только статус `active`. `EditVersion` хранит
-  `base_network_revision`, статус `open` и partial unique index
-  `uq_edit_versions_open_work_order` для запрета двух открытых версий одного
-  work order. Downgrade этой ревизии использует `DROP ... IF EXISTS`, потому
-  что более поздняя schema-boundary ревизия может уже удалить эти таблицы при
-  откате `head -> d3a01f4e9c21` в migration-cycle тестах.
-- `f2b3c4d5e6a7_sprint1_schema_boundaries.py` является schema-boundary миграцией:
-  создает схемы `user`/`work_order`, переносит
-  `public.users` в `user.users` при необходимости, удаляет legacy
-  `utility_network.work_orders`/`utility_network.edit_versions`/`utility_network.aois`,
-  создает `work_order.aois`, `work_order.work_orders` с обязательным `aoi_id`
-  и новую схему таблиц без compatibility views. Downgrade этой ревизии удаляет
-  новые edit/default-state таблицы, но сохраняет/воссоздает
-  `work_order.work_orders` в контракте `e4b7a9c2d5f8`: без `aoi_id`,
-  `fk_work_orders_aoi` и `ix_work_orders_aoi_id`.
-- `c9d0e1f2a3b4_repair_work_order_aoi_scope.py` является repair-миграцией для
-  dev/CI volumes, где `alembic_version` уже помечен как `f2b3c4d5e6a7`, но
-  физическая таблица `work_order.work_orders` осталась без `aoi_id`. Миграция
-  создает `work_order.aois` при необходимости, переносит строки из legacy
-  `utility_network.aois`, добавляет `work_orders.aoi_id`, backfill'ит
-  отсутствующий scope fallback AOI, восстанавливает `fk_work_orders_aoi` и
-  `ix_work_orders_aoi_id`, затем удаляет legacy `utility_network.aois`.
+  `edit_version_features` и `edit_version_associations`.
+- `f2b3c4d5e6a7_sprint1_schema_boundaries.py` является compatibility
+  checkpoint. Актуальные schema-boundary объекты уже создаются в baseline
+  migrations, поэтому ревизия не выполняет cleanup старых volumes.
+- `c9d0e1f2a3b4_repair_work_order_aoi_scope.py` является compatibility
+  checkpoint. Old stamped dev volumes не поддерживаются как migration path, а
+  demo AOI создаётся через `SeedWorkOrderService`.
 
 `DefaultState.base_network_revision` должен совпадать с актуальной версией
 сети, от которой сделан срез. При `post` несовпадение этой версии с текущей

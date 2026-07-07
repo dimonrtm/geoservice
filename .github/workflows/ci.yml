@@ -158,6 +158,8 @@ jobs:
         working-directory: infra
         run: |
           docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
+            pytest tests/integration_tests/test_user_role_migration.py -q
+          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
             pytest tests/integration_tests/test_network_model_integration.py -q
           docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
             pytest tests/integration_tests/test_network_model_migration.py -q

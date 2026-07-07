@@ -76,11 +76,22 @@ cd infra
 docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev up --build
 ```
 
+Перед первым запуском ветки с production-like migration baseline пересоздайте
+старый disposable Postgres volume. Старые demo/dev volumes с уже примененными
+Alembic revisions не являются поддерживаемым migration path:
+
+```bash
+cd infra
+docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml down -v
+```
+
+После этого запустите demo/dev compose снова. Команда удаляет локальные данные
+Postgres и предназначена только для disposable demo/dev БД.
+
 Если после смены demo env `utility_service` становится unhealthy, а в логах
 есть `password authentication failed for user "postgres"`, локальный Docker
 volume `infra_geo_pgdata` был создан с другим паролем. Для disposable demo DB
-пересоздайте его командой `docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml down -v`
-и затем повторите запуск. Команда удаляет локальные данные Postgres.
+пересоздайте его командой выше и затем повторите запуск.
 
 Demo credentials:
 

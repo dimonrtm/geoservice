@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-07-05
-source: repository-change:2026-07-05
+updated: 2026-07-07
+source: repository-change:2026-07-07
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,7 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-07-07 | [[архитектура/data_model]], [[dev_setup/local_development]], [[deployment/docker_compose]], [[сборка/ci_and_quality]] | Зафиксирован production-like migration baseline: clean DB перед первым `alembic upgrade head`, `c6` сразу создает `editor`/`reviewer` и `is_active`, `d3` больше не владеет `utility_network.aois`, `e4` создает `work_order.aois`/`work_orders.aoi_id`, `b82`/`f2`/`c9` стали compatibility checkpoints, smoke CI запускает user-role migration contract, а старые disposable dev/demo volumes пересоздаются вместо автоматического repair. | repository-change:2026-07-07 production-like-migration-baseline |
 | 2026-07-05 | [[архитектура/api_and_realtime]] | Legacy GIS API `/api/v1/layers*` и ticket issue `/api/v1/ws/layers*/ticket` теперь описаны как compatibility surface: default `LEGACY_GIS_API_ENABLED=false`, disabled дает `LEGACY_GIS_API_DISABLED`, enabled допускает только активного `Editor`, а `Reviewer` не получает legacy layer realtime ticket. | repository-change:2026-07-05 legacy-gis-api-guard |
 | 2026-07-05 | [[архитектура/backend]] | Backend security boundary уточнен: `require_legacy_gis_editor` закрывает legacy layers/realtime ticket issue по feature flag и роли, а WebSocket handshake остается ticket-only. | repository-change:2026-07-05 legacy-gis-api-guard |
 | 2026-07-04 | [[архитектура/frontend]] | Открытый Editor workspace теперь переживает reload вкладки: store сохраняет в `sessionStorage` только `workOrderId/editVersionId`, после `loadAssigned()` восстанавливает workspace через `fetchWorkspace()` и не вызывает повторный `POST /edit-versions`. | `apps/frontend/src/stores/workOrders.ts`, `apps/frontend/src/components/EditorWorkOrdersView.vue`, `apps/frontend/src/api/workOrders.ts` |

@@ -30,14 +30,20 @@ def upgrade() -> None:
         sa.Column(
             "role",
             sa.Enum(
-                "viewer",
                 "editor",
+                "reviewer",
                 name="user_role",
                 native_enum=False,
                 create_constraint=True,
                 length=16,
             ),
             nullable=False,
+        ),
+        sa.Column(
+            "is_active",
+            sa.Boolean(),
+            nullable=False,
+            server_default=sa.text("true"),
         ),
         sa.Column(
             "created_at",

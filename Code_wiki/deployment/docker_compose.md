@@ -3,8 +3,8 @@ title: Docker Compose Deployment
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-17
-source: repository-change:2026-06-17
+updated: 2026-07-07
+source: repository-change:2026-07-07
 tags: [deployment, docker-compose, postgis]
 ---
 
@@ -38,6 +38,12 @@ Build context для backend: `apps/backend`.
 
 `infra/docker-compose.yml` описывает `postgis`, `migrate`, `utility_service`,
 `frontend-prod` и volume `geo_pgdata`.
+
+Production-like baseline предполагает clean PostgreSQL/PostGIS DB перед первым
+`alembic upgrade head`. Старые локальные `geo_pgdata`/`infra_geo_pgdata`
+volumes, созданные до переписывания destructive demo migrations, являются
+disposable dev state и пересоздаются через demo/dev `down -v`; production-safe
+startup не выполняет автоматический repair таких volumes.
 
 Важные детали:
 

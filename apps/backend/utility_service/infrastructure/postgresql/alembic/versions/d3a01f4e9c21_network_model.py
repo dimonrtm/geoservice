@@ -22,60 +22,6 @@ def upgrade() -> None:
     op.execute(sa.text("CREATE SCHEMA utility_network"))
 
     op.create_table(
-        "aois",
-        sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column("name", sa.String(length=200), nullable=False),
-        sa.Column("description", sa.Text(), nullable=True),
-        sa.Column(
-            "geometry",
-            geoalchemy2.Geometry(
-                geometry_type="GEOMETRY",
-                srid=4326,
-                spatial_index=False,
-            ),
-            nullable=False,
-        ),
-        sa.Column(
-            "created_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.Column(
-            "updated_at",
-            sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
-            nullable=False,
-        ),
-        sa.CheckConstraint(
-            "NOT ST_IsEmpty(geometry)",
-            name="ck_aois_geometry_not_empty",
-        ),
-        sa.CheckConstraint(
-            "ST_IsValid(geometry)",
-            name="ck_aois_geometry_valid",
-        ),
-        sa.CheckConstraint(
-            "ST_SRID(geometry) = 4326",
-            name="ck_aois_geometry_srid",
-        ),
-        sa.CheckConstraint(
-            "GeometryType(geometry) IN ('POLYGON', 'MULTIPOLYGON')",
-            name="ck_aois_geometry_type",
-        ),
-        sa.PrimaryKeyConstraint("id"),
-        schema="utility_network",
-    )
-    op.create_index(
-        "ix_aois_geometry",
-        "aois",
-        ["geometry"],
-        unique=False,
-        schema="utility_network",
-        postgresql_using="gist",
-    )
-
-    op.create_table(
         "feeders",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
         sa.Column("code", sa.String(length=100), nullable=False),
@@ -305,6 +251,4 @@ def downgrade() -> None:
     op.execute(sa.text("DROP INDEX IF EXISTS utility_network.ix_network_features_geometry"))
     op.execute(sa.text("DROP TABLE IF EXISTS utility_network.network_features"))
     op.execute(sa.text("DROP TABLE IF EXISTS utility_network.feeders"))
-    op.execute(sa.text("DROP INDEX IF EXISTS utility_network.ix_aois_geometry"))
-    op.execute(sa.text("DROP TABLE IF EXISTS utility_network.aois"))
     op.execute(sa.text("DROP SCHEMA IF EXISTS utility_network"))

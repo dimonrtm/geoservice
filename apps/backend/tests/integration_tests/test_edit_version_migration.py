@@ -13,7 +13,6 @@ from tests.integration_tests.network_db_support import require_db_tests
 APP_ROOT = Path(__file__).resolve().parents[2]
 PREVIOUS_REVISION = "e4b7a9c2d5f8"
 EDIT_VERSION_REVISION = "a8c1f2d3e4b5"
-SCHEMA_BOUNDARY_REVISION = "f2b3c4d5e6a7"
 SCHEMA_REPAIR_REVISION = "c9d0e1f2a3b4"
 NETWORK_SCHEMA = "utility_network"
 WORK_ORDER_SCHEMA = "work_order"
@@ -28,6 +27,7 @@ EDIT_VERSION_TABLES = {
     "edit_version_features",
     "edit_version_associations",
 }
+WORK_ORDER_BASELINE_TABLES = {"aois", "work_orders"}
 WORK_ORDER_TABLES = {"aois", "work_orders", *EDIT_VERSION_TABLES}
 REQUIRED_CONSTRAINTS = {
     "uq_network_states_name",
@@ -153,9 +153,9 @@ def assert_edit_version_schema_contract() -> None:
 def assert_edit_version_schema_absent() -> None:
     assert read_tables(NETWORK_SCHEMA, UTILITY_BASELINE_TABLES) == set()
     assert read_tables(WORK_ORDER_SCHEMA, EDIT_VERSION_TABLES) == set()
-    assert read_tables(WORK_ORDER_SCHEMA, {"work_orders"}) == {"work_orders"}
-    assert read_tables(WORK_ORDER_SCHEMA, {"aois"}) == set()
-    assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is False
+    assert read_tables(WORK_ORDER_SCHEMA, WORK_ORDER_BASELINE_TABLES) == WORK_ORDER_BASELINE_TABLES
+    assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is True
+    assert utility_network_aoi_exists() is False
 
 
 def test_edit_version_migration_upgrade_downgrade_upgrade_cycle() -> None:
@@ -176,24 +176,6 @@ def test_edit_version_migration_upgrade_downgrade_upgrade_cycle() -> None:
         assert_edit_version_schema_absent()
 
         command.upgrade(config, SCHEMA_REPAIR_REVISION)
-        assert_edit_version_schema_contract()
-    finally:
-        command.upgrade(config, "head")
-
-
-def test_schema_repair_migration_handles_stamped_boundary_without_aoi_id() -> None:
-    require_db_tests()
-    config = alembic_config()
-
-    try:
-        command.downgrade(config, PREVIOUS_REVISION)
-        command.upgrade(config, EDIT_VERSION_REVISION)
-        assert read_tables(WORK_ORDER_SCHEMA, {"work_orders"}) == {"work_orders"}
-        assert column_exists(WORK_ORDER_SCHEMA, "work_orders", "aoi_id") is False
-
-        command.stamp(config, SCHEMA_BOUNDARY_REVISION)
-        command.upgrade(config, SCHEMA_REPAIR_REVISION)
-
         assert_edit_version_schema_contract()
     finally:
         command.upgrade(config, "head")
@@ -270,21 +252,26 @@ ON CONFLICT (id) DO NOTHING
 def test_open_edit_version_partial_unique_index_blocks_duplicates() -> None:
     require_db_tests()
     config = alembic_config()
-    command.upgrade(config, SCHEMA_REPAIR_REVISION)
 
-    async def insert_duplicates() -> str:
-        engine = create_async_engine(os.environ["DATABASE_URL"])
-        try:
+    try:
+        command.downgrade(config, PREVIOUS_REVISION)
+        command.upgrade(config, SCHEMA_REPAIR_REVISION)
+
+        async def insert_duplicates() -> str:
+            engine = create_async_engine(os.environ["DATABASE_URL"])
             try:
-                async with engine.begin() as connection:
-                    await connection.execute(text(OPEN_VERSION_AOI_SQL))
-                    await connection.execute(text(OPEN_VERSION_DUPLICATE_SQL))
-            except Exception as exc:
-                return str(exc)
-            return ""
-        finally:
-            await engine.dispose()
+                try:
+                    async with engine.begin() as connection:
+                        await connection.execute(text(OPEN_VERSION_AOI_SQL))
+                        await connection.execute(text(OPEN_VERSION_DUPLICATE_SQL))
+                except Exception as exc:
+                    return str(exc)
+                return ""
+            finally:
+                await engine.dispose()
 
-    message = asyncio.run(insert_duplicates())
+        message = asyncio.run(insert_duplicates())
 
-    assert "uq_edit_versions_open_work_order" in message
+        assert "uq_edit_versions_open_work_order" in message
+    finally:
+        command.upgrade(config, "head")

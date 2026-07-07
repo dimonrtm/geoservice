@@ -3,8 +3,8 @@ title: Local Development
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-22
-source: repository-change:2026-06-22
+updated: 2026-07-07
+source: repository-change:2026-07-07
 tags: [dev-setup, docker, backend, frontend]
 ---
 
@@ -26,6 +26,10 @@ tags: [dev-setup, docker, backend, frontend]
 cd infra
 docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev up --build
 ```
+
+После перехода на production-like migration baseline старые disposable dev/demo
+volumes нужно пересоздать. Новая Alembic chain рассчитана на clean DB; old
+stamped volumes с промежуточной demo-схемой не чинятся автоматически.
 
 Сервисы:
 
@@ -56,14 +60,15 @@ UUID и при каждом старте backend приводит demo users к 
 и `is_active=true`. Повторный запуск не создаёт дубликаты.
 
 `python -m seeds.runners.seed_utility_dataset` создаёт
-`synthetic_utility_feeder_01`: 1 AOI, 19 features и 9 associations. Повторный
-запуск при существующем feeder является no-op и сохраняет ручные изменения.
+`synthetic_utility_feeder_01`: 19 features и 9 associations. Повторный запуск
+при существующем feeder является no-op и сохраняет ручные изменения. AOI больше
+не принадлежит utility dataset seed.
 
 `python -m seeds.runners.seed_work_orders` создаёт create-once `WO-001` после
-demo users и utility dataset. Повторный запуск при существующем `WO-001` не
-перезаписывает assignee, status, title или description, но гарантирует активный
-per-WorkOrder `DefaultState`, скопированный из текущего
-`synthetic_utility_feeder_01`.
+demo users и utility dataset, гарантирует `work_order.AOI` для рабочей области
+и активный per-WorkOrder `DefaultState`, скопированный из текущего
+`synthetic_utility_feeder_01`. Повторный запуск при существующем `WO-001` не
+перезаписывает assignee, status, title или description.
 
 Legacy credentials `editor@example.com` и `viewer@example.com` удалены.
 После login `Editor` попадает на экран `Мои наряды`: список назначенных ему work

@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-06-26
-source: repository-change:2026-06-26
+updated: 2026-07-07
+source: repository-change:2026-07-07
 tags: [ci, tests, lint, build]
 ---
 
@@ -34,8 +34,11 @@ baseline tables, `work_order` edit tables и partial unique index на одну
 открытую edit version. Integration tests лежат в
 `apps/backend/tests/integration_tests`, а CI запускает их как
 `pytest tests/integration_tests/<test_file>.py -q` внутри `utility_service`.
-Migration cycle удаляет данные utility schema при downgrade, поэтому перед authenticated API
-smoke CI повторно запускает `python -m seeds.runners.seed_utility_dataset`.
+Migration-cycle tests проверяют clean production-like Alembic chain:
+`upgrade -> downgrade -> upgrade` для user role, utility network и edit-version
+слоёв. Они больше не проверяют repair старых stamped volumes и не ожидают
+legacy `utility_network.aois`. Demo seed chain проверяется отдельными
+seed-проверками и authenticated API smoke gates.
 Для локального smoke после уже поднятого dev volume также нужен
 `python -m seeds.runners.seed_work_orders`, если проверяется создание
 `DefaultState`/`EditVersion` для demo work order. Затем Editor login проверяет
