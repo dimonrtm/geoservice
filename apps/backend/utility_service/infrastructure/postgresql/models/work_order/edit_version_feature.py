@@ -9,6 +9,7 @@ from sqlalchemy import (
     CheckConstraint,
     Enum as SAEnum,
     ForeignKey,
+    Index,
     Integer,
     String,
     UniqueConstraint,
@@ -34,6 +35,7 @@ class EditVersionOperationState(str, enum.Enum):
 class EditVersionFeature(Base):
     __tablename__ = "edit_version_features"
     __table_args__ = (
+        Index("ix_edit_version_features_geometry", "geometry", postgresql_using="gist"),
         UniqueConstraint(
             "edit_version_id",
             "asset_code",

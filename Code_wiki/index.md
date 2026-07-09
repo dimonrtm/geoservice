@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-05
-source: repository-change:2026-07-05
+updated: 2026-07-09
+source: repository-change:2026-07-09
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -46,6 +46,16 @@ tags: [code-wiki, technical-knowledge]
 
 ## Свежие Repository-Change Знания
 
+- 2026-07-09: [[архитектура/data_model]], [[правила_и_стиль/testing_strategy]] и
+  [[сборка/ci_and_quality]] отражают raw SQL workspace aggregate: SQL живет в
+  `sql/workspace_aggregate.sql`, `workspace_features AS MATERIALIZED` один раз
+  вычисляет AOI membership, а features/associations собираются из этого CTE за
+  один repository round trip.
+- 2026-07-09: [[архитектура/data_model]], [[правила_и_стиль/testing_strategy]] и
+  [[сборка/ci_and_quality]] отражают index hardening для workspace working-copy
+  tables: `ix_edit_version_features_geometry` и
+  `ix_edit_version_associations_edit_version_to_feature_id`, а migration contract
+  проверяет, что целевые index groups в каталоге БД не дублируются.
 - 2026-07-05: [[архитектура/api_and_realtime]] и [[архитектура/backend]]
   отражают legacy GIS API guard: `/api/v1/layers*` и
   `/api/v1/ws/layers*/ticket` выключены по умолчанию через

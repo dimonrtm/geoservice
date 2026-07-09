@@ -504,6 +504,19 @@ def test_edit_version_feature_metadata_preserves_future_network_ids() -> None:
     }.issubset(constraint_names(EditVersionFeature))
 
 
+def test_edit_version_feature_declares_exactly_one_spatial_index() -> None:
+    indexes = [
+        index
+        for index in EditVersionFeature.__table__.indexes
+        if tuple(column.name for column in index.columns) == ("geometry",)
+    ]
+
+    assert len(indexes) == 1
+    assert indexes[0].name == "ix_edit_version_features_geometry"
+    assert indexes[0].dialect_options["postgresql"]["using"] == "gist"
+    assert EditVersionFeature.__table__.c.geometry.type.spatial_index is False
+
+
 def test_edit_version_association_metadata_preserves_future_network_ids() -> None:
     assert EditVersionAssociation.__tablename__ == "edit_version_associations"
     assert EditVersionAssociation.__table__.schema == "work_order"
@@ -527,3 +540,15 @@ def test_edit_version_association_metadata_preserves_future_network_ids() -> Non
         "ck_edit_version_associations_network_version_positive",
         "ck_edit_version_associations_operation",
     }.issubset(constraint_names(EditVersionAssociation))
+
+
+def test_edit_version_association_declares_to_feature_lookup_index() -> None:
+    indexes = {
+        index.name: tuple(column.name for column in index.columns)
+        for index in EditVersionAssociation.__table__.indexes
+    }
+
+    assert indexes["ix_edit_version_associations_edit_version_to_feature_id"] == (
+        "edit_version_id",
+        "to_feature_id",
+    )

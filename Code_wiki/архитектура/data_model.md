@@ -3,8 +3,8 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-07-07
-source: repository-change:2026-07-07
+updated: 2026-07-09
+source: repository-change:2026-07-09
 tags: [database, postgis, sqlalchemy, geojson]
 ---
 
@@ -62,6 +62,14 @@ associations, у которых оба endpoint feature попали в рабо
 возвращается как GeoJSON через `ST_AsGeoJSON(...).cast(JSONB)`, AOI дополнительно
 возвращает extent.
 
+SQL для workspace aggregate вынесен в
+`apps/backend/utility_service/infrastructure/postgresql/sql/workspace_aggregate.sql`.
+Запрос сохраняет один round trip и текущий API repository/use-case слоя, но сначала
+строит `workspace_features AS MATERIALIZED`, а затем собирает `features_data` и
+`associations_data` через join к этому CTE. Это убирает повторное вычисление AOI
+membership и фиксирует правило: association попадает в workspace только когда оба
+ее endpoint feature входят в материализованный AOI-scoped набор.
+
 ## Миграции И Seed
 
 Alembic migrations лежат в
@@ -85,7 +93,11 @@ Alembic migrations лежат в
 - `a8c1f2d3e4b5_edit_versions.py` добавляет `utility_network.network_states`,
   per-WorkOrder `utility_network.default_states`, `default_state_features`,
   `default_state_associations`, а также `work_order.edit_versions`,
-  `edit_version_features` и `edit_version_associations`.
+  `edit_version_features` и `edit_version_associations`. Эта же baseline-ревизия
+  объявляет partial unique index `uq_edit_versions_open_work_order`, GiST index
+  `ix_edit_version_features_geometry` на `work_order.edit_version_features.geometry`
+  и btree lookup index `ix_edit_version_associations_edit_version_to_feature_id`
+  на `work_order.edit_version_associations(edit_version_id, to_feature_id)`.
 - `f2b3c4d5e6a7_sprint1_schema_boundaries.py` является compatibility
   checkpoint. Актуальные schema-boundary объекты уже создаются в baseline
   migrations, поэтому ревизия не выполняет cleanup старых volumes.

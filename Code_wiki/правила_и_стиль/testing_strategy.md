@@ -3,8 +3,8 @@ title: Testing Strategy
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-07-02
-source: repository-change:2026-07-02
+updated: 2026-07-09
+source: repository-change:2026-07-09
 tags: [testing, backend, frontend, quality]
 ---
 
@@ -52,17 +52,28 @@ Live service smoke runners лежат в `apps/backend/tests/smoke`. Файлы 
 - edit version metadata, aggregate `WorkOrderRepository`, `DefaultState`
   repository lookup, `EditVersionService` rules, Work Orders API open/reopen
   behavior, `baseNetworkRevision` response contract и structured errors;
+- raw SQL contract для `WorkOrderRepository.get_workspace_aggregate`: SQL грузится
+  из `sql/workspace_aggregate.sql`, repository делает один `session.execute`
+  round trip, мапит aggregate row в прежний API и возвращает `None`, если
+  work-order/edit-version context не найден;
 - Work Orders `assigned-to-me` API contract, Editor-only access, compact response
   without audit/date fields, service delegation и repository sorting by
   `updated_at DESC`, `code ASC`;
 - full path workspace smoke runner: login seeded `Editor`, получить `WO-001`
   через `assigned-to-me`, открыть или переоткрыть `EditVersion`, загрузить
   workspace и проверить AOI, 19 features и 9 associations;
+- seed-chain integration regression для workspace aggregate проверяет, что
+  association не попадает в response, если один endpoint feature лежит вне AOI,
+  даже когда второй endpoint находится внутри workspace;
 - PostGIS persistence, spatial AOI intersection и single-query feeder aggregate;
 - migration integration test для `a8c1f2d3e4b5_edit_versions.py`, включая
   upgrade/downgrade/upgrade cycle, `utility_network.network_states`,
   per-WorkOrder `DefaultState`, `work_order.edit_versions`, constraints и
-  partial unique index `uq_edit_versions_open_work_order`;
+  partial unique index `uq_edit_versions_open_work_order`; он также требует
+  `ix_edit_version_features_geometry`,
+  `ix_edit_version_associations_edit_version_to_feature_id` и проверяет через
+  каталог БД, что целевые index groups `geometry` и
+  `edit_version_id,to_feature_id` не дублируются;
 - utility mapping, structured errors и Editor-only API access;
 - architecture boundaries между `web_api`, `use_cases` и `infrastructure`.
 

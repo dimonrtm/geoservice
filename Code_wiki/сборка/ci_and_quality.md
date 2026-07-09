@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-07-07
-source: repository-change:2026-07-07
+updated: 2026-07-09
+source: repository-change:2026-07-09
 tags: [ci, tests, lint, build]
 ---
 
@@ -30,8 +30,12 @@ Smoke job также запускает PostGIS tests network model, migration c
 single-query repository. После EditVersion foundation в этот же блок добавлен
 `pytest tests/integration_tests/test_edit_version_migration.py -q`, который
 проверяет миграцию `a8c1f2d3e4b5_edit_versions.py`, `utility_network`
-baseline tables, `work_order` edit tables и partial unique index на одну
-открытую edit version. Integration tests лежат в
+baseline tables, `work_order` edit tables, partial unique index на одну
+открытую edit version, GiST index `ix_edit_version_features_geometry` и lookup
+index `ix_edit_version_associations_edit_version_to_feature_id`. Этот migration
+contract дополнительно группирует реальные индексы в каталоге БД по таблице,
+access method и колонкам, чтобы не допустить дублей целевых index groups.
+Integration tests лежат в
 `apps/backend/tests/integration_tests`, а CI запускает их как
 `pytest tests/integration_tests/<test_file>.py -q` внутри `utility_service`.
 Migration-cycle tests проверяют clean production-like Alembic chain:
@@ -54,6 +58,12 @@ GET /api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}/workspace`.
 из assigned list и проверяет связку login/assignment/open/workspace на seeded
 `WO-001`, expected AOI, 19 features и 9 associations. Browser E2E tooling в
 этот gate не входит.
+
+Для raw SQL workspace aggregate локальный focused gate дополнительно включает
+repository contract tests для `sql/workspace_aggregate.sql`, full seed-chain
+integration file и regression, где association с endpoint feature вне AOI
+исключается из workspace response. Format/lint scope остается стандартным:
+`black --check` и `ruff check` по измененным backend Python files.
 
 Локальные настройки:
 

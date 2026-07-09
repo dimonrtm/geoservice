@@ -44,7 +44,11 @@ REQUIRED_CONSTRAINTS = {
     "ck_edit_versions_base_network_revision_positive",
     "ck_edit_versions_status",
 }
-REQUIRED_INDEXES = {"uq_edit_versions_open_work_order"}
+REQUIRED_INDEXES = {
+    "uq_edit_versions_open_work_order",
+    "ix_edit_version_features_geometry",
+    "ix_edit_version_associations_edit_version_to_feature_id",
+}
 
 
 def alembic_config() -> Config:
@@ -57,6 +61,16 @@ async def scalar_set(sql: str, params: dict | None = None) -> set[str]:
         async with engine.connect() as connection:
             result = await connection.execute(text(sql), params or {})
             return set(result.scalars())
+    finally:
+        await engine.dispose()
+
+
+async def mapping_list(sql: str, params: dict | None = None) -> list[dict]:
+    engine = create_async_engine(os.environ["DATABASE_URL"])
+    try:
+        async with engine.connect() as connection:
+            result = await connection.execute(text(sql), params or {})
+            return [dict(row) for row in result.mappings().all()]
     finally:
         await engine.dispose()
 
@@ -105,6 +119,73 @@ def read_indexes(schema_name: str) -> set[str]:
     )
 
 
+def read_index_target_groups(
+    schema_name: str,
+    table_names: set[str],
+) -> dict[tuple[str, str, str], list[str]]:
+    rows = asyncio.run(
+        mapping_list(
+            """
+            WITH index_columns AS (
+                SELECT
+                    table_info.relname AS table_name,
+                    access_method.amname AS access_method,
+                    index_info.relname AS index_name,
+                    string_agg(
+                        attribute_info.attname,
+                        ','
+                        ORDER BY indexed_column.position
+                    ) AS indexed_columns
+                FROM pg_index AS index_metadata
+                JOIN pg_class AS table_info
+                  ON table_info.oid = index_metadata.indrelid
+                JOIN pg_namespace AS schema_info
+                  ON schema_info.oid = table_info.relnamespace
+                JOIN pg_class AS index_info
+                  ON index_info.oid = index_metadata.indexrelid
+                JOIN pg_am AS access_method
+                  ON access_method.oid = index_info.relam
+                JOIN LATERAL unnest(index_metadata.indkey)
+                  WITH ORDINALITY AS indexed_column(attnum, position)
+                  ON indexed_column.attnum > 0
+                JOIN pg_attribute AS attribute_info
+                  ON attribute_info.attrelid = table_info.oid
+                 AND attribute_info.attnum = indexed_column.attnum
+                WHERE schema_info.nspname = :schema_name
+                  AND table_info.relname = ANY(:table_names)
+                GROUP BY table_info.relname, access_method.amname, index_info.relname
+            )
+            SELECT
+                table_name,
+                access_method,
+                indexed_columns,
+                array_agg(index_name ORDER BY index_name) AS index_names
+            FROM index_columns
+            GROUP BY table_name, access_method, indexed_columns
+            """,
+            {"schema_name": schema_name, "table_names": list(table_names)},
+        )
+    )
+    return {
+        (row["table_name"], row["access_method"], row["indexed_columns"]): list(row["index_names"])
+        for row in rows
+    }
+
+
+def assert_workspace_index_targets_are_not_duplicated() -> None:
+    index_groups = read_index_target_groups(
+        WORK_ORDER_SCHEMA,
+        {"edit_version_features", "edit_version_associations"},
+    )
+
+    assert index_groups[("edit_version_features", "gist", "geometry")] == [
+        "ix_edit_version_features_geometry"
+    ]
+    assert index_groups[
+        ("edit_version_associations", "btree", "edit_version_id,to_feature_id")
+    ] == ["ix_edit_version_associations_edit_version_to_feature_id"]
+
+
 def column_exists(schema_name: str, table_name: str, column_name: str) -> bool:
     return (
         asyncio.run(
@@ -147,6 +228,7 @@ def assert_edit_version_schema_contract() -> None:
     constraints = read_constraints(NETWORK_SCHEMA) | read_constraints(WORK_ORDER_SCHEMA)
     assert REQUIRED_CONSTRAINTS.issubset(constraints)
     assert REQUIRED_INDEXES.issubset(read_indexes(WORK_ORDER_SCHEMA))
+    assert_workspace_index_targets_are_not_duplicated()
     assert utility_network_aoi_exists() is False
 
 

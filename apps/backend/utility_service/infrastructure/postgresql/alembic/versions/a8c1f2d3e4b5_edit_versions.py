@@ -398,6 +398,13 @@ def upgrade() -> None:
         ),
         schema="work_order",
     )
+    op.create_index(
+        "ix_edit_version_features_geometry",
+        "edit_version_features",
+        ["geometry"],
+        schema="work_order",
+        postgresql_using="gist",
+    )
     op.create_table(
         "edit_version_associations",
         sa.Column("edit_version_id", postgresql.UUID(as_uuid=True), nullable=False),
@@ -488,6 +495,12 @@ def upgrade() -> None:
             "association_type",
             name="uq_edit_version_associations_directed_edge",
         ),
+        schema="work_order",
+    )
+    op.create_index(
+        "ix_edit_version_associations_edit_version_to_feature_id",
+        "edit_version_associations",
+        ["edit_version_id", "to_feature_id"],
         schema="work_order",
     )
 

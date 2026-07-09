@@ -1,6 +1,8 @@
 import asyncio
 import os
+from uuid import uuid4
 
+from geoalchemy2.elements import WKTElement
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
@@ -24,9 +26,11 @@ from tests.integration_tests.network_db_support import (
 )
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
 from utility_service.infrastructure.postgresql.models.utility_network import (
+    AssociationType,
     DefaultState,
     DefaultStateAssociation,
     DefaultStateFeature,
+    FeatureType,
     Feeder,
     NetworkAssociation,
     NetworkFeature,
@@ -252,6 +256,73 @@ def test_seed_chain_workspace_aggregate_returns_work_order_scope() -> None:
         assert aggregate.work_order.code == SEED_WORK_ORDER_SPEC.code
         assert aggregate.aoi.id == SEED_WORK_ORDER_AOI_SPEC.id
         assert aggregate.aoi.name == SEED_WORK_ORDER_AOI_SPEC.name
+        assert len(aggregate.features_data) == 19
+        assert len(aggregate.associations_data) == 9
+
+    run_in_rollback_transaction(scenario)
+
+
+def test_workspace_aggregate_excludes_association_when_endpoint_feature_is_outside_aoi() -> None:
+    async def scenario(session: AsyncSession) -> None:
+        await remove_canonical_seed_chain(session)
+        await run_seed_chain(session)
+
+        assignee_id = next(
+            spec.id
+            for spec in SEED_DEMO_USER_SPECS
+            if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
+        )
+        result = await EditVersionService(
+            session,
+            UserRepository(session),
+            WorkOrderRepository(session),
+            DefaultStateRepository(session),
+        ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+
+        inside_feature = await session.scalar(
+            select(EditVersionFeature)
+            .where(EditVersionFeature.edit_version_id == result.edit_version.id)
+            .order_by(EditVersionFeature.asset_code)
+        )
+        assert inside_feature is not None
+
+        outside_feature_id = uuid4()
+        outside_association_id = uuid4()
+        session.add(
+            EditVersionFeature(
+                edit_version_id=result.edit_version.id,
+                feature_id=outside_feature_id,
+                asset_code="OUTSIDE-AOI-001",
+                feature_type=FeatureType.JUNCTION,
+                geometry=WKTElement("SRID=4326;POINT(66 45)", extended=True),
+                properties={"name": "Outside AOI"},
+                network_version=1,
+            )
+        )
+        await session.flush()
+        session.add(
+            EditVersionAssociation(
+                edit_version_id=result.edit_version.id,
+                association_id=outside_association_id,
+                association_type=AssociationType.CONNECTIVITY,
+                from_feature_id=inside_feature.feature_id,
+                to_feature_id=outside_feature_id,
+                properties={"reason": "endpoint outside AOI"},
+                network_version=1,
+            )
+        )
+        await session.flush()
+
+        aggregate = await WorkOrderRepository(session).get_workspace_aggregate(
+            work_order_id=SEED_WORK_ORDER_SPEC.id,
+            edit_version_id=result.edit_version.id,
+        )
+
+        assert aggregate is not None
+        feature_ids = {str(feature["id"]) for feature in aggregate.features_data}
+        association_ids = {str(association["id"]) for association in aggregate.associations_data}
+        assert str(outside_feature_id) not in feature_ids
+        assert str(outside_association_id) not in association_ids
         assert len(aggregate.features_data) == 19
         assert len(aggregate.associations_data) == 9
 

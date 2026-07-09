@@ -8,6 +8,7 @@ from sqlalchemy import (
     Enum as SAEnum,
     ForeignKey,
     ForeignKeyConstraint,
+    Index,
     Integer,
     UniqueConstraint,
     text,
@@ -28,6 +29,11 @@ from utility_service.infrastructure.postgresql.models.work_order.edit_version_fe
 class EditVersionAssociation(Base):
     __tablename__ = "edit_version_associations"
     __table_args__ = (
+        Index(
+            "ix_edit_version_associations_edit_version_to_feature_id",
+            "edit_version_id",
+            "to_feature_id",
+        ),
         ForeignKeyConstraint(
             ["edit_version_id", "from_feature_id"],
             [
