@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, WebSocketException, status
@@ -10,6 +9,7 @@ from utility_service.use_cases.deps import (
     get_websocket_connection_manager,
     get_websocket_ticket_service,
 )
+from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.web_api.api.auth import require_legacy_gis_editor
 from utility_service.utils.websocket_ticket_auth import authenticate_websocket_ticket
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
@@ -32,7 +32,7 @@ def _websocket_route_error(reason: str) -> WebSocketException:
 )
 async def issue_layer_websocket_ticket(
     layer_id: UUID,
-    user: Any = Depends(require_legacy_gis_editor),
+    user: AuthUserDTO = Depends(require_legacy_gis_editor),
     ticket_service: WebSocketTicketService = Depends(get_websocket_ticket_service),
 ) -> WebSocketTicketOut:
     return await ticket_service.issue_ticket(user, layer_id)

@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
+from typing import cast, get_type_hints
 from uuid import uuid4
 
 import pytest
@@ -9,6 +10,7 @@ from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiEr
 from utility_service.use_cases.domain.exceptions.websocket_ticket_error import (
     WebSocketTicketError,
 )
+from utility_service.use_cases.dtos import AuthRole, AuthUserDTO
 from utility_service.use_cases.services.websocket_ticket_service import (
     WebSocketTicketService,
     hash_websocket_ticket,
@@ -94,12 +96,21 @@ class FakeUserRepository:
         return None
 
 
-def make_user(role="editor", is_active=True):
+def make_orm_user(role: str = "editor", is_active: bool = True):
     return SimpleNamespace(
         id=uuid4(),
         email="editor@example.local",
         role=SimpleNamespace(value=role),
         is_active=is_active,
+    )
+
+
+def make_auth_user(user) -> AuthUserDTO:
+    return AuthUserDTO(
+        id=user.id,
+        email=user.email,
+        role=cast(AuthRole, user.role.value),
+        is_active=user.is_active,
     )
 
 
@@ -124,18 +135,22 @@ def test_hash_websocket_ticket_uses_sha_256_hex() -> None:
     )
 
 
-def test_issue_ticket_stores_hash_and_returns_raw_ticket() -> None:
-    user = make_user()
-    layer = SimpleNamespace(id=uuid4())
-    service, repository = build_service(user, layer)
+def test_issue_ticket_accepts_auth_user_dto() -> None:
+    assert get_type_hints(WebSocketTicketService.issue_ticket)["user"] is AuthUserDTO
 
-    result = asyncio.run(service.issue_ticket(user, layer.id))
+
+def test_issue_ticket_stores_hash_and_returns_raw_ticket() -> None:
+    orm_user = make_orm_user()
+    layer = SimpleNamespace(id=uuid4())
+    service, repository = build_service(orm_user, layer)
+
+    result = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
 
     assert result.ticket
     assert result.expires_at > datetime.now(timezone.utc)
     assert repository.created[0].ticket_hash == hash_websocket_ticket(result.ticket)
     assert repository.created[0].ticket_hash != result.ticket
-    assert repository.created[0].user_id == user.id
+    assert repository.created[0].user_id == orm_user.id
     assert repository.created[0].layer_id == layer.id
     assert service.session.begin_calls == 1
     assert service.session.completed_begin_calls == 1
@@ -143,12 +158,12 @@ def test_issue_ticket_stores_hash_and_returns_raw_ticket() -> None:
 
 @pytest.mark.parametrize("role", ["viewer", "reviewer"])
 def test_issue_ticket_rejects_role_not_allowed(role: str) -> None:
-    user = make_user(role=role)
+    orm_user = make_orm_user(role=role)
     layer = SimpleNamespace(id=uuid4())
-    service, _repository = build_service(user, layer)
+    service, _repository = build_service(orm_user, layer)
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(service.issue_ticket(user, layer.id))
+        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "ROLE_NOT_ALLOWED"
@@ -157,12 +172,12 @@ def test_issue_ticket_rejects_role_not_allowed(role: str) -> None:
 
 
 def test_issue_ticket_rejects_inactive_user() -> None:
-    user = make_user(is_active=False)
+    orm_user = make_orm_user(is_active=False)
     layer = SimpleNamespace(id=uuid4())
-    service, _repository = build_service(user, layer)
+    service, _repository = build_service(orm_user, layer)
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(service.issue_ticket(user, layer.id))
+        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "USER_INACTIVE"
@@ -171,12 +186,12 @@ def test_issue_ticket_rejects_inactive_user() -> None:
 
 
 def test_issue_ticket_rejects_missing_layer_with_structured_404() -> None:
-    user = make_user()
+    orm_user = make_orm_user()
     layer_id = uuid4()
-    service, _repository = build_service(user, None)
+    service, _repository = build_service(orm_user, None)
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(service.issue_ticket(user, layer_id))
+        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer_id))
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.code == "LAYER_NOT_FOUND"
@@ -185,15 +200,15 @@ def test_issue_ticket_rejects_missing_layer_with_structured_404() -> None:
 
 
 def test_consume_ticket_returns_user_context_once() -> None:
-    user = make_user(role="editor")
+    orm_user = make_orm_user(role="editor")
     layer = SimpleNamespace(id=uuid4())
-    service, _repository = build_service(user, layer)
-    issued = asyncio.run(service.issue_ticket(user, layer.id))
+    service, _repository = build_service(orm_user, layer)
+    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
 
     context = asyncio.run(service.consume_ticket(issued.ticket, layer.id))
 
-    assert context.user_id == user.id
-    assert context.email == user.email
+    assert context.user_id == orm_user.id
+    assert context.email == orm_user.email
     assert context.role == "editor"
     assert service.session.begin_calls == 2
     assert service.session.completed_begin_calls == 2
@@ -207,31 +222,31 @@ def test_consume_ticket_returns_user_context_once() -> None:
 
 
 def test_consume_ticket_rejects_wrong_layer() -> None:
-    user = make_user()
+    orm_user = make_orm_user()
     layer = SimpleNamespace(id=uuid4())
-    service, _repository = build_service(user, layer)
-    issued = asyncio.run(service.issue_ticket(user, layer.id))
+    service, _repository = build_service(orm_user, layer)
+    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
 
     with pytest.raises(WebSocketTicketError):
         asyncio.run(service.consume_ticket(issued.ticket, uuid4()))
 
 
 def test_consume_ticket_rejects_reviewer_user_after_ticket_row_exists() -> None:
-    user = make_user(role="reviewer")
+    orm_user = make_orm_user(role="reviewer")
     layer = SimpleNamespace(id=uuid4())
     repository = FakeTicketRepository()
     service = WebSocketTicketService(
         DummySession(),
         repository,
         FakeLayerRepository(layer),
-        FakeUserRepository(user),
+        FakeUserRepository(orm_user),
         ticket_ttl_seconds=60,
     )
     ticket = "reviewer-ticket"
     repository.created.append(
         SimpleNamespace(
             ticket_hash=hash_websocket_ticket(ticket),
-            user_id=user.id,
+            user_id=orm_user.id,
             layer_id=layer.id,
             expires_at=datetime.now(timezone.utc) + timedelta(seconds=60),
         )
@@ -242,11 +257,11 @@ def test_consume_ticket_rejects_reviewer_user_after_ticket_row_exists() -> None:
 
 
 def test_consume_ticket_rejects_inactive_user_after_issue() -> None:
-    user = make_user(is_active=True)
+    orm_user = make_orm_user(is_active=True)
     layer = SimpleNamespace(id=uuid4())
-    service, repository = build_service(user, layer)
-    issued = asyncio.run(service.issue_ticket(user, layer.id))
-    user.is_active = False
+    service, repository = build_service(orm_user, layer)
+    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
+    orm_user.is_active = False
 
     with pytest.raises(WebSocketTicketError):
         asyncio.run(service.consume_ticket(issued.ticket, layer.id))
@@ -256,21 +271,21 @@ def test_consume_ticket_rejects_inactive_user_after_issue() -> None:
 
 
 def test_consume_ticket_rejects_expired_ticket() -> None:
-    user = make_user()
+    orm_user = make_orm_user()
     layer = SimpleNamespace(id=uuid4())
     repository = FakeTicketRepository()
     service = WebSocketTicketService(
         DummySession(),
         repository,
         FakeLayerRepository(layer),
-        FakeUserRepository(user),
+        FakeUserRepository(orm_user),
         ticket_ttl_seconds=60,
     )
     ticket = "expired-ticket"
     repository.created.append(
         SimpleNamespace(
             ticket_hash=hash_websocket_ticket(ticket),
-            user_id=user.id,
+            user_id=orm_user.id,
             layer_id=layer.id,
             expires_at=datetime.now(timezone.utc) - timedelta(seconds=1),
         )

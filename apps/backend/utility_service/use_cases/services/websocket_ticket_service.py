@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
-from typing import Any
 from uuid import UUID
 
 from fastapi import status
@@ -19,6 +18,7 @@ from utility_service.use_cases.domain.exceptions.websocket_ticket_error import (
     INVALID_WEBSOCKET_TICKET_MESSAGE,
     WebSocketTicketError,
 )
+from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
 from utility_service.use_cases.services.realtime_connection_manager import WebSocketUserContext
 from utility_service.utils.settings import settings
@@ -29,11 +29,6 @@ ALLOWED_REALTIME_ROLES = {"editor"}
 
 def hash_websocket_ticket(ticket: str) -> str:
     return hashlib.sha256(ticket.encode("utf-8")).hexdigest()
-
-
-def _role_value(user: Any) -> str:
-    role = getattr(user, "role", "")
-    return str(getattr(role, "value", role))
 
 
 class WebSocketTicketService:
@@ -55,8 +50,8 @@ class WebSocketTicketService:
             else settings.websocket_ticket_ttl_seconds
         )
 
-    async def issue_ticket(self, user: Any, layer_id: UUID) -> WebSocketTicketOut:
-        if _role_value(user) not in ALLOWED_REALTIME_ROLES:
+    async def issue_ticket(self, user: AuthUserDTO, layer_id: UUID) -> WebSocketTicketOut:
+        if user.role not in ALLOWED_REALTIME_ROLES:
             raise AuthApiError(
                 status.HTTP_403_FORBIDDEN,
                 "ROLE_NOT_ALLOWED",
@@ -102,11 +97,11 @@ class WebSocketTicketService:
             user_id = ticket_row.user_id
 
         user = await self.user_repository.get_by_id(user_id)
-        if user is None or not user.is_active or _role_value(user) not in ALLOWED_REALTIME_ROLES:
+        if user is None or not user.is_active or user.role.value not in ALLOWED_REALTIME_ROLES:
             raise WebSocketTicketError(INVALID_WEBSOCKET_TICKET_MESSAGE)
 
         return WebSocketUserContext(
             user_id=user.id,
             email=user.email,
-            role=_role_value(user),
+            role=user.role.value,
         )

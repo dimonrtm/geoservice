@@ -1,4 +1,3 @@
-from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import UUID, uuid4
 
@@ -7,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from utility_service.web_api.api.auth import create_access_token
 from utility_service.use_cases.deps import get_auth_service, get_utility_network_service
+from utility_service.use_cases.dtos import AuthRole
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.utility_network import utility_network_router
 from utility_service.use_cases.domain.exceptions.utility_network_api_error import (
@@ -17,6 +17,7 @@ from utility_service.use_cases.schemas.utility_network import (
     UtilityFeatureCollectionOut,
     UtilityFeederOut,
 )
+from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
 FEEDER_ID = UUID("6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0101")
@@ -33,14 +34,17 @@ def build_app(auth_service: object, utility_service: object) -> FastAPI:
     return app
 
 
-def auth_context(role: str, *, is_active: bool = True) -> tuple[AsyncMock, str]:
+def auth_context(
+    role: AuthRole,
+    *,
+    is_active: bool = True,
+) -> tuple[AsyncMock, str]:
     user_id = uuid4()
     token = create_access_token(str(user_id), role)
     auth_service = AsyncMock()
-    auth_service.get_user_by_id.return_value = SimpleNamespace(
-        id=user_id,
-        email=f"{role}@example.local",
-        role=SimpleNamespace(value=role),
+    auth_service.get_user_by_id.return_value = auth_user(
+        role,
+        user_id=user_id,
         is_active=is_active,
     )
     return auth_service, token

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
@@ -10,6 +9,7 @@ from utility_service.use_cases.deps import (
     get_work_order_service,
     get_workspace_service,
 )
+from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.schemas.edit_version import EditVersionOut, OpenEditVersionOut
 from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut
 from utility_service.use_cases.schemas.workspace import WorkspaceOut
@@ -27,7 +27,7 @@ work_orders_router = APIRouter(prefix="/api/v1/work-orders", tags=["work-orders"
     response_model=AssignedWorkOrdersOut,
 )
 async def list_assigned_to_me(
-    user: Any = Depends(require_editor),
+    user: AuthUserDTO = Depends(require_editor),
     work_order_service: WorkOrderService = Depends(get_work_order_service),
 ) -> AssignedWorkOrdersOut:
     return await work_order_service.list_assigned_to_editor(user.id)
@@ -41,7 +41,7 @@ async def list_assigned_to_me(
 async def open_edit_version(
     work_order_id: UUID,
     response: Response,
-    user: Any = Depends(require_editor),
+    user: AuthUserDTO = Depends(require_editor),
     edit_version_service: EditVersionService = Depends(get_edit_version_service),
 ) -> OpenEditVersionOut:
     result = await edit_version_service.open_for_work_order(work_order_id, user.id)
@@ -71,7 +71,7 @@ async def open_edit_version(
 async def get_workspace(
     work_order_id: UUID,
     edit_version_id: UUID,
-    user: Any = Depends(require_editor),
+    user: AuthUserDTO = Depends(require_editor),
     workspace_service: WorkspaceService = Depends(get_workspace_service),
 ) -> WorkspaceOut:
     return await workspace_service.get_workspace(

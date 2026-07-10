@@ -7,6 +7,7 @@ from uuid import uuid4
 import pytest
 
 from utility_service.utils.passwords import hash_password
+from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.services.auth_service import AuthService
 
@@ -31,7 +32,7 @@ def build_service(repository: AsyncMock) -> tuple[AuthService, FakeReadSession]:
     return AuthService(session=session, user_repository=repository), session
 
 
-def test_authenticate_user_returns_user_for_valid_credentials() -> None:
+def test_authenticate_user_returns_dto_for_valid_credentials() -> None:
     user = SimpleNamespace(
         id=uuid4(),
         email="editor@example.com",
@@ -45,7 +46,12 @@ def test_authenticate_user_returns_user_for_valid_credentials() -> None:
 
     result = asyncio.run(service.authenticate_user("editor@example.com", "editor-password"))
 
-    assert result is user
+    assert result == AuthUserDTO(
+        id=user.id,
+        email=user.email,
+        role="editor",
+        is_active=True,
+    )
     repository.get_by_email.assert_awaited_once_with("editor@example.com")
 
 
@@ -70,14 +76,19 @@ def test_authenticate_user_closes_read_transaction_before_session_reuse() -> Non
 
     result = asyncio.run(service.authenticate_user("editor@example.com", "editor-password"))
 
-    assert result is user
+    assert result == AuthUserDTO(
+        id=user.id,
+        email=user.email,
+        role="editor",
+        is_active=True,
+    )
     assert session.begin_calls == 1
     assert session.in_transaction is False
     assert get_by_email_in_transaction == [True]
     repository.get_by_email.assert_awaited_once_with("editor@example.com")
 
 
-def test_get_user_by_id_closes_read_transaction_before_session_reuse() -> None:
+def test_get_user_by_id_returns_dto_after_closing_read_transaction() -> None:
     user = SimpleNamespace(
         id=uuid4(),
         email="editor@example.com",
@@ -92,7 +103,12 @@ def test_get_user_by_id_closes_read_transaction_before_session_reuse() -> None:
 
     result = asyncio.run(service.get_user_by_id(user.id))
 
-    assert result is user
+    assert result == AuthUserDTO(
+        id=user.id,
+        email=user.email,
+        role="editor",
+        is_active=True,
+    )
     assert session.begin_calls == 1
     assert session.in_transaction is False
     repository.get_by_id.assert_awaited_once_with(user.id)

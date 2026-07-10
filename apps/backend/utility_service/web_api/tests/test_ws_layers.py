@@ -19,6 +19,7 @@ from utility_service.use_cases.domain.exceptions.websocket_ticket_error import W
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
 from utility_service.web_api.api.ws_layers import ws_layers_router
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.tests.auth_user_factory import auth_user
 from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
     WebSocketUserContext,
@@ -75,12 +76,7 @@ def test_ws_layer_ticket_issue_accepts_editor_when_legacy_enabled(monkeypatch) -
     layer_id = uuid4()
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
-    user = SimpleNamespace(
-        id=user_id,
-        email="editor@example.com",
-        role=SimpleNamespace(value="editor"),
-        is_active=True,
-    )
+    user = auth_user("editor", user_id=user_id)
 
     async def get_user_by_id(_user_id):
         return user
@@ -114,12 +110,7 @@ def test_ws_layer_ticket_issue_rejects_editor_when_legacy_disabled(monkeypatch) 
     layer_id = uuid4()
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
-    user = SimpleNamespace(
-        id=user_id,
-        email="editor@example.com",
-        role=SimpleNamespace(value="editor"),
-        is_active=True,
-    )
+    user = auth_user("editor", user_id=user_id)
 
     async def get_user_by_id(_user_id):
         return user
@@ -150,12 +141,7 @@ def test_ws_layer_ticket_issue_rejects_reviewer_when_legacy_enabled(monkeypatch)
     layer_id = uuid4()
     user_id = uuid4()
     token = create_access_token(str(user_id), "reviewer")
-    user = SimpleNamespace(
-        id=user_id,
-        email="reviewer@example.com",
-        role=SimpleNamespace(value="reviewer"),
-        is_active=True,
-    )
+    user = auth_user("reviewer", user_id=user_id)
 
     async def get_user_by_id(_user_id):
         return user
@@ -208,12 +194,7 @@ def test_ws_layer_ticket_issue_returns_structured_layer_not_found(monkeypatch) -
     layer_id = uuid4()
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
-    user = SimpleNamespace(
-        id=user_id,
-        email="editor@example.local",
-        role=SimpleNamespace(value="editor"),
-        is_active=True,
-    )
+    user = auth_user("editor", user_id=user_id)
 
     async def get_user_by_id(_user_id):
         return user
@@ -303,12 +284,7 @@ def test_ws_layer_subscription_rejects_legacy_jwt_query_token() -> None:
     ticket_service = FakeWebSocketTicketService()
 
     async def get_user_by_id(_user_id):
-        return SimpleNamespace(
-            id=user_id,
-            email="editor@example.local",
-            role=SimpleNamespace(value="editor"),
-            is_active=True,
-        )
+        return auth_user("editor", user_id=user_id)
 
     async def get_layer_by_id(_layer_id):
         return SimpleNamespace(id=layer_id)

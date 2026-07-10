@@ -1,5 +1,6 @@
 import asyncio
 from types import SimpleNamespace
+from typing import get_type_hints
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
@@ -9,6 +10,9 @@ from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
     WorkOrderStatus,
+)
+from utility_service.infrastructure.postgresql.repository_rows.workspace import (
+    WorkspaceAggregateRow,
 )
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
 from utility_service.use_cases.services.workspace_service import WorkspaceService
@@ -90,6 +94,12 @@ def build_service(actor, aggregate) -> WorkspaceService:
         user_repository=repository(get_by_id=actor),
         work_order_repository=repository(get_workspace_aggregate=aggregate),
     )
+
+
+def test_workspace_from_aggregate_uses_repository_row_contract() -> None:
+    annotation = get_type_hints(WorkspaceService.workspace_from_aggregate)["aggregate"]
+
+    assert annotation is WorkspaceAggregateRow
 
 
 def test_editor_gets_workspace_for_assigned_open_edit_version() -> None:

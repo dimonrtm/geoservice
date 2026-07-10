@@ -11,6 +11,9 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
     WorkOrderStatus,
 )
+from utility_service.infrastructure.postgresql.repository_rows.workspace import (
+    WorkspaceAggregateRow,
+)
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
     WorkOrderRepository,
@@ -83,7 +86,10 @@ class WorkspaceService:
                 "Workspace невозможно сформировать из текущих данных.",
             ) from exc
 
-    def workspace_from_aggregate(self, aggregate: Any) -> WorkspaceOut:
+    def workspace_from_aggregate(
+        self,
+        aggregate: WorkspaceAggregateRow,
+    ) -> WorkspaceOut:
         if aggregate.aoi is None:
             raise ValueError("missing AOI")
 

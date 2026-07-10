@@ -27,6 +27,7 @@ from utility_service.web_api.api import auth as auth_api
 from utility_service.web_api.api.auth import create_access_token
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.layers import layers_router
+from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
 USER_ID = UUID("10000000-0000-0000-0000-000000000001")
@@ -140,12 +141,7 @@ def feature_out(version: int, properties: dict[str, object]) -> FeatureOut:
 
 
 def build_app(role: str, layer_service: FakeLayerService, feature_service: FakeFeatureService):
-    user = SimpleNamespace(
-        id=USER_ID,
-        email=f"{role}@example.local",
-        role=SimpleNamespace(value=role),
-        is_active=True,
-    )
+    user = auth_user(role, user_id=USER_ID)
 
     async def get_user_by_id(_user_id):
         return user

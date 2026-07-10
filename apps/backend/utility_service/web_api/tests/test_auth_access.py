@@ -1,5 +1,4 @@
 import asyncio
-from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
@@ -14,6 +13,7 @@ from utility_service.use_cases.deps import get_auth_service
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.secure_router import secure_router
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
+from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
 def credentials(token: str) -> HTTPAuthorizationCredentials:
@@ -23,12 +23,7 @@ def credentials(token: str) -> HTTPAuthorizationCredentials:
 def test_get_current_user_uses_current_database_role() -> None:
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
-    current_user = SimpleNamespace(
-        id=user_id,
-        email="marina.reviewer@example.local",
-        role=SimpleNamespace(value="reviewer"),
-        is_active=True,
-    )
+    current_user = auth_user("reviewer", user_id=user_id)
     auth_service = AsyncMock()
     auth_service.get_user_by_id.return_value = current_user
 
@@ -51,9 +46,9 @@ def test_get_current_user_rejects_inactive_user() -> None:
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
     auth_service = AsyncMock()
-    auth_service.get_user_by_id.return_value = SimpleNamespace(
-        id=user_id,
-        role=SimpleNamespace(value="editor"),
+    auth_service.get_user_by_id.return_value = auth_user(
+        "editor",
+        user_id=user_id,
         is_active=False,
     )
 
@@ -65,8 +60,8 @@ def test_get_current_user_rejects_inactive_user() -> None:
 
 
 def test_role_guards_are_mutually_exclusive() -> None:
-    editor = SimpleNamespace(role=SimpleNamespace(value="editor"))
-    reviewer = SimpleNamespace(role=SimpleNamespace(value="reviewer"))
+    editor = auth_user("editor")
+    reviewer = auth_user("reviewer")
 
     assert auth_api.require_editor(editor) is editor
     assert auth_api.require_reviewer(reviewer) is reviewer
@@ -79,7 +74,7 @@ def test_role_guards_are_mutually_exclusive() -> None:
 
 def test_legacy_gis_guard_returns_feature_flag_error_when_disabled(monkeypatch) -> None:
     monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", False)
-    editor = SimpleNamespace(role=SimpleNamespace(value="editor"))
+    editor = auth_user("editor")
 
     with pytest.raises(AuthApiError) as exc_info:
         auth_api.require_legacy_gis_editor(editor)
@@ -91,14 +86,14 @@ def test_legacy_gis_guard_returns_feature_flag_error_when_disabled(monkeypatch) 
 
 def test_legacy_gis_guard_allows_editor_when_enabled(monkeypatch) -> None:
     monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
-    editor = SimpleNamespace(role=SimpleNamespace(value="editor"))
+    editor = auth_user("editor")
 
     assert auth_api.require_legacy_gis_editor(editor) is editor
 
 
 def test_legacy_gis_guard_rejects_reviewer_when_enabled(monkeypatch) -> None:
     monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
-    reviewer = SimpleNamespace(role=SimpleNamespace(value="reviewer"))
+    reviewer = auth_user("reviewer")
 
     with pytest.raises(AuthApiError) as exc_info:
         auth_api.require_legacy_gis_editor(reviewer)
@@ -115,16 +110,11 @@ def build_secure_app(auth_service: object) -> FastAPI:
     return app
 
 
-def test_secure_ping_uses_database_user_model() -> None:
+def test_secure_ping_uses_auth_user_dto() -> None:
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
     auth_service = AsyncMock()
-    auth_service.get_user_by_id.return_value = SimpleNamespace(
-        id=user_id,
-        email="alexey.editor@example.local",
-        role=SimpleNamespace(value="editor"),
-        is_active=True,
-    )
+    auth_service.get_user_by_id.return_value = auth_user("editor", user_id=user_id)
 
     response = TestClient(build_secure_app(auth_service)).get(
         "/api/v1/secure/ping",
@@ -143,12 +133,7 @@ def test_reviewer_gets_structured_403_from_editor_endpoint() -> None:
     user_id = uuid4()
     token = create_access_token(str(user_id), "reviewer")
     auth_service = AsyncMock()
-    auth_service.get_user_by_id.return_value = SimpleNamespace(
-        id=user_id,
-        email="marina.reviewer@example.local",
-        role=SimpleNamespace(value="reviewer"),
-        is_active=True,
-    )
+    auth_service.get_user_by_id.return_value = auth_user("reviewer", user_id=user_id)
 
     response = TestClient(build_secure_app(auth_service)).post(
         "/api/v1/secure/ping",

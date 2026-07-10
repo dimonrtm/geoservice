@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
-from typing import Any
 
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,7 +11,9 @@ from utility_service.infrastructure.postgresql.repositories.auth_session_reposit
     AuthSessionRepository,
 )
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
+from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
+from utility_service.use_cases.mappers import to_auth_user_dto
 from utility_service.use_cases.schemas.auth.issued_auth_session_out import (
     IssuedAuthSessionOut,
 )
@@ -61,7 +62,7 @@ class AuthSessionService:
         self.user_repository = user_repository
         self.ttl_hours = ttl_hours if ttl_hours is not None else settings.auth_session_ttl_hours
 
-    async def issue_session(self, user: Any) -> IssuedAuthSessionOut:
+    async def issue_session(self, user: AuthUserDTO) -> IssuedAuthSessionOut:
         token = secrets.token_urlsafe(32)
         now = datetime.now(timezone.utc)
         expires_at = now + timedelta(hours=self.ttl_hours)
@@ -121,7 +122,7 @@ class AuthSessionService:
         return RefreshedAuthSessionOut(
             token=new_token,
             expires_at=expires_at,
-            user=user,
+            user=to_auth_user_dto(user),
         )
 
     async def revoke_session(self, token: str | None) -> None:

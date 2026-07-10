@@ -1,15 +1,18 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
+from typing import get_type_hints
 from uuid import uuid4
 
 import pytest
 
+from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.repositories.auth_session_repository import (
     AuthSessionRepository,
 )
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.use_cases.deps import get_auth_session_service
+from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.schemas.auth.issued_auth_session_out import (
     IssuedAuthSessionOut,
@@ -104,12 +107,21 @@ class FakeUserRepository:
         return self.users_by_id.get(user_id)
 
 
-def make_user(*, is_active=True):
+def make_user(*, is_active: bool = True):
     return SimpleNamespace(
         id=uuid4(),
         email="editor@example.local",
-        role=SimpleNamespace(value="editor"),
+        role=UserRole.EDITOR,
         is_active=is_active,
+    )
+
+
+def auth_user_dto(user) -> AuthUserDTO:
+    return AuthUserDTO(
+        id=user.id,
+        email=user.email,
+        role="editor",
+        is_active=user.is_active,
     )
 
 
@@ -141,12 +153,17 @@ def test_hash_auth_session_token_is_sha256_hex() -> None:
     assert len(value) == 64
 
 
+def test_auth_session_service_uses_auth_user_dto_contract() -> None:
+    assert get_type_hints(AuthSessionService.issue_session)["user"] is AuthUserDTO
+    assert RefreshedAuthSessionOut.model_fields["user"].annotation is AuthUserDTO
+
+
 def test_issue_session_creates_hash_and_12_hour_expiry() -> None:
     user = make_user()
     service, session, repository, _user_repository, _events = build_service(user=user)
 
     before = datetime.now(timezone.utc)
-    result = asyncio.run(service.issue_session(user))
+    result = asyncio.run(service.issue_session(auth_user_dto(user)))
     after = datetime.now(timezone.utc)
 
     assert isinstance(result, IssuedAuthSessionOut)
@@ -172,7 +189,7 @@ def test_refresh_session_rotates_old_hash_and_creates_new_session() -> None:
     result = asyncio.run(service.refresh_session(old_token))
 
     assert isinstance(result, RefreshedAuthSessionOut)
-    assert result.user is user
+    assert result.user == auth_user_dto(user)
     assert result.token
     assert result.token != old_token
     assert repository.get_active_calls[0].session_token_hash == old_hash
@@ -206,7 +223,7 @@ def test_refresh_session_uses_rotated_session_user_id_after_successful_rotation(
 
     result = asyncio.run(service.refresh_session("old-session-token"))
 
-    assert result.user is rotated_user
+    assert result.user == auth_user_dto(rotated_user)
     assert user_repository.get_by_id_calls == [active_user.id, rotated_user.id]
     assert repository.created[0].user_id == rotated_user.id
     assert events == [

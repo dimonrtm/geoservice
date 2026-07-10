@@ -12,6 +12,7 @@ from utility_service.use_cases.deps import (
     get_work_order_service,
     get_workspace_service,
 )
+from utility_service.use_cases.dtos import AuthRole
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
 from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut, WorkOrderSummaryOut
 from utility_service.use_cases.schemas.workspace import (
@@ -26,6 +27,7 @@ from utility_service.use_cases.services.edit_version_service import OpenEditVers
 from utility_service.web_api.api.auth import create_access_token
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.work_orders import work_orders_router
+from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
 def build_app(
@@ -46,14 +48,13 @@ def build_app(
     return app
 
 
-def auth_context(role: str, *, is_active: bool = True):
+def auth_context(role: AuthRole, *, is_active: bool = True):
     user_id = uuid4()
     token = create_access_token(str(user_id), role)
     auth_service = AsyncMock()
-    auth_service.get_user_by_id.return_value = SimpleNamespace(
-        id=user_id,
-        email=f"{role}@example.local",
-        role=SimpleNamespace(value=role),
+    auth_service.get_user_by_id.return_value = auth_user(
+        role,
+        user_id=user_id,
         is_active=is_active,
     )
     return auth_service, token, user_id

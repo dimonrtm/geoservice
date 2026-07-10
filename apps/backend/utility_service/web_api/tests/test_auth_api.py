@@ -1,12 +1,11 @@
 from datetime import datetime, timezone
-from types import SimpleNamespace
 from unittest.mock import AsyncMock
-from uuid import uuid4
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from utility_service.use_cases.deps import get_auth_service, get_auth_session_service
+from utility_service.use_cases.dtos import AuthRole, AuthUserDTO
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.schemas.auth.issued_auth_session_out import (
     IssuedAuthSessionOut,
@@ -17,6 +16,7 @@ from utility_service.use_cases.schemas.auth.refreshed_auth_session_out import (
 from utility_service.web_api.api import auth as auth_api
 from utility_service.web_api.api.auth import auth_router
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
 def build_auth_app(auth_service: object, auth_session_service: object | None = None) -> FastAPI:
@@ -28,13 +28,8 @@ def build_auth_app(auth_service: object, auth_session_service: object | None = N
     return app
 
 
-def build_auth_user(role: str = "editor") -> SimpleNamespace:
-    return SimpleNamespace(
-        id=uuid4(),
-        email=f"{role}@example.local",
-        role=SimpleNamespace(value=role),
-        is_active=True,
-    )
+def build_auth_user(role: AuthRole = "editor") -> AuthUserDTO:
+    return auth_user(role)
 
 
 def test_login_invalid_credentials_returns_strict_structured_error() -> None:
