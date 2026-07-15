@@ -2,6 +2,8 @@ import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { WorkspaceResponse } from "@/contracts/work-orders";
+
 vi.mock("@/components/MapView.vue", () => ({
   default: {
     name: "MapView",
@@ -30,6 +32,45 @@ function inProgressWorkOrder() {
   return {
     ...assignedWorkOrder(),
     status: "in_progress" as const,
+  };
+}
+
+function workspaceResponse(): WorkspaceResponse {
+  return {
+    workOrder: {
+      id: "wo-1",
+      code: "WO-001",
+      title: "Проверка участка фидера",
+      description: null,
+      status: "in_progress",
+      scope: {
+        aoi: {
+          id: "aoi-1",
+          name: "Рабочая область WO-001",
+          description: null,
+          geometry: {
+            type: "Polygon",
+            coordinates: [
+              [
+                [65.5, 44.8],
+                [65.54, 44.8],
+                [65.54, 44.84],
+                [65.5, 44.84],
+                [65.5, 44.8],
+              ],
+            ],
+          },
+          extent: [65.5, 44.8, 65.54, 44.84],
+        },
+      },
+      editVersion: {
+        id: "ev-1",
+        status: "open",
+        baseNetworkRevision: 1,
+        features: { type: "FeatureCollection", features: [] },
+        associations: [],
+      },
+    },
   };
 }
 
@@ -199,11 +240,11 @@ describe("EditorWorkOrdersView", () => {
     expect(unselected.attributes("aria-pressed")).toBeUndefined();
   });
 
-  it("shows start action only for selected assigned work order", async () => {
+  it("renders selected preview and opens from the right panel", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
     store.items = [
-      assignedWorkOrder(),
+      { ...assignedWorkOrder(), description: "Описание выбранного наряда" },
       {
         id: "wo-2",
         code: "WO-002",
@@ -220,85 +261,61 @@ describe("EditorWorkOrdersView", () => {
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    expect(wrapper.get('[data-test="open-work-order-wo-1"]').text()).toBe(
+    expect(
+      wrapper.get('[data-test="workspace-details-panel"]').text(),
+    ).toContain("WO-001");
+    expect(wrapper.get('[data-test="workspace-description"]').text()).toContain(
+      "Описание выбранного наряда",
+    );
+    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
       "Начать",
     );
-    expect(wrapper.find('[data-test="open-work-order-wo-2"]').exists()).toBe(
+    expect(wrapper.find(".workOrderCard .openWorkspaceButton").exists()).toBe(
       false,
     );
+    expect(wrapper.get('[data-test="map-view"]').attributes("data-mode")).toBe(
+      "empty",
+    );
 
-    await wrapper.get('[data-test="open-work-order-wo-1"]').trigger("click");
+    await wrapper.get('[data-test="workspace-open-action"]').trigger("click");
     expect(openSelectedWorkOrderMock).toHaveBeenCalledTimes(1);
   });
 
-  it("shows continue action for selected in-progress work order", async () => {
+  it("renders continue for an in-progress preview", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
     store.items = [inProgressWorkOrder()];
     store.selectedWorkOrderId = "wo-1";
     store.loadAssigned = loadAssignedMock;
-    store.openSelectedWorkOrder = openSelectedWorkOrderMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    expect(wrapper.get('[data-test="open-work-order-wo-1"]').text()).toBe(
+    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
       "Продолжить",
     );
   });
 
-  it("hides action and renders workspace map for opened selected work order", async () => {
+  it("renders details and workspace map for the opened selected work order", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
     store.items = [inProgressWorkOrder()];
     store.selectedWorkOrderId = "wo-1";
     store.openedWorkOrderId = "wo-1";
     store.openedEditVersionId = "ev-1";
-    store.workspace = {
-      workOrder: {
-        id: "wo-1",
-        code: "WO-001",
-        title: "Проверка участка фидера",
-        description: null,
-        status: "in_progress",
-        scope: {
-          aoi: {
-            id: "aoi-1",
-            name: "Рабочая область WO-001",
-            description: null,
-            geometry: {
-              type: "Polygon",
-              coordinates: [
-                [
-                  [65.5, 44.8],
-                  [65.54, 44.8],
-                  [65.54, 44.84],
-                  [65.5, 44.84],
-                  [65.5, 44.8],
-                ],
-              ],
-            },
-            extent: [65.5, 44.8, 65.54, 44.84],
-          },
-        },
-        editVersion: {
-          id: "ev-1",
-          status: "open",
-          baseNetworkRevision: 1,
-          features: { type: "FeatureCollection", features: [] },
-          associations: [],
-        },
-      },
-    };
+    store.workspace = workspaceResponse();
     store.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    expect(wrapper.find('[data-test="open-work-order-wo-1"]').exists()).toBe(
+    expect(wrapper.find('[data-test="workspace-open-action"]').exists()).toBe(
       false,
+    );
+    expect(wrapper.get('[data-test="workspace-aoi"]').text()).toBe(
+      "Рабочая область WO-001",
     );
     expect(wrapper.get('[data-test="map-view"]').attributes("data-mode")).toBe(
       "workspace",
@@ -308,23 +325,213 @@ describe("EditorWorkOrdersView", () => {
     ).toBe("wo-1:ev-1");
   });
 
-  it("shows open error near selected work order", async () => {
+  it("moves the selected open error into the right panel", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
     store.items = [assignedWorkOrder()];
     store.selectedWorkOrderId = "wo-1";
     store.openWorkspaceErrorByWorkOrderId = {
       "wo-1":
-        "Не удалось открыть рабочую версию. Обновите список или попробуйте еще раз.",
+        "Не удалось открыть рабочую версию. Обновите список или попробуйте ещё раз.",
     };
+    store.loadAssigned = loadAssignedMock;
+    store.openSelectedWorkOrder = openSelectedWorkOrderMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+
+    const error = wrapper.get('[data-test="workspace-open-error"]');
+    expect(error.text()).toContain("Не удалось открыть рабочую версию");
+    expect(error.attributes("role")).toBe("alert");
+    expect(wrapper.find(".workOrderCard .workOrderError").exists()).toBe(false);
+
+    await wrapper.get('[data-test="workspace-open-action"]').trigger("click");
+    expect(openSelectedWorkOrderMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not label a newly selected work order as opening", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      assignedWorkOrder(),
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Второй наряд",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectedWorkOrderId = "wo-2";
+    store.openingWorkOrderId = "wo-1";
     store.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    const openError = wrapper.get('[data-test="open-work-order-error-wo-1"]');
-    expect(openError.text()).toContain("Не удалось открыть рабочую версию");
-    expect(openError.attributes("role")).toBe("alert");
+    const action = wrapper.get('[data-test="workspace-open-action"]');
+    expect(action.text()).toBe("Начать");
+    expect(action.attributes("disabled")).toBeDefined();
+  });
+
+  it("focuses details and announces only after explicit open", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [assignedWorkOrder()];
+    store.selectedWorkOrderId = "wo-1";
+    store.loadAssigned = loadAssignedMock;
+    store.openSelectedWorkOrder = vi.fn(async () => {
+      store.updateWorkOrderStatus("wo-1", "in_progress");
+      store.openedWorkOrderId = "wo-1";
+      store.openedEditVersionId = "ev-1";
+      store.workspace = workspaceResponse();
+    });
+
+    const host = document.createElement("div");
+    document.body.append(host);
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView, { attachTo: host });
+
+    await wrapper.get('[data-test="workspace-open-action"]').trigger("click");
+    await flushPromises();
+
+    expect(document.activeElement).toBe(
+      wrapper.get('[data-test="workspace-details-title"]').element,
+    );
+    expect(wrapper.get('[data-test="workspace-announcement"]').text()).toBe(
+      "Рабочее пространство WO-001 загружено",
+    );
+
+    wrapper.unmount();
+    host.remove();
+  });
+
+  it("does not announce or move focus when selection changes during explicit open", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      assignedWorkOrder(),
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Второй наряд",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectedWorkOrderId = "wo-1";
+    store.loadAssigned = loadAssignedMock;
+
+    let resolveOpen!: () => void;
+    store.openSelectedWorkOrder = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveOpen = () => {
+            store.openedWorkOrderId = "wo-1";
+            store.openedEditVersionId = "ev-1";
+            store.workspace = workspaceResponse();
+            resolve();
+          };
+        }),
+    );
+
+    const sentinel = document.createElement("button");
+    document.body.append(sentinel);
+    sentinel.focus();
+    const host = document.createElement("div");
+    document.body.append(host);
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView, { attachTo: host });
+
+    await wrapper.get('[data-test="workspace-open-action"]').trigger("click");
+    store.selectWorkOrder("wo-2");
+    resolveOpen();
+    await flushPromises();
+
+    expect(wrapper.get('[data-test="workspace-announcement"]').text()).toBe("");
+    expect(document.activeElement).toBe(sentinel);
+    expect(document.activeElement).not.toBe(
+      wrapper.get('[data-test="workspace-details-title"]').element,
+    );
+
+    wrapper.unmount();
+    host.remove();
+    sentinel.remove();
+  });
+
+  it("restores workspace without moving focus or announcing explicit success", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [inProgressWorkOrder()];
+    store.loadAssigned = loadAssignedMock;
+    store.restoreOpenedWorkspace = vi.fn(async () => {
+      store.selectedWorkOrderId = "wo-1";
+      store.openedWorkOrderId = "wo-1";
+      store.openedEditVersionId = "ev-1";
+      store.workspace = workspaceResponse();
+    });
+
+    const sentinel = document.createElement("button");
+    document.body.append(sentinel);
+    sentinel.focus();
+    const host = document.createElement("div");
+    document.body.append(host);
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView, { attachTo: host });
+    await flushPromises();
+
+    expect(document.activeElement).toBe(sentinel);
+    expect(wrapper.get('[data-test="workspace-announcement"]').text()).toBe("");
+
+    wrapper.unmount();
+    host.remove();
+    sentinel.remove();
+  });
+
+  it("returns to the saved workspace when its work order is selected again", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      inProgressWorkOrder(),
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Второй наряд",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectedWorkOrderId = "wo-2";
+    store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    store.workspace = workspaceResponse();
+    store.loadAssigned = loadAssignedMock;
+    store.openSelectedWorkOrder = openSelectedWorkOrderMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+
+    expect(wrapper.get('[data-test="map-view"]').attributes("data-mode")).toBe(
+      "empty",
+    );
+    expect(wrapper.get('[data-test="workspace-details-title"]').text()).toBe(
+      "Второй наряд",
+    );
+
+    await wrapper.get('[data-test="work-order-wo-1"]').trigger("click");
+
+    expect(wrapper.get('[data-test="map-view"]').attributes("data-mode")).toBe(
+      "workspace",
+    );
+    expect(wrapper.get('[data-test="workspace-aoi"]').text()).toBe(
+      "Рабочая область WO-001",
+    );
+    expect(openSelectedWorkOrderMock).not.toHaveBeenCalled();
   });
 });

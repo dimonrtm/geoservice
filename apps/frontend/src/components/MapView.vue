@@ -17,7 +17,9 @@
     </div>
 
     <div class="mapRoot">
-      <div class="badge">{{ labelText }}</div>
+      <div v-if="props.mode !== 'workspace'" class="badge">
+        {{ labelText }}
+      </div>
       <div
         v-if="props.mode === 'editing'"
         class="realtimeBadge"
@@ -161,15 +163,11 @@ const realtimeBadgeClass = computed(() => ({
 
 function renderWorkspace(): void {
   if (!map.value || !props.workspace) {
-    labelText.value = "Workspace не выбран";
     return;
   }
 
   ensureWorkspaceLayers(map.value);
   setWorkspaceData(map.value, props.workspace);
-
-  const editVersion = props.workspace.workOrder.editVersion;
-  labelText.value = `${props.workspace.workOrder.code} | Версия: ${editVersion.status} | Базовая ревизия сети: ${editVersion.baseNetworkRevision} | Объекты: ${editVersion.features.features.length} | Связи: ${editVersion.associations.length}`;
 
   if (props.shouldFitWorkspace && props.workspaceKey) {
     fitWorkspaceToAoi(map.value, props.workspace);

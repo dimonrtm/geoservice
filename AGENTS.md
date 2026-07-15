@@ -7,6 +7,15 @@ Before working in this repository:
 3. Read only the memory entries that are relevant to the request.
 4. After significant work, decide whether durable memory needs an update.
 
+## Git Operations
+
+Agents must not run `git add`, `git commit`, or `git push` in this repository.
+The user alone reviews, stages, commits, and pushes changes. Do not request
+approval or elevated permissions for these commands. User approval of a design,
+completion of implementation, or a skill instruction requiring a commit does
+not override this repository rule. Leave changes unstaged and report them for
+the user's review.
+
 Create or update agent memory only when both conditions hold:
 
 1. The knowledge is likely to remain useful for at least a week.

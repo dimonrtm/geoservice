@@ -8,7 +8,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - agent memory quick file lookup: `docs/agent-memory/file-map.md`
 - agent memory design spec: `docs/superpowers/specs/2026-05-30-agent-memory-design.md`
 - agent memory and knowledge base optimization design: `docs/superpowers/specs/2026-06-13-memory-knowledge-base-optimization-design.md`, `docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`
-- git commit only after explicit user review approval: `docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`
+- agents never stage, commit, or push; Git writes are user-only: `AGENTS.md`, `docs/agent-memory/decisions/2026-05-30-agent-memory-operating-rules.md`
 - agent memory and knowledge base optimization plan: `docs/superpowers/plans/2026-06-13-memory-knowledge-base-optimization.md`
 - implementation plans and specs language rule: `docs/agent-memory/patterns/2026-05-30-russian-implementation-plans.md`, `docs/superpowers/plans/`, `docs/superpowers/specs/`
 - project knowledge wiki pipeline: `index.md`, `RAW_inputs/`, `Vision_wiki/`, `Code_wiki/`, `memory/`, `Общие_принципы/`, `docs/knowledge-pipeline/README.md`, `.agents/skills/source-command-*/`

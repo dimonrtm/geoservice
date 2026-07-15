@@ -1,10 +1,24 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 
 import MapView from "@/components/MapView.vue";
+import WorkspaceDetailsPanel from "@/components/WorkspaceDetailsPanel.vue";
 import { useWorkOrdersStore } from "@/stores/workOrders";
 
+type WorkspaceDetailsPanelHandle = {
+  focusHeading(): void;
+};
+
 const workOrders = useWorkOrdersStore();
+const detailsPanelRef = ref<WorkspaceDetailsPanelHandle | null>(null);
+const workspaceAnnouncement = ref("");
+
+watch(
+  () => workOrders.selectedWorkOrderId,
+  () => {
+    workspaceAnnouncement.value = "";
+  },
+);
 
 onMounted(async () => {
   await workOrders.loadAssigned();
@@ -20,22 +34,26 @@ function statusLabel(status: string): string {
   return "Назначен";
 }
 
-function actionLabel(status: string): string {
-  if (status === "in_progress") {
-    return "Продолжить";
+async function openSelectedWorkspace(): Promise<void> {
+  const workOrderId = workOrders.selectedWorkOrderId;
+  if (!workOrderId) {
+    return;
   }
-  return "Начать";
-}
 
-function canShowOpenAction(workOrderId: string): boolean {
-  return (
-    workOrders.selectedWorkOrderId === workOrderId &&
-    !workOrders.isWorkOrderOpened(workOrderId)
-  );
-}
+  workspaceAnnouncement.value = "";
+  await workOrders.openSelectedWorkOrder();
 
-function openError(workOrderId: string): string | null {
-  return workOrders.openWorkspaceErrorByWorkOrderId[workOrderId] ?? null;
+  const workspace = workOrders.activeWorkspace;
+  if (
+    workOrders.selectedWorkOrderId !== workOrderId ||
+    workspace?.workOrder.id !== workOrderId
+  ) {
+    return;
+  }
+
+  workspaceAnnouncement.value = `Рабочее пространство ${workspace.workOrder.code} загружено`;
+  await nextTick();
+  detailsPanelRef.value?.focusHeading();
 }
 </script>
 
@@ -110,42 +128,37 @@ function openError(workOrderId: string): string | null {
                 {{ workOrder.description }}
               </span>
             </button>
-
-            <div
-              v-if="openError(workOrder.id)"
-              class="workOrderError"
-              role="alert"
-              :data-test="`open-work-order-error-${workOrder.id}`"
-            >
-              {{ openError(workOrder.id) }}
-            </div>
-
-            <div
-              v-if="canShowOpenAction(workOrder.id)"
-              class="workOrderActionRow"
-            >
-              <button
-                class="openWorkspaceButton"
-                type="button"
-                :data-test="`open-work-order-${workOrder.id}`"
-                :disabled="workOrders.isOpeningWorkspace"
-                @click="workOrders.openSelectedWorkOrder"
-              >
-                {{
-                  workOrders.isOpeningWorkspace
-                    ? "Открываем..."
-                    : actionLabel(workOrder.status)
-                }}
-              </button>
-            </div>
           </div>
         </li>
       </ul>
     </aside>
 
-    <section class="mapPane" aria-label="Карта">
+    <section class="workspacePane" aria-label="Рабочая область">
+      <WorkspaceDetailsPanel
+        v-if="workOrders.selectedWorkOrder"
+        ref="detailsPanelRef"
+        :work-order="workOrders.selectedWorkOrder"
+        :workspace="workOrders.activeWorkspace"
+        :is-opening="
+          workOrders.openingWorkOrderId === workOrders.selectedWorkOrder.id
+        "
+        :is-open-action-disabled="workOrders.isOpeningWorkspace"
+        :error-message="workOrders.selectedOpenWorkspaceError"
+        @open="openSelectedWorkspace"
+      />
+
+      <p
+        class="srOnly"
+        data-test="workspace-announcement"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {{ workspaceAnnouncement }}
+      </p>
+
       <MapView
         v-if="workOrders.activeWorkspace"
+        class="workspaceMap"
         mode="workspace"
         :workspace="workOrders.activeWorkspace"
         :workspace-key="workOrders.activeWorkspaceKey"
@@ -154,7 +167,7 @@ function openError(workOrderId: string): string | null {
         "
         @workspace-fitted="workOrders.markWorkspaceFitted"
       />
-      <MapView v-else mode="empty" />
+      <MapView v-else class="workspaceMap" mode="empty" />
     </section>
   </div>
 </template>
@@ -274,48 +287,45 @@ function openError(workOrderId: string): string | null {
   color: #475569;
 }
 
-.workOrderError {
-  color: #b91c1c;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
-.workOrderActionRow {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.openWorkspaceButton {
-  border: 1px solid #166534;
-  border-radius: 8px;
-  padding: 7px 10px;
-  background: #166534;
-  color: #fff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.openWorkspaceButton:disabled {
-  opacity: 0.7;
-  cursor: wait;
-}
-
-.mapPane {
+.workspacePane {
   min-width: 0;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.workspaceMap {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @media (max-width: 760px) {
   .editorShell {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(220px, 42%) minmax(260px, 1fr);
+    grid-template-rows: minmax(220px, 42%) minmax(420px, 1fr);
+    overflow-y: auto;
   }
 
   .workOrdersPanel {
     border-right: 0;
     border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  }
+
+  .workspaceMap {
+    min-height: 220px;
   }
 }
 </style>

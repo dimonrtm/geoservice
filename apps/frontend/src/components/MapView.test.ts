@@ -186,7 +186,9 @@ describe("MapView", () => {
     expect(mocks.reloadFeatures).not.toHaveBeenCalled();
     expect(mocks.handleRealtimeLayerChange).not.toHaveBeenCalled();
     expect(mocks.enableEditingOverlaySync).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain("Карта готова. Выберите наряд в списке.");
+    expect(wrapper.get(".badge").text()).toContain(
+      "Карта готова. Выберите наряд в списке.",
+    );
   });
 
   it("passes auth readiness to realtime without exposing a token", async () => {
@@ -202,13 +204,16 @@ describe("MapView", () => {
     });
     const { default: MapView } = await import("@/components/MapView.vue");
 
-    mount(MapView, {
+    const wrapper = mount(MapView, {
       props: {
         mode: "editing",
       },
     });
     await flushPromises();
 
+    expect(wrapper.get(".badge").text()).toContain(
+      "Слои загружены: 1. Выбран слой: Power lines",
+    );
     expect(mocks.handleRealtimeLayerChange).toHaveBeenCalledWith(layer, true);
     expect(mocks.handleRealtimeLayerChange).not.toHaveBeenCalledWith(
       layer,
@@ -254,11 +259,12 @@ describe("MapView workspace mode", () => {
     expect(mocks.reloadFeatures).not.toHaveBeenCalled();
     expect(mocks.handleRealtimeLayerChange).not.toHaveBeenCalled();
     expect(mocks.enableEditingOverlaySync).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain("WO-001");
-    expect(wrapper.text()).toContain("Версия: open");
-    expect(wrapper.text()).toContain("Базовая ревизия сети: 1");
-    expect(wrapper.text()).toContain("Объекты: 1");
-    expect(wrapper.text()).toContain("Связи: 1");
+    expect(wrapper.find(".badge").exists()).toBe(false);
+    expect(wrapper.text()).not.toContain("WO-001");
+    expect(wrapper.text()).not.toContain("Версия: open");
+    expect(wrapper.text()).not.toContain("Базовая ревизия сети: 1");
+    expect(wrapper.text()).not.toContain("Объекты: 1");
+    expect(wrapper.text()).not.toContain("Связи: 1");
     expect(wrapper.text()).not.toContain("EditVersion:");
     expect(wrapper.text()).not.toContain("baseNetworkRevision:");
     expect(wrapper.text()).not.toContain("features:");

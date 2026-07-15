@@ -150,7 +150,7 @@ describe("work orders store", () => {
     store.openedWorkOrderId = "wo-1";
     store.openedEditVersionId = "ev-1";
     store.workspace = workspaceResponse();
-    store.isOpeningWorkspace = true;
+    store.openingWorkOrderId = "wo-1";
     store.openWorkspaceErrorByWorkOrderId = {
       "wo-1": "open failed",
     };
@@ -167,6 +167,7 @@ describe("work orders store", () => {
     expect(store.openedWorkOrderId).toBeNull();
     expect(store.openedEditVersionId).toBeNull();
     expect(store.workspace).toBeNull();
+    expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
     expect(store.openWorkspaceErrorByWorkOrderId).toEqual({});
     expect(store.lastFittedWorkspaceKey).toBeNull();
@@ -220,6 +221,48 @@ describe("work orders store", () => {
     expect(fetchAssignedWorkOrdersMock).not.toHaveBeenCalled();
   });
 
+  it("tracks the initiating work order while open is pending", async () => {
+    const openResponse = openEditVersionResponse("wo-1");
+    const openDeferred = createDeferred<typeof openResponse>();
+    openEditVersionMock.mockReturnValue(openDeferred.promise);
+    fetchWorkspaceMock.mockResolvedValue(workspaceResponse("wo-1", "ev-1"));
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Проверка участка фидера",
+        description: null,
+        status: "assigned",
+      },
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Проверка второго участка",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectWorkOrder("wo-1");
+
+    const opening = store.openSelectedWorkOrder();
+
+    expect(store.openingWorkOrderId).toBe("wo-1");
+    expect(store.isOpeningWorkspace).toBe(true);
+
+    store.selectWorkOrder("wo-2");
+    expect(store.openingWorkOrderId).toBe("wo-1");
+
+    openDeferred.resolve(openResponse);
+    await opening;
+
+    expect(fetchWorkspaceMock).not.toHaveBeenCalled();
+    expect(store.openingWorkOrderId).toBeNull();
+    expect(store.isOpeningWorkspace).toBe(false);
+  });
+
   it("keeps a user-facing error when loading fails", async () => {
     fetchAssignedWorkOrdersMock.mockRejectedValue(new Error("network"));
 
@@ -262,6 +305,7 @@ describe("work orders store", () => {
     expect(store.activeWorkspace?.workOrder.code).toBe("WO-001");
     expect(store.activeWorkspaceKey).toBe("wo-1:ev-1");
     expect(store.selectedOpenWorkspaceError).toBeNull();
+    expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
   });
 
@@ -317,6 +361,7 @@ describe("work orders store", () => {
     expect(store.openedEditVersionId).toBe("ev-1");
     expect(store.activeWorkspace?.workOrder.code).toBe("WO-001");
     expect(store.activeWorkspaceKey).toBe("wo-1:ev-1");
+    expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
   });
 
@@ -371,6 +416,7 @@ describe("work orders store", () => {
     expect(store.selectedOpenWorkspaceError).toBe(
       "Не удалось открыть рабочую версию. Обновите список или попробуйте еще раз.",
     );
+    expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
   });
 
@@ -469,6 +515,7 @@ describe("work orders store", () => {
     expect(store.openedWorkOrderId).toBeNull();
     expect(store.openedEditVersionId).toBeNull();
     expect(store.workspace).toBeNull();
+    expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
   });
 });

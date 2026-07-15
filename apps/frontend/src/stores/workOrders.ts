@@ -19,7 +19,7 @@ type WorkOrdersState = {
   openedWorkOrderId: string | null;
   openedEditVersionId: string | null;
   workspace: WorkspaceResponse | null;
-  isOpeningWorkspace: boolean;
+  openingWorkOrderId: string | null;
   openWorkspaceErrorByWorkOrderId: Record<string, string | undefined>;
   lastFittedWorkspaceKey: string | null;
   loadAssignedRequestSeq: number;
@@ -118,7 +118,7 @@ function createInitialWorkOrdersState(): WorkOrdersState {
     openedWorkOrderId: null,
     openedEditVersionId: null,
     workspace: null,
-    isOpeningWorkspace: false,
+    openingWorkOrderId: null,
     openWorkspaceErrorByWorkOrderId: {},
     lastFittedWorkspaceKey: null,
     loadAssignedRequestSeq: 0,
@@ -129,6 +129,7 @@ function createInitialWorkOrdersState(): WorkOrdersState {
 export const useWorkOrdersStore = defineStore("workOrders", {
   state: createInitialWorkOrdersState,
   getters: {
+    isOpeningWorkspace: (state) => state.openingWorkOrderId !== null,
     selectedWorkOrder: (state) =>
       state.items.find((item) => item.id === state.selectedWorkOrderId) ?? null,
     activeWorkspace: (state) => {
@@ -222,13 +223,13 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     },
     async openSelectedWorkOrder() {
       const workOrderId = this.selectedWorkOrderId;
-      if (!workOrderId || this.isOpeningWorkspace) {
+      if (!workOrderId || this.openingWorkOrderId !== null) {
         return;
       }
 
       const requestSeq = this.openWorkspaceRequestSeq + 1;
       this.openWorkspaceRequestSeq = requestSeq;
-      this.isOpeningWorkspace = true;
+      this.openingWorkOrderId = workOrderId;
       this.openWorkspaceErrorByWorkOrderId = {
         ...this.openWorkspaceErrorByWorkOrderId,
         [workOrderId]: undefined,
@@ -271,14 +272,17 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           };
         }
       } finally {
-        if (this.openWorkspaceRequestSeq === requestSeq) {
-          this.isOpeningWorkspace = false;
+        if (
+          this.openWorkspaceRequestSeq === requestSeq &&
+          this.openingWorkOrderId === workOrderId
+        ) {
+          this.openingWorkOrderId = null;
         }
       }
     },
     async restoreOpenedWorkspace() {
       const storedWorkspace = readStoredOpenedWorkspace();
-      if (!storedWorkspace || this.isOpeningWorkspace) {
+      if (!storedWorkspace || this.openingWorkOrderId !== null) {
         return;
       }
 
@@ -291,7 +295,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
 
       const requestSeq = this.openWorkspaceRequestSeq + 1;
       this.openWorkspaceRequestSeq = requestSeq;
-      this.isOpeningWorkspace = true;
+      this.openingWorkOrderId = workOrderId;
       this.selectedWorkOrderId = workOrderId;
       this.openWorkspaceErrorByWorkOrderId = {
         ...this.openWorkspaceErrorByWorkOrderId,
@@ -325,8 +329,11 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           };
         }
       } finally {
-        if (this.openWorkspaceRequestSeq === requestSeq) {
-          this.isOpeningWorkspace = false;
+        if (
+          this.openWorkspaceRequestSeq === requestSeq &&
+          this.openingWorkOrderId === workOrderId
+        ) {
+          this.openingWorkOrderId = null;
         }
       }
     },
