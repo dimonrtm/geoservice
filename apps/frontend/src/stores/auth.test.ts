@@ -45,8 +45,12 @@ function createLocalStorageMock() {
   };
 }
 
-const SESSION_RETRY_MESSAGE =
-  "Сейчас не удалось восстановить сессию. Попробуйте ещё раз.";
+const SESSION_RETRY_PRESENTATION = {
+  summary: "Не удалось восстановить сессию.",
+  guidance: "Проверьте соединение и повторите запрос.",
+  action: { id: "retry" as const, label: "Повторить" },
+  diagnostics: { code: null, correlationId: null },
+};
 const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
 
 function expectAuthLocalStorageNotUsed() {
@@ -120,7 +124,7 @@ describe("auth store", () => {
       email: "editor@example.com",
       role: "editor",
     };
-    store.sessionError = SESSION_RETRY_MESSAGE;
+    store.sessionError = SESSION_RETRY_PRESENTATION;
     store.isReady = false;
     store.isRestoring = true;
 
@@ -153,7 +157,7 @@ describe("auth store", () => {
       email: "editor@example.com",
       role: "editor",
     };
-    store.sessionError = SESSION_RETRY_MESSAGE;
+    store.sessionError = SESSION_RETRY_PRESENTATION;
     store.isReady = true;
     store.isRestoring = true;
 
@@ -380,8 +384,51 @@ describe("auth store", () => {
 
     expect(store.token).toBeNull();
     expect(store.user).toBeNull();
-    expect(store.sessionError).toBe(SESSION_RETRY_MESSAGE);
+    expect(store.sessionError).toEqual(SESSION_RETRY_PRESENTATION);
     expect(store.isReady).toBe(true);
+  });
+
+  it("keeps an actionable sign-in error after a runtime 401", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const store = useAuthStore();
+    store.token = "token-1";
+    store.user = {
+      id: "user-1",
+      email: "editor@example.com",
+      role: "editor",
+    };
+
+    store.handleUnauthorizedResponse({
+      isAxiosError: true,
+      response: {
+        status: 401,
+        headers: { "x-correlation-id": "runtime-auth-id" },
+        data: {
+          code: "AUTH_REQUIRED",
+          message: "Сессия недействительна.",
+          correlationId: "runtime-auth-id",
+        },
+      },
+    });
+
+    expect(store.token).toBeNull();
+    expect(store.user).toBeNull();
+    expect(store.sessionError?.action?.id).toBe("sign-in");
+    expect(store.sessionError?.diagnostics.correlationId).toBe(
+      "runtime-auth-id",
+    );
+  });
+
+  it("does not create a runtime notice for an already anonymous user", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const store = useAuthStore();
+
+    store.handleUnauthorizedResponse({
+      isAxiosError: true,
+      response: { status: 401, data: {} },
+    });
+
+    expect(store.sessionError).toBeNull();
   });
 
   it("resets work orders when restoreSession logs out the current user", async () => {

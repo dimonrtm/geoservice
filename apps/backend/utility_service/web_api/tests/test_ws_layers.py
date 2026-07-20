@@ -19,6 +19,7 @@ from utility_service.use_cases.domain.exceptions.websocket_ticket_error import W
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
 from utility_service.web_api.api.ws_layers import ws_layers_router
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
@@ -33,6 +34,7 @@ def create_test_app(
     ticket_service: object | None = None,
 ) -> FastAPI:
     app = FastAPI()
+    app.add_middleware(CorrelationIdMiddleware)
     app.state.websocket_connection_manager = connection_manager or WebSocketConnectionManager()
     install_exception_handlers(app)
     app.include_router(ws_layers_router)

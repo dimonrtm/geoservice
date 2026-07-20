@@ -17,6 +17,7 @@ from utility_service.use_cases.schemas.utility_network import (
     UtilityFeatureCollectionOut,
     UtilityFeederOut,
 )
+from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
@@ -27,6 +28,7 @@ TO_ID = UUID("6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0211")
 
 def build_app(auth_service: object, utility_service: object) -> FastAPI:
     app = FastAPI()
+    app.add_middleware(CorrelationIdMiddleware)
     install_exception_handlers(app)
     app.include_router(utility_network_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service

@@ -1,12 +1,14 @@
 import { defineStore } from "pinia";
-import axios from "axios";
 
+import { parseApiError } from "@/api/parseApiError";
 import {
   login,
   logoutSession,
   refreshSession,
   type AuthUser,
 } from "@/api/auth";
+import type { ErrorPresentation } from "@/contracts/api-error";
+import { presentSessionError } from "@/errors/apiErrorPresentations";
 import {
   useWorkOrdersStore,
   type ResetWorkOrdersOptions,
@@ -17,7 +19,7 @@ type AuthState = {
   user: AuthUser | null;
   isReady: boolean;
   isRestoring: boolean;
-  sessionError: string | null;
+  sessionError: ErrorPresentation | null;
 };
 
 function authUserId(user: AuthUser | null): string | null {
@@ -83,6 +85,17 @@ export const useAuthStore = defineStore(
         this.isRestoring = false;
         resetWorkOrdersIfUserIdChanged(previousUserId, null);
       },
+      handleUnauthorizedResponse(error: unknown): void {
+        const hadActiveSession = this.isAuthenticated;
+        const parsed = parseApiError(error);
+        this.clearLocalSession();
+        if (hadActiveSession) {
+          this.sessionError = presentSessionError(parsed, "runtime");
+        }
+      },
+      dismissSessionError(): void {
+        this.sessionError = null;
+      },
       async loginWithPassword(email: string, password: string) {
         const result = await login(email, password);
         this.setAuth(result.access_token, result.user);
@@ -91,6 +104,7 @@ export const useAuthStore = defineStore(
         return result;
       },
       async restoreSession() {
+        const restoreMode = this.isAuthenticated ? "runtime" : "initial";
         this.sessionError = null;
         this.isRestoring = true;
 
@@ -100,17 +114,10 @@ export const useAuthStore = defineStore(
             preserveOpenedWorkspaceOnInitialUser: true,
           });
         } catch (error: unknown) {
-          if (axios.isAxiosError(error)) {
-            const status = error.response?.status;
-            if (status === 401) {
-              this.clearLocalSession();
-              return;
-            }
-          }
-
+          const parsed = parseApiError(error);
+          const sessionError = presentSessionError(parsed, restoreMode);
           this.clearLocalSession();
-          this.sessionError =
-            "Сейчас не удалось восстановить сессию. Попробуйте ещё раз.";
+          this.sessionError = sessionError;
         } finally {
           this.isReady = true;
           this.isRestoring = false;

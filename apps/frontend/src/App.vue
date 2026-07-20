@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 
+import ActionableError from "./components/ActionableError.vue";
 import EditorWorkOrdersView from "./components/EditorWorkOrdersView.vue";
 import LoginScreen from "./components/LoginScreen.vue";
 import ReviewerHome from "./components/ReviewerHome.vue";
+import type { ErrorActionId } from "@/contracts/api-error";
 import { getRoleLabel, isEditorRole } from "@/domain/authRole";
 import { useAuthStore } from "@/stores/auth";
 import "./assets/main.css";
@@ -27,6 +29,16 @@ onMounted(() => {
     void auth.restoreSession();
   }
 });
+
+function handleSessionErrorAction(actionId: ErrorActionId): void {
+  if (actionId === "retry") {
+    void auth.restoreSession();
+    return;
+  }
+  if (actionId === "sign-in") {
+    auth.dismissSessionError();
+  }
+}
 </script>
 
 <template>
@@ -43,15 +55,11 @@ onMounted(() => {
     <div v-else-if="auth.sessionError" class="statusScreen">
       <div class="statusCard">
         <div class="statusTitle">Не удалось восстановить сессию</div>
-        <div class="statusText">{{ auth.sessionError }}</div>
+        <ActionableError
+          :presentation="auth.sessionError"
+          @action="handleSessionErrorAction"
+        />
         <div class="statusActions">
-          <button
-            class="btn btnPrimary"
-            type="button"
-            @click="auth.restoreSession"
-          >
-            Повторить
-          </button>
           <button class="btn btnSecondary" type="button" @click="auth.logout">
             Выйти
           </button>
@@ -191,12 +199,6 @@ onMounted(() => {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-}
-
-.btnPrimary {
-  color: #fff;
-  background: #166534;
-  border-color: #166534;
 }
 
 .btnSecondary {

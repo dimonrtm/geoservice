@@ -26,6 +26,7 @@ from utility_service.use_cases.schemas.layer.layer_out import LayerOut
 from utility_service.web_api.api import auth as auth_api
 from utility_service.web_api.api.auth import create_access_token
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.api.layers import layers_router
 from utility_service.web_api.tests.auth_user_factory import auth_user
 
@@ -147,6 +148,7 @@ def build_app(role: str, layer_service: FakeLayerService, feature_service: FakeF
         return user
 
     app = FastAPI()
+    app.add_middleware(CorrelationIdMiddleware)
     install_exception_handlers(app)
     app.include_router(layers_router)
     app.dependency_overrides[get_auth_service] = lambda: SimpleNamespace(

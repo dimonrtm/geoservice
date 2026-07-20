@@ -99,6 +99,25 @@ function createDeferred<T>() {
   return { promise, resolve, reject };
 }
 
+function apiFailure(
+  code: string,
+  status: number,
+  correlationId = "request-id",
+) {
+  return {
+    isAxiosError: true,
+    response: {
+      status,
+      headers: { "x-correlation-id": correlationId },
+      data: { code, message: `Причина ${code}`, correlationId },
+    },
+  };
+}
+
+function networkFailure() {
+  return { isAxiosError: true };
+}
+
 describe("work orders store", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -128,7 +147,7 @@ describe("work orders store", () => {
     expect(store.items).toHaveLength(1);
     expect(store.items[0]).toMatchObject({ code: "WO-001" });
     expect(store.isLoading).toBe(false);
-    expect(store.errorMessage).toBeNull();
+    expect(store.loadError).toBeNull();
   });
 
   it("resets user-scoped state and invalidates pending requests", async () => {
@@ -145,15 +164,26 @@ describe("work orders store", () => {
       },
     ];
     store.isLoading = true;
-    store.errorMessage = "load failed";
+    store.loadError = {
+      summary: "load failed",
+      guidance: null,
+      action: null,
+      diagnostics: { code: null, correlationId: null },
+    };
     store.selectedWorkOrderId = "wo-1";
     store.openedWorkOrderId = "wo-1";
     store.openedEditVersionId = "ev-1";
     store.workspace = workspaceResponse();
     store.openingWorkOrderId = "wo-1";
     store.openWorkspaceErrorByWorkOrderId = {
-      "wo-1": "open failed",
+      "wo-1": {
+        summary: "open failed",
+        guidance: null,
+        action: null,
+        diagnostics: { code: null, correlationId: null },
+      },
     };
+    store.openWorkspaceErrorOperationByWorkOrderId = { "wo-1": "open" };
     store.lastFittedWorkspaceKey = "wo-1:ev-1";
     store.openWorkspaceRequestSeq = 7;
     store.loadAssignedRequestSeq = 11;
@@ -162,7 +192,7 @@ describe("work orders store", () => {
 
     expect(store.items).toEqual([]);
     expect(store.isLoading).toBe(false);
-    expect(store.errorMessage).toBeNull();
+    expect(store.loadError).toBeNull();
     expect(store.selectedWorkOrderId).toBeNull();
     expect(store.openedWorkOrderId).toBeNull();
     expect(store.openedEditVersionId).toBeNull();
@@ -170,6 +200,7 @@ describe("work orders store", () => {
     expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
     expect(store.openWorkspaceErrorByWorkOrderId).toEqual({});
+    expect(store.openWorkspaceErrorOperationByWorkOrderId).toEqual({});
     expect(store.lastFittedWorkspaceKey).toBeNull();
     expect(store.openWorkspaceRequestSeq).toBe(8);
     expect(store.loadAssignedRequestSeq).toBe(12);
@@ -264,7 +295,7 @@ describe("work orders store", () => {
   });
 
   it("keeps a user-facing error when loading fails", async () => {
-    fetchAssignedWorkOrdersMock.mockRejectedValue(new Error("network"));
+    fetchAssignedWorkOrdersMock.mockRejectedValue(networkFailure());
 
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
@@ -273,9 +304,10 @@ describe("work orders store", () => {
 
     expect(store.items).toEqual([]);
     expect(store.isLoading).toBe(false);
-    expect(store.errorMessage).toBe(
-      "Не удалось загрузить назначенные наряды. Попробуйте ещё раз.",
-    );
+    expect(store.loadError).toMatchObject({
+      summary: "Не удалось загрузить назначенные наряды.",
+      action: { id: "retry", label: "Повторить" },
+    });
   });
 
   it("opens selected work order and stores workspace", async () => {
@@ -307,6 +339,32 @@ describe("work orders store", () => {
     expect(store.selectedOpenWorkspaceError).toBeNull();
     expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
+  });
+
+  it("maps a missing work order to refresh", async () => {
+    openEditVersionMock.mockRejectedValue(
+      apiFailure("WORK_ORDER_NOT_FOUND", 404),
+    );
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Наряд",
+        description: null,
+        status: "assigned",
+      },
+    ];
+    store.selectWorkOrder("wo-1");
+
+    await store.openSelectedWorkOrder();
+
+    expect(store.selectedOpenWorkspaceError?.action?.id).toBe("refresh");
+    expect(store.selectedOpenWorkspaceError?.diagnostics.correlationId).toBe(
+      "request-id",
+    );
+    expect(store.selectedOpenWorkspaceErrorOperation).toBe("open");
   });
 
   it("persists opened workspace identifiers after successful open", async () => {
@@ -391,9 +449,63 @@ describe("work orders store", () => {
     expect(store.activeWorkspace).toBeNull();
   });
 
+  it("clears a stale marker and offers reopen when the edit version disappeared", async () => {
+    sessionStorage.setItem(
+      "geoservice:opened-workspace",
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+    fetchWorkspaceMock.mockRejectedValue(
+      apiFailure("EDIT_VERSION_NOT_FOUND", 404),
+    );
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Наряд",
+        description: null,
+        status: "in_progress",
+      },
+    ];
+
+    await store.restoreOpenedWorkspace();
+
+    expect(sessionStorage.getItem("geoservice:opened-workspace")).toBeNull();
+    expect(store.selectedOpenWorkspaceError?.action?.id).toBe("reopen");
+    expect(store.selectedOpenWorkspaceErrorOperation).toBe("restore");
+  });
+
+  it("preserves the marker and retries the original restore after a network failure", async () => {
+    sessionStorage.setItem(
+      "geoservice:opened-workspace",
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+    fetchWorkspaceMock.mockRejectedValueOnce(networkFailure());
+    fetchWorkspaceMock.mockResolvedValueOnce(workspaceResponse("wo-1", "ev-1"));
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Наряд",
+        description: null,
+        status: "in_progress",
+      },
+    ];
+
+    await store.restoreOpenedWorkspace();
+    await store.retrySelectedWorkspaceError();
+
+    expect(openEditVersionMock).not.toHaveBeenCalled();
+    expect(fetchWorkspaceMock).toHaveBeenCalledTimes(2);
+    expect(store.activeWorkspace?.workOrder.id).toBe("wo-1");
+  });
+
   it("keeps action retry available when workspace loading fails after open", async () => {
     openEditVersionMock.mockResolvedValue(openEditVersionResponse());
-    fetchWorkspaceMock.mockRejectedValue(new Error("workspace failed"));
+    fetchWorkspaceMock.mockRejectedValue(networkFailure());
 
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
@@ -413,9 +525,7 @@ describe("work orders store", () => {
     expect(store.items[0]?.status).toBe("in_progress");
     expect(store.workspace).toBeNull();
     expect(store.openedWorkOrderId).toBeNull();
-    expect(store.selectedOpenWorkspaceError).toBe(
-      "Не удалось открыть рабочую версию. Обновите список или попробуйте еще раз.",
-    );
+    expect(store.selectedOpenWorkspaceError?.action?.id).toBe("retry");
     expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
   });
@@ -481,7 +591,7 @@ describe("work orders store", () => {
 
     expect(store.items).toEqual([]);
     expect(store.isLoading).toBe(false);
-    expect(store.errorMessage).toBeNull();
+    expect(store.loadError).toBeNull();
   });
 
   it("ignores open workspace response after reset", async () => {

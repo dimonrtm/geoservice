@@ -30,7 +30,10 @@
           />
         </label>
 
-        <p v-if="errorMessage" class="errorMessage">{{ errorMessage }}</p>
+        <ActionableError
+          v-if="errorPresentation"
+          :presentation="errorPresentation"
+        />
 
         <button class="submitButton" type="submit" :disabled="isSubmitting">
           {{ isSubmitting ? "Выполняем вход..." : "Войти" }}
@@ -41,41 +44,28 @@
 </template>
 
 <script setup lang="ts">
-import axios from "axios";
 import { ref } from "vue";
 
+import { parseApiError } from "@/api/parseApiError";
+import ActionableError from "@/components/ActionableError.vue";
+import type { ErrorPresentation } from "@/contracts/api-error";
+import { presentLoginError } from "@/errors/apiErrorPresentations";
 import { useAuthStore } from "@/stores/auth";
 
 const auth = useAuthStore();
 const email = ref("");
 const password = ref("");
 const isSubmitting = ref(false);
-const errorMessage = ref("");
+const errorPresentation = ref<ErrorPresentation | null>(null);
 
 async function onSubmit() {
-  errorMessage.value = "";
+  errorPresentation.value = null;
   isSubmitting.value = true;
 
   try {
     await auth.loginWithPassword(email.value, password.value);
   } catch (error: unknown) {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const message =
-        typeof error.response?.data?.message === "string"
-          ? error.response.data.message
-          : "";
-
-      if (status === 401 && message) {
-        errorMessage.value = message;
-      } else {
-        errorMessage.value =
-          "Сейчас не удалось выполнить вход. Попробуйте ещё раз.";
-      }
-    } else {
-      errorMessage.value =
-        "Сейчас не удалось выполнить вход. Попробуйте ещё раз.";
-    }
+    errorPresentation.value = presentLoginError(parseApiError(error));
   } finally {
     isSubmitting.value = false;
   }
@@ -156,16 +146,6 @@ async function onSubmit() {
   outline: 2px solid rgba(34, 197, 94, 0.35);
   outline-offset: 1px;
   border-color: rgba(22, 101, 52, 0.35);
-}
-
-.errorMessage {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  line-height: 1.4;
-  color: #991b1b;
-  background: rgba(254, 226, 226, 0.92);
 }
 
 .submitButton {

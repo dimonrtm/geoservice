@@ -5,22 +5,42 @@ import {
   fetchWorkspace,
   openEditVersion,
 } from "@/api/workOrders";
+import { parseApiError } from "@/api/parseApiError";
+import type { ErrorPresentation, ParsedApiError } from "@/contracts/api-error";
 import type {
   WorkOrderStatus,
   WorkOrderSummary,
   WorkspaceResponse,
 } from "@/contracts/work-orders";
+import {
+  presentWorkOrdersLoadError,
+  presentWorkspaceOpenError,
+  presentWorkspaceRestoreError,
+} from "@/errors/apiErrorPresentations";
+
+type WorkspaceErrorOperation = "open" | "restore";
+
+type ClearOpenedWorkspaceOptions = {
+  preserveStoredWorkspace?: boolean;
+};
 
 type WorkOrdersState = {
   items: WorkOrderSummary[];
   isLoading: boolean;
-  errorMessage: string | null;
+  loadError: ErrorPresentation | null;
   selectedWorkOrderId: string | null;
   openedWorkOrderId: string | null;
   openedEditVersionId: string | null;
   workspace: WorkspaceResponse | null;
   openingWorkOrderId: string | null;
-  openWorkspaceErrorByWorkOrderId: Record<string, string | undefined>;
+  openWorkspaceErrorByWorkOrderId: Record<
+    string,
+    ErrorPresentation | undefined
+  >;
+  openWorkspaceErrorOperationByWorkOrderId: Record<
+    string,
+    WorkspaceErrorOperation | undefined
+  >;
   lastFittedWorkspaceKey: string | null;
   loadAssignedRequestSeq: number;
   openWorkspaceRequestSeq: number;
@@ -109,17 +129,26 @@ function clearStoredOpenedWorkspace(): void {
   }
 }
 
+function shouldPreserveStoredWorkspace(error: ParsedApiError): boolean {
+  return (
+    error.kind === "network" ||
+    error.kind === "timeout" ||
+    ((error.kind === "api" || error.kind === "http") && error.status >= 500)
+  );
+}
+
 function createInitialWorkOrdersState(): WorkOrdersState {
   return {
     items: [],
     isLoading: false,
-    errorMessage: null,
+    loadError: null,
     selectedWorkOrderId: null,
     openedWorkOrderId: null,
     openedEditVersionId: null,
     workspace: null,
     openingWorkOrderId: null,
     openWorkspaceErrorByWorkOrderId: {},
+    openWorkspaceErrorOperationByWorkOrderId: {},
     lastFittedWorkspaceKey: null,
     loadAssignedRequestSeq: 0,
     openWorkspaceRequestSeq: 0,
@@ -160,6 +189,16 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         state.openWorkspaceErrorByWorkOrderId[state.selectedWorkOrderId] ?? null
       );
     },
+    selectedOpenWorkspaceErrorOperation: (state) => {
+      if (!state.selectedWorkOrderId) {
+        return null;
+      }
+      return (
+        state.openWorkspaceErrorOperationByWorkOrderId[
+          state.selectedWorkOrderId
+        ] ?? null
+      );
+    },
   },
   actions: {
     reset(options: ResetWorkOrdersOptions = {}): void {
@@ -179,7 +218,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       const requestSeq = this.loadAssignedRequestSeq + 1;
       this.loadAssignedRequestSeq = requestSeq;
       this.isLoading = true;
-      this.errorMessage = null;
+      this.loadError = null;
       try {
         const result = await fetchAssignedWorkOrders();
         if (this.loadAssignedRequestSeq !== requestSeq) {
@@ -200,14 +239,14 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         ) {
           this.clearOpenedWorkspace();
         }
-      } catch {
+      } catch (error: unknown) {
         if (this.loadAssignedRequestSeq !== requestSeq) {
           return;
         }
 
         this.items = [];
-        this.errorMessage =
-          "Не удалось загрузить назначенные наряды. Попробуйте ещё раз.";
+        const parsed = parseApiError(error);
+        this.loadError = presentWorkOrdersLoadError(parsed);
       } finally {
         if (this.loadAssignedRequestSeq === requestSeq) {
           this.isLoading = false;
@@ -232,6 +271,10 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       this.openingWorkOrderId = workOrderId;
       this.openWorkspaceErrorByWorkOrderId = {
         ...this.openWorkspaceErrorByWorkOrderId,
+        [workOrderId]: undefined,
+      };
+      this.openWorkspaceErrorOperationByWorkOrderId = {
+        ...this.openWorkspaceErrorOperationByWorkOrderId,
         [workOrderId]: undefined,
       };
 
@@ -260,15 +303,28 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         this.openedEditVersionId = editVersionId;
         this.workspace = workspace;
         storeOpenedWorkspace({ workOrderId, editVersionId });
-      } catch {
+        this.openWorkspaceErrorByWorkOrderId = {
+          ...this.openWorkspaceErrorByWorkOrderId,
+          [workOrderId]: undefined,
+        };
+        this.openWorkspaceErrorOperationByWorkOrderId = {
+          ...this.openWorkspaceErrorOperationByWorkOrderId,
+          [workOrderId]: undefined,
+        };
+      } catch (error: unknown) {
         if (
           this.openWorkspaceRequestSeq === requestSeq &&
           this.selectedWorkOrderId === workOrderId
         ) {
+          const parsed = parseApiError(error);
+          const errorPresentation = presentWorkspaceOpenError(parsed);
           this.openWorkspaceErrorByWorkOrderId = {
             ...this.openWorkspaceErrorByWorkOrderId,
-            [workOrderId]:
-              "Не удалось открыть рабочую версию. Обновите список или попробуйте еще раз.",
+            [workOrderId]: errorPresentation ?? undefined,
+          };
+          this.openWorkspaceErrorOperationByWorkOrderId = {
+            ...this.openWorkspaceErrorOperationByWorkOrderId,
+            [workOrderId]: errorPresentation ? "open" : undefined,
           };
         }
       } finally {
@@ -301,6 +357,10 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         ...this.openWorkspaceErrorByWorkOrderId,
         [workOrderId]: undefined,
       };
+      this.openWorkspaceErrorOperationByWorkOrderId = {
+        ...this.openWorkspaceErrorOperationByWorkOrderId,
+        [workOrderId]: undefined,
+      };
 
       try {
         const workspace = await fetchWorkspace(workOrderId, editVersionId);
@@ -316,16 +376,31 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         this.openedEditVersionId = editVersionId;
         this.workspace = workspace;
         storeOpenedWorkspace({ workOrderId, editVersionId });
-      } catch {
+        this.openWorkspaceErrorByWorkOrderId = {
+          ...this.openWorkspaceErrorByWorkOrderId,
+          [workOrderId]: undefined,
+        };
+        this.openWorkspaceErrorOperationByWorkOrderId = {
+          ...this.openWorkspaceErrorOperationByWorkOrderId,
+          [workOrderId]: undefined,
+        };
+      } catch (error: unknown) {
         if (
           this.openWorkspaceRequestSeq === requestSeq &&
           this.selectedWorkOrderId === workOrderId
         ) {
-          this.clearOpenedWorkspace();
+          const parsed = parseApiError(error);
+          const errorPresentation = presentWorkspaceRestoreError(parsed);
+          this.clearOpenedWorkspace({
+            preserveStoredWorkspace: shouldPreserveStoredWorkspace(parsed),
+          });
           this.openWorkspaceErrorByWorkOrderId = {
             ...this.openWorkspaceErrorByWorkOrderId,
-            [workOrderId]:
-              "Не удалось восстановить рабочую версию. Обновите список или попробуйте еще раз.",
+            [workOrderId]: errorPresentation ?? undefined,
+          };
+          this.openWorkspaceErrorOperationByWorkOrderId = {
+            ...this.openWorkspaceErrorOperationByWorkOrderId,
+            [workOrderId]: errorPresentation ? "restore" : undefined,
           };
         }
       } finally {
@@ -352,17 +427,30 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         workspaceKey !== null && this.lastFittedWorkspaceKey !== workspaceKey
       );
     },
+    async retrySelectedWorkspaceError(): Promise<void> {
+      if (this.selectedOpenWorkspaceErrorOperation === "restore") {
+        await this.restoreOpenedWorkspace();
+        return;
+      }
+      await this.openSelectedWorkOrder();
+    },
+    async reopenSelectedWorkOrder(): Promise<void> {
+      clearStoredOpenedWorkspace();
+      await this.openSelectedWorkOrder();
+    },
     updateWorkOrderStatus(workOrderId: string, status: WorkOrderStatus): void {
       this.items = this.items.map((item) =>
         item.id === workOrderId ? { ...item, status } : item,
       );
     },
-    clearOpenedWorkspace(): void {
+    clearOpenedWorkspace(options: ClearOpenedWorkspaceOptions = {}): void {
       this.openedWorkOrderId = null;
       this.openedEditVersionId = null;
       this.workspace = null;
       this.lastFittedWorkspaceKey = null;
-      clearStoredOpenedWorkspace();
+      if (!options.preserveStoredWorkspace) {
+        clearStoredOpenedWorkspace();
+      }
     },
   },
 });

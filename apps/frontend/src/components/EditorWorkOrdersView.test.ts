@@ -17,6 +17,7 @@ vi.mock("@/components/MapView.vue", () => ({
 const loadAssignedMock = vi.fn();
 const openSelectedWorkOrderMock = vi.fn();
 const restoreOpenedWorkspaceMock = vi.fn();
+const reopenSelectedWorkOrderMock = vi.fn();
 
 function assignedWorkOrder() {
   return {
@@ -193,22 +194,50 @@ describe("EditorWorkOrdersView", () => {
     ).toBe(true);
   });
 
-  it("marks list load errors as alerts", async () => {
+  it("routes the list retry action to loadAssigned", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
-    store.errorMessage =
-      "Не удалось загрузить назначенные наряды. Попробуйте ещё раз.";
+    store.loadError = {
+      summary: "Не удалось загрузить назначенные наряды.",
+      guidance: "Проверьте соединение и повторите запрос.",
+      action: { id: "retry", label: "Повторить" },
+      diagnostics: { code: "INTERNAL_ERROR", correlationId: "list-id" },
+    };
+    store.loadAssigned = loadAssignedMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    await flushPromises();
+    loadAssignedMock.mockClear();
+
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      "Не удалось загрузить назначенные наряды",
+    );
+    await wrapper.get('[data-test="error-action"]').trigger("click");
+    expect(loadAssignedMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("routes sign-in errors to local logout", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const auth = useAuthStore();
+    const store = useWorkOrdersStore();
+    auth.logout = vi.fn();
+    store.loadError = {
+      summary: "Сессия завершена.",
+      guidance: "Войдите снова.",
+      action: { id: "sign-in", label: "Войти снова" },
+      diagnostics: { code: "AUTH_REQUIRED", correlationId: "auth-id" },
+    };
     store.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    const errorMessage = wrapper.get(".panelState.isError span");
-    expect(errorMessage.text()).toContain(
-      "Не удалось загрузить назначенные наряды",
-    );
-    expect(errorMessage.attributes("role")).toBe("alert");
+    await wrapper.get('[data-test="error-action"]').trigger("click");
+    expect(auth.logout).toHaveBeenCalledTimes(1);
   });
 
   it("exposes the selected work order as current without pressed state", async () => {
@@ -325,29 +354,31 @@ describe("EditorWorkOrdersView", () => {
     ).toBe("wo-1:ev-1");
   });
 
-  it("moves the selected open error into the right panel", async () => {
+  it("routes reopen from the selected workspace error", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
     store.items = [assignedWorkOrder()];
     store.selectedWorkOrderId = "wo-1";
     store.openWorkspaceErrorByWorkOrderId = {
-      "wo-1":
-        "Не удалось открыть рабочую версию. Обновите список или попробуйте ещё раз.",
+      "wo-1": {
+        summary: "Рабочая версия не найдена.",
+        guidance: "Откройте рабочую версию заново.",
+        action: { id: "reopen", label: "Открыть заново" },
+        diagnostics: {
+          code: "EDIT_VERSION_NOT_FOUND",
+          correlationId: "workspace-id",
+        },
+      },
     };
     store.loadAssigned = loadAssignedMock;
-    store.openSelectedWorkOrder = openSelectedWorkOrderMock;
+    store.reopenSelectedWorkOrder = reopenSelectedWorkOrderMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    const error = wrapper.get('[data-test="workspace-open-error"]');
-    expect(error.text()).toContain("Не удалось открыть рабочую версию");
-    expect(error.attributes("role")).toBe("alert");
-    expect(wrapper.find(".workOrderCard .workOrderError").exists()).toBe(false);
-
-    await wrapper.get('[data-test="workspace-open-action"]').trigger("click");
-    expect(openSelectedWorkOrderMock).toHaveBeenCalledTimes(1);
+    await wrapper.get('[data-test="error-action"]').trigger("click");
+    expect(reopenSelectedWorkOrderMock).toHaveBeenCalledTimes(1);
   });
 
   it("does not label a newly selected work order as opening", async () => {

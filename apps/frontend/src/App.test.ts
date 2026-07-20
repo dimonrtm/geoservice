@@ -94,4 +94,42 @@ describe("App", () => {
     );
     expect(wrapper.find('[data-test="reviewer-home"]').exists()).toBe(false);
   });
+
+  it("retries session restoration through the actionable error", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const auth = useAuthStore();
+    auth.isReady = true;
+    auth.sessionError = {
+      summary: "Не удалось восстановить сессию.",
+      guidance: "Проверьте соединение и повторите запрос.",
+      action: { id: "retry", label: "Повторить" },
+      diagnostics: { code: "INTERNAL_ERROR", correlationId: "session-id" },
+    };
+    auth.restoreSession = vi.fn();
+
+    const { default: App } = await import("@/App.vue");
+    const wrapper = mount(App);
+    await wrapper.get('[data-test="error-action"]').trigger("click");
+
+    expect(auth.restoreSession).toHaveBeenCalledTimes(1);
+  });
+
+  it("dismisses an expired-session error before showing login", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const auth = useAuthStore();
+    auth.isReady = true;
+    auth.sessionError = {
+      summary: "Сессия завершена.",
+      guidance: "Войдите снова.",
+      action: { id: "sign-in", label: "Войти снова" },
+      diagnostics: { code: "AUTH_REQUIRED", correlationId: "session-id" },
+    };
+
+    const { default: App } = await import("@/App.vue");
+    const wrapper = mount(App);
+    await wrapper.get('[data-test="error-action"]').trigger("click");
+
+    expect(auth.sessionError).toBeNull();
+    expect(wrapper.find('[data-test="login-screen"]').exists()).toBe(true);
+  });
 });

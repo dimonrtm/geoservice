@@ -27,6 +27,7 @@ from utility_service.use_cases.services.edit_version_service import OpenEditVers
 from utility_service.web_api.api.auth import create_access_token
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.work_orders import work_orders_router
+from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
@@ -37,6 +38,7 @@ def build_app(
     work_order_service: object | None = None,
 ) -> FastAPI:
     app = FastAPI()
+    app.add_middleware(CorrelationIdMiddleware)
     install_exception_handlers(app)
     app.include_router(work_orders_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service

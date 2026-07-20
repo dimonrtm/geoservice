@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 
+import ActionableError from "@/components/ActionableError.vue";
+import type { ErrorActionId, ErrorPresentation } from "@/contracts/api-error";
 import type {
   EditVersionStatus,
   WorkOrderStatus,
@@ -13,11 +15,12 @@ const props = defineProps<{
   workspace: WorkspaceResponse | null;
   isOpening: boolean;
   isOpenActionDisabled: boolean;
-  errorMessage: string | null;
+  error: ErrorPresentation | null;
 }>();
 
 const emit = defineEmits<{
   open: [];
+  errorAction: [actionId: ErrorActionId];
 }>();
 
 const titleRef = ref<HTMLHeadingElement | null>(null);
@@ -123,24 +126,19 @@ defineExpose({ focusHeading });
         {{ props.workOrder.description }}
       </p>
 
-      <p
-        v-if="props.errorMessage"
+      <ActionableError
+        v-if="props.error"
         id="workspace-open-error"
-        class="openError"
-        data-test="workspace-open-error"
-        role="alert"
-      >
-        {{ props.errorMessage }}
-      </p>
+        :presentation="props.error"
+        @action="emit('errorAction', $event)"
+      />
 
       <button
+        v-else
         class="openAction"
         type="button"
         data-test="workspace-open-action"
         :disabled="props.isOpenActionDisabled"
-        :aria-describedby="
-          props.errorMessage ? 'workspace-open-error' : undefined
-        "
         @click="emit('open')"
       >
         {{ actionText }}
@@ -206,8 +204,7 @@ h2:focus-visible {
   margin-top: 10px;
 }
 
-.workOrderDescription,
-.openError {
+.workOrderDescription {
   margin: 0;
   line-height: 1.4;
 }
@@ -215,11 +212,6 @@ h2:focus-visible {
 .workOrderDescription {
   color: #475569;
   font-size: 14px;
-}
-
-.openError {
-  color: #b91c1c;
-  font-size: 13px;
 }
 
 .openAction {

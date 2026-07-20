@@ -13,6 +13,7 @@ from utility_service.use_cases.deps import get_auth_service
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.secure_router import secure_router
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
+from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
@@ -104,6 +105,7 @@ def test_legacy_gis_guard_rejects_reviewer_when_enabled(monkeypatch) -> None:
 
 def build_secure_app(auth_service: object) -> FastAPI:
     app = FastAPI()
+    app.add_middleware(CorrelationIdMiddleware)
     install_exception_handlers(app)
     app.include_router(secure_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service

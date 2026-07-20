@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from uuid import uuid4
 
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.domain.exceptions.business_validation_exception import (
@@ -25,6 +24,14 @@ from utility_service.use_cases.domain.exceptions.work_order_api_error import Wor
 from utility_service.use_cases.schemas.feature.patch_feature_conflict_response import (
     PatchFeatureConflictResponse,
 )
+from utility_service.web_api.middleware.correlation_id import (
+    CORRELATION_ID_HEADER,
+    get_correlation_id,
+)
+from utility_service.web_api.observability.api_error_logging import (
+    log_handled_api_error,
+    log_unhandled_api_error,
+)
 
 
 def structured_error_response(
@@ -33,9 +40,11 @@ def structured_error_response(
     code: str,
     message: str,
 ) -> JSONResponse:
-    correlation_id = request.headers.get("X-Correlation-ID") or str(uuid4())
+    correlation_id = get_correlation_id(request)
+    log_handled_api_error(request, code=code, status=status_code)
     return JSONResponse(
         status_code=status_code,
+        headers={CORRELATION_ID_HEADER: correlation_id},
         content={
             "code": code,
             "message": message,
@@ -45,6 +54,20 @@ def structured_error_response(
 
 
 def install_exception_handlers(app: FastAPI) -> None:
+    @app.exception_handler(Exception)
+    async def unhandled_api_error(request: Request, error: Exception):
+        correlation_id = get_correlation_id(request)
+        log_unhandled_api_error(request, error)
+        return JSONResponse(
+            status_code=500,
+            headers={CORRELATION_ID_HEADER: correlation_id},
+            content={
+                "code": "INTERNAL_ERROR",
+                "message": "Внутренняя ошибка сервиса",
+                "correlationId": correlation_id,
+            },
+        )
+
     @app.exception_handler(AuthApiError)
     async def auth_api_error(request: Request, error: AuthApiError):
         return structured_error_response(

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { mount, type VueWrapper } from "@vue/test-utils";
 
 import WorkspaceDetailsPanel from "@/components/WorkspaceDetailsPanel.vue";
+import type { ErrorPresentation } from "@/contracts/api-error";
 import type {
   WorkOrderSummary,
   WorkspaceResponse,
@@ -14,7 +15,7 @@ type PanelTestProps = {
   workspace: WorkspaceResponse | null;
   isOpening: boolean;
   isOpenActionDisabled: boolean;
-  errorMessage: string | null;
+  error: ErrorPresentation | null;
 };
 
 function workOrder(
@@ -100,7 +101,7 @@ function mountPanel(props: Partial<PanelTestProps> = {}) {
       workspace: null,
       isOpening: false,
       isOpenActionDisabled: false,
-      errorMessage: null,
+      error: null,
       ...props,
     },
     attachTo: document.body,
@@ -190,16 +191,27 @@ describe("WorkspaceDetailsPanel", () => {
     ).toBe("false");
   });
 
-  it("renders an actionable alert in preview", () => {
+  it("renders a workspace error action instead of the normal open action", async () => {
     const wrapper = mountPanel({
-      errorMessage: "Не удалось открыть workspace",
+      error: {
+        summary: "Рабочая версия не найдена.",
+        guidance: "Откройте рабочую версию заново.",
+        action: { id: "reopen", label: "Открыть заново" },
+        diagnostics: {
+          code: "EDIT_VERSION_NOT_FOUND",
+          correlationId: "workspace-id",
+        },
+      },
     });
 
-    const error = wrapper.get('[data-test="workspace-open-error"]');
-    const action = wrapper.get('[data-test="workspace-open-action"]');
-    expect(error.text()).toBe("Не удалось открыть workspace");
-    expect(error.attributes("role")).toBe("alert");
-    expect(action.attributes("aria-describedby")).toBe("workspace-open-error");
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      "Рабочая версия не найдена",
+    );
+    expect(wrapper.find('[data-test="workspace-open-action"]').exists()).toBe(
+      false,
+    );
+    await wrapper.get('[data-test="error-action"]').trigger("click");
+    expect(wrapper.emitted("errorAction")).toEqual([["reopen"]]);
   });
 
   it("renders localized workspace details without technical values", () => {

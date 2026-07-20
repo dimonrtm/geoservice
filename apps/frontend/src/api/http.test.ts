@@ -16,7 +16,7 @@ const { authStoreMock, axiosCreateMock, responseUseMock } = vi.hoisted(() => {
   return {
     authStoreMock: {
       token: null as string | null,
-      clearLocalSession: vi.fn(),
+      handleUnauthorizedResponse: vi.fn(),
       logout: vi.fn(),
     },
     axiosCreateMock: vi.fn(() => axiosInstanceMock),
@@ -45,7 +45,7 @@ describe("http api", () => {
     authStoreMock.token = null;
   });
 
-  it("clears the local auth session without backend logout when a response is 401", async () => {
+  it("delegates a 401 to the auth store without backend logout", async () => {
     await import("@/api/http");
     const rejectHandler = responseUseMock.mock.calls[0]?.[1] as (
       error: unknown,
@@ -54,7 +54,9 @@ describe("http api", () => {
 
     await expect(rejectHandler(error)).rejects.toBe(error);
 
-    expect(authStoreMock.clearLocalSession).toHaveBeenCalledTimes(1);
+    expect(authStoreMock.handleUnauthorizedResponse).toHaveBeenCalledWith(
+      error,
+    );
     expect(authStoreMock.logout).not.toHaveBeenCalled();
   });
 });

@@ -45,9 +45,16 @@ describe("LoginScreen", () => {
       "editor@example.local",
       "wrong-password",
     );
-    expect(wrapper.get(".errorMessage").text()).toBe(
-      "Неверная электронная почта или пароль",
+    const alert = wrapper.get('[role="alert"]');
+    expect(alert.text()).toContain("Неверная электронная почта или пароль");
+    expect(alert.text()).toContain("Проверьте электронную почту и пароль");
+    expect(wrapper.get('[data-test="error-code"]').text()).toContain(
+      "INVALID_CREDENTIALS",
     );
+    expect(wrapper.get('[data-test="correlation-id"]').text()).toContain(
+      "login-correlation-id",
+    );
+    expect(wrapper.find('[data-test="error-action"]').exists()).toBe(false);
   });
 
   it("uses generic fallback when invalid login response has no structured message", async () => {
@@ -67,8 +74,12 @@ describe("LoginScreen", () => {
 
     await fillAndSubmitLoginForm(wrapper);
 
-    expect(wrapper.get(".errorMessage").text()).toBe(
-      "Сейчас не удалось выполнить вход. Попробуйте ещё раз.",
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      "Сейчас не удалось выполнить вход.",
     );
+    expect(wrapper.text()).not.toContain(
+      "legacy detail should not be rendered",
+    );
+    expect(wrapper.find('[data-test="error-action"]').exists()).toBe(false);
   });
 });

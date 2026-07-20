@@ -16,11 +16,13 @@ from utility_service.use_cases.schemas.auth.refreshed_auth_session_out import (
 from utility_service.web_api.api import auth as auth_api
 from utility_service.web_api.api.auth import auth_router
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 
 
 def build_auth_app(auth_service: object, auth_session_service: object | None = None) -> FastAPI:
     app = FastAPI()
+    app.add_middleware(CorrelationIdMiddleware)
     install_exception_handlers(app)
     app.include_router(auth_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service

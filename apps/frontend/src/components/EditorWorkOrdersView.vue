@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from "vue";
 
+import ActionableError from "@/components/ActionableError.vue";
 import MapView from "@/components/MapView.vue";
 import WorkspaceDetailsPanel from "@/components/WorkspaceDetailsPanel.vue";
+import type { ErrorActionId } from "@/contracts/api-error";
+import { useAuthStore } from "@/stores/auth";
 import { useWorkOrdersStore } from "@/stores/workOrders";
 
 type WorkspaceDetailsPanelHandle = {
@@ -10,6 +13,7 @@ type WorkspaceDetailsPanelHandle = {
 };
 
 const workOrders = useWorkOrdersStore();
+const auth = useAuthStore();
 const detailsPanelRef = ref<WorkspaceDetailsPanelHandle | null>(null);
 const workspaceAnnouncement = ref("");
 
@@ -22,10 +26,38 @@ watch(
 
 onMounted(async () => {
   await workOrders.loadAssigned();
-  if (!workOrders.errorMessage) {
+  if (!workOrders.loadError) {
     await workOrders.restoreOpenedWorkspace();
   }
 });
+
+function handleLoadErrorAction(actionId: ErrorActionId): void {
+  if (actionId === "retry" || actionId === "refresh") {
+    void workOrders.loadAssigned();
+    return;
+  }
+  if (actionId === "sign-in") {
+    void auth.logout();
+  }
+}
+
+function handleWorkspaceErrorAction(actionId: ErrorActionId): void {
+  if (actionId === "retry") {
+    void workOrders.retrySelectedWorkspaceError();
+    return;
+  }
+  if (actionId === "refresh") {
+    void workOrders.loadAssigned();
+    return;
+  }
+  if (actionId === "reopen") {
+    void workOrders.reopenSelectedWorkOrder();
+    return;
+  }
+  if (actionId === "sign-in") {
+    void auth.logout();
+  }
+}
 
 function statusLabel(status: string): string {
   if (status === "in_progress") {
@@ -80,15 +112,11 @@ async function openSelectedWorkspace(): Promise<void> {
         Загружаем назначенные наряды...
       </div>
 
-      <div v-else-if="workOrders.errorMessage" class="panelState isError">
-        <span role="alert">{{ workOrders.errorMessage }}</span>
-        <button
-          class="retryButton"
-          type="button"
-          @click="workOrders.loadAssigned"
-        >
-          Повторить
-        </button>
+      <div v-else-if="workOrders.loadError" class="panelState isError">
+        <ActionableError
+          :presentation="workOrders.loadError"
+          @action="handleLoadErrorAction"
+        />
       </div>
 
       <div
@@ -143,8 +171,9 @@ async function openSelectedWorkspace(): Promise<void> {
           workOrders.openingWorkOrderId === workOrders.selectedWorkOrder.id
         "
         :is-open-action-disabled="workOrders.isOpeningWorkspace"
-        :error-message="workOrders.selectedOpenWorkspaceError"
+        :error="workOrders.selectedOpenWorkspaceError"
         @open="openSelectedWorkspace"
+        @error-action="handleWorkspaceErrorAction"
       />
 
       <p
@@ -206,8 +235,7 @@ async function openSelectedWorkspace(): Promise<void> {
   color: #0f172a;
 }
 
-.refreshButton,
-.retryButton {
+.refreshButton {
   border: 1px solid rgba(15, 23, 42, 0.14);
   border-radius: 8px;
   padding: 8px 10px;
