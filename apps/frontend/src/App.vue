@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { LogOut } from "@lucide/vue";
 import { computed, onMounted } from "vue";
 
 import ActionableError from "./components/ActionableError.vue";
 import EditorWorkOrdersView from "./components/EditorWorkOrdersView.vue";
 import LoginScreen from "./components/LoginScreen.vue";
 import ReviewerHome from "./components/ReviewerHome.vue";
+import UiButton from "@/components/ui/UiButton.vue";
+import UiIconButton from "@/components/ui/UiIconButton.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
 import { getRoleLabel, isEditorRole } from "@/domain/authRole";
 import { useAuthStore } from "@/stores/auth";
@@ -60,9 +63,14 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
           @action="handleSessionErrorAction"
         />
         <div class="statusActions">
-          <button class="btn btnSecondary" type="button" @click="auth.logout">
+          <UiButton
+            :icon="LogOut"
+            variant="secondary"
+            data-test="session-logout"
+            @click="auth.logout"
+          >
             Выйти
-          </button>
+          </UiButton>
         </div>
       </div>
     </div>
@@ -73,9 +81,29 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
           <div class="identityLabel">Выполнен вход</div>
           <div class="identityValue">{{ userLabel }}</div>
         </div>
-        <button class="btn btnSecondary" type="button" @click="auth.logout">
-          Выйти
-        </button>
+        <div class="logoutControls">
+          <div class="logoutDesktop">
+            <UiButton
+              :icon="LogOut"
+              variant="secondary"
+              data-test="logout-desktop"
+              @click="auth.logout"
+            >
+              Выйти
+            </UiButton>
+          </div>
+          <div class="logoutMobile">
+            <UiIconButton
+              :icon="LogOut"
+              label="Выйти"
+              tooltip="Выйти из GeoService"
+              tooltip-align="end"
+              variant="secondary"
+              data-test="logout-mobile"
+              @click="auth.logout"
+            />
+          </div>
+        </div>
       </div>
 
       <div class="content">
@@ -192,18 +220,32 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
   flex-wrap: wrap;
 }
 
-.btn {
-  border: 1px solid transparent;
-  border-radius: 12px;
-  padding: 10px 14px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
+.logoutControls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
 }
 
-.btnSecondary {
-  color: #0f172a;
-  background: #fff;
-  border-color: rgba(15, 23, 42, 0.14);
+.logoutDesktop {
+  display: block;
+}
+
+.logoutMobile {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .topBar {
+    gap: 12px;
+    padding: 10px 12px;
+  }
+
+  .logoutDesktop {
+    display: none;
+  }
+
+  .logoutMobile {
+    display: block;
+  }
 }
 </style>

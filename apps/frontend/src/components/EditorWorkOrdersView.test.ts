@@ -149,6 +149,46 @@ describe("EditorWorkOrdersView", () => {
     expect(state.attributes("aria-atomic")).toBe("true");
   });
 
+  it("refreshes assigned work orders through an accessible icon control", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [];
+    store.loadAssigned = loadAssignedMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    await flushPromises();
+    loadAssignedMock.mockClear();
+
+    const refresh = wrapper.get('[data-test="refresh-work-orders"]');
+    expect(refresh.attributes("aria-label")).toBe("Обновить");
+    expect(refresh.attributes("aria-describedby")).toBeDefined();
+
+    await refresh.trigger("click");
+    expect(loadAssignedMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("exposes refresh loading state and blocks a second request", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.isLoading = true;
+    store.loadAssigned = loadAssignedMock;
+
+    const { default: EditorWorkOrdersView } =
+      await import("@/components/EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    const refresh = wrapper.get('[data-test="refresh-work-orders"]');
+
+    expect(refresh.attributes("disabled")).toBeDefined();
+    expect(refresh.attributes("aria-busy")).toBe("true");
+    expect(refresh.attributes("aria-label")).toBe("Обновление списка нарядов");
+    expect(refresh.get("svg").classes()).toContain("uiControlLoader");
+
+    await refresh.trigger("click");
+    expect(loadAssignedMock).toHaveBeenCalledTimes(1);
+  });
+
   it("announces the empty assigned list politely", async () => {
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
@@ -296,9 +336,12 @@ describe("EditorWorkOrdersView", () => {
     expect(wrapper.get('[data-test="workspace-description"]').text()).toContain(
       "Описание выбранного наряда",
     );
-    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
-      "Начать",
-    );
+    expect(
+      wrapper
+        .get('[data-test="workspace-open-action"]')
+        .get('[data-ui-control-state="idle"]')
+        .text(),
+    ).toBe("Начать");
     expect(wrapper.find(".workOrderCard .openWorkspaceButton").exists()).toBe(
       false,
     );
@@ -321,9 +364,12 @@ describe("EditorWorkOrdersView", () => {
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
 
-    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
-      "Продолжить",
-    );
+    expect(
+      wrapper
+        .get('[data-test="workspace-open-action"]')
+        .get('[data-ui-control-state="idle"]')
+        .text(),
+    ).toBe("Продолжить");
   });
 
   it("renders details and workspace map for the opened selected work order", async () => {
@@ -403,7 +449,7 @@ describe("EditorWorkOrdersView", () => {
     const wrapper = mount(EditorWorkOrdersView);
 
     const action = wrapper.get('[data-test="workspace-open-action"]');
-    expect(action.text()).toBe("Начать");
+    expect(action.get('[data-ui-control-state="idle"]').text()).toBe("Начать");
     expect(action.attributes("disabled")).toBeDefined();
   });
 

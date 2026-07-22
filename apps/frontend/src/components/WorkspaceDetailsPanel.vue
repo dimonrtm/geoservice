@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { Play } from "@lucide/vue";
 import { computed, ref } from "vue";
 
 import ActionableError from "@/components/ActionableError.vue";
+import UiButton from "@/components/ui/UiButton.vue";
 import type { ErrorActionId, ErrorPresentation } from "@/contracts/api-error";
 import type {
   EditVersionStatus,
@@ -28,12 +30,9 @@ const titleRef = ref<HTMLHeadingElement | null>(null);
 const workOrderStatusText = computed(() =>
   workOrderStatusLabel(props.workOrder.status),
 );
-const actionText = computed(() => {
-  if (props.isOpening) {
-    return "Открываем…";
-  }
-  return props.workOrder.status === "in_progress" ? "Продолжить" : "Начать";
-});
+const actionText = computed(() =>
+  props.workOrder.status === "in_progress" ? "Продолжить" : "Начать",
+);
 
 function workOrderStatusLabel(status: WorkOrderStatus): string {
   return status === "in_progress" ? "В работе" : "Назначен";
@@ -133,16 +132,18 @@ defineExpose({ focusHeading });
         @action="emit('errorAction', $event)"
       />
 
-      <button
+      <UiButton
         v-else
-        class="openAction"
-        type="button"
-        data-test="workspace-open-action"
+        :icon="Play"
+        variant="primary"
+        :loading="props.isOpening"
+        loading-label="Открываем…"
         :disabled="props.isOpenActionDisabled"
+        data-test="workspace-open-action"
         @click="emit('open')"
       >
         {{ actionText }}
-      </button>
+      </UiButton>
     </div>
   </section>
 </template>
@@ -212,24 +213,6 @@ h2:focus-visible {
 .workOrderDescription {
   color: #475569;
   font-size: 14px;
-}
-
-.openAction {
-  min-width: 112px;
-  border: 1px solid #166534;
-  border-radius: 8px;
-  padding: 8px 12px;
-  background: #166534;
-  color: #fff;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.openAction:disabled {
-  opacity: 0.7;
-  cursor: wait;
 }
 
 .detailsGrid {

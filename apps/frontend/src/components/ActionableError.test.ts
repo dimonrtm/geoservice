@@ -1,8 +1,16 @@
-import { mount } from "@vue/test-utils";
+import {
+  FolderOpen,
+  LogIn,
+  RefreshCw,
+  RotateCcw,
+  type LucideIcon,
+} from "@lucide/vue";
+import { flushPromises, mount } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import ActionableError from "@/components/ActionableError.vue";
-import type { ErrorPresentation } from "@/contracts/api-error";
+import UiButton from "@/components/ui/UiButton.vue";
+import type { ErrorActionId, ErrorPresentation } from "@/contracts/api-error";
 
 const presentation: ErrorPresentation = {
   summary: "Рабочая версия не найдена.",
@@ -93,5 +101,64 @@ describe("ActionableError", () => {
 
     expect(wrapper.find("details").exists()).toBe(false);
     expect(wrapper.find('[data-test="error-action"]').exists()).toBe(false);
+  });
+
+  it.each([
+    ["retry", RotateCcw],
+    ["refresh", RefreshCw],
+    ["reopen", FolderOpen],
+    ["sign-in", LogIn],
+  ] satisfies [ErrorActionId, LucideIcon][])(
+    "maps %s to the agreed Lucide icon",
+    (actionId, expectedIcon) => {
+      const actionPresentation: ErrorPresentation = {
+        summary: "Ошибка операции",
+        guidance: null,
+        action: { id: actionId, label: "Выполнить действие" },
+        diagnostics: { code: null, correlationId: null },
+      };
+      const wrapper = mount(ActionableError, {
+        props: { presentation: actionPresentation },
+      });
+
+      expect(wrapper.getComponent(UiButton).props("icon")).toBe(expectedIcon);
+    },
+  );
+
+  it("blocks duplicate clipboard writes while copy is pending", async () => {
+    let resolveWriteText: (() => void) | undefined;
+    const writeText = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveWriteText = resolve;
+        }),
+    );
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    const wrapper = mount(ActionableError, { props: { presentation } });
+    const copyButton = wrapper.get('[data-test="copy-correlation-id"]');
+
+    await copyButton.trigger("click");
+    expect(copyButton.attributes("disabled")).toBeDefined();
+    expect(copyButton.attributes("aria-busy")).toBe("true");
+    expect(copyButton.attributes("aria-label")).toBe("Копируем код обращения");
+    expect(
+      copyButton.get('[data-ui-control-state="loading"]').classes(),
+    ).not.toContain("isHidden");
+    expect(copyButton.get('[data-ui-control-state="loading"]').text()).toBe(
+      "Копируем…",
+    );
+
+    await copyButton.trigger("click");
+    expect(writeText).toHaveBeenCalledTimes(1);
+
+    resolveWriteText?.();
+    await flushPromises();
+    expect(copyButton.attributes("disabled")).toBeUndefined();
+    expect(wrapper.get('[data-test="copy-status"]').text()).toBe(
+      "Код обращения скопирован",
+    );
   });
 });

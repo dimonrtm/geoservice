@@ -15,6 +15,7 @@
     "format:write": "prettier --write ."
   },
   "dependencies": {
+    "@lucide/vue": "^1.25.0",
     "axios": "^1.13.2",
     "maplibre-gl": "^5.15.0",
     "pinia": "^3.0.4",

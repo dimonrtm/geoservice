@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { RefreshCw } from "@lucide/vue";
 import { nextTick, onMounted, ref, watch } from "vue";
 
 import ActionableError from "@/components/ActionableError.vue";
 import MapView from "@/components/MapView.vue";
+import UiIconButton from "@/components/ui/UiIconButton.vue";
 import WorkspaceDetailsPanel from "@/components/WorkspaceDetailsPanel.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
 import { useAuthStore } from "@/stores/auth";
@@ -94,13 +96,17 @@ async function openSelectedWorkspace(): Promise<void> {
     <aside class="workOrdersPanel" aria-label="Мои наряды">
       <div class="panelHeader">
         <h1>Мои наряды</h1>
-        <button
-          class="refreshButton"
-          type="button"
+        <UiIconButton
+          :icon="RefreshCw"
+          label="Обновить"
+          tooltip="Обновить список назначенных нарядов"
+          tooltip-align="end"
+          variant="secondary"
+          :loading="workOrders.isLoading"
+          loading-label="Обновление списка нарядов"
+          data-test="refresh-work-orders"
           @click="workOrders.loadAssigned"
-        >
-          Обновить
-        </button>
+        />
       </div>
 
       <div
@@ -233,16 +239,6 @@ async function openSelectedWorkspace(): Promise<void> {
   font-size: 18px;
   line-height: 1.2;
   color: #0f172a;
-}
-
-.refreshButton {
-  border: 1px solid rgba(15, 23, 42, 0.14);
-  border-radius: 8px;
-  padding: 8px 10px;
-  background: #fff;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 .panelState {

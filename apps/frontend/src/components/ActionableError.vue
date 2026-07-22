@@ -1,6 +1,15 @@
 <script setup lang="ts">
+import {
+  Copy,
+  FolderOpen,
+  LogIn,
+  RefreshCw,
+  RotateCcw,
+  type LucideIcon,
+} from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 
+import UiButton from "@/components/ui/UiButton.vue";
 import type { ErrorActionId, ErrorPresentation } from "@/contracts/api-error";
 
 const props = defineProps<{
@@ -13,6 +22,15 @@ const emit = defineEmits<{
 }>();
 
 const copyStatus = ref("");
+const isCopying = ref(false);
+
+const errorActionIcons: Record<ErrorActionId, LucideIcon> = {
+  retry: RotateCcw,
+  refresh: RefreshCw,
+  reopen: FolderOpen,
+  "sign-in": LogIn,
+};
+
 const hasDiagnostics = computed(
   () =>
     props.presentation.diagnostics.code !== null ||
@@ -31,6 +49,8 @@ async function copyCorrelationId(): Promise<void> {
   if (!correlationId) {
     return;
   }
+
+  isCopying.value = true;
   try {
     if (!navigator.clipboard) {
       throw new Error("Clipboard API недоступен");
@@ -39,7 +59,13 @@ async function copyCorrelationId(): Promise<void> {
     copyStatus.value = "Код обращения скопирован";
   } catch {
     copyStatus.value = "Не удалось скопировать код обращения";
+  } finally {
+    isCopying.value = false;
   }
+}
+
+function errorActionIcon(actionId: ErrorActionId): LucideIcon {
+  return errorActionIcons[actionId];
 }
 
 function emitAction(): void {
@@ -59,15 +85,15 @@ function emitAction(): void {
       </p>
     </div>
 
-    <button
+    <UiButton
       v-if="props.presentation.action"
-      class="errorAction"
+      :icon="errorActionIcon(props.presentation.action.id)"
+      variant="error"
       data-test="error-action"
-      type="button"
       @click="emitAction"
     >
       {{ props.presentation.action.label }}
-    </button>
+    </UiButton>
 
     <details v-if="hasDiagnostics" class="errorDiagnostics">
       <summary>Технические сведения</summary>
@@ -85,14 +111,18 @@ function emitAction(): void {
           </dd>
         </div>
       </dl>
-      <button
+      <UiButton
         v-if="props.presentation.diagnostics.correlationId"
+        :icon="Copy"
+        variant="error"
+        :loading="isCopying"
+        loading-label="Копируем…"
+        :aria-label="isCopying ? 'Копируем код обращения' : undefined"
         data-test="copy-correlation-id"
-        type="button"
         @click="copyCorrelationId"
       >
         Копировать код обращения
-      </button>
+      </UiButton>
     </details>
 
     <p
@@ -129,18 +159,6 @@ function emitAction(): void {
 .errorDiagnostics,
 .copyStatus {
   font-size: 13px;
-}
-
-.errorAction,
-.errorDiagnostics button {
-  border: 1px solid rgba(153, 27, 27, 0.3);
-  border-radius: 8px;
-  padding: 8px 10px;
-  background: #fff;
-  color: #7f1d1d;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
 }
 
 .errorDiagnostics dl {

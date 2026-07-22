@@ -132,4 +132,53 @@ describe("App", () => {
     expect(auth.sessionError).toBeNull();
     expect(wrapper.find('[data-test="login-screen"]').exists()).toBe(true);
   });
+
+  it("renders desktop and narrow logout controls through one action", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const auth = useAuthStore();
+    auth.token = "token-1";
+    auth.user = {
+      id: "editor-1",
+      email: "editor@example.local",
+      role: "editor",
+    };
+    auth.isReady = true;
+    auth.logout = vi.fn();
+
+    const { default: App } = await import("@/App.vue");
+    const wrapper = mount(App);
+    const desktop = wrapper.get('[data-test="logout-desktop"]');
+    const mobile = wrapper.get('[data-test="logout-mobile"]');
+
+    expect(desktop.text()).toContain("Выйти");
+    expect(desktop.element.closest(".logoutDesktop")).not.toBeNull();
+    expect(mobile.attributes("aria-label")).toBe("Выйти");
+    expect(mobile.attributes("aria-describedby")).toBeDefined();
+    expect(mobile.element.closest(".logoutMobile")).not.toBeNull();
+
+    await desktop.trigger("click");
+    await mobile.trigger("click");
+    expect(auth.logout).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps session-error logout as icon plus text", async () => {
+    const { useAuthStore } = await import("@/stores/auth");
+    const auth = useAuthStore();
+    auth.isReady = true;
+    auth.sessionError = {
+      summary: "Не удалось восстановить сессию.",
+      guidance: "Проверьте соединение и повторите запрос.",
+      action: { id: "retry", label: "Повторить" },
+      diagnostics: { code: "INTERNAL_ERROR", correlationId: "session-id" },
+    };
+    auth.logout = vi.fn();
+
+    const { default: App } = await import("@/App.vue");
+    const wrapper = mount(App);
+    const logout = wrapper.get('[data-test="session-logout"]');
+    expect(logout.text()).toContain("Выйти");
+
+    await logout.trigger("click");
+    expect(auth.logout).toHaveBeenCalledTimes(1);
+  });
 });

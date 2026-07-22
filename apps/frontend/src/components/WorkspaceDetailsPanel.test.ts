@@ -1,6 +1,8 @@
+import { Play } from "@lucide/vue";
 import { afterEach, describe, expect, it } from "vitest";
 import { mount, type VueWrapper } from "@vue/test-utils";
 
+import UiButton from "@/components/ui/UiButton.vue";
 import WorkspaceDetailsPanel from "@/components/WorkspaceDetailsPanel.vue";
 import type { ErrorPresentation } from "@/contracts/api-error";
 import type {
@@ -110,6 +112,14 @@ function mountPanel(props: Partial<PanelTestProps> = {}) {
   return wrapper;
 }
 
+function activeControlText(wrapper: VueWrapper, selector: string): string {
+  const button = wrapper.get(selector);
+  const loading = button.get('[data-ui-control-state="loading"]');
+  return loading.classes().includes("isHidden")
+    ? button.get('[data-ui-control-state="idle"]').text()
+    : loading.text();
+}
+
 afterEach(() => {
   for (const wrapper of mountedWrappers.splice(0)) {
     wrapper.unmount();
@@ -130,9 +140,10 @@ describe("WorkspaceDetailsPanel", () => {
     expect(wrapper.get('[data-test="workspace-description"]').text()).toContain(
       "Проверить оборудование",
     );
-    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
-      "Начать",
-    );
+    expect(
+      activeControlText(wrapper, '[data-test="workspace-open-action"]'),
+    ).toBe("Начать");
+    expect(wrapper.getComponent(UiButton).props("icon")).toBe(Play);
 
     await wrapper.get('[data-test="workspace-open-action"]').trigger("click");
     expect(wrapper.emitted("open")).toHaveLength(1);
@@ -148,9 +159,14 @@ describe("WorkspaceDetailsPanel", () => {
     expect(wrapper.get('[data-test="workspace-status"]').text()).toBe(
       "В работе",
     );
-    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
-      "Открываем…",
-    );
+    expect(
+      activeControlText(wrapper, '[data-test="workspace-open-action"]'),
+    ).toBe("Открываем…");
+    expect(
+      wrapper
+        .get('[data-test="workspace-open-action"]')
+        .attributes("aria-busy"),
+    ).toBe("true");
     expect(
       wrapper.get('[data-test="workspace-open-action"]').attributes("disabled"),
     ).toBeDefined();
@@ -167,9 +183,9 @@ describe("WorkspaceDetailsPanel", () => {
       isOpening: false,
     });
 
-    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
-      "Продолжить",
-    );
+    expect(
+      activeControlText(wrapper, '[data-test="workspace-open-action"]'),
+    ).toBe("Продолжить");
   });
 
   it("keeps the normal label while another work order is opening", () => {
@@ -178,9 +194,14 @@ describe("WorkspaceDetailsPanel", () => {
       isOpenActionDisabled: true,
     });
 
-    expect(wrapper.get('[data-test="workspace-open-action"]').text()).toBe(
-      "Начать",
-    );
+    expect(
+      activeControlText(wrapper, '[data-test="workspace-open-action"]'),
+    ).toBe("Начать");
+    expect(
+      wrapper
+        .get('[data-test="workspace-open-action"]')
+        .attributes("aria-busy"),
+    ).toBeUndefined();
     expect(
       wrapper.get('[data-test="workspace-open-action"]').attributes("disabled"),
     ).toBeDefined();
