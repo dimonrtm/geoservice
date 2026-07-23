@@ -1,7 +1,19 @@
 <script setup lang="ts">
 import { LoaderCircle, type LucideIcon } from "@lucide/vue";
-import { computed, onBeforeUnmount, ref, useAttrs, useId } from "vue";
+import {
+  computed,
+  onBeforeUnmount,
+  ref,
+  useAttrs,
+  useId,
+  watchEffect,
+} from "vue";
 
+import {
+  hasNonEmptyLoadingLabel,
+  type UiControlLoadingProps,
+  warnInvalidLoadingLabel,
+} from "@/components/ui/ui-control-loading";
 import "@/components/ui/ui-controls.css";
 
 defineOptions({ inheritAttrs: false });
@@ -9,26 +21,16 @@ defineOptions({ inheritAttrs: false });
 type UiControlVariant = "primary" | "secondary" | "error";
 type TooltipAlign = "center" | "end";
 type NativeButtonType = "button" | "submit" | "reset";
+type UiIconButtonBaseProps = {
+  icon: LucideIcon;
+  label: string;
+  tooltip: string;
+  tooltipAlign?: TooltipAlign;
+  variant?: UiControlVariant;
+  disabled?: boolean;
+};
 
-const props = withDefaults(
-  defineProps<{
-    icon: LucideIcon;
-    label: string;
-    tooltip: string;
-    tooltipAlign?: TooltipAlign;
-    variant?: UiControlVariant;
-    loading?: boolean;
-    loadingLabel?: string;
-    disabled?: boolean;
-  }>(),
-  {
-    tooltipAlign: "center",
-    variant: "secondary",
-    loading: false,
-    loadingLabel: "Выполняется",
-    disabled: false,
-  },
-);
+const props = defineProps<UiIconButtonBaseProps & UiControlLoadingProps>();
 
 const attrs = useAttrs();
 const tooltipId = `ui-tooltip-${useId()}`;
@@ -44,13 +46,25 @@ const nativeType = computed<NativeButtonType>(() => {
     ? candidate
     : "button";
 });
-const isDisabled = computed(() => props.disabled || props.loading);
+const resolvedTooltipAlign = computed(() => props.tooltipAlign ?? "center");
+const resolvedVariant = computed(() => props.variant ?? "secondary");
+const isLoadingRequested = computed(() => props.loading === true);
+const isLoadingVisible = computed(
+  () => isLoadingRequested.value && hasNonEmptyLoadingLabel(props.loadingLabel),
+);
+const isDisabled = computed(
+  () => props.disabled === true || isLoadingRequested.value,
+);
 const accessibleLabel = computed(() =>
-  props.loading ? props.loadingLabel : props.label,
+  isLoadingVisible.value ? props.loadingLabel : props.label,
 );
 const renderedIcon = computed(() =>
-  props.loading ? LoaderCircle : props.icon,
+  isLoadingVisible.value ? LoaderCircle : props.icon,
 );
+
+watchEffect(() => {
+  warnInvalidLoadingLabel("UiIconButton", props.loading, props.loadingLabel);
+});
 
 function clearHoverTimer(): void {
   if (hoverTimer !== null) {
@@ -111,15 +125,15 @@ onBeforeUnmount(clearHoverTimer);
       v-bind="$attrs"
       class="uiControl uiControlIconOnly"
       :class="{
-        uiControlPrimary: props.variant === 'primary',
-        uiControlSecondary: props.variant === 'secondary',
-        uiControlError: props.variant === 'error',
+        uiControlPrimary: resolvedVariant === 'primary',
+        uiControlSecondary: resolvedVariant === 'secondary',
+        uiControlError: resolvedVariant === 'error',
       }"
       :type="nativeType"
       :disabled="isDisabled"
       :aria-label="accessibleLabel"
       :aria-describedby="tooltipId"
-      :aria-busy="props.loading ? 'true' : undefined"
+      :aria-busy="isLoadingRequested ? 'true' : undefined"
       @focus="handleFocus"
       @blur="handleBlur"
       @keydown.esc="dismissTooltip"
@@ -127,7 +141,7 @@ onBeforeUnmount(clearHoverTimer);
       <component
         :is="renderedIcon"
         class="uiControlIcon"
-        :class="{ uiControlLoader: props.loading }"
+        :class="{ uiControlLoader: isLoadingVisible }"
         :size="18"
         :stroke-width="2"
         aria-hidden="true"
@@ -139,8 +153,8 @@ onBeforeUnmount(clearHoverTimer);
       :id="tooltipId"
       class="uiControlTooltip"
       :class="{
-        uiControlTooltipCenter: props.tooltipAlign === 'center',
-        uiControlTooltipEnd: props.tooltipAlign === 'end',
+        uiControlTooltipCenter: resolvedTooltipAlign === 'center',
+        uiControlTooltipEnd: resolvedTooltipAlign === 'end',
       }"
       role="tooltip"
       :data-state="isTooltipOpen ? 'open' : 'closed'"

@@ -1,29 +1,25 @@
 <script setup lang="ts">
 import { LoaderCircle, type LucideIcon } from "@lucide/vue";
-import { computed, useAttrs } from "vue";
+import { computed, useAttrs, watchEffect } from "vue";
 
+import {
+  hasNonEmptyLoadingLabel,
+  type UiControlLoadingProps,
+  warnInvalidLoadingLabel,
+} from "@/components/ui/ui-control-loading";
 import "@/components/ui/ui-controls.css";
 
 defineOptions({ inheritAttrs: false });
 
 type UiControlVariant = "primary" | "secondary" | "error";
 type NativeButtonType = "button" | "submit" | "reset";
+type UiButtonBaseProps = {
+  icon: LucideIcon;
+  variant?: UiControlVariant;
+  disabled?: boolean;
+};
 
-const props = withDefaults(
-  defineProps<{
-    icon: LucideIcon;
-    variant?: UiControlVariant;
-    loading?: boolean;
-    loadingLabel?: string;
-    disabled?: boolean;
-  }>(),
-  {
-    variant: "secondary",
-    loading: false,
-    loadingLabel: undefined,
-    disabled: false,
-  },
-);
+const props = defineProps<UiButtonBaseProps & UiControlLoadingProps>();
 
 const attrs = useAttrs();
 const nativeType = computed<NativeButtonType>(() => {
@@ -34,31 +30,42 @@ const nativeType = computed<NativeButtonType>(() => {
     ? candidate
     : "button";
 });
-const isDisabled = computed(() => props.disabled || props.loading);
-const resolvedLoadingLabel = computed(
-  () => props.loadingLabel ?? "Выполняется…",
+const resolvedVariant = computed(() => props.variant ?? "secondary");
+const isLoadingRequested = computed(() => props.loading === true);
+const hasLoadingLayer = computed(() =>
+  hasNonEmptyLoadingLabel(props.loadingLabel),
 );
+const isLoadingVisible = computed(
+  () => isLoadingRequested.value && hasLoadingLayer.value,
+);
+const isDisabled = computed(
+  () => props.disabled === true || isLoadingRequested.value,
+);
+
+watchEffect(() => {
+  warnInvalidLoadingLabel("UiButton", props.loading, props.loadingLabel);
+});
 </script>
 
 <template>
   <button
     v-bind="$attrs"
-    class="uiControl"
+    class="uiControl uiControlText"
     :class="{
-      uiControlPrimary: props.variant === 'primary',
-      uiControlSecondary: props.variant === 'secondary',
-      uiControlError: props.variant === 'error',
+      uiControlPrimary: resolvedVariant === 'primary',
+      uiControlSecondary: resolvedVariant === 'secondary',
+      uiControlError: resolvedVariant === 'error',
     }"
     :type="nativeType"
     :disabled="isDisabled"
-    :aria-busy="props.loading ? 'true' : undefined"
+    :aria-busy="isLoadingRequested ? 'true' : undefined"
   >
     <span class="uiControlStableContent">
       <span
         class="uiControlContent"
-        :class="{ isHidden: props.loading }"
+        :class="{ isHidden: isLoadingVisible }"
         data-ui-control-state="idle"
-        :aria-hidden="props.loading ? 'true' : undefined"
+        :aria-hidden="isLoadingVisible ? 'true' : undefined"
       >
         <component
           :is="props.icon"
@@ -68,15 +75,15 @@ const resolvedLoadingLabel = computed(
           aria-hidden="true"
           focusable="false"
         />
-        <span><slot /></span>
+        <span class="uiControlLabel"><slot /></span>
       </span>
 
       <span
-        v-if="props.loading || props.loadingLabel !== undefined"
+        v-if="hasLoadingLayer"
         class="uiControlContent"
-        :class="{ isHidden: !props.loading }"
+        :class="{ isHidden: !isLoadingVisible }"
         data-ui-control-state="loading"
-        :aria-hidden="props.loading ? undefined : 'true'"
+        :aria-hidden="isLoadingVisible ? undefined : 'true'"
       >
         <LoaderCircle
           class="uiControlIcon uiControlLoader"
@@ -85,7 +92,7 @@ const resolvedLoadingLabel = computed(
           aria-hidden="true"
           focusable="false"
         />
-        <span>{{ resolvedLoadingLabel }}</span>
+        <span class="uiControlLabel">{{ props.loadingLabel }}</span>
       </span>
     </span>
   </button>

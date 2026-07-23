@@ -7,6 +7,7 @@ import UiIconButton from "@/components/ui/UiIconButton.vue";
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.restoreAllMocks();
 });
 
 describe("UiIconButton", () => {
@@ -109,5 +110,25 @@ describe("UiIconButton", () => {
 
     await button.trigger("click");
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("keeps the idle accessible state for an empty loading label", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const wrapper = mount(UiIconButton, {
+      props: {
+        icon: RefreshCw,
+        label: "Обновить",
+        tooltip: "Обновить список назначенных нарядов",
+        loading: true,
+        loadingLabel: " ",
+      },
+    });
+
+    const button = wrapper.get("button");
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("loadingLabel"));
+    expect(button.attributes("disabled")).toBeDefined();
+    expect(button.attributes("aria-busy")).toBe("true");
+    expect(button.attributes("aria-label")).toBe("Обновить");
+    expect(button.get("svg").classes()).not.toContain("uiControlLoader");
   });
 });

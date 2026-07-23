@@ -35,19 +35,29 @@
           :presentation="errorPresentation"
         />
 
-        <button class="submitButton" type="submit" :disabled="isSubmitting">
-          {{ isSubmitting ? "Выполняем вход..." : "Войти" }}
-        </button>
+        <UiButton
+          class="submitButton"
+          :icon="LogIn"
+          variant="primary"
+          type="submit"
+          :loading="isSubmitting"
+          loading-label="Выполняем вход…"
+          data-test="login-submit"
+        >
+          Войти
+        </UiButton>
       </form>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { LogIn } from "@lucide/vue";
 import { ref } from "vue";
 
 import { parseApiError } from "@/api/parseApiError";
 import ActionableError from "@/components/ActionableError.vue";
+import UiButton from "@/components/ui/UiButton.vue";
 import type { ErrorPresentation } from "@/contracts/api-error";
 import { presentLoginError } from "@/errors/apiErrorPresentations";
 import { useAuthStore } from "@/stores/auth";
@@ -149,18 +159,6 @@ async function onSubmit() {
 }
 
 .submitButton {
-  border: 0;
-  border-radius: 12px;
-  padding: 12px 14px;
-  font: inherit;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #166534 0%, #15803d 100%);
-  cursor: pointer;
-}
-
-.submitButton:disabled {
-  cursor: wait;
-  opacity: 0.7;
+  inline-size: 100%;
 }
 </style>

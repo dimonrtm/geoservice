@@ -1,5 +1,6 @@
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { nextTick } from "vue";
 
 const loginWithPasswordMock = vi.hoisted(() => vi.fn());
 
@@ -14,6 +15,16 @@ async function fillAndSubmitLoginForm(wrapper: VueWrapper) {
   await wrapper.get('input[type="password"]').setValue("wrong-password");
   await wrapper.get("form").trigger("submit");
   await flushPromises();
+}
+
+function createDeferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, resolve, reject };
 }
 
 describe("LoginScreen", () => {
@@ -81,5 +92,47 @@ describe("LoginScreen", () => {
       "legacy detail should not be rendered",
     );
     expect(wrapper.find('[data-test="error-action"]').exists()).toBe(false);
+  });
+
+  it("keeps stable button layers while login is pending", async () => {
+    const loginDeferred = createDeferred<void>();
+    loginWithPasswordMock.mockReturnValue(loginDeferred.promise);
+
+    const { default: LoginScreen } =
+      await import("@/components/LoginScreen.vue");
+    const wrapper = mount(LoginScreen);
+
+    await wrapper.get('input[type="email"]').setValue("editor@example.local");
+    await wrapper.get('input[type="password"]').setValue("editor-password");
+
+    const button = wrapper.get('[data-test="login-submit"]');
+    const idle = button.get('[data-ui-control-state="idle"]');
+    const loading = button.get('[data-ui-control-state="loading"]');
+
+    expect(button.classes()).toContain("submitButton");
+    expect(idle.text()).toBe("Войти");
+    expect(idle.classes()).not.toContain("isHidden");
+    expect(loading.text()).toBe("Выполняем вход…");
+    expect(loading.classes()).toContain("isHidden");
+
+    await wrapper.get("form").trigger("submit");
+    await nextTick();
+
+    expect(loginWithPasswordMock).toHaveBeenCalledTimes(1);
+    expect(button.attributes("disabled")).toBeDefined();
+    expect(button.attributes("aria-busy")).toBe("true");
+    expect(idle.classes()).toContain("isHidden");
+    expect(loading.classes()).not.toContain("isHidden");
+
+    await button.trigger("click");
+    expect(loginWithPasswordMock).toHaveBeenCalledTimes(1);
+
+    loginDeferred.resolve();
+    await flushPromises();
+
+    expect(button.attributes("disabled")).toBeUndefined();
+    expect(button.attributes("aria-busy")).toBeUndefined();
+    expect(idle.classes()).not.toContain("isHidden");
+    expect(loading.classes()).toContain("isHidden");
   });
 });
