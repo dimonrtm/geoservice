@@ -3,11 +3,11 @@ title: AOI
 type: value-object
 status: active
 created: 2026-06-24
-updated: 2026-06-24
-source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Code_wiki/архитектура/data_model.md"
+updated: 2026-07-25
+source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/first_save_for_edit_version.md"
 tags: [domain-knowledge, value-object, spatial]
 confidence: high
-related: [Wiki/entities/work_order, DDD_Wiki/bounded_contexts/work_order]
+related: [Wiki/entities/work_order, Wiki/commands/update_edit_version_feature_geometry, DDD_Wiki/bounded_contexts/work_order]
 ---
 
 # AOI
@@ -22,6 +22,10 @@ related: [Wiki/entities/work_order, DDD_Wiki/bounded_contexts/work_order]
 
 Для Sprint 1 `AOI` фиксируется при назначении `WorkOrder`; изменение AOI, несколько AOI на задачу, buffer zones и spatial ACL не входят в scope.
 
+## Visibility And Edit Eligibility
+
+Workspace может показывать features, пересекающие AOI. First-save edit eligibility строже: line feature должна целиком быть `covered by` AOI. Boundary включена, поэтому касание границы разрешено; простого пересечения недостаточно.
+
 ## Used By
 
-`WorkOrder`, workspace filtering и `WorkOrderRepository.get_workspace_aggregate`.
+`WorkOrder`, workspace filtering, `WorkOrderRepository.get_workspace_aggregate` и blocking spatial invariant `UpdateEditVersionFeatureGeometry`.

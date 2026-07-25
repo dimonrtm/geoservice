@@ -3,8 +3,8 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-06-30
-source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md"
+updated: 2026-07-25
+source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md"
 tags: [domain-knowledge, ddd, health]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
@@ -14,13 +14,13 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 ## Current Summary
 
-Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и audit. Ближайшая реализация должна сначала доказать persisted edit slice в существующем `WorkOrder` / `EditVersion` flow: workspace -> `UpdateEditVersionFeatureGeometry` -> geometry-only изменение существующей line feature относительно baseline -> persisted resulting feature snapshot -> readback resulting feature + новый `DraftVersionToken` + `hasPersistedChangeSet` + basic draft validation flags. Diff относительно baseline вычисляется из baseline/current snapshots и не является обязательной persisted формой первого slice. `operation` - текущая проекция diff, а не след прошлого save; event возникает при первом переходе `unchanged -> updated`. Review/post остается отдельным downstream context: `submit_for_review`, `ReviewPackage`, reviewer decision, computed `can_post`, simulated post и durable audit добавляются после того, как есть устойчивый change set. Legacy standalone Release 2 contract остается reference для прежнего `geometry/association conflict` framing и не является source of truth для ближайшей реализации.
+Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и audit. Discovery answers закрыли first-save contract. Ближайшая реализация должна доказать путь workspace -> `UpdateEditVersionFeatureGeometry` -> сдвиг ровно одной внутренней вершины одной существующей line feature -> atomic save full resulting snapshot относительно immutable baseline -> command response + persisted readback -> revert к baseline. Line должна быть valid/simple и `covered by` AOI; endpoints, structure, attributes и associations заморожены. `DraftVersionToken` защищает весь aggregate, `CommandId` обеспечивает idempotent retry, hard failures отклоняются без blocked draft. `EditVersionChangeSetPersisted` возникает на каждый content-changing save с непустым diff, `EditVersionChangeSetCleared` - на revert; no-op/retry событий не создают. First-save readiness называется `persisted-draft-ready`: lifecycle остается `open`, topology - `not_checked`, review/post остается downstream context.
 
 ## Current Blocking Conflicts
 
 | Conflict | Blocks | Status | Next Question |
 | --- | --- | --- | --- |
-| Нет активных blocking conflicts после ingest `ic_review_package_and_simulated_post.md` | - | clear | Следующий вопрос - оформить отдельный integrated review/post implementation contract и разложить его на маленькие спринты |
+| Нет активных blocking conflicts после ingest `first_save_for_edit_version.md` | - | clear | Уточнить implementation choices по precision grid, `CommandId` storage и `BaselineRevisionRef`, не расширяя доменный scope |
 
 ## Recently Resolved Conflicts
 
@@ -30,6 +30,7 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 | [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; `RAW_inputs/meetings/increment_after_open_workspace.md` | Review/post remains required downstream scope, но ближайший code slice сначала закрывает persisted edit change set. |
 | [[Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]] | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; user chat 2026-06-26 | Новый contract отдельный и integrated; старый Release 2 artifact остается legacy/reference. |
 | [[Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]] | `RAW_inputs/meetings/increment_after_open_workspace.md`; `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` | Ближайший sprint начинается с persisted geometry diff existing line feature и edit-save-readback; `ReviewPackage`, `can_post`, simulated post, full audit, trace/subnetwork evidence, risk tiers, reviewer queue, endpoint rewiring и association mutation откладываются. |
+| [[Wiki/conflicts/2026-07-25-edit-version-event-cadence]] | `RAW_inputs/meetings/first_save_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md` | `EditVersionChangeSetPersisted` эмитится на каждый content-changing save с непустым diff; revert создает `EditVersionChangeSetCleared`; no-op/retry событий не создают. |
 
 ## Current Coverage
 
@@ -40,19 +41,26 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 | Bounded Contexts | active | Выделены контексты Work Order, Utility Network, Review Post, Audit и Auth. |
 | Context Map | active | [[DDD_Wiki/context_map/geoservice_context_map]] описывает upstream/downstream и границу application layer. |
 | Aggregates | active | `WorkOrder`, `EditVersion` и `ReviewPackage` активны в доменной модели. |
-| Commands And Events | active | `OpenEditVersion` активна; first write command уточнен как `UpdateEditVersionFeatureGeometry`, событие - `EditVersionChangeSetPersisted` при первом ненулевом change set; команды review/post запланированы downstream. |
+| Commands And Events | active | `OpenEditVersion` активна; first write command - `UpdateEditVersionFeatureGeometry`; события `EditVersionChangeSetPersisted` и `EditVersionChangeSetCleared` описывают save/revert, `CommandId` отделяет retry от concurrency. |
 | Policies And Specifications | active | Проверка назначения, persisted change set, basic draft validation, ready-for-review, post allowed, review/post и stale policies активны. |
 | Sprint Planning Inputs | active | `Wiki/_registry/questions.md` содержит приоритетные вопросы для планирования маленьких спринтов. |
 
 ## Current Discovery Queue
 
-Следующий `/discover` должен оставаться code-aware, но центрировать доменную модель: вопросы строятся от текущего workspace/open `EditVersion` к persisted geometry edit slice, включая snapshot-vs-diff, internal-vertex mutation, AOI containment, aggregate-level `DraftVersionToken` и state-based readback proof. Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevant `traceResult` / `subnetworkStatus` и developer demo границам важны только после фиксации change set и basic draft validation path.
+Основные доменные развилки first save закрыты. Следующий `/discover` не должен заново спрашивать snapshot-vs-diff, one-internal-vertex guard, AOI boundary, token/idempotency или event cadence. Открыты точечные implementation/model choices:
+
+- Какая dataset precision/grid канонична для нормализации координат?
+- Каков retention и payload fingerprint для `CommandId`?
+- Переименовать persistence/read поле `networkVersion` в `BaselineRevisionRef` или скрыть его за mapping?
+- Что является минимальным event evidence: `geometryHash`, `bbox` или оба поля?
+
+Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevant `traceResult` / `subnetworkStatus` важны после реализации persisted draft path.
 
 ## Current Sprint Planning Queue
 
 Следующий `/plan-sprint` должен использовать 14-дневную рамку, но мыслить маленькими вертикальными increments:
 
-- Первый спринт после открытия workspace создает version-scoped geometry update existing line feature path: persist full resulting geometry snapshot relative to baseline, compute diff from baseline/current snapshots, readback resulting feature + new `DraftVersionToken` + `hasPersistedChangeSet` + validation flags, normalize `operation`, emit event only on first non-empty change set.
+- Первый спринт после открытия workspace создает end-to-end first-save slice для одной line feature и одной внутренней вершины: immutable baseline + current snapshot, AOI `CoveredBy`, precision normalization, hard atomic guards, aggregate `DraftVersionToken`, обязательный `CommandId`, response/readback proof, no-op semantics, stale recovery и revert с двумя domain events.
 - Следующий спринт добавляет `submit_for_review` и `ReviewPackage v0.1` как materialized snapshot поверх persisted `edit_version_features`, с backrefs на исходные rows и editor summary/evidence.
 - Следующий спринт добавляет reviewer detail view одного package, reviewer decision и computed `can_post`; simulated post, durable audit, trace/subnetwork evidence, risk tiers, reviewer queue и association mutation не должны стартовать раньше persisted change set.
 

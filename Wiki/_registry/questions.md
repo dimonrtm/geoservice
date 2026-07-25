@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-30
+updated: 2026-07-25
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -30,3 +30,14 @@ related: [Wiki/index, DDD_Wiki/model_health]
 | Должен ли explicit baseline diff быть обязательным minimum proof первого save? | [[Wiki/specifications/edit_version_has_persisted_change_set]] | high | answered | `RAW_inputs/meetings/first_save_edit_version.md` |
 | Что хранить как source of truth для first save: full geometry snapshot или pure diff? | [[DDD_Wiki/aggregates/edit_version]] | high | answered | `RAW_inputs/meetings/first_save_edit_version.md` |
 | Как отличать optimistic concurrency от idempotent retry в first save? | [[Wiki/value_objects/draft_version_token]] | medium | answered | `RAW_inputs/meetings/first_save_edit_version.md` |
+| Должна ли команда выражать UI-операцию или full resulting geometry? | [[Wiki/commands/update_edit_version_feature_geometry]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
+| Сколько features и внутренних вершин может менять first-save slice? | [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
+| Как различаются workspace visibility и first-save edit eligibility? | [[Wiki/value_objects/aoi]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
+| Сохранять ли prohibited/invalid state как blocked draft? | [[Wiki/specifications/edit_version_basic_draft_validation]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
+| Когда меняется `DraftVersionToken` и что делает no-op save? | [[Wiki/value_objects/draft_version_token]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
+| Какова cadence событий для save, revert, no-op и retry? | [[Wiki/conflicts/2026-07-25-edit-version-event-cadence]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
+| Меняет ли first save lifecycle `EditVersion` / `WorkOrder`? | [[DDD_Wiki/use_cases/utility_editor_workflow]] | medium | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
+| Какая dataset precision/grid канонична для coordinate normalization? | [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | medium | open | - |
+| Как хранить `CommandId`, payload fingerprint и срок deduplication? | [[Wiki/value_objects/command_id]] | medium | open | - |
+| Переименовать `networkVersion` в `BaselineRevisionRef` или скрыть его за mapping? | [[Wiki/value_objects/draft_version_token]] | medium | open | - |
+| Какое минимальное event evidence выбрать: `geometryHash`, `bbox` или оба поля? | [[Wiki/domain_events/edit_version_change_set_persisted]] | low | open | - |

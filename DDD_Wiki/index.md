@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-30
+updated: 2026-07-25
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -27,3 +27,10 @@ tags: [domain-knowledge, ddd]
 ## Здоровье Модели
 
 Текущие пробелы, противоречия и готовность к discovery фиксируются в [[DDD_Wiki/model_health]].
+
+## Актуальный First-Save Срез
+
+- [[DDD_Wiki/aggregates/edit_version]] - consistency boundary, baseline/current snapshots, token и idempotency.
+- [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] - blocking spatial/structure guards.
+- [[DDD_Wiki/state_machines/edit_version_persisted_change_set]] - `Unchanged` / `Updated`, save/revert/no-op/reject.
+- [[DDD_Wiki/use_cases/utility_editor_workflow]] - end-to-end save/readback/revert proof.

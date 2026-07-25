@@ -3,7 +3,7 @@ title: Conflicts Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-29
+updated: 2026-07-25
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, conflict]
 confidence: n/a
@@ -18,3 +18,4 @@ related: [Wiki/index, DDD_Wiki/model_health]
 | [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | Единая state machine review/post и границы спринта | resolved | Review/post остается must для downstream slice, но не раньше persisted edit change set | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; `RAW_inputs/meetings/increment_after_open_workspace.md` |
 | [[Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]] | Source of truth для нового review/post implementation contract | resolved | Новый contract отдельный и встроенный в `WorkOrder` / `EditVersion` flow; старый artifact - legacy/reference | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; user chat 2026-06-26 |
 | [[Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]] | Sprint planning после открытия workspace | resolved | Сначала persisted geometry diff существующей линии + readback persisted object + baseline diff + basic draft validation; review/post layers откладываются | `RAW_inputs/meetings/increment_after_open_workspace.md`; `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
+| [[Wiki/conflicts/2026-07-25-edit-version-event-cadence]] | Единая семантика событий save/revert/no-op/retry | resolved | Persisted event на каждый content-changing non-empty save; cleared event на revert; no-op/retry без событий | `RAW_inputs/meetings/first_save_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md` |

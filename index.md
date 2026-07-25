@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-06-30
+updated: 2026-07-25
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -31,6 +31,15 @@ tags: [knowledge, index, geoservice]
 - [[docs/agent-memory/README]] - компактная инженерная память Codex.
 
 ## Свежие Изменения
+
+- 2026-07-25: Выполнен `/sync-vision`: все 35 RAW sources учтены, новых необработанных RAW inputs и новых доменных нод нет, открыты 16 follow-up'ов, активных blocking conflicts в каноническом `Wiki` нет, stale-ноды не обнаружены.
+- 2026-07-25: Текущий lint подтверждает только 34 ожидаемых `missing_frontmatter` в неизменяемых RAW Markdown files; новых проблем вне `RAW_inputs/` не найдено.
+- 2026-07-09: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с raw SQL workspace aggregate, AOI-safe association filtering и index hardening working-copy таблиц.
+- 2026-07-07: [[Code_wiki/index]] обновлен production-like migration baseline и правилами пересоздания disposable dev/demo volumes.
+- 2026-07-05: [[Code_wiki/index]] зафиксировал default-off guard для legacy GIS API и Editor-only доступ при явном включении.
+- Изменения кода 2026-07-10 — 2026-07-25 еще не отражены в `Code_wiki`; требуется отдельный `/ingest repository-change`.
+
+## История До 2026-06-30
 
 - 2026-05-30: Создана стартовая project knowledge wiki и ручной pipeline `/discover`, `/ingest`, `/sync-vision`, `/lint-wiki`.
 - 2026-05-30: Выполнен `/ingest repository-snapshot`; техническая карта текущего репозитория добавлена в [[Code_wiki/index]].
@@ -111,6 +120,7 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
+- Нужно выполнить `/ingest repository-change` для семи коммитов после 2026-07-09: typed `AuthUser`, workspace details UI, correlation ID и actionable errors, reusable UI controls и восстановление выбранного `WorkOrder` после reload.
 - Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.

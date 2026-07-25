@@ -3,11 +3,11 @@ title: Update Edit Version Feature Geometry
 type: command
 status: planned
 created: 2026-06-28
-updated: 2026-06-30
-source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md"
+updated: 2026-07-25
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md"
 tags: [domain-knowledge, command, edit-version, workspace, geometry]
 confidence: high
-related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_basic_draft_validation, Wiki/domain_events/edit_version_change_set_persisted, DDD_Wiki/aggregates/edit_version]
+related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/value_objects/aoi, Wiki/value_objects/draft_version_token, Wiki/value_objects/command_id, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_basic_draft_validation, Wiki/domain_events/edit_version_change_set_persisted, Wiki/domain_events/edit_version_change_set_cleared, DDD_Wiki/aggregates/edit_version]
 ---
 
 # Update Edit Version Feature Geometry
@@ -22,24 +22,31 @@ related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/specif
 
 ## Intent
 
-Сохранить geometry-only изменение существующей линии относительно baseline этой `EditVersion`. Первый deterministic case - сдвиг одной или нескольких внутренних вершин линии без изменения start/end vertices, `part count`, vertex identity и `NetworkAssociation`; команда не является generic update для любых feature changes.
+Заменить текущую persisted geometry существующей line `NetworkFeature` на переданную full resulting geometry внутри `EditVersion`. Команда выражает итоговый shape, а не UI-операцию или diff. Guard первого slice разрешает непустой diff только одного класса — сдвиг ровно одной внутренней вершины — и отдельно допускает resulting geometry, равную baseline, для revert.
 
 ## Preconditions
 
 - `Editor` назначен на `WorkOrder`.
 - `EditVersion` существует, имеет статус `open` и принадлежит этой `WorkOrder`.
-- Target feature существует в baseline этой версии и доступен в workspace.
-- Изменение касается только геометрии существующей линии.
-- Start/end vertices, association semantics, create/delete, split/merge, attributes, `part count` и vertex count не меняются.
-- Resulting geometry валидна и целиком остается внутри AOI.
+- Target feature существует в immutable baseline этой версии, является line geometry минимум с тремя вершинами и доступен в workspace.
+- Во всей `EditVersion` изменяется не больше одной существующей line feature.
+- После нормализации к dataset precision/grid resulting geometry либо равна baseline, либо отличается от нее ровно одной внутренней вершиной; все остальные координаты совпадают с baseline.
+- Start/end vertices, feature identity, association semantics, create/delete, split/merge, attributes, `part count`, vertex count и insert/delete vertex не меняются.
+- Resulting geometry валидна и проста, а вся линия `covered by` AOI; касание границы AOI допустимо.
 - `DraftVersionToken` совпадает с текущей версией агрегата `EditVersion`; устаревший token означает stale draft и требует refresh.
+- `CommandId` обязателен и уникально обозначает payload команды для идемпотентного retry.
 
 ## Outcome
 
-Система сохраняет full resulting geometry snapshot как persisted draft state и вычисляет diff относительно baseline как производный артефакт. Readback возвращает resulting feature, новый `DraftVersionToken`, `operation` / `hasPersistedChangeSet` и validation summary; explicit diff можно вычислять или возвращать позже для review/readback удобства, но это не minimum proof первого save. Если геометрия возвращена к baseline, persisted projection должна стать `unchanged`, `hasPersistedChangeSet=false`, `dirtyRelativeToBaseline=false`, а не хранить `updated` только из-за прошлого save.
+При допустимом изменении система атомарно сохраняет full resulting geometry snapshot рядом с immutable baseline snapshot. Diff вычисляется как read model. Командный ответ содержит `updatedFeature`, новый `draftVersionToken`, `operation`, `hasPersistedChangeSet` и `basicValidation`; отдельный readback должен вернуть тот же persisted state и пережить restart browser/backend.
 
-[[Wiki/domain_events/edit_version_change_set_persisted]] фиксируется при переходе `unchanged -> updated`, когда впервые появляется ненулевой persisted change set. Повторный identical retry не создает новое событие; для retry UX нужен отдельный `CommandId` / idempotency key.
+- Непустой diff дает `operation=updated`, `hasPersistedChangeSet=true` и [[Wiki/domain_events/edit_version_change_set_persisted]] на каждый успешный content-changing save.
+- Revert к baseline сохраняет current snapshot равным baseline, дает `operation=unchanged`, `hasPersistedChangeSet=false`, меняет token и создает [[Wiki/domain_events/edit_version_change_set_cleared]].
+- No-op относительно текущего persisted state не меняет token и не создает событие.
+- Повтор с тем же `CommandId` и тем же payload возвращает результат уже выполненной команды без новой мутации и нового события; переиспользование `CommandId` для другого payload отклоняется.
+- Stale `DraftVersionToken` отклоняет mutation и возвращает актуальные persisted object и token для refresh/merge.
+- Нарушение hard invariants отклоняет save атомарно; запрещенное состояние не сохраняется как blocked draft.
 
 ## Out Of Scope
 
-Create/delete feature, изменение attributes, endpoint connectivity, vertex insert/delete, split/merge, association mutation, topology trace, full topology QA, live-`Default` freshness check, reconcile, submit for review, `ReviewPackage`, `can_post` и review conflict UI.
+Create/delete feature, point/device/junction editing, изменение attributes, endpoint connectivity, vertex insert/delete, split/merge, association mutation, containment/attachment changes, multi-feature change set, topology validate/trace, live-`Default` freshness check, reconcile, submit for review, `ReviewPackage`, `can_post`, post и review conflict UI.

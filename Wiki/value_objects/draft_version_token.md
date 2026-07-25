@@ -3,11 +3,11 @@ title: Draft Version Token
 type: value-object
 status: planned
 created: 2026-06-28
-updated: 2026-06-30
-source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md"
+updated: 2026-07-25
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md"
 tags: [domain-knowledge, value-object, edit-version, concurrency]
 confidence: high
-related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, DDD_Wiki/aggregates/edit_version]
+related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/value_objects/command_id, DDD_Wiki/aggregates/edit_version]
 ---
 
 # Draft Version Token
@@ -16,11 +16,11 @@ related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_
 
 ## Equality
 
-Равенство определяется конкретным token/moment, который client прочитал перед save. Если save приходит со старым token, команда должна считаться stale draft и требовать refresh. Практическая форма может быть `rowversion`, monotonically increasing revision или ULID-with-revision.
+Равенство определяется конкретным opaque strong validator, который client получил при первом read/open `EditVersion`. Если save приходит со старым token, команда считается stale draft и не меняет агрегат.
 
 ## Changes On Aggregate Mutation
 
-Token меняется после любой успешной persisted мутации внутри `EditVersion`: изменился change set, validation summary или metadata агрегата. Token защищает transactional consistency boundary агрегата, а не отдельную строку feature.
+Token меняется только после content-changing persisted mutation внутри `EditVersion`: current geometry snapshot или change set создан, обновлен или очищен; validation summary изменился как следствие save; lifecycle/status изменился. `lastOpenedAt`, refresh, read и повторный расчет того же результата token не меняют. No-op save относительно текущего persisted state также не меняет token.
 
 ## Immutability
 
@@ -32,7 +32,7 @@ Token меняется после любой успешной persisted мута
 
 ## Idempotency
 
-Повторный запрос со старым token после successful save по смыслу является stale. Хороший retry UX нужно поддерживать отдельным `CommandId` / idempotency key: тот же command может вернуть idempotent success, а другой запрос со старым token должен стать conflict.
+Повторный запрос со старым token после successful save по смыслу является stale. [[Wiki/value_objects/command_id]] отделяет idempotent retry от concurrency: тот же `CommandId` с тем же payload возвращает idempotent success, а другой запрос со старым token становится conflict. Error payload stale-команды возвращает актуальные persisted object и token для refresh/merge.
 
 ## Used By
 
