@@ -6,6 +6,8 @@ import type { WorkspaceResponse } from "@/contracts/work-orders";
 const fetchAssignedWorkOrdersMock = vi.fn();
 const openEditVersionMock = vi.fn();
 const fetchWorkspaceMock = vi.fn();
+const SELECTED_WORK_ORDER_STORAGE_KEY = "geoservice:selected-work-order";
+const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
 
 vi.mock("@/api/workOrders", () => ({
   fetchAssignedWorkOrders: fetchAssignedWorkOrdersMock,
@@ -151,6 +153,15 @@ describe("work orders store", () => {
   });
 
   it("resets user-scoped state and invalidates pending requests", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+
     const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const store = useWorkOrdersStore();
 
@@ -204,11 +215,17 @@ describe("work orders store", () => {
     expect(store.lastFittedWorkspaceKey).toBeNull();
     expect(store.openWorkspaceRequestSeq).toBe(8);
     expect(store.loadAssignedRequestSeq).toBe(12);
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
   });
 
-  it("can reset in-memory state while preserving opened workspace marker", async () => {
+  it("can reset in-memory state while preserving work order session markers", async () => {
     sessionStorage.setItem(
-      "geoservice:opened-workspace",
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
       JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
     );
 
@@ -219,17 +236,95 @@ describe("work orders store", () => {
     store.openedEditVersionId = "ev-1";
     store.workspace = workspaceResponse();
 
-    (store.reset as (options: { preserveOpenedWorkspace?: boolean }) => void)({
+    store.reset({
       preserveOpenedWorkspace: true,
+      preserveSelectedWorkOrder: true,
     });
 
     expect(store.selectedWorkOrderId).toBeNull();
     expect(store.openedWorkOrderId).toBeNull();
     expect(store.openedEditVersionId).toBeNull();
     expect(store.workspace).toBeNull();
-    expect(sessionStorage.getItem("geoservice:opened-workspace")).toBe(
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBe(
       JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
     );
+  });
+
+  it("persists the selected work order in session storage", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+
+    store.selectWorkOrder("wo-1");
+
+    expect(store.selectedWorkOrderId).toBe("wo-1");
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+  });
+
+  it("keeps the opened workspace when the same work order is selected again", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.selectWorkOrder("wo-1");
+    store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    store.workspace = workspaceResponse("wo-1", "ev-1");
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+
+    store.selectWorkOrder("wo-1");
+
+    expect(store.workspace?.workOrder.id).toBe("wo-1");
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+  });
+
+  it("evicts the client workspace when another work order is selected", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.selectWorkOrder("wo-1");
+    store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    store.workspace = workspaceResponse("wo-1", "ev-1");
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+
+    store.selectWorkOrder("wo-2");
+
+    expect(store.selectedWorkOrderId).toBe("wo-2");
+    expect(store.openedWorkOrderId).toBeNull();
+    expect(store.openedEditVersionId).toBeNull();
+    expect(store.workspace).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-2" }),
+    );
+  });
+
+  it("keeps selection in memory when session storage writes fail", async () => {
+    const setItemSpy = vi
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {
+        throw new DOMException("storage unavailable", "SecurityError");
+      });
+
+    try {
+      const { useWorkOrdersStore } = await import("@/stores/workOrders");
+      const store = useWorkOrdersStore();
+
+      expect(() => store.selectWorkOrder("wo-1")).not.toThrow();
+      expect(store.selectedWorkOrderId).toBe("wo-1");
+    } finally {
+      setItemSpy.mockRestore();
+    }
   });
 
   it("selects a work order locally without API calls", async () => {
@@ -391,9 +486,151 @@ describe("work orders store", () => {
     );
   });
 
+  it("restores a selected work order without fetching a workspace", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Проверка участка фидера",
+        description: null,
+        status: "assigned",
+      },
+    ];
+
+    await store.restoreOpenedWorkspace();
+
+    expect(store.selectedWorkOrderId).toBe("wo-1");
+    expect(store.activeWorkspace).toBeNull();
+    expect(openEditVersionMock).not.toHaveBeenCalled();
+    expect(fetchWorkspaceMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps the last selection and removes a mismatched workspace marker", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-2" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Первый наряд",
+        description: null,
+        status: "in_progress",
+      },
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Второй наряд",
+        description: null,
+        status: "assigned",
+      },
+    ];
+
+    await store.restoreOpenedWorkspace();
+
+    expect(store.selectedWorkOrderId).toBe("wo-2");
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
+    expect(fetchWorkspaceMock).not.toHaveBeenCalled();
+  });
+
+  it("clears selection and workspace markers when the saved selection is no longer assigned", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-missing" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Первый наряд",
+        description: null,
+        status: "in_progress",
+      },
+    ];
+
+    await store.restoreOpenedWorkspace();
+
+    expect(store.selectedWorkOrderId).toBeNull();
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
+    expect(fetchWorkspaceMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    "{invalid-json",
+    JSON.stringify({}),
+    JSON.stringify({ workOrderId: "" }),
+    JSON.stringify({ workOrderId: 42 }),
+  ])(
+    "removes an invalid selected work order marker: %s",
+    async (storedValue) => {
+      sessionStorage.setItem(SELECTED_WORK_ORDER_STORAGE_KEY, storedValue);
+
+      const { useWorkOrdersStore } = await import("@/stores/workOrders");
+      const store = useWorkOrdersStore();
+      store.items = [
+        {
+          id: "wo-1",
+          code: "WO-001",
+          title: "Первый наряд",
+          description: null,
+          status: "assigned",
+        },
+      ];
+
+      await expect(store.restoreOpenedWorkspace()).resolves.toBeUndefined();
+
+      expect(store.selectedWorkOrderId).toBeNull();
+      expect(
+        sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY),
+      ).toBeNull();
+      expect(fetchWorkspaceMock).not.toHaveBeenCalled();
+    },
+  );
+
+  it("keeps the selected marker when assigned work orders fail to load", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    fetchAssignedWorkOrdersMock.mockRejectedValue(networkFailure());
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+
+    await store.loadAssigned();
+
+    expect(store.loadError).not.toBeNull();
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+  });
+
   it("restores opened workspace from session storage without opening edit version again", async () => {
     sessionStorage.setItem(
-      "geoservice:opened-workspace",
+      OPENED_WORKSPACE_STORAGE_KEY,
       JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
     );
     fetchWorkspaceMock.mockResolvedValue(workspaceResponse("wo-1", "ev-1"));
@@ -421,6 +658,9 @@ describe("work orders store", () => {
     expect(store.activeWorkspaceKey).toBe("wo-1:ev-1");
     expect(store.openingWorkOrderId).toBeNull();
     expect(store.isOpeningWorkspace).toBe(false);
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
   });
 
   it("clears persisted workspace when saved work order is no longer assigned", async () => {
@@ -562,6 +802,115 @@ describe("work orders store", () => {
     expect(store.openedWorkOrderId).toBeNull();
     expect(store.activeWorkspace).toBeNull();
     expect(store.openWorkspaceErrorByWorkOrderId["wo-1"]).toBeUndefined();
+  });
+
+  it("does not restore an old workspace after the user selects another work order", async () => {
+    const deferred = createDeferred<WorkspaceResponse>();
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+    fetchWorkspaceMock.mockReturnValue(deferred.promise);
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "Первый наряд",
+        description: null,
+        status: "in_progress",
+      },
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Второй наряд",
+        description: null,
+        status: "assigned",
+      },
+    ];
+
+    const restoring = store.restoreOpenedWorkspace();
+    store.selectWorkOrder("wo-2");
+    deferred.resolve(workspaceResponse("wo-1", "ev-1"));
+    await restoring;
+
+    expect(store.selectedWorkOrderId).toBe("wo-2");
+    expect(store.workspace).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
+  });
+
+  it("does not accept an old restore response after selecting away and back", async () => {
+    const deferred = createDeferred<WorkspaceResponse>();
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
+    fetchWorkspaceMock.mockReturnValue(deferred.promise);
+
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: "wo-1",
+        code: "WO-001",
+        title: "First work order",
+        description: null,
+        status: "in_progress",
+      },
+      {
+        id: "wo-2",
+        code: "WO-002",
+        title: "Second work order",
+        description: null,
+        status: "assigned",
+      },
+    ];
+
+    const restoring = store.restoreOpenedWorkspace();
+    store.selectWorkOrder("wo-2");
+    store.selectWorkOrder("wo-1");
+    deferred.resolve(workspaceResponse("wo-1", "ev-1"));
+    await restoring;
+
+    expect(store.selectedWorkOrderId).toBe("wo-1");
+    expect(store.openedWorkOrderId).toBeNull();
+    expect(store.workspace).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
+  });
+
+  it("ignores unavailable session storage while reading restore markers", async () => {
+    const getItemSpy = vi
+      .spyOn(Storage.prototype, "getItem")
+      .mockImplementation(() => {
+        throw new DOMException("storage unavailable", "SecurityError");
+      });
+    const removeItemSpy = vi
+      .spyOn(Storage.prototype, "removeItem")
+      .mockImplementation(() => {
+        throw new DOMException("storage unavailable", "SecurityError");
+      });
+
+    try {
+      const { useWorkOrdersStore } = await import("@/stores/workOrders");
+      const store = useWorkOrdersStore();
+
+      await expect(store.restoreOpenedWorkspace()).resolves.toBeUndefined();
+      expect(store.selectedWorkOrderId).toBeNull();
+      expect(store.workspace).toBeNull();
+    } finally {
+      getItemSpy.mockRestore();
+      removeItemSpy.mockRestore();
+    }
   });
 
   it("ignores assigned work orders response after reset", async () => {

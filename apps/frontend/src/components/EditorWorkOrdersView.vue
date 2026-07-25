@@ -26,16 +26,18 @@ watch(
   },
 );
 
-onMounted(async () => {
+async function loadAssignedAndRestore(): Promise<void> {
   await workOrders.loadAssigned();
   if (!workOrders.loadError) {
     await workOrders.restoreOpenedWorkspace();
   }
-});
+}
+
+onMounted(loadAssignedAndRestore);
 
 function handleLoadErrorAction(actionId: ErrorActionId): void {
   if (actionId === "retry" || actionId === "refresh") {
-    void workOrders.loadAssigned();
+    void loadAssignedAndRestore();
     return;
   }
   if (actionId === "sign-in") {
@@ -49,7 +51,7 @@ function handleWorkspaceErrorAction(actionId: ErrorActionId): void {
     return;
   }
   if (actionId === "refresh") {
-    void workOrders.loadAssigned();
+    void loadAssignedAndRestore();
     return;
   }
   if (actionId === "reopen") {
@@ -105,7 +107,7 @@ async function openSelectedWorkspace(): Promise<void> {
           :loading="workOrders.isLoading"
           loading-label="Обновление списка нарядов"
           data-test="refresh-work-orders"
-          @click="workOrders.loadAssigned"
+          @click="loadAssignedAndRestore"
         />
       </div>
 

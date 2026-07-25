@@ -39,7 +39,11 @@ function resetWorkOrdersIfUserIdChanged(
 }
 
 type SetAuthOptions = {
-  preserveOpenedWorkspaceOnInitialUser?: boolean;
+  preserveWorkOrderStateOnInitialUser?: boolean;
+};
+
+type ClearLocalSessionOptions = {
+  forceWorkOrdersReset?: boolean;
 };
 
 export const useAuthStore = defineStore(
@@ -63,10 +67,12 @@ export const useAuthStore = defineStore(
         this.token = token;
         this.user = user;
         this.sessionError = null;
+        const preserveWorkOrderState =
+          options.preserveWorkOrderStateOnInitialUser === true &&
+          previousUserId === null;
         resetWorkOrdersIfUserIdChanged(previousUserId, user.id, {
-          preserveOpenedWorkspace:
-            options.preserveOpenedWorkspaceOnInitialUser === true &&
-            previousUserId === null,
+          preserveOpenedWorkspace: preserveWorkOrderState,
+          preserveSelectedWorkOrder: preserveWorkOrderState,
         });
       },
       setUser(user: AuthUser | null) {
@@ -75,7 +81,7 @@ export const useAuthStore = defineStore(
         this.user = user;
         resetWorkOrdersIfUserIdChanged(previousUserId, authUserId(user));
       },
-      clearLocalSession() {
+      clearLocalSession(options: ClearLocalSessionOptions = {}) {
         const previousUserId = authUserId(this.user);
 
         this.token = null;
@@ -83,7 +89,11 @@ export const useAuthStore = defineStore(
         this.sessionError = null;
         this.isReady = true;
         this.isRestoring = false;
-        resetWorkOrdersIfUserIdChanged(previousUserId, null);
+        if (options.forceWorkOrdersReset) {
+          useWorkOrdersStore().reset();
+        } else {
+          resetWorkOrdersIfUserIdChanged(previousUserId, null);
+        }
       },
       handleUnauthorizedResponse(error: unknown): void {
         const hadActiveSession = this.isAuthenticated;
@@ -111,12 +121,18 @@ export const useAuthStore = defineStore(
         try {
           const result = await refreshSession();
           this.setAuth(result.access_token, result.user, {
-            preserveOpenedWorkspaceOnInitialUser: true,
+            preserveWorkOrderStateOnInitialUser: true,
           });
         } catch (error: unknown) {
           const parsed = parseApiError(error);
           const sessionError = presentSessionError(parsed, restoreMode);
-          this.clearLocalSession();
+          const initialSessionEnded =
+            restoreMode === "initial" &&
+            (parsed.kind === "api" || parsed.kind === "http") &&
+            parsed.status === 401;
+          this.clearLocalSession({
+            forceWorkOrdersReset: initialSessionEnded,
+          });
           this.sessionError = sessionError;
         } finally {
           this.isReady = true;

@@ -33,6 +33,7 @@ type WorkOrdersState = {
   openedEditVersionId: string | null;
   workspace: WorkspaceResponse | null;
   openingWorkOrderId: string | null;
+  openingWorkspaceRequestSeq: number | null;
   openWorkspaceErrorByWorkOrderId: Record<
     string,
     ErrorPresentation | undefined
@@ -51,10 +52,16 @@ type StoredOpenedWorkspace = {
   editVersionId: string;
 };
 
-export type ResetWorkOrdersOptions = {
-  preserveOpenedWorkspace?: boolean;
+type StoredSelectedWorkOrder = {
+  workOrderId: string;
 };
 
+export type ResetWorkOrdersOptions = {
+  preserveOpenedWorkspace?: boolean;
+  preserveSelectedWorkOrder?: boolean;
+};
+
+const SELECTED_WORK_ORDER_STORAGE_KEY = "geoservice:selected-work-order";
 const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
 
 function sessionStorageOrNull(): Storage | null {
@@ -86,7 +93,7 @@ function readStoredOpenedWorkspace(): StoredOpenedWorkspace | null {
       typeof parsed.workOrderId !== "string" ||
       typeof parsed.editVersionId !== "string"
     ) {
-      storage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
+      clearStoredOpenedWorkspace();
       return null;
     }
 
@@ -95,7 +102,7 @@ function readStoredOpenedWorkspace(): StoredOpenedWorkspace | null {
       editVersionId: parsed.editVersionId,
     };
   } catch {
-    storage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
+    clearStoredOpenedWorkspace();
     return null;
   }
 }
@@ -129,6 +136,63 @@ function clearStoredOpenedWorkspace(): void {
   }
 }
 
+function clearStoredSelectedWorkOrder(): void {
+  const storage = sessionStorageOrNull();
+  if (!storage) {
+    return;
+  }
+
+  try {
+    storage.removeItem(SELECTED_WORK_ORDER_STORAGE_KEY);
+  } catch {
+    // Nothing to clean up if browser storage is unavailable.
+  }
+}
+
+function readStoredSelectedWorkOrder(): StoredSelectedWorkOrder | null {
+  const storage = sessionStorageOrNull();
+  if (!storage) {
+    return null;
+  }
+
+  try {
+    const rawValue = storage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY);
+    if (!rawValue) {
+      return null;
+    }
+
+    const parsed = JSON.parse(rawValue) as Partial<StoredSelectedWorkOrder>;
+    if (
+      typeof parsed.workOrderId !== "string" ||
+      parsed.workOrderId.trim().length === 0
+    ) {
+      clearStoredSelectedWorkOrder();
+      return null;
+    }
+
+    return { workOrderId: parsed.workOrderId };
+  } catch {
+    clearStoredSelectedWorkOrder();
+    return null;
+  }
+}
+
+function storeSelectedWorkOrder(workOrderId: string): void {
+  const storage = sessionStorageOrNull();
+  if (!storage) {
+    return;
+  }
+
+  try {
+    storage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId }),
+    );
+  } catch {
+    // The in-memory selection remains valid if browser storage is unavailable.
+  }
+}
+
 function shouldPreserveStoredWorkspace(error: ParsedApiError): boolean {
   return (
     error.kind === "network" ||
@@ -147,6 +211,7 @@ function createInitialWorkOrdersState(): WorkOrdersState {
     openedEditVersionId: null,
     workspace: null,
     openingWorkOrderId: null,
+    openingWorkspaceRequestSeq: null,
     openWorkspaceErrorByWorkOrderId: {},
     openWorkspaceErrorOperationByWorkOrderId: {},
     lastFittedWorkspaceKey: null,
@@ -210,6 +275,9 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         loadAssignedRequestSeq: nextLoadAssignedRequestSeq,
         openWorkspaceRequestSeq: nextOpenWorkspaceRequestSeq,
       });
+      if (!options.preserveSelectedWorkOrder) {
+        clearStoredSelectedWorkOrder();
+      }
       if (!options.preserveOpenedWorkspace) {
         clearStoredOpenedWorkspace();
       }
@@ -230,8 +298,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           this.selectedWorkOrderId &&
           !this.items.some((item) => item.id === this.selectedWorkOrderId)
         ) {
-          this.selectedWorkOrderId = null;
-          this.clearOpenedWorkspace();
+          this.clearSelection();
         }
         if (
           this.openedWorkOrderId &&
@@ -253,11 +320,21 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         }
       }
     },
-    selectWorkOrder(workOrderId: string) {
+    selectWorkOrder(workOrderId: string): void {
+      if (this.selectedWorkOrderId === workOrderId) {
+        storeSelectedWorkOrder(workOrderId);
+        return;
+      }
+
+      this.openWorkspaceRequestSeq += 1;
+      this.clearOpenedWorkspace();
       this.selectedWorkOrderId = workOrderId;
+      storeSelectedWorkOrder(workOrderId);
     },
-    clearSelection() {
+    clearSelection(): void {
+      this.openWorkspaceRequestSeq += 1;
       this.selectedWorkOrderId = null;
+      clearStoredSelectedWorkOrder();
       this.clearOpenedWorkspace();
     },
     async openSelectedWorkOrder() {
@@ -269,6 +346,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       const requestSeq = this.openWorkspaceRequestSeq + 1;
       this.openWorkspaceRequestSeq = requestSeq;
       this.openingWorkOrderId = workOrderId;
+      this.openingWorkspaceRequestSeq = requestSeq;
       this.openWorkspaceErrorByWorkOrderId = {
         ...this.openWorkspaceErrorByWorkOrderId,
         [workOrderId]: undefined,
@@ -328,31 +406,57 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           };
         }
       } finally {
-        if (
-          this.openWorkspaceRequestSeq === requestSeq &&
-          this.openingWorkOrderId === workOrderId
-        ) {
+        if (this.openingWorkspaceRequestSeq === requestSeq) {
           this.openingWorkOrderId = null;
+          this.openingWorkspaceRequestSeq = null;
         }
       }
     },
     async restoreOpenedWorkspace() {
+      if (this.openingWorkOrderId !== null) {
+        return;
+      }
+
+      const storedSelection = readStoredSelectedWorkOrder();
       const storedWorkspace = readStoredOpenedWorkspace();
-      if (!storedWorkspace || this.openingWorkOrderId !== null) {
+      const workOrderId =
+        this.selectedWorkOrderId ??
+        storedSelection?.workOrderId ??
+        storedWorkspace?.workOrderId ??
+        null;
+
+      if (!workOrderId) {
         return;
       }
 
-      const workOrderId = storedWorkspace.workOrderId;
-      const editVersionId = storedWorkspace.editVersionId;
       if (!this.items.some((item) => item.id === workOrderId)) {
-        clearStoredOpenedWorkspace();
+        this.selectedWorkOrderId = null;
+        clearStoredSelectedWorkOrder();
+        this.clearOpenedWorkspace();
         return;
       }
 
+      this.selectedWorkOrderId = workOrderId;
+      storeSelectedWorkOrder(workOrderId);
+
+      if (!storedWorkspace) {
+        return;
+      }
+
+      if (storedWorkspace.workOrderId !== workOrderId) {
+        this.clearOpenedWorkspace();
+        return;
+      }
+
+      if (this.isWorkOrderOpened(workOrderId)) {
+        return;
+      }
+
+      const editVersionId = storedWorkspace.editVersionId;
       const requestSeq = this.openWorkspaceRequestSeq + 1;
       this.openWorkspaceRequestSeq = requestSeq;
       this.openingWorkOrderId = workOrderId;
-      this.selectedWorkOrderId = workOrderId;
+      this.openingWorkspaceRequestSeq = requestSeq;
       this.openWorkspaceErrorByWorkOrderId = {
         ...this.openWorkspaceErrorByWorkOrderId,
         [workOrderId]: undefined,
@@ -404,11 +508,9 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           };
         }
       } finally {
-        if (
-          this.openWorkspaceRequestSeq === requestSeq &&
-          this.openingWorkOrderId === workOrderId
-        ) {
+        if (this.openingWorkspaceRequestSeq === requestSeq) {
           this.openingWorkOrderId = null;
+          this.openingWorkspaceRequestSeq = null;
         }
       }
     },

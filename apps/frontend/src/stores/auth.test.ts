@@ -51,6 +51,7 @@ const SESSION_RETRY_PRESENTATION = {
   action: { id: "retry" as const, label: "Повторить" },
   diagnostics: { code: null, correlationId: null },
 };
+const SELECTED_WORK_ORDER_STORAGE_KEY = "geoservice:selected-work-order";
 const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
 
 function expectAuthLocalStorageNotUsed() {
@@ -81,9 +82,15 @@ describe("auth store", () => {
     vi.stubGlobal("localStorage", localStorageMock);
     sessionStorage.clear();
     resetWorkOrdersMock.mockImplementation(
-      (options?: { preserveOpenedWorkspace?: boolean }) => {
+      (options?: {
+        preserveOpenedWorkspace?: boolean;
+        preserveSelectedWorkOrder?: boolean;
+      }) => {
         if (!options?.preserveOpenedWorkspace) {
           sessionStorage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
+        }
+        if (!options?.preserveSelectedWorkOrder) {
+          sessionStorage.removeItem(SELECTED_WORK_ORDER_STORAGE_KEY);
         }
       },
     );
@@ -127,6 +134,14 @@ describe("auth store", () => {
     store.sessionError = SESSION_RETRY_PRESENTATION;
     store.isReady = false;
     store.isRestoring = true;
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
 
     store.clearLocalSession();
     store.clearLocalSession();
@@ -138,6 +153,8 @@ describe("auth store", () => {
     expect(store.isRestoring).toBe(false);
     expect(resetWorkOrdersMock).toHaveBeenCalledTimes(1);
     expect(logoutSessionMock).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
     expectAuthLocalStorageNotUsed();
   });
 
@@ -223,6 +240,14 @@ describe("auth store", () => {
       email: "editor@example.com",
       role: "editor",
     };
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
 
     store.setAuth("token-2", {
       id: "user-2",
@@ -231,6 +256,8 @@ describe("auth store", () => {
     });
 
     expect(resetWorkOrdersMock).toHaveBeenCalledTimes(1);
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
   });
 
   it("restores session through refresh endpoint without reading localStorage token", async () => {
@@ -274,7 +301,11 @@ describe("auth store", () => {
     expect(localStorage.clear).not.toHaveBeenCalled();
   });
 
-  it("preserves opened workspace marker when restoreSession hydrates initial user", async () => {
+  it("preserves work order session markers when restoreSession hydrates initial user", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
     sessionStorage.setItem(
       OPENED_WORKSPACE_STORAGE_KEY,
       JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
@@ -296,7 +327,11 @@ describe("auth store", () => {
 
     expect(resetWorkOrdersMock).toHaveBeenCalledWith({
       preserveOpenedWorkspace: true,
+      preserveSelectedWorkOrder: true,
     });
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBe(
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
     expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBe(
       JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
     );
@@ -321,11 +356,23 @@ describe("auth store", () => {
       email: "cached@example.com",
       role: "editor",
     };
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
 
     await store.restoreSession();
 
     expect(store.user?.id).toBe("user-1");
     expect(resetWorkOrdersMock).not.toHaveBeenCalled();
+    expect(
+      sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY),
+    ).not.toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).not.toBeNull();
   });
 
   it("resets work orders when restoreSession refreshes a different user id", async () => {
@@ -355,6 +402,14 @@ describe("auth store", () => {
   });
 
   it("treats refresh 401 as logged out without session error", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
     refreshSessionMock.mockRejectedValue({
       isAxiosError: true,
       response: { status: 401 },
@@ -369,9 +424,20 @@ describe("auth store", () => {
     expect(store.user).toBeNull();
     expect(store.sessionError).toBeNull();
     expect(store.isReady).toBe(true);
+    expect(resetWorkOrdersMock).toHaveBeenCalledTimes(1);
+    expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).toBeNull();
   });
 
   it("keeps retry UX when refresh fails without 401", async () => {
+    sessionStorage.setItem(
+      SELECTED_WORK_ORDER_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1" }),
+    );
+    sessionStorage.setItem(
+      OPENED_WORKSPACE_STORAGE_KEY,
+      JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
+    );
     refreshSessionMock.mockRejectedValue({
       isAxiosError: true,
       response: { status: 503 },
@@ -386,6 +452,11 @@ describe("auth store", () => {
     expect(store.user).toBeNull();
     expect(store.sessionError).toEqual(SESSION_RETRY_PRESENTATION);
     expect(store.isReady).toBe(true);
+    expect(resetWorkOrdersMock).not.toHaveBeenCalled();
+    expect(
+      sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY),
+    ).not.toBeNull();
+    expect(sessionStorage.getItem(OPENED_WORKSPACE_STORAGE_KEY)).not.toBeNull();
   });
 
   it("keeps an actionable sign-in error after a runtime 401", async () => {
