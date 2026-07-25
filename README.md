@@ -141,8 +141,7 @@ Backend-конфигурация централизована в [settings.py](C
 - [knowledge pipeline runbook](C:/Repositories/geoservice/docs/knowledge-pipeline/README.md)
 - [action-plan.md](C:/Repositories/geoservice/docs/requirements/action-plan.md)
 - [requirements-compliance-audit.md](C:/Repositories/geoservice/docs/requirements/requirements-compliance-audit.md)
-- [Документы текущего Спринта 1](C:/Repositories/geoservice/docs/sprint_1/README.md)
-- [Исторический generic-план Спринта 1](C:/Repositories/geoservice/docs/sprint_1/legacy-generic-plan/sprint-1-plan.md)
+- [Спецификации и результаты проверок Спринта 1](C:/Repositories/geoservice/docs/release_1/sprint_1/README.md)
 
 ## Project Knowledge Wiki
 
