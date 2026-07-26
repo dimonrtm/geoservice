@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-25
+updated: 2026-07-26
 source: null
 tags: [followups, conflicts]
 ---
@@ -42,7 +42,7 @@ tags: [followups, conflicts]
 | FU-2026-06-23-002 | open | Release 2 experiment design | [[../../chats/2026-06-23-geometry-association-conflict-f7]], [[../../chats/2026-06-23-geometry-association-conflict-f8]], [[../../concepts/metrics]], [[../risk_assumption_log]], [[../release_2_conflict_explanation]], [[../../solution/roadmap]] | Подготовить measurement harness для developer demo: один scripted golden walkthrough, 10 deterministic repeats canonical scenario, 10 mutated stale/blocker/pre-post variants, optional 30 automated runs, run-data schema, manual baseline против `ArcGIS native Conflicts view + SOP + expert handoff`, course-change criteria и разделение audit fields от telemetry/debug fields. |
 | FU-2026-06-23-003 | open | Release 2 user validation | [[../../chats/2026-06-23-geometry-association-conflict-f8]], [[../release_2_conflict_explanation]], [[../risk_assumption_log]], [[../../concepts/metrics]] | Подготовить отдельный real validation checklist для `Editor`/`Reviewer`: risk wording, authority matrix для High/Critical, sample review для `Normal`, evidence sufficiency thresholds, repeat-review UX, `delta since previous approval`, language of trust и доверие к blocker verdict. |
 | FU-2026-06-26-001 | open | Documentation cleanup | [[../../chats/2026-06-26-ic-review-package-and-simulated-post]], [[../../../Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]], `docs/release_2/geometry_association_conflict/2026-06-23-implementation-contract-v0.1.md` | Отдельной docs-задачей пометить старый Release 2 implementation contract artifact как legacy/reference, чтобы он не был source of truth для integrated review/post slice. |
-| FU-2026-07-25-001 | open | First-save implementation contract | [[../../chats/2026-07-25-first-save-for-edit-version]], [[../../../Wiki/commands/update_edit_version_feature_geometry]], [[../../../Wiki/value_objects/command_id]], [[../../../DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | До implementation зафиксировать dataset precision/grid для coordinate normalization, retention и payload fingerprint `CommandId`, mapping `networkVersion` / `BaselineRevisionRef`, а также минимальный event evidence (`geometryHash`, `bbox` или оба). |
+| FU-2026-07-25-001 | open | First-save implementation contract | [[../../chats/2026-07-25-first-save-for-edit-version]], [[../../chats/2026-07-26-tolerance-rules]], [[../../../Wiki/policies/edit_geometry_precision_policy]], [[../../../Wiki/value_objects/command_id]], [[../../../DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | До implementation остались два точечных выбора: указать фактическую спецификацию позиционной точности и grid слоя/БД для demo dataset; выбрать точный idempotency window и место хранения record `CommandId`. Fingerprint команды, единое базовое состояние работы, mapping feature `networkVersion` и обязательное before/after event evidence уже определены. |
 
 ## Правило Post-Ingest Correction
 

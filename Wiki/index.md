@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-25
+updated: 2026-07-26
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -50,6 +50,8 @@ tags: [domain-knowledge, ddd]
 
 ## Актуальный First-Save Контракт
 
+- [[Wiki/glossary/positional_accuracy_for_acceptance]], [[Wiki/glossary/coordinate_storage_precision]] и [[Wiki/glossary/base_work_state]] - подтверждённый ubiquitous language для точности и baseline.
+- [[Wiki/policies/edit_geometry_precision_policy]] - канонизация только изменённой вершины, no-op после канонизации и atomic reject недопустимого результата.
 - [[Wiki/commands/update_edit_version_feature_geometry]] - full resulting geometry с guard «одна line feature / одна внутренняя вершина».
 - [[Wiki/value_objects/draft_version_token]] и [[Wiki/value_objects/command_id]] - разделение optimistic concurrency и idempotent retry.
 - [[Wiki/domain_events/edit_version_change_set_persisted]] и [[Wiki/domain_events/edit_version_change_set_cleared]] - события save/revert.

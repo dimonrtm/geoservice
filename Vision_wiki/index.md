@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-25
+updated: 2026-07-26
 source: null
 tags: [vision-wiki, product]
 ---
@@ -97,6 +97,7 @@ tags: [vision-wiki, product]
 - [[chats/2026-06-29-persisted-edit-slice-for-editversion]] - design/architecture input: first persisted edit slice уточнен как saved geometry diff относительно baseline с readback persisted object + baseline diff, event only for non-empty diff, `DraftVersionToken` как draft concurrency token и stop-line до review/post.
 - [[chats/2026-06-30-first-save-edit-version]] - design/architecture input: first save уточнен как geometry-only internal-vertex edit существующей line feature, full resulting snapshot + computed diff, state-based readback proof, aggregate-level `DraftVersionToken` и stop-line до review/post.
 - [[chats/2026-07-25-first-save-for-edit-version]] - принятые discovery answers: одна line feature / одна внутренняя вершина, AOI `CoveredBy`, atomic guards, `DraftVersionToken` + `CommandId`, save/revert events и `persisted-draft-ready`.
+- [[chats/2026-07-26-tolerance-rules]] - expert design/research answers: разделение позиционной точности и coordinate grid, canonical single-vertex save, fingerprint повтора, единое базовое состояние работы и обязательное before/after evidence.
 - [[chats/2026-06-14-utility-gis-editor-market-research]] - доверенное market research по полному Use Case, vendors и product families.
 - [[chats/2026-06-20-utility-gis-editor-role-research]] - research source о реальной работе роли: authoritative network change owner/editor, ArcGIS и QGIS/PostGIS/QField/GISwater stacks, field sync, topology QA, training и KPI.
 - [[concepts/operational_utility_gis]] - справочная рыночная категория из network editor, field execution и integration hub.

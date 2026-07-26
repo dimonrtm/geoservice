@@ -3,8 +3,8 @@ title: Edit Version Basic Draft Validation
 type: specification
 status: planned
 created: 2026-06-28
-updated: 2026-07-25
-source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md"
+updated: 2026-07-26
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md"
 tags: [domain-knowledge, specification, edit-version, validation]
 confidence: high
 related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_ready_for_review, DDD_Wiki/invariants/edit_version_persisted_edit_invariants]
@@ -15,6 +15,8 @@ related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_
 ## Predicate
 
 После first save система синхронно вычисляет small validation summary со статусами `passed`, `failed` и `not_checked`:
+
+До вычисления summary перемещённая вершина детерминированно канонизируется к [[Wiki/glossary/coordinate_storage_precision]]. Нетронутые вершины не перенормализуются. Если канонический результат совпал с текущим persisted state, команда является no-op; если канонизация дала невалидную, непростую или схлопнутую линию, команда отклоняется атомарно.
 
 | Поле | Успешный save | Значение |
 | --- | --- | --- |

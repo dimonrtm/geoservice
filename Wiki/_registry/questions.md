@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-25
+updated: 2026-07-26
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -37,7 +37,7 @@ related: [Wiki/index, DDD_Wiki/model_health]
 | Когда меняется `DraftVersionToken` и что делает no-op save? | [[Wiki/value_objects/draft_version_token]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
 | Какова cadence событий для save, revert, no-op и retry? | [[Wiki/conflicts/2026-07-25-edit-version-event-cadence]] | high | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
 | Меняет ли first save lifecycle `EditVersion` / `WorkOrder`? | [[DDD_Wiki/use_cases/utility_editor_workflow]] | medium | answered | `RAW_inputs/meetings/first_save_for_edit_version.md` |
-| Какая dataset precision/grid канонична для coordinate normalization? | [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] | medium | open | - |
-| Как хранить `CommandId`, payload fingerprint и срок deduplication? | [[Wiki/value_objects/command_id]] | medium | open | - |
-| Переименовать `networkVersion` в `BaselineRevisionRef` или скрыть его за mapping? | [[Wiki/value_objects/draft_version_token]] | medium | open | - |
-| Какое минимальное event evidence выбрать: `geometryHash`, `bbox` или оба поля? | [[Wiki/domain_events/edit_version_change_set_persisted]] | low | open | - |
+| Какая утверждённая спецификация позиционной точности и какой фактический grid слоя/БД используются demo dataset? | [[Wiki/policies/edit_geometry_precision_policy]] | medium | open | `RAW_inputs/meetings/tolerance_rules.md` (источник правила известен, конкретные значения не заданы) |
+| Каков точный idempotency window и где хранить record `CommandId`? | [[Wiki/value_objects/command_id]] | medium | open | `RAW_inputs/meetings/tolerance_rules.md` (fingerprint и scope определены, срок не задан) |
+| Переименовать `networkVersion` в `BaselineRevisionRef` или скрыть его за mapping? | [[Wiki/value_objects/draft_version_token]] | medium | answered | `RAW_inputs/meetings/tolerance_rules.md` |
+| Какое минимальное event evidence выбрать: `geometryHash`, `bbox` или оба поля? | [[Wiki/domain_events/edit_version_change_set_persisted]] | low | answered | `RAW_inputs/meetings/tolerance_rules.md` |

@@ -3,11 +3,11 @@ title: Draft Version Token
 type: value-object
 status: planned
 created: 2026-06-28
-updated: 2026-07-25
-source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md"
+updated: 2026-07-26
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md"
 tags: [domain-knowledge, value-object, edit-version, concurrency]
 confidence: high
-related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/value_objects/command_id, DDD_Wiki/aggregates/edit_version]
+related: [Wiki/entities/edit_version, Wiki/glossary/base_work_state, Wiki/commands/update_edit_version_feature_geometry, Wiki/value_objects/command_id, DDD_Wiki/aggregates/edit_version]
 ---
 
 # Draft Version Token
@@ -28,7 +28,11 @@ Token меняется только после content-changing persisted mutati
 
 ## Not A Baseline Fact
 
-`DraftVersionToken` не является `baseNetworkRevision`, не описывает authoritative `Default` и не доказывает свежесть относительно Default. `networkVersion` / baseline network revision, если хранится в draft row, должен трактоваться как baseline-факт common ancestor для future stale/conflict logic, а не как optimistic concurrency token. Drift `Default` относительно baseline обрабатывается позже на reconcile/post boundary.
+`DraftVersionToken` не является `baseNetworkRevision`, не описывает authoritative `Default` и не доказывает свежесть относительно Default.
+
+Для одной `WorkOrder` используется одно [[Wiki/glossary/base_work_state]], на которое ссылается aggregate-level `BaselineRevisionRef` / `baseNetworkRevision`. Feature-level `networkVersion` описывает историю конкретной линии и не является отдельным baseline этой работы. Поэтому persistence/read field `networkVersion` не следует переименовывать в `BaselineRevisionRef` как эквивалент: внешний contract должен показывать базовое состояние работы отдельно, а feature version скрывать за mapping или явно называть историей линии.
+
+Drift `Default` относительно базового состояния работы обрабатывается позже на reconcile/post boundary.
 
 ## Idempotency
 

@@ -3,8 +3,8 @@ title: Edit Version Persisted Change Set State Machine
 type: state-machine
 status: planned
 created: 2026-07-25
-updated: 2026-07-25
-source: RAW_inputs/meetings/first_save_for_edit_version.md
+updated: 2026-07-26
+source: "RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md"
 tags: [domain-knowledge, ddd, state-machine, edit-version]
 confidence: high
 related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/domain_events/edit_version_change_set_persisted, Wiki/domain_events/edit_version_change_set_cleared, DDD_Wiki/aggregates/edit_version]
@@ -12,7 +12,7 @@ related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_
 
 # Edit Version Persisted Change Set State Machine
 
-Состояние описывает current diff относительно immutable baseline, а не lifecycle `EditVersion`.
+Состояние описывает current diff относительно immutable [[Wiki/glossary/base_work_state]], а не lifecycle `EditVersion`. Сравнение выполняется после канонизации изменённой вершины к точности хранения координат.
 
 ```text
 Unchanged -- save(valid non-empty diff) --> Updated
@@ -33,5 +33,5 @@ Updated   -- save(invalid or stale)     --> Rejected
 
 - Content-changing save с непустым diff меняет token и создает `EditVersionChangeSetPersisted`.
 - Revert к baseline меняет token и создает `EditVersionChangeSetCleared`.
-- No-op save и idempotent retry не меняют token и не создают событие.
+- No-op после coordinate normalization и idempotent retry не меняют token и не создают событие.
 - Invalid geometry, prohibited diff и stale token отклоняются атомарно.
