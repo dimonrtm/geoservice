@@ -3,11 +3,11 @@ title: Edit Version Basic Draft Validation
 type: specification
 status: planned
 created: 2026-06-28
-updated: 2026-07-26
-source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md"
+updated: 2026-07-31
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
 tags: [domain-knowledge, specification, edit-version, validation]
 confidence: high
-related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_ready_for_review, DDD_Wiki/invariants/edit_version_persisted_edit_invariants]
+related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/policies/positional_accuracy_acceptance_policy, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_ready_for_review, DDD_Wiki/invariants/edit_version_persisted_edit_invariants]
 ---
 
 # Edit Version Basic Draft Validation
@@ -26,8 +26,9 @@ related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_
 | `topologyChecked` | `not_checked` | Full topology validation остается отдельным downstream этапом. |
 | `dirtyRelativeToBaseline` | `passed` для непустого diff; `failed`/false после revert | Информационный статус текущего отличия, а не критерий качества. |
 | `concurrencyOk` | `passed` | Команда применена к актуальному `DraftVersionToken`; при stale token mutation не выполняется. |
+| `positionalAccuracy` | `not_checked` + `POSITIONAL_ACCURACY_UNVERIFIED`, пока нет утверждённой спецификации и evidence | Не является hard guard technical save; становится blocker для review/completion/post по [[Wiki/policies/positional_accuracy_acceptance_policy]]. |
 
-Нарушение `geometryValid`, `aoiCovered`, structure/endpoints или association invariants отклоняет save атомарно, поэтому persisted successful result не содержит `failed` hard-invariant state. Summary подтверждает persisted draft, но не заменяет topology validation, reconcile, review или post readiness.
+Нарушение `geometryValid`, `aoiCovered`, structure/endpoints или association invariants отклоняет save атомарно, поэтому persisted successful result не содержит `failed` hard-invariant state. `POSITIONAL_ACCURACY_UNVERIFIED` не делает geometry invalid и допускает technical save в working version, но не позволяет считать draft готовым к review/post. Summary подтверждает persisted draft, но не заменяет topology validation, reconcile, positional acceptance, review или post readiness.
 
 ## Failure Meaning
 

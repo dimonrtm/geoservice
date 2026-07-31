@@ -3,11 +3,11 @@ title: Update Edit Version Feature Geometry
 type: command
 status: planned
 created: 2026-06-28
-updated: 2026-07-26
-source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md"
+updated: 2026-07-31
+source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
 tags: [domain-knowledge, command, edit-version, workspace, geometry]
 confidence: high
-related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/glossary/base_work_state, Wiki/glossary/coordinate_storage_precision, Wiki/policies/edit_geometry_precision_policy, Wiki/value_objects/aoi, Wiki/value_objects/draft_version_token, Wiki/value_objects/command_id, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_basic_draft_validation, Wiki/domain_events/edit_version_change_set_persisted, Wiki/domain_events/edit_version_change_set_cleared, DDD_Wiki/aggregates/edit_version]
+related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/glossary/base_work_state, Wiki/glossary/coordinate_storage_precision, Wiki/policies/edit_geometry_precision_policy, Wiki/policies/positional_accuracy_acceptance_policy, Wiki/value_objects/aoi, Wiki/value_objects/draft_version_token, Wiki/value_objects/command_id, Wiki/specifications/edit_version_has_persisted_change_set, Wiki/specifications/edit_version_basic_draft_validation, Wiki/domain_events/edit_version_change_set_persisted, Wiki/domain_events/edit_version_change_set_cleared, DDD_Wiki/aggregates/edit_version]
 ---
 
 # Update Edit Version Feature Geometry
@@ -30,12 +30,12 @@ related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/glossa
 - `EditVersion` существует, имеет статус `open` и принадлежит этой `WorkOrder`.
 - Target feature существует в immutable baseline этой версии, является line geometry минимум с тремя вершинами и доступен в workspace.
 - Во всей `EditVersion` изменяется не больше одной существующей line feature.
-- Позиционная точность для приёмки берётся из спецификации задания/продукта данных; шаг coordinate normalization — из настроек слоя/БД.
+- Позиционная точность для приёмки берётся из утверждённой спецификации задания/продукта данных; при её отсутствии save получает `POSITIONAL_ACCURACY_UNVERIFIED`, но не отклоняется только по этой причине. Шаг coordinate normalization берётся из metadata фактического сохраняющего dataset.
 - Перемещённая вершина детерминированно канонизируется к dataset precision/grid. После канонизации resulting geometry либо равна baseline, либо отличается от неё ровно одной внутренней вершиной; все остальные координаты совпадают с baseline и не перенормализуются.
 - Start/end vertices, feature identity, association semantics, create/delete, split/merge, attributes, `part count`, vertex count и insert/delete vertex не меняются.
 - Resulting geometry валидна и проста, а вся линия `covered by` AOI; касание границы AOI допустимо.
 - `DraftVersionToken` совпадает с текущей версией агрегата `EditVersion`; устаревший token означает stale draft и требует refresh.
-- `CommandId` обязателен и уникально обозначает canonical payload fingerprint: target feature, базовое состояние работы, ожидаемый `DraftVersionToken`, тип операции, изменяемую вершину и resulting geometry после coordinate normalization.
+- `CommandId` обязателен и уникально обозначает canonical payload fingerprint: `WorkOrder`, `EditVersion`, target feature, базовое состояние работы, ожидаемый `DraftVersionToken`, тип операции, изменяемую вершину, structure hash и resulting geometry после coordinate normalization.
 
 ## Outcome
 
@@ -44,7 +44,8 @@ related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/glossa
 - Непустой diff дает `operation=updated`, `hasPersistedChangeSet=true` и [[Wiki/domain_events/edit_version_change_set_persisted]] на каждый успешный content-changing save.
 - Revert к baseline сохраняет current snapshot равным baseline, дает `operation=unchanged`, `hasPersistedChangeSet=false`, меняет token и создает [[Wiki/domain_events/edit_version_change_set_cleared]].
 - No-op относительно текущего persisted state не меняет token и не создает событие.
-- Повтор с тем же `CommandId` и тем же fingerprint возвращает результат уже выполненной команды без новой мутации и нового события; переиспользование `CommandId` для другого fingerprint отклоняется. Если feature после исходной команды менялась снова, response также показывает актуальный persisted object.
+- Повтор с тем же `CommandId` и тем же fingerprint возвращает состояние и результат той же operation без новой мутации и нового события; concurrent retry присоединяется к pending operation. Переиспользование `CommandId` для другого fingerprint отклоняется. Domain rejection также запоминается; исправленный intent требует нового id. Если feature после исходной команды менялась снова, response отдельно показывает актуальный persisted object.
+- Retry распознаётся весь lifecycle open `EditVersion`. После post/close/cancel/read-only/archive старый request отклоняется как закрытый save context и не становится новой командой.
 - Stale `DraftVersionToken` отклоняет mutation и возвращает актуальные persisted object и token для refresh/merge.
 - Нарушение hard invariants отклоняет save атомарно; запрещенное состояние не сохраняется как blocked draft.
 

@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-25
+updated: 2026-07-31
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -32,8 +32,11 @@ tags: [knowledge, index, geoservice]
 
 ## Свежие Изменения
 
-- 2026-07-25: Выполнен `/sync-vision`: все 35 RAW sources учтены, новых необработанных RAW inputs и новых доменных нод нет, открыты 16 follow-up'ов, активных blocking conflicts в каноническом `Wiki` нет, stale-ноды не обнаружены.
-- 2026-07-25: Текущий lint подтверждает только 34 ожидаемых `missing_frontmatter` в неизменяемых RAW Markdown files; новых проблем вне `RAW_inputs/` не найдено.
+- 2026-07-31: Обработан RAW source `RAW_inputs/meetings/demo_utility_gis.md`; technical first save отделён от positional acceptance, grid привязан к actual dataset metadata, а `CommandId` — к одной operation на весь lifecycle `EditVersion`. Открыты фактическая specification/metadata/eligible fixture и records-retention срок history.
+- 2026-07-31: Выполнен `/sync-vision`: все 37 RAW sources учтены, новых необработанных RAW inputs нет, открыты 17 follow-up'ов, активных blocking conflicts в каноническом `Wiki` нет, stale-ноды не обнаружены.
+- 2026-07-31: Текущий lint подтверждает только 37 ожидаемых `missing_frontmatter` в неизменяемых RAW Markdown files; новых проблем вне `RAW_inputs/` не найдено.
+- 2026-07-26: Обработан RAW source `RAW_inputs/meetings/tolerance_rules.md`; модель first save разделила positional accuracy и coordinate grid, закрепила единое базовое состояние работы, canonical fingerprint `CommandId` и before/after event evidence. Открыты точные значения accuracy/grid и idempotency window/storage.
+- 2026-07-25: Обработан RAW source `RAW_inputs/meetings/first_save_for_edit_version.md`; уточнены full resulting geometry, одна line feature / одна внутренняя вершина, AOI `CoveredBy`, atomic validation, aggregate token, save/revert events и persisted readback.
 - 2026-07-09: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с raw SQL workspace aggregate, AOI-safe association filtering и index hardening working-copy таблиц.
 - 2026-07-07: [[Code_wiki/index]] обновлен production-like migration baseline и правилами пересоздания disposable dev/demo volumes.
 - 2026-07-05: [[Code_wiki/index]] зафиксировал default-off guard для legacy GIS API и Editor-only доступ при явном включении.
@@ -121,6 +124,7 @@ tags: [knowledge, index, geoservice]
 ## Открытые Вопросы
 
 - Нужно выполнить `/ingest repository-change` для семи коммитов после 2026-07-09: typed `AuthUser`, workspace details UI, correlation ID и actionable errors, reusable UI controls и восстановление выбранного `WorkOrder` после reload.
+- Для first-save implementation нужно найти утверждённую positional specification, прочитать actual dataset spatial metadata, выбрать существующую line с eligible internal shape vertex и определить records-retention срок save history; канонический список — [[Wiki/_registry/questions]].
 - Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.

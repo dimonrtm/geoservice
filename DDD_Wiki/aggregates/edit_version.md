@@ -3,11 +3,11 @@ title: Edit Version Aggregate
 type: aggregate
 status: active
 created: 2026-06-24
-updated: 2026-07-26
-source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md"
+updated: 2026-07-31
+source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
 tags: [domain-knowledge, ddd, aggregate]
 confidence: high
-related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/entities/network_association, Wiki/glossary/base_work_state, Wiki/policies/edit_geometry_precision_policy, Wiki/commands/update_edit_version_feature_geometry, Wiki/value_objects/draft_version_token, Wiki/value_objects/command_id, DDD_Wiki/invariants/edit_version_persisted_edit_invariants, DDD_Wiki/state_machines/edit_version_persisted_change_set]
+related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/entities/network_association, Wiki/glossary/base_work_state, Wiki/policies/edit_geometry_precision_policy, Wiki/policies/positional_accuracy_acceptance_policy, Wiki/commands/update_edit_version_feature_geometry, Wiki/value_objects/draft_version_token, Wiki/value_objects/command_id, DDD_Wiki/invariants/edit_version_persisted_edit_invariants, DDD_Wiki/state_machines/edit_version_persisted_change_set, DDD_Wiki/state_machines/edit_version_save_request]
 ---
 
 # Edit Version Aggregate
@@ -30,8 +30,10 @@ related: [Wiki/entities/edit_version, Wiki/entities/network_feature, Wiki/entiti
 - Resulting line валидна, проста и целиком `covered by` AOI; граница AOI допустима.
 - `operation` является текущей проекцией diff относительно baseline и может вернуться в `unchanged`, если diff исчез.
 - `DraftVersionToken` является version всего агрегата, выдается при read/open и меняется только на content-changing mutation; no-op/read/refresh его не меняют.
-- `CommandId` обязателен: одинаковый id + canonical payload fingerprint даёт idempotent success, другой fingerprint с тем же id отклоняется. Record переживает reconnect/relogin/device switch; точный retention window остаётся открытым выбором.
+- `CommandId` обязателен: одинаковый id + canonical payload fingerprint присоединяется к одной operation и возвращает её состояние/результат, другой fingerprint с тем же id отклоняется. Операционный record живёт весь lifecycle `EditVersion`, переживает reconnect/relogin/device switch и запоминает domain rejection; долгосрочная append-only history хранится отдельно.
+- После закрытия save context старый retry отклоняется и не трактуется как новая команда. Точный срок хранения immutable operation history остаётся открытым records-policy выбором.
 - Stale token и hard-invariant failure отклоняют mutation атомарно; stale error возвращает актуальные persisted object и token.
 - `EditVersionChangeSetPersisted` возникает на каждый content-changing save с непустым diff; revert создает `EditVersionChangeSetCleared`; no-op и retry событий не создают.
 - История каждого content-changing save хранит line identity, before/after geometry, editor, time, базовое состояние и `CommandId`; current diff является отдельной materialized projection.
 - Draft summary/evidence могут жить рядом с `EditVersion` до submit; durable review snapshot создается позже в `ReviewPackage`.
+- `POSITIONAL_ACCURACY_UNVERIFIED` допускается в technical working draft, но блокирует downstream review/completion/post; storage grid и positional acceptance остаются разными правилами.

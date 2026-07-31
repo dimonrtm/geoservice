@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-26
+updated: 2026-07-31
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -31,6 +31,7 @@ tags: [domain-knowledge, ddd]
 ## Актуальный First-Save Срез
 
 - [[DDD_Wiki/aggregates/edit_version]] - consistency boundary, baseline/current snapshots, token и idempotency.
-- [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] - blocking spatial/structure guards, разделение positional accuracy и storage grid, canonical single-vertex save.
+- [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] - blocking spatial/structure guards, technical save с явным positional status, canonical single-vertex save.
 - [[DDD_Wiki/state_machines/edit_version_persisted_change_set]] - `Unchanged` / `Updated`, save/revert/no-op/reject.
+- [[DDD_Wiki/state_machines/edit_version_save_request]] - одна operation на `CommandId`, concurrent retry, terminal result и закрытый save context.
 - [[DDD_Wiki/use_cases/utility_editor_workflow]] - end-to-end save/readback/revert proof.

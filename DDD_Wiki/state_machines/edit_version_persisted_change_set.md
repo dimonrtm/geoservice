@@ -3,11 +3,11 @@ title: Edit Version Persisted Change Set State Machine
 type: state-machine
 status: planned
 created: 2026-07-25
-updated: 2026-07-26
-source: "RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md"
+updated: 2026-07-31
+source: "RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
 tags: [domain-knowledge, ddd, state-machine, edit-version]
 confidence: high
-related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/domain_events/edit_version_change_set_persisted, Wiki/domain_events/edit_version_change_set_cleared, DDD_Wiki/aggregates/edit_version]
+related: [Wiki/entities/edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/domain_events/edit_version_change_set_persisted, Wiki/domain_events/edit_version_change_set_cleared, DDD_Wiki/aggregates/edit_version, DDD_Wiki/state_machines/edit_version_save_request]
 ---
 
 # Edit Version Persisted Change Set State Machine
@@ -35,3 +35,4 @@ Updated   -- save(invalid or stale)     --> Rejected
 - Revert к baseline меняет token и создает `EditVersionChangeSetCleared`.
 - No-op после coordinate normalization и idempotent retry не меняют token и не создают событие.
 - Invalid geometry, prohibited diff и stale token отклоняются атомарно.
+- Lifecycle и concurrent retry самой save operation описывает [[DDD_Wiki/state_machines/edit_version_save_request]]; terminal domain rejection не становится persisted change-set state.
