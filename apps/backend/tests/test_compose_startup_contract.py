@@ -1,8 +1,23 @@
 from pathlib import Path
 
+import pytest
+
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT = BACKEND_ROOT.parents[1]
+
+
+def find_repo_root(start: Path) -> Path | None:
+    for candidate in (start, *start.parents):
+        if (candidate / "infra" / "docker-compose.yml").exists():
+            return candidate
+    return None
+
+
+REPO_ROOT = find_repo_root(Path(__file__).resolve())
+requires_repo_infra = pytest.mark.skipif(
+    REPO_ROOT is None,
+    reason="Repository infra files are not available in the backend-only Docker image.",
+)
 DEMO_STARTUP_STEPS = (
     "alembic upgrade head",
     "python -m seeds.runners.seed_demo_users",
@@ -35,7 +50,9 @@ def test_production_api_startup_script_does_not_run_migrations_or_demo_seed() ->
         assert step not in text
 
 
+@requires_repo_infra
 def test_dev_up_cmd_does_not_require_host_python_or_delete_volumes() -> None:
+    assert REPO_ROOT is not None
     text = (REPO_ROOT / "infra" / "dev-up.cmd").read_text(encoding="utf-8").lower()
 
     assert "python" not in text
@@ -43,7 +60,9 @@ def test_dev_up_cmd_does_not_require_host_python_or_delete_volumes() -> None:
     assert "down --volumes" not in text
 
 
+@requires_repo_infra
 def test_db_tests_cmd_owns_only_dedicated_test_compose_project() -> None:
+    assert REPO_ROOT is not None
     text = (REPO_ROOT / "infra" / "db-tests.cmd").read_text(encoding="utf-8").lower()
 
     assert "python" not in text
