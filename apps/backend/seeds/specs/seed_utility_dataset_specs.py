@@ -10,6 +10,7 @@ from utility_service.infrastructure.postgresql.models.utility_network import (
 
 UTILITY_FEEDER_ID = UUID("6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0101")
 UTILITY_FEEDER_CODE = "synthetic_utility_feeder_01"
+UTILITY_EDITABLE_LINE_ASSET_CODE = "L-003"
 
 
 @dataclass(frozen=True)
@@ -135,9 +136,9 @@ UTILITY_FEATURE_SPECS: tuple[SeedNetworkFeatureSpec, ...] = (
     ),
     SeedNetworkFeatureSpec(
         id=stable_uuid("0213"),
-        asset_code="L-003",
+        asset_code=UTILITY_EDITABLE_LINE_ASSET_CODE,
         feature_type=FeatureType.LINE,
-        geometry_wkt="LINESTRING (65.520 44.820, 65.530 44.820)",
+        geometry_wkt=("LINESTRING (65.520 44.820, 65.525 44.8205, 65.530 44.820)"),
         name="Основная линия 3",
         description="Участок J-003 -> J-004.",
         properties={"status": "in_service", "voltageKv": 10.0},
@@ -247,6 +248,12 @@ UTILITY_FEATURE_SPECS: tuple[SeedNetworkFeatureSpec, ...] = (
             "normalState": "active",
         },
     ),
+)
+
+UTILITY_EDITABLE_LINE_SPEC = next(
+    feature
+    for feature in UTILITY_FEATURE_SPECS
+    if feature.asset_code == UTILITY_EDITABLE_LINE_ASSET_CODE
 )
 
 

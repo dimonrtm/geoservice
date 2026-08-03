@@ -94,6 +94,42 @@ def test_demo_env_is_explicitly_demo_only() -> None:
     assert "DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgis:5432/geo" in demo_env
 
 
+def test_base_compose_passes_utility_geometry_settings() -> None:
+    compose = read_infra_file("docker-compose.yml")
+    utility_service = service_block(compose, "utility_service")
+
+    assert (
+        "UTILITY_GEOMETRY_XY_RESOLUTION: " "${UTILITY_GEOMETRY_XY_RESOLUTION:-0.0000001}"
+    ) in utility_service
+    assert (
+        "UTILITY_GEOMETRY_ROUNDING_MODE: "
+        "${UTILITY_GEOMETRY_ROUNDING_MODE:-ROUND_HALF_AWAY_FROM_ZERO}"
+    ) in utility_service
+
+
+def test_demo_env_fixes_utility_geometry_defaults() -> None:
+    demo_env = read_infra_file("demo.env")
+
+    assert "UTILITY_GEOMETRY_XY_RESOLUTION=0.0000001" in demo_env
+    assert "UTILITY_GEOMETRY_ROUNDING_MODE=ROUND_HALF_AWAY_FROM_ZERO" in demo_env
+
+
 def test_auto_loaded_override_file_is_not_present() -> None:
     assert INFRA_ROOT is not None
     assert not (INFRA_ROOT / "docker-compose.override.yml").exists()
+
+
+def test_db_test_compose_is_physically_isolated_and_disposable() -> None:
+    compose = read_infra_file("docker-compose.test.yml")
+    postgis_test = service_block(compose, "postgis_test")
+    runner = service_block(compose, "backend_db_tests")
+
+    assert "tmpfs:" in postgis_test
+    assert "/var/lib/postgresql/data" in postgis_test
+    assert "ports:" not in postgis_test
+    assert "\nvolumes:" not in compose
+    assert "geo_pgdata" not in compose
+    assert "postgis_test:5432/geo_test" in runner
+    assert 'RUN_DB_TESTS: "1"' in runner
+    assert "postgis:5432/geo" not in runner
+    assert "infra_default" not in compose

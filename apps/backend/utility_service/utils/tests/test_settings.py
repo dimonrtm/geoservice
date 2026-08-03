@@ -1,3 +1,4 @@
+from decimal import Decimal
 import os
 
 import pytest
@@ -7,7 +8,76 @@ os.environ["DATABASE_URL"] = "postgresql+asyncpg://postgres:postgres@localhost:5
 os.environ["DEV_MODE"] = "true"
 os.environ["JWT_SECRET"] = "local-dev-secret"
 
-from utility_service.utils.settings import Settings
+from utility_service.utils.settings import Settings, UtilityGeometryRoundingMode
+
+
+def test_settings_defaults_utility_geometry_grid() -> None:
+    settings = Settings(
+        DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+        DEV_MODE=True,
+        JWT_SECRET="CHANGE_ME_IN_ENV",
+    )
+
+    assert settings.utility_geometry_xy_resolution == Decimal("0.0000001")
+    assert (
+        settings.utility_geometry_rounding_mode is UtilityGeometryRoundingMode.HALF_AWAY_FROM_ZERO
+    )
+
+
+def test_settings_read_utility_geometry_grid_from_env_aliases() -> None:
+    settings = Settings(
+        DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+        DEV_MODE=True,
+        JWT_SECRET="CHANGE_ME_IN_ENV",
+        UTILITY_GEOMETRY_XY_RESOLUTION="0.00000025",
+        UTILITY_GEOMETRY_ROUNDING_MODE="ROUND_HALF_AWAY_FROM_ZERO",
+    )
+
+    assert settings.utility_geometry_xy_resolution == Decimal("0.00000025")
+    assert (
+        settings.utility_geometry_rounding_mode is UtilityGeometryRoundingMode.HALF_AWAY_FROM_ZERO
+    )
+
+
+def test_settings_accepts_any_large_finite_positive_resolution() -> None:
+    settings = Settings(
+        DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+        DEV_MODE=True,
+        JWT_SECRET="CHANGE_ME_IN_ENV",
+        UTILITY_GEOMETRY_XY_RESOLUTION="1E+1000",
+    )
+
+    assert settings.utility_geometry_xy_resolution == Decimal("1E+1000")
+
+
+@pytest.mark.parametrize(
+    "resolution",
+    ["0", "-0.0000001", "NaN", "Infinity", "-Infinity", "", "not-a-number"],
+)
+def test_settings_reject_invalid_utility_geometry_resolution(resolution: str) -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+            DEV_MODE=True,
+            JWT_SECRET="CHANGE_ME_IN_ENV",
+            UTILITY_GEOMETRY_XY_RESOLUTION=resolution,
+        )
+
+
+@pytest.mark.parametrize(
+    "rounding_mode",
+    ["ROUND_HALF_UP", "round_half_away_from_zero", "ROUND_HALF_TO_EVEN"],
+)
+def test_settings_reject_unsupported_utility_geometry_rounding_mode(
+    rounding_mode: str,
+) -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+            DEV_MODE=True,
+            JWT_SECRET="CHANGE_ME_IN_ENV",
+            UTILITY_GEOMETRY_ROUNDING_MODE=rounding_mode,
+        )
 
 
 def test_settings_allow_dev_mode_with_explicit_local_runtime_marker() -> None:

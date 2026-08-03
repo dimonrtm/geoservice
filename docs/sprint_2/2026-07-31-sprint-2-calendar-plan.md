@@ -33,11 +33,11 @@
 - Добавить настраиваемые `UTILITY_GEOMETRY_XY_RESOLUTION` и `UTILITY_GEOMETRY_ROUNDING_MODE`.
 - Зафиксировать default `0.0000001` градуса и `ROUND_HALF_AWAY_FROM_ZERO`.
 - Сделать `L-003` трёхвершинной линией с редактируемой внутренней вершиной.
-- Зафиксировать обязательный `full-clean` для существующих create-once volumes.
+- После create-once seed chain атомарно обновлять только безопасные двухвершинные materialized-копии `L-003`; unsafe state блокирует demo startup.
 
 Результат дня: fresh demo environment создаёт ровно одну пригодную для сценария линию, не меняя общие counts 19 features и 9 associations.
 
-Проверка: settings tests и seed specification tests.
+Проверка: settings tests, seed specification tests, upgrade service tests, startup contract и DB integration.
 
 ### День 2 — вторник, 4 августа
 
@@ -244,11 +244,13 @@
 ## Условия старта
 
 - Доступен disposable demo environment.
-- Разрешён destructive local `full-clean` только для demo compose project.
-- Команда запускается из `infra`:
+- Штатный demo startup после create-once seeds автоматически выполняет transactional in-place upgrade старых безопасных copies `L-003`.
+- Host CMD не запускает Python и не удаляет volume; повторный startup является no-op для уже трёхвершинной hierarchy.
+- Destructive local `full-clean` разрешён только как ручной fallback для unsafe/invalid fixture или несовместимого disposable demo volume.
+- Fallback-команда запускается из `infra`:
 
 ```powershell
 docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml down -v
 ```
 
-- После очистки demo stack запускается повторно, чтобы create-once seeds создали обновлённую `L-003`.
+- После ручной очистки demo stack запускается повторно, чтобы create-once seeds создали обновлённую `L-003`.

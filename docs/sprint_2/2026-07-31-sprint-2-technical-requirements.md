@@ -92,14 +92,30 @@ Vertex:   index 1
 - не совпадает с junction или device;
 - не меняет общее количество demo features и associations: 19 и 9 соответственно.
 
-Seed является create-once. Для получения обновлённой fixture на старом local volume требуется destructive demo-only `full-clean`:
+Seed остаётся create-once. После user, utility dataset и work order seeds demo
+startup запускает отдельный transactional fixture upgrade. Он рассчитывает target
+geometry по lineage `Feeder -> DefaultState -> EditVersion`:
+
+- двухвершинный feeder получает точную seed geometry `L-003`, трёхвершинный сохраняется;
+- двухвершинный `DefaultStateFeature` получает рассчитанную feeder geometry, трёхвершинный сохраняется;
+- двухвершинный `EditVersionFeature` с `operation=unchanged` получает рассчитанную default geometry, трёхвершинный сохраняется независимо от coordinates;
+- несовпадающий `EditVersion.default_state_id`, двухвершинный edit с `operation != unchanged`, missing copy, неверный geometry type или `4+` vertices блокируют startup.
+
+Сначала валидируется вся существующая hierarchy, затем geometry-only updates
+выполняются одной transaction. UUID, properties, associations,
+`version/network_version`, operation и `NetworkState.current_revision` не меняются.
+Fresh fixture и повторный startup являются no-op.
+
+Destructive demo-only `full-clean` остаётся ручным fallback для unsafe/invalid
+fixture или несовместимого disposable volume:
 
 ```powershell
 Set-Location infra
 docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml down -v
 ```
 
-Команда удаляет локальные demo data. Её нельзя применять к production-like данным.
+Команда удаляет локальные demo data. Её нельзя применять к production-like данным,
+и она не выполняется автоматически.
 
 ## 6. Правила редактирования геометрии
 
@@ -117,6 +133,10 @@ docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.
 12. Отсутствие утверждённой positional specification возвращает `POSITIONAL_ACCURACY_UNVERIFIED`, но не блокирует технический Save.
 
 Storage grid является правилом детерминированного хранения, а не допуском positional accuracy.
+При resolution `0.0000001` точные midpoint округляются от нуля:
+`+0.00000015 -> +0.0000002`, `-0.00000015 -> -0.0000002`.
+Day 1 фиксирует configuration contract; canonicalization algorithm реализуется на
+следующем этапе.
 
 ## 7. Сохранение и транзакционность
 
@@ -327,7 +347,7 @@ Readback должен возвращать одинаковый current snapshot
 | Область | Что меняется |
 | --- | --- |
 | Backend settings | Настройки координатной сетки и режима округления |
-| Demo seeds | Трёхвершинная `L-003` и проверки воспроизводимости fixture |
+| Demo seeds | Трёхвершинная `L-003`, transactional in-place fixture upgrade и проверки воспроизводимости |
 | PostgreSQL/PostGIS | `draft_revision`, command registry, change events, spatial checks и migration |
 | Domain/use cases | Команда Save/Revert, optimistic concurrency, idempotency и validation summary |
 | API/workspace readback | Новый `PUT` contract и baseline-aware projection для восстановления после restart |
@@ -345,7 +365,10 @@ Default resolution равен `0.0000001`, invalid/zero value блокирует
 
 ### AC-02. Demo fixture
 
-После fresh `full-clean` линия `L-003` имеет три coordinates, внутренняя вершина пригодна для drag, counts остаются 19 features и 9 associations.
+На fresh volume и после automatic upgrade совместимого старого volume линия
+`L-003` имеет три coordinates, внутренняя вершина пригодна для drag, counts
+остаются 19 features и 9 associations. Unsafe state блокирует startup без partial
+writes; manual `full-clean` не является штатным требованием.
 
 ### AC-03. Успешный Save
 
@@ -385,6 +408,7 @@ Sprint 2 готов к приёмке, когда одновременно вы�
 
 - AC-01–AC-10 подтверждены;
 - backend format/lint/tests проходят;
+- settings, seed specification, fixture upgrade idempotency/rollback и startup-order tests проходят;
 - frontend format/lint/typecheck/tests/build проходят;
 - migration проходит upgrade/downgrade/upgrade;
 - DB/API smoke проходит на fresh demo database;
@@ -399,7 +423,7 @@ Sprint 2 готов к приёмке, когда одновременно вы�
 
 | Риск | Основная защита | Допустимый fallback |
 | --- | --- | --- |
-| Старый volume скрывает новую fixture | Обязательный demo-only `full-clean` | Preflight останавливает demo и показывает точную команду очистки |
+| Старый volume скрывает новую fixture | Atomic validate-first fixture upgrade после seed chain | Demo startup останавливается с rollback; manual `full-clean` разрешён только для disposable fallback |
 | Degree grid принимают за positional tolerance | Раздельные названия и `POSITIONAL_ACCURACY_UNVERIFIED` | Не добавлять выдуманный допуск в метрах |
 | Retry создаёт повторное изменение | Global `CommandId` и сохранённый terminal result | Сериализовать Save на locked `EditVersion` |
 | Revert после restart теряет baseline | Baseline приходит в workspace `changeSet` | Добавить отдельный read-only change-set endpoint, не кешировать seed в UI |

@@ -154,25 +154,45 @@ jobs:
         run: |
           docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2); print('health ok')"
 
-      - name: PostgreSQL/PostGIS network model tests
+      - name: PostgreSQL/PostGIS tests in isolated database
         working-directory: infra
         run: |
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_user_role_migration.py -q
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_network_model_integration.py -q
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_network_model_migration.py -q
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_edit_version_migration.py -q
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_seed_utility_dataset_integration.py -q
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_work_order_seed_chain_integration.py -q
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_cross_context_consistency.py -q
-          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service env RUN_DB_TESTS=1 \
-            pytest tests/integration_tests/test_utility_network_repository_integration.py -q
+          read_demo_fingerprint() {
+            docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T postgis \
+              psql -U postgres -d geo -At -c "
+                SELECT 'work_order|' || w.id || '|' || w.status
+                FROM work_order.work_orders w WHERE w.code = 'WO-001'
+                UNION ALL
+                SELECT 'default_state|' || ds.id || '|' || ds.work_order_id
+                FROM utility_network.default_states ds
+                JOIN work_order.work_orders w ON w.id = ds.work_order_id
+                WHERE w.code = 'WO-001'
+                UNION ALL
+                SELECT 'edit_version|' || ev.id || '|' || ev.status
+                FROM work_order.edit_versions ev
+                JOIN work_order.work_orders w ON w.id = ev.work_order_id
+                WHERE w.code = 'WO-001'
+                ORDER BY 1;"
+          }
+
+          DEMO_FINGERPRINT_BEFORE="$(read_demo_fingerprint)"
+          set +e
+          docker compose -p geoservice-db-tests -f docker-compose.test.yml up \
+            --build --abort-on-container-exit --exit-code-from backend_db_tests
+          DB_TEST_EXIT=$?
+          set -e
+          DEMO_FINGERPRINT_AFTER="$(read_demo_fingerprint)"
+
+          if [ "$DEMO_FINGERPRINT_BEFORE" != "$DEMO_FINGERPRINT_AFTER" ]; then
+            echo "Demo database changed during isolated DB tests"
+            exit 1
+          fi
+          exit "$DB_TEST_EXIT"
+
+      - name: Shutdown isolated DB test compose
+        if: always()
+        working-directory: infra
+        run: docker compose -p geoservice-db-tests -f docker-compose.test.yml down -v --remove-orphans
 
       - name: Utility dataset authenticated API smoke
         working-directory: infra

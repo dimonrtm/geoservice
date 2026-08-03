@@ -76,6 +76,14 @@ cd infra
 docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev up --build
 ```
 
+При штатном demo startup create-once seeds сначала создают отсутствующие данные,
+после чего `upgrade_demo_fixture` атомарно проверяет materialized-копии `L-003` в
+`NetworkFeature`, `DefaultStateFeature` и существующих `EditVersionFeature`.
+Fresh volume сразу получает трёхвершинную линию. На совместимом старом volume
+безопасные двухвершинные copies обновляются in place, а уже трёхвершинные
+geometry сохраняются. Unsafe или повреждённое состояние останавливает запуск API
+с rollback и требует явного решения пользователя.
+
 Перед первым запуском ветки с production-like migration baseline пересоздайте
 старый disposable Postgres volume. Старые demo/dev volumes с уже примененными
 Alembic revisions не являются поддерживаемым migration path:
@@ -86,7 +94,8 @@ docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.
 ```
 
 После этого запустите demo/dev compose снова. Команда удаляет локальные данные
-Postgres и предназначена только для disposable demo/dev БД.
+Postgres и предназначена только для disposable demo/dev БД. Для fixture upgrade
+это ручной fallback, а не обязательная часть обычного restart.
 
 Если после смены demo env `utility_service` становится unhealthy, а в логах
 есть `password authentication failed for user "postgres"`, локальный Docker
@@ -102,6 +111,26 @@ Demo credentials:
 `Editor` видит существующую основу карты и editor workspace. `Reviewer` видит
 отдельную страницу роли без editor workspace; reviewer queue будет добавлена
 в следующем спринте. Legacy credentials `viewer@example.com` удалены.
+
+### PostgreSQL/PostGIS integration-тесты
+
+Полный набор `RUN_DB_TESTS=1` нельзя запускать против demo-БД. Для локального
+прогона используйте отдельный disposable PostGIS:
+
+```bat
+infra\db-tests.cmd
+```
+
+Команда требует только Docker Compose и не использует host Python. Она создаёт
+отдельный проект `geoservice-db-tests`, выполняет Alembic и весь каталог
+`tests/integration_tests` в БД `geo_test`, а затем удаляет test containers и
+`tmpfs`. `dev-up.cmd`, demo-контейнеры и volume `infra_geo_pgdata` не
+перезапускаются и не изменяются.
+
+При `RUN_DB_TESTS=1` pytest требует отдельный `TEST_DATABASE_URL`. Отсутствующий,
+совпадающий с `DATABASE_URL` или не оканчивающийся на `_test` URL отклоняется до
+Alembic, collection и первого SQL-запроса. DB-тесты не создают и не
+восстанавливают `EditVersion` в demo-БД.
 
 Проверка login flow:
 
@@ -122,12 +151,14 @@ curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <access_toke
 
 ## Конфигурация
 
-Backend-конфигурация централизована в [settings.py](C:/Repositories/geoservice/apps/backend/app/core/settings.py).
+Backend-конфигурация централизована в [settings.py](C:/Repositories/geoservice/apps/backend/utility_service/utils/settings.py).
 
 Важно:
 
 - production-safe `infra/docker-compose.yml` требует `JWT_SECRET` и DB env через окружение или `infra/.env`;
 - `infra/demo.env` содержит public demo-only значения для локального сценария;
+- `UTILITY_GEOMETRY_XY_RESOLUTION` задаёт координатную сетку и по умолчанию равен `0.0000001`;
+- `UTILITY_GEOMETRY_ROUNDING_MODE` поддерживает `ROUND_HALF_AWAY_FROM_ZERO`;
 - `DEV_MODE` больше не включает `/api/v1/auth/dev-login`;
 - `VITE_API_BASE_URL` задаёт базовый URL API для frontend.
 

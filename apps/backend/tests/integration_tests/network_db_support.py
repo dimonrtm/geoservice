@@ -27,6 +27,8 @@ def run_in_rollback_transaction(
                 session = AsyncSession(
                     bind=connection,
                     expire_on_commit=False,
+                    # Service rollback must not erase fixture setup inside the outer test transaction.
+                    join_transaction_mode="create_savepoint",
                 )
                 try:
                     await scenario(session)
