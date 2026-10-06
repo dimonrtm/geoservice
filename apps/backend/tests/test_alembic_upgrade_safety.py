@@ -4,6 +4,8 @@ import ast
 import re
 from pathlib import Path
 
+import pytest
+
 
 ALEMBIC_VERSION_DIR = (
     Path(__file__).resolve().parents[1]
@@ -16,7 +18,11 @@ ALEMBIC_VERSION_DIR = (
 
 FORBIDDEN_UPGRADE_SQL = {
     "DELETE FROM": re.compile(r"\bDELETE\s+FROM\b", re.IGNORECASE),
-    "TRUNCATE": re.compile(r"\bTRUNCATE\b", re.IGNORECASE),
+    # ON / OR after TRUNCATE denotes a trigger event, not a cleanup statement.
+    "TRUNCATE": re.compile(
+        r"\bTRUNCATE\b(?!\s+(?:ON|OR)\b)",
+        re.IGNORECASE,
+    ),
     "DROP TABLE": re.compile(r"\bDROP\s+TABLE\b", re.IGNORECASE),
     "DROP SCHEMA": re.compile(r"\bDROP\s+SCHEMA\b", re.IGNORECASE),
     "ALTER TABLE SET SCHEMA": re.compile(
@@ -26,6 +32,45 @@ FORBIDDEN_UPGRADE_SQL = {
 }
 
 FORBIDDEN_UPGRADE_OP_CALLS = {"drop_table"}
+
+
+@pytest.mark.parametrize(
+    "sql,forbidden",
+    [
+        (
+            "CREATE TRIGGER guard BEFORE TRUNCATE ON work_order.events "
+            "FOR EACH STATEMENT EXECUTE FUNCTION reject_mutation()",
+            False,
+        ),
+        (
+            "CREATE TRIGGER guard AFTER INSERT OR truncate\nON work_order.events "
+            "FOR EACH STATEMENT EXECUTE FUNCTION reject_mutation()",
+            False,
+        ),
+        (
+            "CREATE TRIGGER guard BEFORE TRUNCATE OR DELETE ON work_order.events "
+            "FOR EACH STATEMENT EXECUTE FUNCTION reject_mutation()",
+            False,
+        ),
+        ("TRUNCATE work_order.events", True),
+        ("truncate table work_order.events restart identity cascade", True),
+        ("TRUNCATE ONLY work_order.events", True),
+        ('TRUNCATE "work_order"."events"', True),
+        ('TRUNCATE "on"', True),
+        ("TRUNCATE /* cleanup */ work_order.events", True),
+        (
+            "CREATE TRIGGER guard BEFORE TRUNCATE ON work_order.events "
+            "FOR EACH STATEMENT EXECUTE FUNCTION reject_mutation(); "
+            "TRUNCATE work_order.events",
+            True,
+        ),
+    ],
+)
+def test_truncate_detection_distinguishes_trigger_event_from_cleanup(
+    sql: str,
+    forbidden: bool,
+) -> None:
+    assert bool(FORBIDDEN_UPGRADE_SQL["TRUNCATE"].search(sql)) is forbidden
 
 
 def upgrade_function(tree: ast.Module) -> ast.FunctionDef:
