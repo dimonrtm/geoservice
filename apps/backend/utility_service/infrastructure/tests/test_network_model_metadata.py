@@ -35,7 +35,10 @@ def foreign_key_targets(model: type) -> set[str]:
     return {
         element.target_fullname
         for constraint in model.__table__.constraints
-        if isinstance(constraint, ForeignKeyConstraint)
+        if isinstance(
+            constraint,
+            ForeignKeyConstraint,
+        )
         for element in constraint.elements
     }
 
@@ -63,6 +66,10 @@ def test_work_order_package_exports_public_contract() -> None:
     assert set(work_order.__all__) == {
         "AOI",
         "EditVersion",
+        "EditVersionCommand",
+        "EditVersionCommandState",
+        "EditVersionChangeEvent",
+        "EditVersionChangeEventType",
         "EditVersionAssociation",
         "EditVersionFeature",
         "EditVersionStatus",
@@ -145,7 +152,10 @@ def test_feeder_metadata_contains_defaults_and_unique_code() -> None:
     assert Feeder.__table__.c.is_active.default.arg is True
     assert str(Feeder.__table__.c.is_active.server_default.arg) == "true"
     assert any(
-        isinstance(constraint, UniqueConstraint)
+        isinstance(
+            constraint,
+            UniqueConstraint,
+        )
         and tuple(column.name for column in constraint.columns) == ("code",)
         for constraint in Feeder.__table__.constraints
     )
@@ -181,7 +191,10 @@ def test_network_feature_has_schema_qualified_restrict_foreign_key() -> None:
     foreign_keys = [
         constraint
         for constraint in NetworkFeature.__table__.constraints
-        if isinstance(constraint, ForeignKeyConstraint)
+        if isinstance(
+            constraint,
+            ForeignKeyConstraint,
+        )
     ]
 
     assert len(foreign_keys) == 1
@@ -230,7 +243,10 @@ def test_network_association_foreign_keys_are_schema_qualified_and_restrict() ->
     foreign_keys = [
         constraint
         for constraint in NetworkAssociation.__table__.constraints
-        if isinstance(constraint, ForeignKeyConstraint)
+        if isinstance(
+            constraint,
+            ForeignKeyConstraint,
+        )
     ]
 
     assert len(foreign_keys) == 3
@@ -272,7 +288,10 @@ def test_check_constraints_are_named() -> None:
             EditVersionAssociation,
         )
         for constraint in model.__table__.constraints
-        if isinstance(constraint, CheckConstraint)
+        if isinstance(
+            constraint,
+            CheckConstraint,
+        )
     ]
 
     assert checks
@@ -308,7 +327,10 @@ def test_work_order_metadata_contains_aggregate_guards() -> None:
         "ck_work_orders_status",
     }.issubset(constraint_names(WorkOrder))
     assert any(
-        isinstance(constraint, UniqueConstraint)
+        isinstance(
+            constraint,
+            UniqueConstraint,
+        )
         and tuple(column.name for column in constraint.columns) == ("code",)
         for constraint in WorkOrder.__table__.constraints
     )
@@ -370,7 +392,10 @@ def test_default_state_metadata_contains_work_order_baseline_guards() -> None:
         "ck_default_states_status",
     }.issubset(constraint_names(DefaultState))
     assert any(
-        isinstance(constraint, UniqueConstraint)
+        isinstance(
+            constraint,
+            UniqueConstraint,
+        )
         and tuple(column.name for column in constraint.columns) == ("work_order_id",)
         for constraint in DefaultState.__table__.constraints
     )
@@ -443,6 +468,7 @@ def test_edit_version_metadata_contains_open_version_guards() -> None:
         "status",
         "created_at",
         "last_opened_at",
+        "draft_revision",
     }
     assert EditVersion.__table__.c.base_network_revision.default.arg == 1
     assert str(EditVersion.__table__.c.base_network_revision.server_default.arg) == "1"
@@ -456,7 +482,10 @@ def test_edit_version_foreign_keys_stay_inside_work_order_schema() -> None:
     foreign_keys = [
         constraint
         for constraint in EditVersion.__table__.constraints
-        if isinstance(constraint, ForeignKeyConstraint)
+        if isinstance(
+            constraint,
+            ForeignKeyConstraint,
+        )
     ]
 
     assert len(foreign_keys) == 1

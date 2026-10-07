@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
+    BigInteger,
     CheckConstraint,
     DateTime,
     Enum as SAEnum,
@@ -34,6 +35,10 @@ class EditVersion(Base):
     __tablename__ = "edit_versions"
     __table_args__ = (
         CheckConstraint(
+            "draft_revision >= 1",
+            name="ck_edit_versions_draft_revision_positive",
+        ),
+        CheckConstraint(
             "base_network_revision >= 1",
             name="ck_edit_versions_base_network_revision_positive",
         ),
@@ -47,7 +52,9 @@ class EditVersion(Base):
             unique=True,
             postgresql_where=text("status = 'open'"),
         ),
-        {"schema": "work_order"},
+        {
+            "schema": "work_order",
+        },
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -64,8 +71,19 @@ class EditVersion(Base):
         ),
         nullable=False,
     )
-    default_state_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
-    owner_user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    default_state_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
+    draft_revision: Mapped[int] = mapped_column(
+        BigInteger,
+        nullable=False,
+        server_default="1",
+    )
+    owner_user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        nullable=False,
+    )
     base_network_revision: Mapped[int] = mapped_column(
         Integer,
         nullable=False,

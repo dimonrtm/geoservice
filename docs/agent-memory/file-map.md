@@ -56,6 +56,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 
 ## Project Documentation
 
+- Форматирование всех языков проекта, многострочные аргументы и trailing commas с учётом синтаксиса, линтеров и форматтеров, эталон 4bde517: `docs/agent-memory/patterns/2026-10-07-python-formatting-style.md`
 - product requirements planning: `docs/requirements/geoservice-prd-v1.md`, `docs/requirements/geoservice-requirements.md`, `docs/requirements/action-plan.md`
 - legacy generic sprint 1 plans: `docs/release_1/sprint_1/legacy-generic-plan/sprint-1-plan.md`, `docs/release_1/sprint_1/legacy-generic-plan/day-8-plan.md`
 - project overview: `README.md`, `docs/project-description.md`

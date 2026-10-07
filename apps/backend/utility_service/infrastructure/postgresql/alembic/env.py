@@ -58,6 +58,8 @@ from utility_service.infrastructure.postgresql.models.websocket_ticket import ( 
 from utility_service.infrastructure.postgresql.models.work_order import (  # noqa: E402, F401
     AOI,
     EditVersion,
+    EditVersionCommand,
+    EditVersionChangeEvent,
     EditVersionAssociation,
     EditVersionFeature,
     EditVersionStatus,
@@ -89,7 +91,9 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        dialect_opts={
+            "paramstyle": "named",
+        },
         compare_type=True,
         compare_server_default=True,
         include_schemas=True,
