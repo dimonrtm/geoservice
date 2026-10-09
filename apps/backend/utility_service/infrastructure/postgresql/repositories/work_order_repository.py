@@ -6,6 +6,11 @@ from uuid import UUID
 from sqlalchemy import Integer, String, select, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.ext.asyncio import AsyncSession
+from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
+from utility_service.infrastructure.postgresql.geometry_codec import (
+    decode_geometry,
+    geometry_to_geojson,
+)
 
 from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersion,
@@ -95,8 +100,12 @@ class WorkOrderRepository:
         default_features: Sequence[Any],
         default_associations: Sequence[Any],
         owner_user_id: UUID,
+        geometry_policy: GeometryPolicy,
     ) -> EditVersion:
         edit_version = EditVersion(
+            geometry_xy_resolution=geometry_policy.xy_resolution,
+            geometry_rounding_mode=geometry_policy.rounding_mode,
+            geometry_policy_version=geometry_policy.version,
             work_order_id=work_order_id,
             default_state_id=default_state_id,
             owner_user_id=owner_user_id,
@@ -182,6 +191,14 @@ class WorkOrderRepository:
                 geometry_data=row["aoi_geometry_data"],
                 extent=row["aoi_extent"],
             ),
-            features_data=row["features_data"],
+            features_data=[
+                {
+                    **{key: value for key, value in feature.items() if key != "geometry_ewkb"},
+                    "geometry_data": geometry_to_geojson(
+                        decode_geometry(bytes.fromhex(feature["geometry_ewkb"]))
+                    ),
+                }
+                for feature in row["features_data"]
+            ],
             associations_data=row["associations_data"],
         )

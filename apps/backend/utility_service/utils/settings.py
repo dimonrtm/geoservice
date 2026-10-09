@@ -1,14 +1,13 @@
-import enum
 from decimal import Decimal
 from functools import lru_cache
 import json
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-class UtilityGeometryRoundingMode(str, enum.Enum):
-    HALF_AWAY_FROM_ZERO = "ROUND_HALF_AWAY_FROM_ZERO"
+from utility_service.domain_services.edit_geometry.policy import (
+    GeometryPolicy,
+    UtilityGeometryRoundingMode,
+)
 
 
 class Settings(BaseSettings):
@@ -52,6 +51,14 @@ class Settings(BaseSettings):
         UtilityGeometryRoundingMode.HALF_AWAY_FROM_ZERO,
         alias="UTILITY_GEOMETRY_ROUNDING_MODE",
     )
+
+    @model_validator(mode="after")
+    def validate_geometry_policy(self) -> "Settings":
+        GeometryPolicy(
+            xy_resolution=self.utility_geometry_xy_resolution,
+            rounding_mode=self.utility_geometry_rounding_mode,
+        )
+        return self
 
     @model_validator(mode="after")
     def validate_security_settings(self) -> "Settings":

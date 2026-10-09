@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
@@ -13,6 +14,9 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
+    SmallInteger,
+    String,
     func,
     text,
 )
@@ -34,6 +38,27 @@ class EditVersionStatus(str, enum.Enum):
 class EditVersion(Base):
     __tablename__ = "edit_versions"
     __table_args__ = (
+        CheckConstraint(
+            """
+            geometry_xy_resolution NOT IN (
+                'NaN'::numeric,
+                'Infinity'::numeric,
+                '-Infinity'::numeric
+            )
+            AND geometry_xy_resolution BETWEEN 0.0000001 AND 360
+            AND geometry_xy_resolution * 1000000000
+                = trunc(geometry_xy_resolution * 1000000000)
+            """,
+            name="ck_edit_versions_geometry_grid",
+        ),
+        CheckConstraint(
+            "geometry_rounding_mode = 'ROUND_HALF_AWAY_FROM_ZERO'",
+            name="ck_edit_versions_geometry_rounding",
+        ),
+        CheckConstraint(
+            "geometry_policy_version = 1",
+            name="ck_edit_versions_geometry_policy_version",
+        ),
         CheckConstraint(
             "draft_revision >= 1",
             name="ck_edit_versions_draft_revision_positive",
@@ -113,6 +138,19 @@ class EditVersion(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+    )
+
+    geometry_xy_resolution: Mapped[Decimal] = mapped_column(
+        Numeric(),
+        nullable=False,
+    )
+    geometry_rounding_mode: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+    )
+    geometry_policy_version: Mapped[int] = mapped_column(
+        SmallInteger(),
+        nullable=False,
     )
 
     work_order: Mapped[WorkOrder] = relationship()

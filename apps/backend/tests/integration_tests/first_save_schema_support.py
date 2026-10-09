@@ -52,6 +52,8 @@ def run_scenario(scenario: Callable[[AsyncConnection], Awaitable[None]]) -> None
 
 async def seed_context(
     connection: AsyncConnection,
+    *,
+    include_geometry_policy: bool = True,
     **overrides: UUID,
 ) -> dict[str, UUID]:
     ids = {
@@ -161,7 +163,8 @@ async def seed_context(
             :junction_id,
             :feature_id
         )""",
-        """INSERT INTO work_order.edit_versions
+        (
+            """INSERT INTO work_order.edit_versions
         (
             id,
             work_order_id,
@@ -173,7 +176,28 @@ async def seed_context(
             :work_order_id,
             :default_state_id,
             :actor_user_id
-        )""",
+        )"""
+            if not include_geometry_policy
+            else """INSERT INTO work_order.edit_versions
+        (
+            id,
+            work_order_id,
+            default_state_id,
+            owner_user_id,
+            geometry_xy_resolution,
+            geometry_rounding_mode,
+            geometry_policy_version
+        )
+        VALUES (
+            :edit_version_id,
+            :work_order_id,
+            :default_state_id,
+            :actor_user_id,
+            0.0000001,
+            'ROUND_HALF_AWAY_FROM_ZERO',
+            1
+        )"""
+        ),
         """INSERT INTO work_order.edit_version_features
         (
             edit_version_id,

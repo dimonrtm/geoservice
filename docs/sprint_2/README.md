@@ -14,6 +14,11 @@
 - [Спецификация Дня 3: соответствие моделей схеме](2026-10-06-day-3-model-schema-design.md) — модели registry/history, metadata parity, ORM integration, migration lifecycle и конкурентные проверки; принята 7 октября 2026 года.
 - [План реализации Дня 3](2026-10-07-day-3-model-schema-plan.md) — пять выполненных задач с тестами и командами проверки.
 - [Отчёт реализации Дня 3](2026-10-07-day-3-model-schema-implementation-report.md) — изменения, фактические результаты проверок и статус финального ревью.
+- [Анализ кода и обсуждение Дня 4](2026-10-08-day-4-geometry-analysis.md) — текущее состояние canonicalization, structure guard и fingerprint, неоднозначности контракта и вопросы для уточнения.
+- [Спецификация Дня 4: детерминированная геометрия](2026-10-08-day-4-geometry-design.md) — canonicalization, structure guard, fingerprint, policy и точный readback; принята 8 октября 2026 года.
+- [План реализации Дня 4](2026-10-08-day-4-geometry-plan.md) — семь выполненных задач с интерфейсами, тестами и командами проверки.
+- [Отчёт реализации Дня 4](2026-10-08-day-4-geometry-implementation-report.md) — реализованные правила, проверки и решения при исполнении.
+- [Runbook geometry policy](2026-10-08-day-4-geometry-runbook.md) — backfill, миграция при остановленном API и последствия downgrade.
 - `2026-08-16-sprint-2-acceptance-report.md` — будущий отчёт о фактической приёмке; создаётся после реализации и полного прогона сценария.
 
 Все новые human-readable материалы этого спринта следует добавлять в `docs/sprint_2/` и писать на русском, сохраняя paths, commands, API names, types и identifiers без перевода.

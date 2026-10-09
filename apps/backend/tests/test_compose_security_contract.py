@@ -114,6 +114,18 @@ def test_demo_env_fixes_utility_geometry_defaults() -> None:
     assert "UTILITY_GEOMETRY_ROUNDING_MODE=ROUND_HALF_AWAY_FROM_ZERO" in demo_env
 
 
+def test_migrator_receives_same_geometry_configuration_as_api() -> None:
+    compose = read_infra_file("docker-compose.yml")
+    migrator = service_block(compose, "migrate")
+    assert (
+        "UTILITY_GEOMETRY_XY_RESOLUTION: ${UTILITY_GEOMETRY_XY_RESOLUTION:-0.0000001}" in migrator
+    )
+    assert (
+        "UTILITY_GEOMETRY_ROUNDING_MODE: ${UTILITY_GEOMETRY_ROUNDING_MODE:-ROUND_HALF_AWAY_FROM_ZERO}"
+        in migrator
+    )
+
+
 def test_auto_loaded_override_file_is_not_present() -> None:
     assert INFRA_ROOT is not None
     assert not (INFRA_ROOT / "docker-compose.override.yml").exists()

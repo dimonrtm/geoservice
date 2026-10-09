@@ -1,3 +1,5 @@
+from decimal import Decimal
+from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
@@ -126,6 +128,7 @@ def build_service(
     default_state_repository=None,
 ) -> EditVersionService:
     return EditVersionService(
+        geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         session=session or FakeSession(),
         user_repository=user_repository or repository(get_by_id=None),
         work_order_repository=work_order_repository
@@ -199,6 +202,7 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
         assigned.id
     )
     work_order_repository.create_open_edit_version.assert_awaited_once_with(
+        geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         work_order_id=assigned.id,
         default_state_id=baseline.id,
         base_network_revision=baseline.base_network_revision,

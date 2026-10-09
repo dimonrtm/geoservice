@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-09
-source: repository-change:2026-07-09
+updated: 2026-10-08
+source: repository-change:2026-10-08
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -28,6 +28,8 @@ tags: [code-wiki, technical-knowledge]
   `/ingest repository-change`.
 
 ## Текущий Repository Snapshot
+
+- [[архитектура/edit_geometry_determinism]] — Decimal canonicalization, immutable policy EditVersion, fingerprint и точный EWKB readback.
 
 - [[архитектура/backend]] - backend FastAPI, auth, services, repositories и PostGIS.
 - [[архитектура/frontend]] - Vue/MapLibre приложение, role-specific shell, state, map composables и polygon editing.

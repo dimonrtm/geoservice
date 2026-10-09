@@ -43,7 +43,7 @@ features_json AS (
                 'id', feature.feature_id,
                 'asset_code', feature.asset_code,
                 'feature_type', feature.feature_type,
-                'geometry_data', ST_AsGeoJSON(feature.geometry)::jsonb,
+                'geometry_ewkb', encode(ST_AsEWKB(feature.geometry), 'hex'),
                 'properties', feature.properties,
                 'network_version', feature.network_version,
                 'operation', feature.operation

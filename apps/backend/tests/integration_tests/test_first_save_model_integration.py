@@ -1,6 +1,7 @@
 """Real ORM transactions against the schema created by Alembic."""
 
 from datetime import datetime, timezone
+from decimal import Decimal
 from uuid import uuid4
 
 import pytest
@@ -173,6 +174,9 @@ def test_orm_revision_server_default_and_reopen():
             )
         async with AsyncSession(engine) as session:
             version = EditVersion(
+                geometry_xy_resolution=Decimal("0.0000001"),
+                geometry_rounding_mode="ROUND_HALF_AWAY_FROM_ZERO",
+                geometry_policy_version=1,
                 id=ids["edit_version_id"],
                 work_order_id=ids["work_order_id"],
                 default_state_id=ids["default_state_id"],

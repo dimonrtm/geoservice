@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from fastapi import Depends, Request, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
+from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
+from utility_service.utils.settings import settings
 
 from utility_service.infrastructure.postgresql.repositories.auth_session_repository import (
     AuthSessionRepository,
@@ -104,6 +106,10 @@ def get_edit_version_service(
         UserRepository(session),
         WorkOrderRepository(session),
         DefaultStateRepository(session),
+        geometry_policy=GeometryPolicy(
+            xy_resolution=settings.utility_geometry_xy_resolution,
+            rounding_mode=settings.utility_geometry_rounding_mode.value,
+        ),
     )
 
 

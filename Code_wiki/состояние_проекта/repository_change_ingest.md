@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-07-09
-source: repository-change:2026-07-09
+updated: 2026-10-08
+source: repository-change:2026-10-08
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,7 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-10-08 | [[архитектура/edit_geometry_determinism]] | Добавлены контракты Decimal canonicalization, baseline-relative guard/fingerprint, immutable policy EditVersion и lossless workspace readback. | repository-change:2026-10-08 geometry-determinism |
 | 2026-07-09 | [[архитектура/data_model]], [[правила_и_стиль/testing_strategy]], [[сборка/ci_and_quality]] | Зафиксирован raw SQL workspace aggregate: `WorkOrderRepository.get_workspace_aggregate` читает `sql/workspace_aggregate.sql`, запрос материализует `workspace_features AS MATERIALIZED`, собирает features/associations из этого CTE за один round trip и исключает associations, если любой endpoint feature вне AOI. | repository-change:2026-07-09 workspace-aggregate-raw-sql |
 | 2026-07-09 | [[архитектура/data_model]], [[правила_и_стиль/testing_strategy]], [[сборка/ci_and_quality]] | Зафиксирован index hardening workspace working-copy: `a8c1f2d3e4b5` создает один GiST index `ix_edit_version_features_geometry` на `work_order.edit_version_features.geometry` и один btree lookup index `ix_edit_version_associations_edit_version_to_feature_id` на `work_order.edit_version_associations(edit_version_id, to_feature_id)`; migration contract проверяет отсутствие дублей по этим целевым группам в каталоге БД. | repository-change:2026-07-09 workspace-index-hardening |
 | 2026-07-07 | [[архитектура/data_model]], [[dev_setup/local_development]], [[deployment/docker_compose]], [[сборка/ci_and_quality]] | Зафиксирован production-like migration baseline: clean DB перед первым `alembic upgrade head`, `c6` сразу создает `editor`/`reviewer` и `is_active`, `d3` больше не владеет `utility_network.aois`, `e4` создает `work_order.aois`/`work_orders.aoi_id`, `b82`/`f2`/`c9` стали compatibility checkpoints, smoke CI запускает user-role migration contract, а старые disposable dev/demo volumes пересоздаются вместо автоматического repair. | repository-change:2026-07-07 production-like-migration-baseline |

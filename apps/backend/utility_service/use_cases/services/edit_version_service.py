@@ -5,6 +5,7 @@ from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
 from utility_service.infrastructure.postgresql.models.work_order import (
@@ -39,11 +40,14 @@ class EditVersionService:
         user_repository: UserRepository,
         work_order_repository: WorkOrderRepository,
         default_state_repository: DefaultStateRepository,
+        *,
+        geometry_policy: GeometryPolicy,
     ):
         self.session = session
         self.user_repository = user_repository
         self.work_order_repository = work_order_repository
         self.default_state_repository = default_state_repository
+        self.geometry_policy = geometry_policy
 
     async def open_for_work_order(
         self,
@@ -97,6 +101,7 @@ class EditVersionService:
 
         default_state = default_state_aggregate.state
         created = await self.work_order_repository.create_open_edit_version(
+            geometry_policy=self.geometry_policy,
             work_order_id=work_order.id,
             default_state_id=default_state.id,
             base_network_revision=default_state.base_network_revision,

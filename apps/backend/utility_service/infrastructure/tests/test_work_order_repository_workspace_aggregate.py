@@ -1,5 +1,6 @@
 import asyncio
 from uuid import uuid4
+from shapely import Point, set_srid, to_wkb
 
 from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
@@ -90,7 +91,9 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
                     "id": str(feature_id),
                     "asset_code": "J-001",
                     "feature_type": "junction",
-                    "geometry_data": {"type": "Point", "coordinates": [65.5, 44.82]},
+                    "geometry_ewkb": to_wkb(
+                        set_srid(Point(65.5, 44.82), 4326), include_srid=True, hex=True
+                    ),
                     "properties": {"name": "Junction"},
                     "network_version": 1,
                     "operation": "unchanged",
@@ -136,6 +139,11 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
     assert aggregate.aoi.id == aoi_id
     assert aggregate.aoi.extent == [65.495, 44.795, 65.545, 44.835]
     assert aggregate.features_data[0]["asset_code"] == "J-001"
+    assert aggregate.features_data[0]["geometry_data"] == {
+        "type": "Point",
+        "coordinates": [65.5, 44.82],
+    }
+    assert "geometry_ewkb" not in aggregate.features_data[0]
     assert aggregate.associations_data[0]["id"] == str(association_id)
 
 

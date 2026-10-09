@@ -37,7 +37,7 @@ def test_first_save_populated_upgrade_downgrade_upgrade():
 
     async def seed(engine):
         async with engine.begin() as connection:
-            state["ids"] = await seed_context(connection)
+            state["ids"] = await seed_context(connection, include_geometry_policy=False)
             state["original"] = await snapshot_context(
                 connection,
                 state["ids"]["edit_version_id"],
@@ -459,7 +459,7 @@ def test_populated_upgrade_preserves_snapshot() -> None:
         engine = create_async_engine(os.environ["DATABASE_URL"])
         try:
             async with engine.begin() as connection:
-                ids = await seed_context(connection)
+                ids = await seed_context(connection, include_geometry_policy=False)
                 return ids, await snapshot_context(
                     connection,
                     ids["edit_version_id"],
@@ -475,7 +475,7 @@ def test_populated_upgrade_preserves_snapshot() -> None:
         ids, original = asyncio.run(before())
         command.upgrade(
             config,
-            "head",
+            "b7d2e9f4a6c8",
         )
 
         async def after(connection):

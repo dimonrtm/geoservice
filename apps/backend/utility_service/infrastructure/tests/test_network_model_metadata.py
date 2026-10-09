@@ -469,6 +469,9 @@ def test_edit_version_metadata_contains_open_version_guards() -> None:
         "created_at",
         "last_opened_at",
         "draft_revision",
+        "geometry_xy_resolution",
+        "geometry_rounding_mode",
+        "geometry_policy_version",
     }
     assert EditVersion.__table__.c.base_network_revision.default.arg == 1
     assert str(EditVersion.__table__.c.base_network_revision.server_default.arg) == "1"

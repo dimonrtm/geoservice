@@ -1,8 +1,8 @@
-# Планы И Спецификации На Русском Языке
+# Русский язык планов, спецификаций и сообщений исключений
 
 Date: 2026-05-30
 Type: pattern
-Tags: planning, specs, superpowers, language, documentation
+Tags: planning, specs, superpowers, language, documentation, exceptions
 Related files:
 
 - `docs/superpowers/plans/2026-05-30-project-knowledge-wiki-pipeline.md`
@@ -16,6 +16,12 @@ Implementation plans в `docs/superpowers/plans/` и design specs в
 `docs/superpowers/specs/` должны писаться на русском языке. Пути, команды, имена
 файлов, API, типы, идентификаторы, названия пакетов и код не переводятся.
 
+Написанные разработчиком сообщения исключений также должны быть на русском
+языке, включая внутренние причины ошибок и SQL `RAISE EXCEPTION`.
+Машинные error codes, имена constraints и технические идентификаторы сохраняются.
+При новых изменениях не добавлять английские сообщения; перевод сообщений
+сторонних библиотек не подразумевается автоматически.
+
 ## Context
 
 Пользователь явно уточнил это правило после подготовки плана
@@ -26,6 +32,9 @@ Implementation plans в `docs/superpowers/plans/` и design specs в
 Ранее в `docs/agent-memory/protocol.md` уже было общее правило: human-facing fields обычно пишутся на основном языке чата, в этом репозитории обычно на русском. Но отдельной записи, которую будущий агент найдет по запросу про планы, не было.
 
 ## Actions
+
+- 2026-10-09: Пользователь явно закрепил русский язык сообщений исключений.
+  Правило относится к будущему коду, а не только к текущей правке геометрии.
 
 - 2026-05-30: План `docs/superpowers/plans/2026-05-30-project-knowledge-wiki-pipeline.md` переведен на русский язык.
 - 2026-05-30: Зафиксировано правило, что будущие implementation plans должны быть на русском языке.
@@ -52,3 +61,5 @@ rg -n "план|plans|specs|спецификац|русск|язык|implementat
 writing-plans, brainstorming specs, русский язык, язык планов, язык
 спецификаций, docs/superpowers/plans, docs/superpowers/specs, planning language,
 superpowers plans, superpowers specs
+
+сообщения исключений на русском, exceptions, ValueError, RAISE EXCEPTION, язык ошибок

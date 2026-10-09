@@ -39,15 +39,15 @@ def test_settings_read_utility_geometry_grid_from_env_aliases() -> None:
     )
 
 
-def test_settings_accepts_any_large_finite_positive_resolution() -> None:
-    settings = Settings(
-        DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
-        DEV_MODE=True,
-        JWT_SECRET="CHANGE_ME_IN_ENV",
-        UTILITY_GEOMETRY_XY_RESOLUTION="1E+1000",
-    )
-
-    assert settings.utility_geometry_xy_resolution == Decimal("1E+1000")
+@pytest.mark.parametrize("resolution", ["1E+1000", "0.00000001", "0.0000001001"])
+def test_settings_rejects_unsupported_geometry_grid(resolution: str) -> None:
+    with pytest.raises(ValidationError):
+        Settings(
+            DATABASE_URL="postgresql+asyncpg://postgres:postgres@localhost:5432/geo",
+            DEV_MODE=True,
+            JWT_SECRET="CHANGE_ME_IN_ENV",
+            UTILITY_GEOMETRY_XY_RESOLUTION=resolution,
+        )
 
 
 @pytest.mark.parametrize(
