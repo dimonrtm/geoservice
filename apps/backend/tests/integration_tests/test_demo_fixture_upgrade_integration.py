@@ -1,4 +1,7 @@
 from decimal import Decimal
+from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
+    EditVersionRepository,
+)
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 from dataclasses import dataclass
 from typing import Any
@@ -141,6 +144,7 @@ async def open_edit_version(session: AsyncSession) -> MaterializedOwnerIds:
         UserRepository(session),
         WorkOrderRepository(session),
         DefaultStateRepository(session),
+        edit_version_repository=EditVersionRepository(session),
         geometry_policy=GeometryPolicy(Decimal("0.0000001")),
     ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
     default_state_id = await session.scalar(

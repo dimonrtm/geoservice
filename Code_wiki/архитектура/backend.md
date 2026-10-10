@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-07-05
-source: repository-change:2026-07-05
+updated: 2026-10-10
+source: repository-change:2026-10-10
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -64,11 +64,11 @@ feeder вместе с тремя независимо отсортирован�
 - повторный старт или другой несовместимый статус возвращает
   `WORK_ORDER_STATE_CONFLICT`.
 
-`WorkOrderRepository` является единым writer/repository агрегата `WorkOrder`: он
-читает сам work order, сохраняет status transitions, ищет открытую
-`EditVersion` и пишет `work_order.edit_versions`,
-`edit_version_features`/`edit_version_associations` из уже переданных baseline
-rows. Чтение пользователя остается ответственностью `UserRepository`, чтение
+`WorkOrderRepository` читает и блокирует наряд, находит наряды исполнителя,
+сохраняет изменения наряда и собирает модель чтения рабочего пространства.
+Поиск открытой версии, создание её объектов и связей из базового состояния,
+а также обновление времени повторного открытия выполняет `EditVersionRepository`.
+Чтение пользователя остается ответственностью `UserRepository`, чтение
 `DefaultState` и его features/associations - `DefaultStateRepository`.
 `DefaultStateRepository.get_active_aggregate_by_work_order_id` выполняет один
 SQL round trip с независимыми JSONB aggregation subqueries для features и
@@ -76,7 +76,15 @@ associations, чтобы не делать несколько repository calls �
 `features x associations` row explosion. Текст запроса вынесен в
 `utility_service/infrastructure/postgresql/sql/default_state_aggregate.sql` и
 читается один раз при импорте repository module в module-level SQLAlchemy
-statement. Отдельного `EditVersionRepository` в финальной границе нет.
+statement.
+
+`EditVersionRepository` обслуживает атомарную запись current geometry агрегата
+`EditVersion`: root lock, отдельное чтение current/baseline/AOI, PostGIS validation
+и UPDATE только geometry/operation target. Геометрия не является отдельным
+агрегатом. Repository работает внутри transaction вызывающего сервиса, не
+меняет authoritative DefaultState и не управляет revision/registry/events.
+Lifetime handles и ограничения конкурентного доступа описаны в
+[[edit_version_persistence]]. Production Save service ещё не подключён.
 
 ## EditVersion Foundation
 
@@ -84,7 +92,8 @@ statement. Отдельного `EditVersionRepository` в финальной г
 `DefaultState` назначенного work order. Service остается application-layer
 оркестратором: он принимает `actor_id`, работает внутри `AsyncSession`
 transaction boundary и связывает данные из разных схем только через repositories
-(`UserRepository`, `WorkOrderRepository`, `DefaultStateRepository`), а не через
+(`UserRepository`, `WorkOrderRepository`, `DefaultStateRepository`,
+`EditVersionRepository`), а не через
 cross-schema FK или прямые обращения к чужим моделям.
 
 Правила открытия:
@@ -95,11 +104,11 @@ cross-schema FK или прямые обращения к чужим модел�
 - `assigned` без открытой edit version требует активный `DefaultState` этого
   work order; `EditVersionService` через один aggregate-вызов
   `DefaultStateRepository` получает baseline features/associations, затем
-  передает их в `WorkOrderRepository`, который создает deep copy в
+  передает их в `EditVersionRepository`, который создаёт копию в
   `work_order.edit_versions`, `edit_version_features` и
   `edit_version_associations` с сохранением UUID features/associations и записывает
-  `base_network_revision = DefaultState.base_network_revision` и переводит work
-  order в `in_progress` в той же transaction boundary;
+  `base_network_revision = DefaultState.base_network_revision`; сервис переводит
+  наряд в `in_progress` через `WorkOrderRepository` в той же транзакции;
 - `in_progress` с уже открытой edit version возвращает существующую версию,
   обновляя `last_opened_at`;
 - рассинхрон work order и edit version возвращает

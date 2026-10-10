@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-10-08
-source: repository-change:2026-10-08
+updated: 2026-10-10
+source: repository-change:2026-10-10
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-10-10 | [[архитектура/backend]] | После фиксации FU-2026-10-10-001 уточнены разные ответственности WorkOrderRepository и нового EditVersionRepository; старое отрицание отдельного repository больше не действует. FU-2026-10-10-002 уточняет перенос создания и повторного открытия версии в EditVersionRepository. | `apps/backend/utility_service/infrastructure/postgresql/repositories/edit_version_repository.py`, `Vision_wiki/decisions/followups/index.md` |
+| 2026-10-10 | [[архитектура/edit_version_persistence]] | Зафиксирована persistence boundary агрегата EditVersion: root lock, provenance/lifetime handles, spatial validation и точная ограниченная mutation current; после решения пользователя также поиск, создание и повторное открытие версии. | `apps/backend/utility_service/infrastructure/postgresql/repositories/edit_version_repository.py`, `docs/sprint_2/2026-10-10-day-5-repository-context-design.md` |
 | 2026-10-08 | [[архитектура/edit_geometry_determinism]] | Добавлены контракты Decimal canonicalization, baseline-relative guard/fingerprint, immutable policy EditVersion и lossless workspace readback. | repository-change:2026-10-08 geometry-determinism |
 | 2026-07-09 | [[архитектура/data_model]], [[правила_и_стиль/testing_strategy]], [[сборка/ci_and_quality]] | Зафиксирован raw SQL workspace aggregate: `WorkOrderRepository.get_workspace_aggregate` читает `sql/workspace_aggregate.sql`, запрос материализует `workspace_features AS MATERIALIZED`, собирает features/associations из этого CTE за один round trip и исключает associations, если любой endpoint feature вне AOI. | repository-change:2026-07-09 workspace-aggregate-raw-sql |
 | 2026-07-09 | [[архитектура/data_model]], [[правила_и_стиль/testing_strategy]], [[сборка/ci_and_quality]] | Зафиксирован index hardening workspace working-copy: `a8c1f2d3e4b5` создает один GiST index `ix_edit_version_features_geometry` на `work_order.edit_version_features.geometry` и один btree lookup index `ix_edit_version_associations_edit_version_to_feature_id` на `work_order.edit_version_associations(edit_version_id, to_feature_id)`; migration contract проверяет отсутствие дублей по этим целевым группам в каталоге БД. | repository-change:2026-07-09 workspace-index-hardening |

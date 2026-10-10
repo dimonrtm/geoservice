@@ -1,4 +1,7 @@
 from decimal import Decimal
+from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
+    EditVersionRepository,
+)
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 import asyncio
 import os
@@ -212,6 +215,7 @@ def test_seed_chain_opens_edit_version_with_full_default_state_slice() -> None:
             UserRepository(session),
             WorkOrderRepository(session),
             DefaultStateRepository(session),
+            edit_version_repository=EditVersionRepository(session),
             geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
 
@@ -248,6 +252,7 @@ def test_seed_chain_workspace_aggregate_returns_work_order_scope() -> None:
             UserRepository(session),
             WorkOrderRepository(session),
             DefaultStateRepository(session),
+            edit_version_repository=EditVersionRepository(session),
             geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
 
@@ -281,6 +286,7 @@ def test_workspace_aggregate_excludes_association_when_endpoint_feature_is_outsi
             UserRepository(session),
             WorkOrderRepository(session),
             DefaultStateRepository(session),
+            edit_version_repository=EditVersionRepository(session),
             geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
 
@@ -349,6 +355,7 @@ def test_reopening_seeded_edit_version_returns_existing_version_without_duplicat
             UserRepository(session),
             WorkOrderRepository(session),
             DefaultStateRepository(session),
+            edit_version_repository=EditVersionRepository(session),
             geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         )
 
@@ -435,6 +442,7 @@ def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopene
                         UserRepository(session),
                         WorkOrderRepository(session),
                         DefaultStateRepository(session),
+                        edit_version_repository=EditVersionRepository(session),
                         geometry_policy=GeometryPolicy(Decimal("0.0000001")),
                     ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
 

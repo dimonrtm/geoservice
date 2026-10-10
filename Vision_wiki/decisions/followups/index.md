@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-31
+updated: 2026-10-10
 source: null
 tags: [followups, conflicts]
 ---
@@ -44,6 +44,11 @@ tags: [followups, conflicts]
 | FU-2026-06-26-001 | open | Documentation cleanup | [[../../chats/2026-06-26-ic-review-package-and-simulated-post]], [[../../../Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]], `docs/release_2/geometry_association_conflict/2026-06-23-implementation-contract-v0.1.md` | Отдельной docs-задачей пометить старый Release 2 implementation contract artifact как legacy/reference, чтобы он не был source of truth для integrated review/post slice. |
 | FU-2026-07-25-001 | open | First-save implementation contract | [[../../chats/2026-07-25-first-save-for-edit-version]], [[../../chats/2026-07-26-tolerance-rules]], [[../../chats/2026-07-31-demo-utility-gis]], [[../../../Wiki/policies/edit_geometry_precision_policy]], [[../../../Wiki/policies/positional_accuracy_acceptance_policy]], [[../../../Wiki/value_objects/command_id]], [[../../../DDD_Wiki/invariants/edit_version_persisted_edit_invariants]], [[../../../DDD_Wiki/state_machines/edit_version_save_request]] | До implementation нужно найти утверждённую data-product specification и positional tolerance, прочитать фактические CRS/grid metadata сохраняющего demo dataset, выбрать существующую line с eligible internal shape vertex и зафиксировать before/after fixture. Lifecycle-safe idempotency semantics и logical storage разделены: operational registry живёт весь lifecycle `EditVersion`, immutable operation history хранится отдельно; открытым остаётся только долгосрочный records-retention срок history. |
 
+| FU-2026-10-10-001 | resolved | Code_wiki | [[../../../Code_wiki/архитектура/backend]], [[../../../Code_wiki/архитектура/edit_version_persistence]], `apps/backend/utility_service/infrastructure/postgresql/repositories/edit_version_repository.py` | После ingest исправлено устаревшее утверждение об отсутствии EditVersionRepository: WorkOrderRepository создаёт/reopen, EditVersionRepository сохраняет current; источники проверены по коду. |
+
+| FU-2026-10-10-002 | resolved | Code_wiki | [[../../../Code_wiki/архитектура/backend]], [[../../../Code_wiki/архитектура/edit_version_persistence]], `apps/backend/utility_service/use_cases/services/edit_version_service.py` | По решению пользователя создание, поиск открытой версии и повторное открытие перенесены в EditVersionRepository. После repository-change ingest описание обеих архитектурных нод синхронизировано с проверенным кодом. |
+
 ## Правило Post-Ingest Correction
+
 
 После `/ingest` можно исправлять старую документацию только по конфликтам, которые уже перечислены здесь и связаны с `Code_wiki`. Нельзя менять код, конфигурацию, миграции или тесты как часть post-ingest correction.

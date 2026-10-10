@@ -7,6 +7,9 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.integration_tests.first_save_schema_support import run_committed_scenario, seed_context
+from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
+    EditVersionRepository,
+)
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import EditVersion
@@ -51,6 +54,7 @@ def service(
         ),
         repository or WorkOrderRepository(session),
         DefaultStateRepository(session),
+        edit_version_repository=EditVersionRepository(session),
         geometry_policy=GeometryPolicy(Decimal(grid)),
     )
 

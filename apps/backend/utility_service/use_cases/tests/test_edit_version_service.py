@@ -126,6 +126,7 @@ def build_service(
     user_repository=None,
     work_order_repository=None,
     default_state_repository=None,
+    edit_version_repository=None,
 ) -> EditVersionService:
     return EditVersionService(
         geometry_policy=GeometryPolicy(Decimal("0.0000001")),
@@ -135,10 +136,13 @@ def build_service(
         or repository(
             get_by_id=None,
             get_by_id_for_update=None,
+            save=None,
+        ),
+        edit_version_repository=edit_version_repository
+        or repository(
             get_open_edit_version=None,
             create_open_edit_version=None,
             touch_edit_version=None,
-            save=None,
         ),
         default_state_repository=default_state_repository
         or repository(get_active_aggregate_by_work_order_id=None),
@@ -177,10 +181,12 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
     user_repository = repository(get_by_id=actor)
     work_order_repository = repository(
         get_by_id_for_update=assigned,
+        save=None,
+    )
+    edit_version_repository = repository(
         get_open_edit_version=None,
         create_open_edit_version=created,
         touch_edit_version=None,
-        save=None,
     )
     default_state_repository = repository(
         get_active_aggregate_by_work_order_id=baseline_aggregate,
@@ -189,6 +195,7 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
         session=session,
         user_repository=user_repository,
         work_order_repository=work_order_repository,
+        edit_version_repository=edit_version_repository,
         default_state_repository=default_state_repository,
     )
 
@@ -201,7 +208,7 @@ def test_open_assigned_work_order_creates_edit_version_and_starts_work_order() -
     default_state_repository.get_active_aggregate_by_work_order_id.assert_awaited_once_with(
         assigned.id
     )
-    work_order_repository.create_open_edit_version.assert_awaited_once_with(
+    edit_version_repository.create_open_edit_version.assert_awaited_once_with(
         geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         work_order_id=assigned.id,
         default_state_id=baseline.id,
@@ -226,14 +233,17 @@ def test_open_reads_work_order_with_row_lock() -> None:
     work_order_repository = repository(
         get_by_id=assigned,
         get_by_id_for_update=assigned,
+        save=None,
+    )
+    edit_version_repository = repository(
         get_open_edit_version=None,
         create_open_edit_version=created,
         touch_edit_version=None,
-        save=None,
     )
     service = build_service(
         user_repository=repository(get_by_id=actor),
         work_order_repository=work_order_repository,
+        edit_version_repository=edit_version_repository,
         default_state_repository=repository(
             get_active_aggregate_by_work_order_id=baseline_aggregate,
         ),
@@ -252,14 +262,17 @@ def test_open_in_progress_work_order_returns_existing_edit_version() -> None:
     existing = edit_version(started.id, actor.id)
     work_order_repository = repository(
         get_by_id_for_update=started,
+        save=None,
+    )
+    edit_version_repository = repository(
         get_open_edit_version=existing,
         create_open_edit_version=None,
         touch_edit_version=None,
-        save=None,
     )
     service = build_service(
         user_repository=repository(get_by_id=actor),
         work_order_repository=work_order_repository,
+        edit_version_repository=edit_version_repository,
         default_state_repository=repository(get_active_aggregate_by_work_order_id=None),
     )
 
@@ -267,8 +280,8 @@ def test_open_in_progress_work_order_returns_existing_edit_version() -> None:
 
     assert result.created is False
     assert result.edit_version is existing
-    work_order_repository.touch_edit_version.assert_awaited_once_with(existing)
-    work_order_repository.create_open_edit_version.assert_not_awaited()
+    edit_version_repository.touch_edit_version.assert_awaited_once_with(existing)
+    edit_version_repository.create_open_edit_version.assert_not_awaited()
 
 
 def test_open_recovers_unique_violation_as_existing_edit_version() -> None:
@@ -286,18 +299,21 @@ def test_open_recovers_unique_violation_as_existing_edit_version() -> None:
     session = FakeSession()
     work_order_repository = repository(
         get_by_id_for_update=None,
+        save=None,
+    )
+    edit_version_repository = repository(
         get_open_edit_version=None,
         create_open_edit_version=None,
         touch_edit_version=None,
-        save=None,
     )
     work_order_repository.get_by_id_for_update.side_effect = [assigned, started]
-    work_order_repository.get_open_edit_version.side_effect = [None, existing]
-    work_order_repository.create_open_edit_version.side_effect = integrity_error()
+    edit_version_repository.get_open_edit_version.side_effect = [None, existing]
+    edit_version_repository.create_open_edit_version.side_effect = integrity_error()
     service = build_service(
         session=session,
         user_repository=repository(get_by_id=actor),
         work_order_repository=work_order_repository,
+        edit_version_repository=edit_version_repository,
         default_state_repository=repository(
             get_active_aggregate_by_work_order_id=baseline_aggregate,
         ),
@@ -309,8 +325,8 @@ def test_open_recovers_unique_violation_as_existing_edit_version() -> None:
     assert result.edit_version is existing
     assert session.begin_calls == 2
     assert work_order_repository.get_by_id_for_update.await_count == 2
-    assert work_order_repository.get_open_edit_version.await_count == 2
-    work_order_repository.touch_edit_version.assert_awaited_once_with(existing)
+    assert edit_version_repository.get_open_edit_version.await_count == 2
+    edit_version_repository.touch_edit_version.assert_awaited_once_with(existing)
     work_order_repository.save.assert_not_awaited()
 
 
@@ -326,18 +342,21 @@ def test_open_does_not_recover_other_integrity_error() -> None:
     session = FakeSession()
     work_order_repository = repository(
         get_by_id_for_update=assigned,
+        save=None,
+    )
+    edit_version_repository = repository(
         get_open_edit_version=None,
         create_open_edit_version=None,
         touch_edit_version=None,
-        save=None,
     )
-    work_order_repository.create_open_edit_version.side_effect = integrity_error(
+    edit_version_repository.create_open_edit_version.side_effect = integrity_error(
         constraint_name="uq_edit_version_features_edit_version_asset_code",
     )
     service = build_service(
         session=session,
         user_repository=repository(get_by_id=actor),
         work_order_repository=work_order_repository,
+        edit_version_repository=edit_version_repository,
         default_state_repository=repository(
             get_active_aggregate_by_work_order_id=baseline_aggregate,
         ),
@@ -347,7 +366,7 @@ def test_open_does_not_recover_other_integrity_error() -> None:
         asyncio.run(service.open_for_work_order(assigned.id, actor.id))
 
     assert session.begin_calls == 1
-    work_order_repository.touch_edit_version.assert_not_awaited()
+    edit_version_repository.touch_edit_version.assert_not_awaited()
 
 
 @pytest.mark.parametrize(
@@ -394,8 +413,10 @@ def test_open_rejects_missing_default_state() -> None:
         user_repository=repository(get_by_id=actor),
         work_order_repository=repository(
             get_by_id_for_update=assigned,
-            get_open_edit_version=None,
             save=None,
+        ),
+        edit_version_repository=repository(
+            get_open_edit_version=None,
         ),
         default_state_repository=repository(get_active_aggregate_by_work_order_id=None),
     )
@@ -415,10 +436,12 @@ def test_open_rejects_assigned_work_order_with_existing_open_version() -> None:
         user_repository=repository(get_by_id=actor),
         work_order_repository=repository(
             get_by_id_for_update=assigned,
+            save=None,
+        ),
+        edit_version_repository=repository(
             get_open_edit_version=existing,
             create_open_edit_version=None,
             touch_edit_version=None,
-            save=None,
         ),
     )
 
@@ -436,8 +459,10 @@ def test_open_rejects_in_progress_work_order_without_existing_open_version() -> 
         user_repository=repository(get_by_id=actor),
         work_order_repository=repository(
             get_by_id_for_update=started,
-            get_open_edit_version=None,
             save=None,
+        ),
+        edit_version_repository=repository(
+            get_open_edit_version=None,
         ),
     )
 

@@ -1,5 +1,8 @@
 from __future__ import annotations
 from decimal import Decimal
+from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
+    EditVersionRepository,
+)
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 
 from uuid import uuid4
@@ -111,6 +114,7 @@ async def ensure_open_seed_edit_version(session: AsyncSession) -> EditVersion:
         UserRepository(session),
         WorkOrderRepository(session),
         DefaultStateRepository(session),
+        edit_version_repository=EditVersionRepository(session),
         geometry_policy=GeometryPolicy(Decimal("0.0000001")),
     ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
     return result.edit_version

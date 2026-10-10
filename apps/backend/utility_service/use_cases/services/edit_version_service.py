@@ -3,6 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
+from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
+    EditVersionRepository,
+)
+
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
@@ -42,12 +46,14 @@ class EditVersionService:
         default_state_repository: DefaultStateRepository,
         *,
         geometry_policy: GeometryPolicy,
+        edit_version_repository: EditVersionRepository,
     ):
         self.session = session
         self.user_repository = user_repository
         self.work_order_repository = work_order_repository
         self.default_state_repository = default_state_repository
         self.geometry_policy = geometry_policy
+        self.edit_version_repository = edit_version_repository
 
     async def open_for_work_order(
         self,
@@ -76,7 +82,7 @@ class EditVersionService:
         work_order: WorkOrder,
         actor: User,
     ) -> OpenEditVersionResult:
-        existing = await self.work_order_repository.get_open_edit_version(work_order.id)
+        existing = await self.edit_version_repository.get_open_edit_version(work_order.id)
 
         if work_order.status is WorkOrderStatus.IN_PROGRESS:
             if existing is None:
@@ -100,7 +106,7 @@ class EditVersionService:
             self.raise_context_invalid()
 
         default_state = default_state_aggregate.state
-        created = await self.work_order_repository.create_open_edit_version(
+        created = await self.edit_version_repository.create_open_edit_version(
             geometry_policy=self.geometry_policy,
             work_order_id=work_order.id,
             default_state_id=default_state.id,
@@ -121,13 +127,13 @@ class EditVersionService:
         async with self.session.begin():
             actor = await self.get_actor(actor_id)
             work_order = await self.get_visible_work_order(work_order_id, actor)
-            existing = await self.work_order_repository.get_open_edit_version(work_order.id)
+            existing = await self.edit_version_repository.get_open_edit_version(work_order.id)
             if existing is None:
                 self.raise_context_invalid()
             return await self.reopen_edit_version(existing)
 
     async def reopen_edit_version(self, edit_version: EditVersion) -> OpenEditVersionResult:
-        await self.work_order_repository.touch_edit_version(edit_version)
+        await self.edit_version_repository.touch_edit_version(edit_version)
         return OpenEditVersionResult(created=False, edit_version=edit_version)
 
     async def get_actor(self, actor_id: UUID) -> User:
