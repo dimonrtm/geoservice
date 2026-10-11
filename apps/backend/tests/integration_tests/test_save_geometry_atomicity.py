@@ -85,7 +85,12 @@ def test_save_noop_revert_and_retry_committed_results():
             )
             == original
         )
-        for key in before.keys() - {"root", "commands"}:
+        assert len(after["events"]) == 2
+        assert {row["event_type"] for row in after["events"]} == {
+            "change_set_persisted",
+            "change_set_cleared",
+        }
+        for key in before.keys() - {"root", "commands", "events"}:
             assert after[key] == before[key]
 
     run_committed_scenario(scenario)
@@ -93,7 +98,13 @@ def test_save_noop_revert_and_retry_committed_results():
 
 @pytest.mark.parametrize(
     "phase",
-    ["write_current", "increment_revision", "complete_command", "deferred_commit"],
+    [
+        "write_current",
+        "increment_revision",
+        "complete_command",
+        "append_change_event",
+        "deferred_commit",
+    ],
 )
 def test_save_failure_rolls_back_every_write(phase):
     async def scenario(engine):
@@ -107,7 +118,7 @@ def test_save_failure_rolls_back_every_write(phase):
         async with AsyncSession(engine) as session:
             service = build_save_service(session)
             repository = service.edit_version_repository
-            method = "complete_command" if phase == "deferred_commit" else phase
+            method = "append_change_event" if phase == "deferred_commit" else phase
             original = getattr(
                 repository,
                 method,
@@ -117,12 +128,33 @@ def test_save_failure_rolls_back_every_write(phase):
                 *args,
                 **kwargs,
             ):
-                if phase == "deferred_commit":
-                    return None  # Real deferred trigger fails when running reaches commit.
                 await original(
                     *args,
                     **kwargs,
                 )
+                if phase == "deferred_commit":
+                    # Event INSERT succeeded. A second unfinished command fails only at commit.
+                    assert (
+                        await session.scalar(
+                            text(
+                                """
+                                SELECT count(*)
+                                FROM work_order.edit_version_change_events
+                                WHERE command_id = :id
+                                """
+                            ),
+                            {"id": value.command_id},
+                        )
+                        == 1
+                    )
+                    await repository.reserve_command(
+                        args[0],
+                        command_id=uuid4(),
+                        feature_id=ids["feature_id"],
+                        actor_id=ids["actor_user_id"],
+                        fingerprint="test-deferred-running",
+                    )
+                    return
                 raise RuntimeError("test-only failure")
 
             setattr(
@@ -194,7 +226,7 @@ def test_history_id_survives_registry_deletion():
     run_committed_scenario(scenario)
 
 
-def test_invalid_geometry_leaves_no_command_or_mutation():
+def test_invalid_geometry_leaves_rejected_command_without_mutation():
     from dataclasses import replace
 
     async def scenario(engine):
@@ -216,13 +248,14 @@ def test_invalid_geometry_leaves_no_command_or_mutation():
             )
         assert error.value.code == "GEOMETRY_INVALID"
         async with engine.connect() as connection:
-            assert (
-                await snapshot_save_state(
-                    connection,
-                    ids,
-                )
-                == before
+            after = await snapshot_save_state(
+                connection,
+                ids,
             )
+        assert len(after["commands"]) == 1
+        assert after["commands"][0]["rejection_code"] == "GEOMETRY_INVALID"
+        for key in before.keys() - {"commands"}:
+            assert after[key] == before[key]
 
     run_committed_scenario(scenario)
 
@@ -259,9 +292,15 @@ def test_off_grid_baseline_roundtrip_and_revert_preserve_storage():
                         WHERE {key} = :{key} AND feature_id = :feature_id
                         """
                     ),
-                    {**ids, "geometry": encode_geometry(baseline)},
+                    {
+                        **ids,
+                        "geometry": encode_geometry(baseline),
+                    },
                 )
-            before = await snapshot_save_state(connection, ids)
+            before = await snapshot_save_state(
+                connection,
+                ids,
+            )
         moved = replace(
             baseline,
             coordinates=(
@@ -287,15 +326,21 @@ def test_off_grid_baseline_roundtrip_and_revert_preserve_storage():
             ),
         )
         async with engine.connect() as connection:
-            after = await snapshot_save_state(connection, ids)
+            after = await snapshot_save_state(
+                connection,
+                ids,
+            )
         assert after["features"] == before["features"]
         assert after["baseline"] == before["baseline"]
 
     run_committed_scenario(scenario)
 
 
-@pytest.mark.parametrize("access_retry", [False, True])
-def test_stored_rejection_is_replayed_without_resuming(access_retry):
+@pytest.mark.parametrize(
+    "access_retry",
+    [False, True],
+)
+def test_stored_rejection_resumes_only_access_retry(access_retry):
     from tests.integration_tests.first_save_schema_support import finish_command
     from tests.integration_tests.edit_geometry_repository_support import read_context
     from utility_service.domain_services.edit_geometry.fingerprint import command_fingerprint
@@ -307,8 +352,14 @@ def test_stored_rejection_is_replayed_without_resuming(access_retry):
         async with engine.begin() as connection:
             ids = await seed_save_context(connection)
         async with AsyncSession(engine) as session, session.begin():
-            repository, context = await read_context(session, ids)
-            prepared = repository.prepare_candidate(context, value.geometry)
+            repository, context = await read_context(
+                session,
+                ids,
+            )
+            prepared = repository.prepare_candidate(
+                context,
+                value.geometry,
+            )
             fingerprint = command_fingerprint(
                 FingerprintContext(
                     ids["work_order_id"],
@@ -337,21 +388,60 @@ def test_stored_rejection_is_replayed_without_resuming(access_retry):
                 retry_on_access_change=access_retry,
             )
         async with engine.connect() as connection:
-            before = await snapshot_save_state(connection, ids)
-        with pytest.raises(WorkOrderApiError) as error:
-            await call_save(engine, ids, value)
-        assert error.value.code == (
-            "EDIT_VERSION_NOT_FOUND" if access_retry else "GEOMETRY_INVALID"
-        )
-        async with engine.connect() as connection:
-            assert await snapshot_save_state(connection, ids) == before
+            before = await snapshot_save_state(
+                connection,
+                ids,
+            )
+        if access_retry:
+            result = await call_save(
+                engine,
+                ids,
+                value,
+            )
+            assert result.payload["draftVersionToken"] == "2"
+            async with engine.connect() as connection:
+                after = await snapshot_save_state(
+                    connection,
+                    ids,
+                )
+            assert len(after["events"]) == 1
+            assert after["commands"][0]["state"] == "succeeded"
+            assert (
+                after["commands"][0]["request_fingerprint"]
+                == before["commands"][0]["request_fingerprint"]
+            )
+        else:
+            with pytest.raises(WorkOrderApiError) as error:
+                await call_save(
+                    engine,
+                    ids,
+                    value,
+                )
+            assert error.value.code == "GEOMETRY_INVALID"
+            async with engine.connect() as connection:
+                assert (
+                    await snapshot_save_state(
+                        connection,
+                        ids,
+                    )
+                    == before
+                )
 
     run_committed_scenario(scenario)
 
 
-@pytest.mark.parametrize("replay", [False, True])
-@pytest.mark.parametrize("revocation", ["inactive", "reviewer"])
-def test_retained_actor_cannot_save_or_replay_after_access_revoked(replay, revocation):
+@pytest.mark.parametrize(
+    "replay",
+    [False, True],
+)
+@pytest.mark.parametrize(
+    "revocation",
+    ["inactive", "reviewer"],
+)
+def test_retained_actor_cannot_save_or_replay_after_access_revoked(
+    replay,
+    revocation,
+):
     from sqlalchemy import update
     from utility_service.infrastructure.postgresql.models.user import User, UserRole
 
@@ -359,13 +449,23 @@ def test_retained_actor_cannot_save_or_replay_after_access_revoked(replay, revoc
         async with engine.begin() as connection:
             ids = await seed_save_context(connection)
         value = request()
-        async with AsyncSession(engine, expire_on_commit=False) as session:
+        async with AsyncSession(
+            engine,
+            expire_on_commit=False,
+        ) as session:
             async with session.begin():
-                retained = await session.get(User, ids["actor_user_id"])
+                retained = await session.get(
+                    User,
+                    ids["actor_user_id"],
+                )
             assert retained.is_active and retained.role is UserRole.EDITOR
             service = build_save_service(session)
             if replay:
-                await save(service, ids, value)
+                await save(
+                    service,
+                    ids,
+                    value,
+                )
             async with engine.begin() as connection:
                 await connection.execute(
                     update(User)
@@ -378,11 +478,28 @@ def test_retained_actor_cannot_save_or_replay_after_access_revoked(replay, revoc
                         )
                     )
                 )
-                before = await snapshot_save_state(connection, ids)
+                before = await snapshot_save_state(
+                    connection,
+                    ids,
+                )
             with pytest.raises(WorkOrderApiError) as error:
-                await save(service, ids, value)
+                await save(
+                    service,
+                    ids,
+                    value,
+                )
             assert error.value.code == "ROLE_NOT_ALLOWED"
             async with engine.connect() as connection:
-                assert await snapshot_save_state(connection, ids) == before
+                after = await snapshot_save_state(
+                    connection,
+                    ids,
+                )
+            if replay:
+                assert after == before
+            else:
+                assert len(after["commands"]) == 1
+                assert after["commands"][0]["rejection_code"] == "ROLE_NOT_ALLOWED"
+                for key in before.keys() - {"commands"}:
+                    assert after[key] == before[key]
 
     run_committed_scenario(scenario)

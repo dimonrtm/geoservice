@@ -149,6 +149,115 @@ class EditVersionRepository:
             raise RepositoryProtocolError("Ревизия версии изменилась после получения блокировки.")
         return revision
 
+    async def reject_command(
+        self,
+        root: LockedEditVersion,
+        *,
+        command_id: UUID,
+        status_code: int,
+        code: str,
+        message: str,
+        retry_on_access_change: bool = False,
+    ) -> None:
+        self.scope.require(root)
+        with self.session.no_autoflush:
+            completed = await edit_version_commands.reject_running_command(
+                self.session,
+                version_id=root.id,
+                command_id=command_id,
+                status_code=status_code,
+                code=code,
+                message=message,
+                retry_on_access_change=retry_on_access_change,
+            )
+        if not completed:
+            raise RepositoryProtocolError("Команда не принадлежит версии или уже завершена.")
+
+    async def append_change_event(
+        self,
+        root: LockedEditVersion,
+        *,
+        command_id: UUID,
+        feature_id: UUID,
+        actor_id: UUID,
+        change: GeometryWriteResult,
+        draft_revision_after: int,
+    ) -> None:
+        self.scope.require(root)
+        if not change.changed or draft_revision_after != root.draft_revision + 1:
+            raise RepositoryProtocolError(
+                "Событие требует фактического изменения и следующей ревизии."
+            )
+        with self.session.no_autoflush:
+            await self.session.execute(
+                text(
+                    """
+                    INSERT INTO work_order.edit_version_change_events (
+                        command_id,
+                        edit_version_id,
+                        work_order_id,
+                        default_state_id,
+                        feature_id,
+                        actor_user_id,
+                        event_type,
+                        before_geometry,
+                        after_geometry,
+                        base_network_revision,
+                        draft_revision_before,
+                        draft_revision_after
+                    )
+                    VALUES (
+                        :command_id,
+                        :edit_version_id,
+                        :work_order_id,
+                        :default_state_id,
+                        :feature_id,
+                        :actor_id,
+                        :event_type,
+                        ST_GeomFromEWKB(:before),
+                        ST_GeomFromEWKB(:after),
+                        :base_revision,
+                        :revision_before,
+                        :revision_after
+                    )
+                    """
+                ),
+                {
+                    "command_id": command_id,
+                    "edit_version_id": root.id,
+                    "work_order_id": root.work_order_id,
+                    "default_state_id": root.default_state_id,
+                    "feature_id": feature_id,
+                    "actor_id": actor_id,
+                    "event_type": (
+                        "change_set_persisted"
+                        if change.operation == "updated"
+                        else "change_set_cleared"
+                    ),
+                    "before": change.before_ewkb,
+                    "after": change.after_ewkb,
+                    "base_revision": root.base_network_revision,
+                    "revision_before": root.draft_revision,
+                    "revision_after": draft_revision_after,
+                },
+            )
+
+    async def resume_access_command(
+        self,
+        root: LockedEditVersion,
+        *,
+        command_id: UUID,
+    ) -> None:
+        self.scope.require(root)
+        with self.session.no_autoflush:
+            resumed = await edit_version_commands.resume_rejected_access_command(
+                self.session,
+                version_id=root.id,
+                command_id=command_id,
+            )
+        if not resumed:
+            raise RepositoryProtocolError("Команда не допускает повтор после изменения доступа.")
+
     async def get_open_edit_version(
         self,
         work_order_id: UUID,

@@ -86,3 +86,64 @@ async def finish_command(
         .execution_options(synchronize_session=False)
     )
     return (await session.execute(statement)).scalar_one_or_none() is not None
+
+
+async def reject_running_command(
+    session: AsyncSession,
+    *,
+    version_id: UUID,
+    command_id: UUID,
+    status_code: int,
+    code: str,
+    message: str,
+    retry_on_access_change: bool = False,
+) -> bool:
+    statement = (
+        update(EditVersionCommand)
+        .where(
+            EditVersionCommand.command_id == command_id,
+            EditVersionCommand.edit_version_id == version_id,
+            EditVersionCommand.state == EditVersionCommandState.RUNNING,
+        )
+        .values(
+            state=EditVersionCommandState.REJECTED,
+            response_status=status_code,
+            response_payload=None,
+            rejection_code=code,
+            rejection_message=message,
+            retry_on_access_change=retry_on_access_change,
+            completed_at=func.now(),
+        )
+        .returning(EditVersionCommand.command_id)
+        .execution_options(synchronize_session=False)
+    )
+    return (await session.execute(statement)).scalar_one_or_none() is not None
+
+
+async def resume_rejected_access_command(
+    session: AsyncSession,
+    *,
+    version_id: UUID,
+    command_id: UUID,
+) -> bool:
+    statement = (
+        update(EditVersionCommand)
+        .where(
+            EditVersionCommand.command_id == command_id,
+            EditVersionCommand.edit_version_id == version_id,
+            EditVersionCommand.state == EditVersionCommandState.REJECTED,
+            EditVersionCommand.retry_on_access_change.is_(True),
+        )
+        .values(
+            state=EditVersionCommandState.RUNNING,
+            response_status=None,
+            response_payload=None,
+            rejection_code=None,
+            rejection_message=None,
+            retry_on_access_change=False,
+            completed_at=None,
+        )
+        .returning(EditVersionCommand.command_id)
+        .execution_options(synchronize_session=False)
+    )
+    return (await session.execute(statement)).scalar_one_or_none() is not None

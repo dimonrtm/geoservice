@@ -169,7 +169,7 @@ def test_disappeared_reservation_winner_never_mutates(history):
         ("GEOMETRY_OUTSIDE_AOI", 422),
     ],
 )
-def test_domain_rejection_rolls_back_new_registry(
+def test_domain_rejection_commits_new_registry(
     code,
     status,
 ):
@@ -186,13 +186,14 @@ def test_domain_rejection_rolls_back_new_registry(
         with pytest.raises(WorkOrderApiError) as error:
             await fixture.save(fixture.request())
         assert (error.value.code, error.value.status_code) == (code, status)
-        assert fixture.commands == {}
+        assert len(fixture.commands) == 1
+        assert next(iter(fixture.commands.values())).state == "rejected"
         assert fixture.mutations == 0
 
     asyncio.run(scenario())
 
 
-def test_existing_access_rejection_is_not_resumed():
+def test_existing_access_rejection_resumes_and_checks_original_token():
     async def scenario():
         fixture = SaveFixture()
         request = fixture.request()
@@ -208,7 +209,7 @@ def test_existing_access_rejection_is_not_resumed():
         )
         with pytest.raises(WorkOrderApiError) as error:
             await fixture.save(request)
-        assert error.value.message == "Исходный отказ."
+        assert error.value.code == "DRAFT_VERSION_STALE"
         assert fixture.mutations == 1
 
     asyncio.run(scenario())

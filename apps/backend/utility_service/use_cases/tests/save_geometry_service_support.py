@@ -115,14 +115,14 @@ class SaveFixture:
     async def begin(self):
         assert not self.active
         self.active = True
-        original = deepcopy((self.context, self.commands, self.mutations))
+        original = deepcopy((self.context, self.commands, self.mutations, self.history))
         try:
             yield self
             if self.fail_commit:
                 raise RuntimeError("commit failed")
             self.commits += 1
         except BaseException:
-            self.context, self.commands, self.mutations = original
+            self.context, self.commands, self.mutations, self.history = original
             raise
         finally:
             self.active = False
@@ -273,6 +273,58 @@ class SaveFixture:
             response_status=200,
             response_payload=deepcopy(payload),
         )
+
+    async def reject_command(
+        self,
+        root,
+        *,
+        command_id,
+        status_code,
+        code,
+        message,
+        retry_on_access_change=False,
+    ):
+        self.commands[command_id] = replace(
+            self.commands[command_id],
+            state=EditVersionCommandState.REJECTED,
+            response_status=status_code,
+            response_payload=None,
+            rejection_code=code,
+            rejection_message=message,
+            retry_on_access_change=retry_on_access_change,
+        )
+
+    async def resume_access_command(
+        self,
+        root,
+        *,
+        command_id,
+    ):
+        self.commands[command_id] = replace(
+            self.commands[command_id],
+            state=EditVersionCommandState.RUNNING,
+            response_status=None,
+            response_payload=None,
+            rejection_code=None,
+            rejection_message=None,
+            retry_on_access_change=False,
+        )
+
+    async def append_change_event(
+        self,
+        root,
+        *,
+        command_id,
+        feature_id,
+        actor_id,
+        change,
+        draft_revision_after,
+    ):
+        assert self.commands[command_id].state == EditVersionCommandState.SUCCEEDED
+        assert command_id not in self.history
+        assert change.changed
+        assert draft_revision_after == root.draft_revision + 1
+        self.history.add(command_id)
 
     def request(
         self,

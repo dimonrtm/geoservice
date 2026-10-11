@@ -199,8 +199,13 @@ def test_competing_same_version_requests(same_command):
                 ids,
             )
         assert snapshot["root"]["draft_revision"] == 2
-        assert len(snapshot["commands"]) == 1
-        assert snapshot["commands"][0]["state"] == "succeeded"
+        assert len(snapshot["commands"]) == (1 if same_command else 2)
+        assert sum(row["state"] == "succeeded" for row in snapshot["commands"]) == 1
+        assert len(snapshot["events"]) == 1
+        if not same_command:
+            assert [
+                row["rejection_code"] for row in snapshot["commands"] if row["state"] == "rejected"
+            ] == ["DRAFT_VERSION_STALE"]
 
     run_committed_scenario(scenario)
 
@@ -286,5 +291,93 @@ def test_save_and_open_do_not_deadlock(open_first):
             )
         assert snapshot["root"]["draft_revision"] == 2
         assert len(snapshot["commands"]) == 1
+
+    run_committed_scenario(scenario)
+
+
+@pytest.mark.parametrize(
+    "different_version",
+    [False, True],
+)
+@pytest.mark.parametrize(
+    "rollback",
+    [False, True],
+)
+def test_concurrent_rejection_preserves_winner(
+    different_version,
+    rollback,
+):
+    async def scenario(engine):
+        async with engine.begin() as connection:
+            first_ids = await seed_save_context(connection)
+            second_ids = await seed_save_context(connection) if different_version else first_ids
+        value = request(token="old")
+        results = await race(
+            engine,
+            first_ids,
+            second_ids,
+            value,
+            value,
+            rollback=rollback,
+        )
+        assert isinstance(
+            results[0],
+            RuntimeError if rollback else WorkOrderApiError,
+        )
+        assert isinstance(
+            results[1],
+            WorkOrderApiError,
+        )
+        assert results[1].code == (
+            "COMMAND_ID_REUSED" if different_version and not rollback else "DRAFT_VERSION_STALE"
+        )
+        async with engine.connect() as connection:
+            a = await snapshot_save_state(
+                connection,
+                first_ids,
+            )
+            b = (
+                await snapshot_save_state(
+                    connection,
+                    second_ids,
+                )
+                if different_version
+                else None
+            )
+        commands = a["commands"] + (b["commands"] if b else [])
+        assert len(commands) == 1
+        assert commands[0]["state"] == "rejected"
+        assert commands[0]["rejection_code"] == "DRAFT_VERSION_STALE"
+        assert not a["events"] and (b is None or not b["events"])
+        assert a["root"]["draft_revision"] == 1
+
+    run_committed_scenario(scenario)
+
+
+def test_concurrent_same_id_different_payload_does_not_replace_success():
+    async def scenario(engine):
+        async with engine.begin() as connection:
+            ids = await seed_save_context(connection)
+        first = request()
+        other = request(
+            token="old",
+            command_id=first.command_id,
+        )
+        results = await race(
+            engine,
+            ids,
+            ids,
+            first,
+            other,
+        )
+        assert results[0].status_code == 200
+        assert results[1].code == "COMMAND_ID_REUSED"
+        async with engine.connect() as connection:
+            state = await snapshot_save_state(
+                connection,
+                ids,
+            )
+        assert len(state["commands"]) == len(state["events"]) == 1
+        assert state["commands"][0]["response_payload"] == results[0].payload
 
     run_committed_scenario(scenario)

@@ -4,6 +4,11 @@
 
 ## Артефакты
 
+- [Анализ Дня 7: отклонения, события и Revert](2026-10-11-day-7-rejections-events-revert-analysis.md) — текущий код, ответы на вопросы, выбор подхода и согласованные разделы дизайна.
+- [Спецификация Дня 7: terminal rejection, история и Revert](2026-10-11-day-7-rejections-events-revert-design.md) — транзакционный контракт, два формата fingerprint, access retry и матрица M2; принята 11 октября 2026 года.
+- [План реализации Дня 7](2026-10-11-day-7-rejections-events-revert-plan.md) — шесть выполненных задач, интерфейсы и проверки M2.
+- [Отчёт реализации Дня 7](2026-10-11-day-7-rejections-events-revert-implementation-report.md) — durable rejection, access retry, события, Revert и подтверждение M2.
+- [Журнал исполнения Дня 7](2026-10-11-day-7-execution-ledger.md) — TDD evidence, review и решения при реализации.
 - [Анализ Дня 6: synchronous Save и идемпотентность](2026-10-11-day-6-save-analysis.md) — текущий код, ограничения транзакции и согласованные уточнения требований.
 - [Спецификация Дня 6: synchronous Save и идемпотентность](2026-10-11-day-6-save-design.md) — Save в EditVersionService, единый EditVersionRepository, reservation/replay, revision и проверки атомарности; принята 11 октября 2026 года.
 - [План реализации Дня 6](2026-10-11-day-6-save-plan.md) — шесть выполненных задач с интерфейсами и проверками.

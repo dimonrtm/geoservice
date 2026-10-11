@@ -48,13 +48,14 @@ def test_save_noop_and_revert_results():
     "token",
     ["01", "old", "2"],
 )
-def test_stale_rolls_back_reservation(token):
+def test_stale_commits_rejection(token):
     async def scenario():
         fixture = SaveFixture()
         with pytest.raises(WorkOrderApiError) as error:
             await fixture.save(fixture.request(token=token))
         assert error.value.code == "DRAFT_VERSION_STALE"
-        assert fixture.commands == {}
+        assert len(fixture.commands) == 1
+        assert next(iter(fixture.commands.values())).state == "rejected"
         assert fixture.mutations == 0
         assert fixture.validations == 0
 
@@ -86,7 +87,10 @@ def test_commit_failure_does_not_return_success():
         ("baseline", "WORK_ORDER_CONTEXT_INVALID"),
     ],
 )
-def test_missing_save_context_does_not_reserve_command(missing, code):
+def test_missing_save_context_reserves_only_existing_target(
+    missing,
+    code,
+):
     async def scenario():
         fixture = SaveFixture()
         if missing == "actor":
@@ -99,8 +103,14 @@ def test_missing_save_context_does_not_reserve_command(missing, code):
             fixture.lock_version = no_root
         elif missing == "feature":
 
-            async def no_feature(*args, **kwargs):
-                return RepositoryRejection(code, "Объект отсутствует.")
+            async def no_feature(
+                *args,
+                **kwargs,
+            ):
+                return RepositoryRejection(
+                    code,
+                    "Объект отсутствует.",
+                )
 
             fixture.read_context = no_feature
         else:
@@ -111,7 +121,7 @@ def test_missing_save_context_does_not_reserve_command(missing, code):
         with pytest.raises(WorkOrderApiError) as error:
             await fixture.save(fixture.request())
         assert error.value.code == code
-        assert fixture.commands == {}
+        assert len(fixture.commands) == int(missing in {"actor", "baseline"})
         assert fixture.mutations == 0
 
     asyncio.run(scenario())

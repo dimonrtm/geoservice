@@ -35,6 +35,115 @@ async def reserve(
     )
 
 
+@pytest.mark.parametrize(
+    "access",
+    [False, True],
+)
+def test_rejection_transition_and_access_resume(access):
+    async def scenario(engine):
+        async with engine.begin() as connection:
+            ids = await seed_repository_context(connection)
+        command_id = uuid4()
+        async with AsyncSession(engine) as session, session.begin():
+            repository, context = await read_context(
+                session,
+                ids,
+            )
+            await reserve(
+                repository,
+                context.root,
+                ids,
+                command_id,
+            )
+            await repository.reject_command(
+                context.root,
+                command_id=command_id,
+                status_code=404 if access else 409,
+                code="EDIT_VERSION_NOT_FOUND" if access else "DRAFT_VERSION_STALE",
+                message="Исходный отказ.",
+                retry_on_access_change=access,
+            )
+        async with AsyncSession(engine) as session:
+            async with session.begin():
+                repository, context = await read_context(
+                    session,
+                    ids,
+                )
+                original = await repository.get_command(
+                    context.root,
+                    command_id=command_id,
+                )
+                assert original.state == "rejected"
+                assert original.response_payload is None
+                assert original.rejection_message == "Исходный отказ."
+                with pytest.raises(RepositoryProtocolError):
+                    await repository.reject_command(
+                        context.root,
+                        command_id=command_id,
+                        status_code=409,
+                        code="DRAFT_VERSION_STALE",
+                        message="Другой отказ.",
+                    )
+            if access:
+                with pytest.raises(
+                    RuntimeError,
+                    match="rollback",
+                ):
+                    async with session.begin():
+                        repository, context = await read_context(
+                            session,
+                            ids,
+                        )
+                        await repository.resume_access_command(
+                            context.root,
+                            command_id=command_id,
+                        )
+                        running = await repository.get_command(
+                            context.root,
+                            command_id=command_id,
+                        )
+                        assert running.state == "running"
+                        assert running.response_status is None
+                        assert running.rejection_code is None
+                        assert not running.retry_on_access_change
+                        assert running.request_fingerprint == original.request_fingerprint
+                        raise RuntimeError("rollback")
+                async with session.begin():
+                    repository, context = await read_context(
+                        session,
+                        ids,
+                    )
+                    assert (
+                        await repository.get_command(
+                            context.root,
+                            command_id=command_id,
+                        )
+                        == original
+                    )
+                    await repository.resume_access_command(
+                        context.root,
+                        command_id=command_id,
+                    )
+                    await repository.complete_command(
+                        context.root,
+                        command_id=command_id,
+                        payload={"ok": True},
+                    )
+            else:
+                async with session.begin():
+                    repository, context = await read_context(
+                        session,
+                        ids,
+                    )
+                    with pytest.raises(RepositoryProtocolError):
+                        await repository.resume_access_command(
+                            context.root,
+                            command_id=command_id,
+                        )
+
+    run_committed_scenario(scenario)
+
+
 def test_reserve_conflict_and_global_lookup_preserve_success():
     async def scenario(engine):
         async with engine.begin() as connection:
