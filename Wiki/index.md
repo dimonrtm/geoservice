@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-31
+updated: 2026-10-12
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -13,6 +13,8 @@ tags: [domain-knowledge, ddd]
 `Wiki/` хранит канонические атомарные доменные знания проекта: словарь, сущности, value objects, концепции, участников, внешние системы, команды, события, политики, спецификации, конфликты и вопросы.
 
 ## Реестры
+
+Исследование восстановления редактора от 2026-10-11 добавило правила, принятые пользователем 2026-10-12: [[Wiki/glossary/editing_result_states]], [[Wiki/policies/editor_recovery_policy]], [[Wiki/policies/geometry_quality_escalation_policy]] и [[Wiki/policies/change_history_retention_policy]]. Это синтез позиции заказчика, не подтверждённое интервью. Разграничение состояния операции и осведомлённости редактора принято; конфликт разрешён: [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]].
 
 - [[Wiki/_registry/glossary]]
 - [[Wiki/_registry/entities]]

@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-31
+updated: 2026-10-12
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -12,8 +12,13 @@ related: [Wiki/index, DDD_Wiki/model_health]
 
 # Questions Registry
 
+После research-ingest от 2026-10-11 после принятия правил 2026-10-12 открыты пять вопросов: четыре прежних организационных/фактических и назначение ответственного за исходные дефекты. Два вопроса принятия правил закрыты решением пользователя. Ответы на 15 discovery-вопросов сохранены в [[RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research]]; это синтез, не интервью. Для demo metadata и fixture появились технические источники: [[Code_wiki/архитектура/edit_geometry_determinism]] и [артефакты Sprint 2](../../docs/sprint_2/README.md). До следующего discovery требуется сверка по `FU-2026-10-11-001` в [[Vision_wiki/decisions/followups/index]]; прежние вопросы не следует повторять без проверки этих источников.
+
 | Question | Domain Gap | Priority | Status | Answer Source |
 | --- | --- | --- | --- | --- |
+| Принять ли предложенную политику восстановления и отделение неизвестного исхода для редактора от operation state? | [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]], [[Wiki/policies/editor_recovery_policy]] | high | answered | `docs/sprint_2/2026-10-12-save-recovery-rules-decision.md`: принято пользователем 2026-10-12 |
+| Сделать ли временный запрет нулевых XY-сегментов постоянным правилом текущего среза? | [[Wiki/policies/geometry_quality_escalation_policy]] | high | answered | `docs/sprint_2/2026-10-12-save-recovery-rules-decision.md`: принято пользователем 2026-10-12 |
+| Кто принимает дефекты исходной геометрии и как разрешает безопасное возобновление работы? | [[Wiki/policies/geometry_quality_escalation_policy]] | medium | open | Тот же research, ответ 2; роль ответственности предложена, реальный владелец не назначен |
 | `Publisher` - отдельная роль, ответственность data owner или техническая операция? | [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | high | answered | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |
 | Какие правила Release 2 про устаревание и блокеры должны влиять на следующий 14-дневный спринт? | [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | high | answered | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |
 | Новый review/post contract должен обновлять legacy artifact или быть отдельным integrated artifact? | [[Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]] | high | answered | user chat 2026-06-26 |

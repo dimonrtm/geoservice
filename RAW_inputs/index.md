@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-31
+updated: 2026-10-11
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -25,6 +25,7 @@ tags: [raw-inputs, source-of-truth]
 
 | Дата | Файл | Источник | Обработан |
 |---|---|---|---|
+| 2026-10-11 | `RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md` | Интернет-исследование на основе `UtilityGisEditorRole.md`: 15 синтезированных ответов заказчика, 9 первичных источников; предложения требуют принятия, не являются реальным интервью | Да: [[../Wiki/glossary/editing_result_states]], [[../Wiki/policies/editor_recovery_policy]], [[../Wiki/policies/geometry_quality_escalation_policy]], [[../Wiki/policies/change_history_retention_policy]], [[../DDD_Wiki/state_machines/editor_save_recovery]], [[../Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]], [[../Vision_wiki/chats/2026-10-11-save-recovery-customer-research]] |
 | 2026-05-30 | `RAW_inputs/documents/спринт 1.odt` | Release 1 planning/requirements document; актуальность и трактовка подтверждены 2026-05-31 | Да: [[../Vision_wiki/chats/2026-05-30-release-1-document]], [[../Vision_wiki/concepts/first_release_mvp]], [[../Vision_wiki/solution/USM]], [[../Code_wiki/архитектура/api_contract_first_release_requirements]] |
 | 2026-06-01 | `RAW_inputs/documents/Ф2.md` | Research-обзор веб-ГИС collaborative editing для подготовки Ф2-Ф3 | Да: [[../Vision_wiki/chats/2026-06-01-phase-f2-collaborative-editing-research]], [[../Vision_wiki/concepts/collaborative_editing_models]], [[../Vision_wiki/entities/personas/collaborative_editing_archetypes]], [[../Vision_wiki/entities/competitors/collaborative_editing_alternatives]] |
 | 2026-06-03 | `RAW_inputs/documents/03.06.2026deep-research-report.md` | Deep research comparison для Ф3: альтернативы GeoService в сценарии `Utility GIS editor` | Да: [[../Vision_wiki/chats/2026-06-03-phase-f3-alternatives]], [[../Vision_wiki/entities/competitors/collaborative_editing_alternatives]], [[../Vision_wiki/concepts/lean_canvas]], [[../Vision_wiki/decisions/risk_assumption_log]] |

@@ -3,12 +3,14 @@ title: Атомарная запись current geometry в EditVersion
 type: technical-note
 status: active
 created: 2026-10-10
-updated: 2026-10-10
+updated: 2026-10-11
 source: repository-change:2026-10-10
-tags: [edit-version, repository, transaction, postgis, geometry]
+tags: [edit-version, repository, transaction, postgis, geometry, stale]
 ---
 
 # Атомарная запись current geometry в EditVersion
+
+> Проверка `/sync-vision` от 2026-10-11: утверждения о будущем Save service требуют обновления после реализации `EditVersionService.save_geometry`, command registry и событий Save/Revert. Граница ниже описывает repository на 2026-10-10; см. `FU-2026-10-11-001` в [[../../Vision_wiki/decisions/followups/index]].
 
 ## Агрегат и transaction boundary
 

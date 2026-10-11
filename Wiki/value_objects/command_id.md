@@ -3,7 +3,7 @@ title: Command ID
 type: value-object
 status: planned
 created: 2026-07-25
-updated: 2026-07-31
+updated: 2026-10-12
 source: "RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
 tags: [domain-knowledge, value-object, idempotency, edit-version]
 confidence: high
@@ -18,7 +18,7 @@ related: [Wiki/entities/edit_version, Wiki/value_objects/draft_version_token, Wi
 
 Одинаковый `CommandId` обозначает одну и ту же команду только при идентичном смысловом payload. Fingerprint включает tenant/project scope, `WorkOrder`, `EditVersion`, target feature, [[Wiki/glossary/base_work_state]], ожидаемый `DraftVersionToken`, тип операции, изменяемую вершину или точный diff, канонический resulting geometry после применения [[Wiki/glossary/coordinate_storage_precision]] и structure hash. Сырые координаты могут различаться, если их канонический результат совпадает.
 
-Повтор с тем же id и тем же fingerprint возвращает тот же operation state/result без новой mutation. Переиспользование id для другого fingerprint отклоняется. Одновременные одинаковые запросы образуют одну operation: повтор в состоянии `running` получает ссылку на тот же pending outcome, а не запускает вторую mutation.
+Повтор с тем же id и тем же fingerprint воспроизводит committed результат без новой mutation. Переиспользование id для другого fingerprint отклоняется. Одновременные запросы сериализуются; отдельная ссылка на pending outcome не требуется. `running` остаётся промежуточным состоянием транзакции, commit с ним запрещён. После rollback новой попытки прежний id допустимо использовать для того же намерения, если committed результат отсутствует и текущие guards допускают выполнение.
 
 ## Immutability
 
@@ -32,13 +32,13 @@ related: [Wiki/entities/edit_version, Wiki/value_objects/draft_version_token, Wi
 
 Операционный registry отделён от append-only history save operations. Registry живёт не меньше lifecycle `EditVersion`; immutable history хранится по records policy `WorkOrder`/authoritative data. Точный долгосрочный срок хранения history остаётся открытым policy-вопросом.
 
-Domain rejection резервирует `CommandId`: одинаковый retry возвращает то же отклонение, а исправленный request получает новый id. Если request не был принят или распознан системой, id не резервируется; при неизвестном исходе после начала commit id считается зарезервированным до установления результата.
+Committed domain rejection сохраняет `CommandId`: обычный retry возвращает то же отклонение, а исправленный request получает новый id. Исключение — предусмотренное продолжение access rejection после восстановления доступа и явного подтверждения прежнего намерения, с текущими guards. Неизвестный клиенту исход не доказывает durable reservation; клиент удерживает прежнюю идентичность до выяснения результата и не создаёт новое намерение автоматически.
 
 ## Separation From Concurrency
 
 `DraftVersionToken` отвечает на вопрос, какую текущую версию агрегата обновляет client. `CommandId` отвечает на вопрос, не является ли request повтором уже выполненного намерения после потери response. Идемпотентный retry не создает новую mutation, не меняет token и не дублирует domain event.
 
-Если после исходной команды feature была изменена снова, запоздалый retry не применяет старую mutation повторно: response подтверждает результат исходной operation и отдельно показывает актуальный persisted object.
+Если после исходной команды feature была изменена снова, запоздалый retry не применяет старую mutation повторно: response подтверждает результат исходной operation. Актуальный persisted object читается отдельно; старый replay не заменяет свежую карту. Основание уточнения — [решение пользователя 2026-10-12](../../docs/sprint_2/2026-10-12-save-recovery-rules-decision.md).
 
 ## Used By
 

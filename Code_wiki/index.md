@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-10
+updated: 2026-10-11
 source: repository-change:2026-10-10
 tags: [code-wiki, technical-knowledge]
 ---
@@ -48,6 +48,10 @@ tags: [code-wiki, technical-knowledge]
 - [Документы Спринта 1](../docs/release_1/sprint_1/README.md) - календарный план, контракты Дня 1, design/implementation plans Дней 2-4, backend foundation Work Orders Дня 5, EditVersion from Default Дня 8, Мои наряды Дня 11 и отделенные исторические generic-планы.
 
 ## Свежие Repository-Change Знания
+
+- 2026-10-11: `/sync-vision` выявил отставание [[архитектура/backend]] и [[архитектура/edit_version_persistence]] от внутреннего Save/Revert service; ноды помечены `stale`, содержательное обновление ожидает `/ingest repository-change` (`FU-2026-10-11-001`).
+- 2026-10-10: [[архитектура/edit_version_persistence]] и [[архитектура/backend]] отражают `EditVersionRepository`, root lock, transaction-bound context, PostGIS guards и перенос create/reopen в repository версии.
+- 2026-10-08: [[архитектура/edit_geometry_determinism]] описывает Decimal canonicalization, immutable geometry policy, fingerprint и точный EWKB readback.
 
 - 2026-07-09: [[архитектура/data_model]], [[правила_и_стиль/testing_strategy]] и
   [[сборка/ci_and_quality]] отражают raw SQL workspace aggregate: SQL живет в

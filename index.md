@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-31
+updated: 2026-10-12
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -32,15 +32,22 @@ tags: [knowledge, index, geoservice]
 
 ## Свежие Изменения
 
+- 2026-10-12: Пользователь [принял правила исследования сохранения/восстановления](docs/sprint_2/2026-10-12-save-recovery-rules-decision.md). Конфликт observer/operation разрешён, D5-Q1 принято; недостающие API/UI изменения оформлены как [S2-X01 вне календарных дней](docs/sprint_2/2026-10-12-s2-x01-save-recovery-followup.md), ещё не реализованы. Открыты 19 follow-up'ов и 5 вопросов; активных blocking conflicts в `Wiki` нет.
+
+- 2026-10-11: Обработано [[RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research]]: 15 синтезированных ответов заказчика с девятью проверенными источниками. Предложения о восстановлении, нулевых сегментах и records governance имеют `needs-review`; открыт [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]]. Текущее состояние — 39 RAW sources, 20 открытых follow-up'ов, 7 вопросов модели; допуск точности и срок истории не выдумывались.
+
+- 2026-10-11: `/sync-vision` сверил весь knowledge graph: 38 RAW sources учтены, новых RAW inputs нет; открыты 18 follow-up'ов и 4 вопроса модели, активных blocking conflicts в `Wiki` нет. Три ноды помечены `stale`: [[Code_wiki/архитектура/backend]], [[Code_wiki/архитектура/edit_version_persistence]] и [[DDD_Wiki/model_health]]. Текущая проверка lint: только 37 известных `missing_frontmatter` в RAW Markdown.
+- 2026-10-11: В [[Code_wiki/index]] отражены две новые технические ноды: [[Code_wiki/архитектура/edit_geometry_determinism]] и [[Code_wiki/архитектура/edit_version_persistence]]. Внутренний backend Save/Revert и история изменений от 11 октября ещё требуют `/ingest repository-change`; очередь fixture/metadata требует сверки с [Sprint 2](docs/sprint_2/README.md).
+
 - 2026-07-31: Обработан RAW source `RAW_inputs/meetings/demo_utility_gis.md`; technical first save отделён от positional acceptance, grid привязан к actual dataset metadata, а `CommandId` — к одной operation на весь lifecycle `EditVersion`. Открыты фактическая specification/metadata/eligible fixture и records-retention срок history.
-- 2026-07-31: Выполнен `/sync-vision`: все 37 RAW sources учтены, новых необработанных RAW inputs нет, открыты 17 follow-up'ов, активных blocking conflicts в каноническом `Wiki` нет, stale-ноды не обнаружены.
+- 2026-07-31: Выполнен `/sync-vision`: все 38 RAW sources учтены, новых необработанных RAW inputs нет, открыты 17 follow-up'ов, активных blocking conflicts в каноническом `Wiki` нет, stale-ноды не обнаружены.
 - 2026-07-31: Текущий lint подтверждает только 37 ожидаемых `missing_frontmatter` в неизменяемых RAW Markdown files; новых проблем вне `RAW_inputs/` не найдено.
 - 2026-07-26: Обработан RAW source `RAW_inputs/meetings/tolerance_rules.md`; модель first save разделила positional accuracy и coordinate grid, закрепила единое базовое состояние работы, canonical fingerprint `CommandId` и before/after event evidence. Открыты точные значения accuracy/grid и idempotency window/storage.
 - 2026-07-25: Обработан RAW source `RAW_inputs/meetings/first_save_for_edit_version.md`; уточнены full resulting geometry, одна line feature / одна внутренняя вершина, AOI `CoveredBy`, atomic validation, aggregate token, save/revert events и persisted readback.
 - 2026-07-09: `/ingest repository-change` синхронизировал [[Code_wiki/index]] с raw SQL workspace aggregate, AOI-safe association filtering и index hardening working-copy таблиц.
 - 2026-07-07: [[Code_wiki/index]] обновлен production-like migration baseline и правилами пересоздания disposable dev/demo volumes.
 - 2026-07-05: [[Code_wiki/index]] зафиксировал default-off guard для legacy GIS API и Editor-only доступ при явном включении.
-- Изменения кода 2026-07-10 — 2026-07-25 еще не отражены в `Code_wiki`; требуется отдельный `/ingest repository-change`.
+- Покрытие изменений кода после 2026-07-09 в `Code_wiki` частичное: ingest от 8–10 октября добавил geometry/repository знания, но не заменяет сверку остальных изменений frontend, fixtures, schema/history и Save service.
 
 ## История До 2026-06-30
 

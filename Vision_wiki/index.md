@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-07-31
+updated: 2026-10-11
 source: null
 tags: [vision-wiki, product]
 ---
@@ -22,6 +22,8 @@ tags: [vision-wiki, product]
 - [[solution/_info]] - solution view, user story map, roadmap и NFR notes.
 
 ## Стартовые Ноды
+
+- [[chats/2026-10-11-save-recovery-customer-research]] — source-summary исследования: 15 предложенных ответов заказчика, девять первичных источников, canonical `Wiki/DDD_Wiki` со статусом `needs-review`.
 
 - [[../index]] - корневой индекс знаний проекта.
 - [[../memory/project-state]] - живое состояние проекта.

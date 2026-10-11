@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-31
+updated: 2026-10-12
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -25,6 +25,8 @@ tags: [domain-knowledge, ddd]
 - `DDD_Wiki/integration_patterns/` - ACL, published language, open host service и другие интеграционные решения DDD.
 
 ## Здоровье Модели
+
+[[DDD_Wiki/state_machines/editor_save_recovery]] — принятая 2026-10-12 модель осведомлённости редактора и восстановления. Не заменяет состояние серверной операции; разграничение принято по [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]].
 
 Текущие пробелы, противоречия и готовность к discovery фиксируются в [[DDD_Wiki/model_health]].
 

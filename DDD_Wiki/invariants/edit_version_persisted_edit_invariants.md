@@ -3,7 +3,7 @@ title: Edit Version Persisted Edit Invariants
 type: invariant
 status: active
 created: 2026-06-28
-updated: 2026-07-31
+updated: 2026-10-12
 source: "RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
 tags: [domain-knowledge, ddd, invariant, edit-version]
 confidence: high
@@ -25,6 +25,7 @@ related: [Wiki/entities/edit_version, Wiki/glossary/base_work_state, Wiki/glossa
 - Перед сравнением изменённая вершина детерминированно канонизируется к dataset precision/grid. Start/end vertices, остальные coordinates, `part count`, vertex identity, vertex count, `NetworkAssociation`, create/delete, split/merge и attributes не меняются.
 - Full-line renormalization и shared-node/topological editing не являются побочным эффектом обычного save и остаются отдельными операциями.
 - Resulting line geometry валидна и проста.
+- Соседние вершины текущей XY-линии не совпадают после canonicalization; нулевые сегменты запрещены без автоматического удаления координат. D5-Q1 принято 2026-10-12 по [решению пользователя](../../docs/sprint_2/2026-10-12-save-recovery-rules-decision.md); правило не обобщается на будущие Z/M-модели.
 - Resulting geometry целиком `covered by` AOI; касание boundary допустимо.
 - `DraftVersionToken` совпадает с текущей версией агрегата `EditVersion`.
 - `CommandId` обязателен; одинаковый id нельзя переиспользовать для другого payload.

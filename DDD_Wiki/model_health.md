@@ -3,14 +3,26 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-07-31
+updated: 2026-10-12
 source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
-tags: [domain-knowledge, ddd, health]
+tags: [domain-knowledge, ddd, health, stale]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 ---
 
 # Model Health
+
+## Актуальность Состояния
+
+Проверка `/sync-vision` от 2026-10-11: доменные контракты ниже сохранены, но очередь реализации и утверждение о неподтверждённой fixture отстают от code reality. В `apps/backend/seeds/tests/test_seed_utility_dataset_specs.py` уже определена eligible line `L-003`, а `EditVersionService.save_geometry` реализует внутренний backend Save/Revert. Источники для сверки: [[Code_wiki/архитектура/edit_geometry_determinism]], [[Code_wiki/архитектура/edit_version_persistence]] и [артефакты Sprint 2](../docs/sprint_2/README.md). Это не подтверждает готовность публичного API/UI или positional acceptance.
+
+После принятия правил 2026-10-12 активных blocking conflicts нет; реестр содержит 5 открытых вопросов. Вопросы о fixture и metadata требуют сверки с принятыми sprint-спецификациями до следующего discovery; автоматически они не закрыты. Сверка зарегистрирована как `FU-2026-10-11-001` в [[Vision_wiki/decisions/followups/index]].
+
+## Исследование Восстановления 2026-10-11
+
+Источник: [[RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research]]. Ответы на 15 вопросов синтезированы от лица заказчика по девяти первичным источникам; это не интервью и не утверждённые организационные правила. Новые [[Wiki/glossary/editing_result_states]], [[Wiki/policies/editor_recovery_policy]], [[Wiki/policies/geometry_quality_escalation_policy]], [[Wiki/policies/change_history_retention_policy]] и [[DDD_Wiki/state_machines/editor_save_recovery]] приняты пользователем 2026-10-12 и имеют `active` (принятие правил, не доказательство реализации).
+
+Политика восстановления и разграничение operation/observer приняты; D5-Q1 стало правилом текущего XY-среза. Реальный ответственный за исходные дефекты ещё не назначен. Недостающая реализация оформлена в [S2-X01](../docs/sprint_2/2026-10-12-s2-x01-save-recovery-followup.md) вне календарных дней. Конкретная positional specification и срок history не получены. Этот ingest не подтверждает готовность публичного API/UI и не исправляет остальное отставание model health от реализации; метка `stale` сохранена.
 
 ## Current Summary
 
@@ -20,7 +32,9 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 | Conflict | Blocks | Status | Next Question |
 | --- | --- | --- | --- |
-| Нет активных blocking conflicts после ingest `demo_utility_gis.md` | - | clear | Найти утверждённую accuracy specification, прочитать фактические spatial metadata и выбрать eligible demo line/vertex fixture |
+| Нет активных blocking conflicts | - | clear | Выполнить S2-X01 после доступности зависимостей; получить организационные входы |
+
+Разрешён 2026-10-12: [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]] по [решению пользователя](../docs/sprint_2/2026-10-12-save-recovery-rules-decision.md).
 
 ## Recently Resolved Conflicts
 

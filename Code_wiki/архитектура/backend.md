@@ -3,12 +3,14 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-10
+updated: 2026-10-11
 source: repository-change:2026-10-10
-tags: [backend, fastapi, postgis, architecture]
+tags: [backend, fastapi, postgis, architecture, stale]
 ---
 
 # Backend Architecture
+
+> Проверка `/sync-vision` от 2026-10-11: описание Save service устарело — в `EditVersionService.save_geometry` уже есть orchestration сохранения, replay, отклонений и событий. Содержательная синхронизация ожидает `/ingest repository-change`; см. `FU-2026-10-11-001` в [[../../Vision_wiki/decisions/followups/index]].
 
 Backend GeoService находится в `apps/backend` и собран вокруг пакета `utility_service`.
 Код разделен на пакеты с направлением зависимостей от внешнего адаптера к use cases и
