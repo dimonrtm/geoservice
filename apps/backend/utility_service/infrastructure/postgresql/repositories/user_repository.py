@@ -22,7 +22,8 @@ class UserRepository:
         return res.scalars().one_or_none()
 
     async def get_by_id(self, user_id: UUID) -> User | None:
-        stmt = select(User).where(User.id == user_id)
+        # Access checks must see revocations even with a retained ORM User.
+        stmt = select(User).where(User.id == user_id).execution_options(populate_existing=True)
         res = await self.session.execute(stmt)
         return res.scalars().one_or_none()
 

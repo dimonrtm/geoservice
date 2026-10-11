@@ -4,7 +4,7 @@ from dataclasses import replace
 from pathlib import Path
 from uuid import UUID
 
-from sqlalchemy import select, text
+from sqlalchemy import select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
@@ -26,6 +26,11 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionAssociation,
     EditVersionFeature,
     EditVersionStatus,
+    EditVersionChangeEvent,
+)
+from utility_service.infrastructure.postgresql.repositories import edit_version_commands
+from utility_service.infrastructure.postgresql.repository_rows.edit_version_command import (
+    EditVersionCommandRow,
 )
 from utility_service.infrastructure.postgresql.repositories.edit_geometry_scope import (
     EditGeometryScope,
@@ -56,6 +61,93 @@ class EditVersionRepository:
     ):
         self.session = session
         self.scope = EditGeometryScope.for_session(session)
+
+    async def get_command(
+        self,
+        root: LockedEditVersion,
+        *,
+        command_id: UUID,
+    ) -> EditVersionCommandRow | None:
+        self.scope.require(root)
+        with self.session.no_autoflush:
+            return await edit_version_commands.read_command(
+                self.session,
+                command_id,
+            )
+
+    async def command_has_history(
+        self,
+        root: LockedEditVersion,
+        *,
+        command_id: UUID,
+    ) -> bool:
+        self.scope.require(root)
+        with self.session.no_autoflush:
+            return (
+                await self.session.scalar(
+                    select(EditVersionChangeEvent.command_id).where(
+                        EditVersionChangeEvent.command_id == command_id
+                    )
+                )
+            ) is not None
+
+    async def reserve_command(
+        self,
+        root: LockedEditVersion,
+        *,
+        command_id: UUID,
+        feature_id: UUID,
+        actor_id: UUID,
+        fingerprint: str,
+    ) -> bool:
+        self.scope.require(root)
+        with self.session.no_autoflush:
+            return await edit_version_commands.insert_command(
+                self.session,
+                version_id=root.id,
+                command_id=command_id,
+                feature_id=feature_id,
+                actor_id=actor_id,
+                fingerprint=fingerprint,
+            )
+
+    async def complete_command(
+        self,
+        root: LockedEditVersion,
+        *,
+        command_id: UUID,
+        payload: dict[str, Any],
+    ) -> None:
+        self.scope.require(root)
+        with self.session.no_autoflush:
+            completed = await edit_version_commands.finish_command(
+                self.session,
+                version_id=root.id,
+                command_id=command_id,
+                payload=payload,
+            )
+        if not completed:
+            raise RepositoryProtocolError("Команда не принадлежит версии или уже завершена.")
+
+    async def increment_revision(
+        self,
+        root: LockedEditVersion,
+    ) -> int:
+        self.scope.require(root)
+        with self.session.no_autoflush:
+            revision = await self.session.scalar(
+                update(EditVersion)
+                .where(
+                    EditVersion.id == root.id,
+                    EditVersion.draft_revision == root.draft_revision,
+                )
+                .values(draft_revision=EditVersion.draft_revision + 1)
+                .returning(EditVersion.draft_revision)
+                .execution_options(synchronize_session=False)
+            )
+        if revision is None:
+            raise RepositoryProtocolError("Ревизия версии изменилась после получения блокировки.")
+        return revision
 
     async def get_open_edit_version(
         self,

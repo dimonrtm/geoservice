@@ -4,6 +4,13 @@
 
 ## Артефакты
 
+- [Анализ Дня 6: synchronous Save и идемпотентность](2026-10-11-day-6-save-analysis.md) — текущий код, ограничения транзакции и согласованные уточнения требований.
+- [Спецификация Дня 6: synchronous Save и идемпотентность](2026-10-11-day-6-save-design.md) — Save в EditVersionService, единый EditVersionRepository, reservation/replay, revision и проверки атомарности; принята 11 октября 2026 года.
+- [План реализации Дня 6](2026-10-11-day-6-save-plan.md) — шесть выполненных задач с интерфейсами и проверками.
+
+- [Отчёт реализации Дня 6](2026-10-11-day-6-save-implementation-report.md) — Save, replay, атомарность, конкуренция и полная регрессия.
+- [Журнал исполнения Дня 6](2026-10-11-day-6-execution-ledger.md) — TDD evidence, исправление по review и решения при исполнении.
+
 - [Анализ Дня 5: атомарный repository context](2026-10-09-day-5-repository-context-analysis.md) — факты текущего кода, принятые решения и временное правило D5-Q1.
 - [Спецификация Дня 5: атомарный repository context](2026-10-10-day-5-repository-context-design.md) — контекст, блокировки, spatial validation, ограниченная запись и матрица M1; принята 10 октября 2026 года.
 - [План реализации Дня 5](2026-10-10-day-5-repository-context-plan.md) — шесть выполненных задач с интерфейсами, тестами и командами проверки.
