@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-10-10
-source: repository-change:2026-10-10
+updated: 2026-10-12
+source: repository-change:2026-10-12
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,7 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-10-12 | [[архитектура/edit_version_api_readback]] | Зафиксированы публичная Save boundary, scoped strict errors и согласованная current/baseline projection после access guards. | `apps/backend/utility_service/web_api/api/work_orders.py`, `apps/backend/utility_service/use_cases/services/workspace_draft_projection.py`, `apps/backend/utility_service/infrastructure/postgresql/sql/workspace_aggregate.sql` |
 | 2026-10-10 | [[архитектура/backend]] | После фиксации FU-2026-10-10-001 уточнены разные ответственности WorkOrderRepository и нового EditVersionRepository; старое отрицание отдельного repository больше не действует. FU-2026-10-10-002 уточняет перенос создания и повторного открытия версии в EditVersionRepository. | `apps/backend/utility_service/infrastructure/postgresql/repositories/edit_version_repository.py`, `Vision_wiki/decisions/followups/index.md` |
 | 2026-10-10 | [[архитектура/edit_version_persistence]] | Зафиксирована persistence boundary агрегата EditVersion: root lock, provenance/lifetime handles, spatial validation и точная ограниченная mutation current; после решения пользователя также поиск, создание и повторное открытие версии. | `apps/backend/utility_service/infrastructure/postgresql/repositories/edit_version_repository.py`, `docs/sprint_2/2026-10-10-day-5-repository-context-design.md` |
 | 2026-10-08 | [[архитектура/edit_geometry_determinism]] | Добавлены контракты Decimal canonicalization, baseline-relative guard/fingerprint, immutable policy EditVersion и lossless workspace readback. | repository-change:2026-10-08 geometry-determinism |

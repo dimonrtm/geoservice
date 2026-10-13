@@ -32,6 +32,7 @@ def test_workspace_http_and_postgis_roundtrip_preserve_off_grid_baseline():
             ids = await seed_context(
                 connection,
                 actor_user_id=actor_id,
+                baseline_wkt="LINESTRING(65.5200000499 44.8200000501,65.5250000499 44.8205000501,65.5300000501 44.8200000499)",
             )
             params = {
                 "id": ids["edit_version_id"],
@@ -42,20 +43,6 @@ def test_workspace_http_and_postgis_roundtrip_preserve_off_grid_baseline():
                 {
                     "id": ids["work_order_id"],
                 },
-            )
-            await connection.execute(
-                text(
-                    """
-                    UPDATE work_order.edit_version_features
-                    SET geometry = ST_GeomFromText(
-                        'LINESTRING(65.5200000499 44.8200000501,65.5250000499 44.8205000501,65.5300000501 44.8200000499)',
-                        4326
-                    )
-                    WHERE edit_version_id = :id
-                        AND feature_id = :feature
-                    """
-                ),
-                params,
             )
             baseline_bytes = await connection.scalar(
                 text(

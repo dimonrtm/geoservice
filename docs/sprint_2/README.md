@@ -9,6 +9,12 @@
 
 ## Артефакты По Дням
 
+- [Анализ Дня 8: API и durable readback](2026-10-12-day-8-api-readback-analysis.md) — сверка кода, Wiki/DDD_Wiki и уточнения, включая сохранение parsing boundary Дня 4.
+- [Спецификация Дня 8: API и durable readback](2026-10-12-day-8-api-readback-design.md) — расширение workspace и подключение Save API; принята пользователем 12 октября 2026 года.
+- [План реализации Дня 8](2026-10-12-day-8-api-readback-plan.md) — шесть выполненных задач API/readback/OpenAPI.
+- [Отчёт реализации Дня 8](2026-10-12-day-8-api-readback-implementation-report.md) — публичный PUT, согласованный workspace, полная регрессия и независимое review.
+- [Журнал исполнения Дня 8](2026-10-12-day-8-execution-ledger.md) — TDD evidence, результаты проверок и решения при исполнении.
+
 - [Анализ Дня 7: отклонения, события и Revert](2026-10-11-day-7-rejections-events-revert-analysis.md) — текущий код, ответы на вопросы, выбор подхода и согласованные разделы дизайна.
 - [Спецификация Дня 7: terminal rejection, история и Revert](2026-10-11-day-7-rejections-events-revert-design.md) — транзакционный контракт, два формата fingerprint, access retry и матрица M2; принята 11 октября 2026 года.
 - [План реализации Дня 7](2026-10-11-day-7-rejections-events-revert-plan.md) — шесть выполненных задач, интерфейсы и проверки M2.

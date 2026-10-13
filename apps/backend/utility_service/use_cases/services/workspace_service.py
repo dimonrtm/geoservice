@@ -6,6 +6,12 @@ from uuid import UUID
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from utility_service.infrastructure.postgresql.geometry_codec import (
+    decode_geometry,
+    geometry_to_geojson,
+)
+from utility_service.use_cases.services.workspace_draft_projection import project_workspace_draft
+
 from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
@@ -83,7 +89,7 @@ class WorkspaceService:
             raise WorkOrderApiError(
                 422,
                 "WORKSPACE_CONTEXT_INVALID",
-                "Workspace невозможно сформировать из текущих данных.",
+                "Рабочее пространство невозможно сформировать из текущих данных.",
             ) from exc
 
     def workspace_from_aggregate(
@@ -91,7 +97,9 @@ class WorkspaceService:
         aggregate: WorkspaceAggregateRow,
     ) -> WorkspaceOut:
         if aggregate.aoi is None:
-            raise ValueError("missing AOI")
+            raise ValueError("Отсутствует область интереса.")
+
+        draft = project_workspace_draft(aggregate)
 
         aoi = WorkspaceAoiOut(
             id=aggregate.aoi.id,
@@ -103,7 +111,9 @@ class WorkspaceService:
         features = [
             WorkspaceFeatureOut(
                 id=feature["id"],
-                geometry=feature["geometry_data"],
+                geometry=geometry_to_geojson(
+                    decode_geometry(bytes.fromhex(feature["geometry_ewkb"]))
+                ),
                 properties=self.feature_properties(feature),
             )
             for feature in aggregate.features_data
@@ -120,6 +130,10 @@ class WorkspaceService:
                     id=aggregate.edit_version.id,
                     status=aggregate.edit_version.status.value,
                     base_network_revision=aggregate.edit_version.base_network_revision,
+                    draft_version_token=draft.draft_version_token,
+                    has_persisted_change_set=draft.has_persisted_change_set,
+                    basic_validation=draft.basic_validation,
+                    change_set=draft.change_set,
                     features=WorkspaceFeatureCollectionOut(features=features),
                     associations=[
                         WorkspaceAssociationOut(

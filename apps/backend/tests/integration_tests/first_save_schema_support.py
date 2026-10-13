@@ -54,6 +54,7 @@ async def seed_context(
     connection: AsyncConnection,
     *,
     include_geometry_policy: bool = True,
+    baseline_wkt: str = BASELINE,
     **overrides: UUID,
 ) -> dict[str, UUID]:
     ids = {
@@ -74,7 +75,7 @@ async def seed_context(
     params = {
         **ids,
         "code": str(ids["work_order_id"]),
-        "baseline": BASELINE,
+        "baseline": baseline_wkt,
     }
     statements = [
         """

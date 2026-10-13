@@ -67,6 +67,7 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
     edit_version_id = uuid4()
     aoi_id = uuid4()
     assignee_user_id = uuid4()
+    default_state_id = uuid4()
     feature_id = uuid4()
     connected_feature_id = uuid4()
     association_id = uuid4()
@@ -81,6 +82,13 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
             "edit_version_id": edit_version_id,
             "edit_version_status": "open",
             "edit_version_base_network_revision": 12,
+            "edit_version_draft_revision": 7,
+            "edit_version_default_state_id": default_state_id,
+            "baseline_state_id": default_state_id,
+            "baseline_work_order_id": work_order_id,
+            "baseline_base_network_revision": 12,
+            "baseline_status": "active",
+            "draft_feature_pairs": [],
             "aoi_id": aoi_id,
             "aoi_name": "Workspace WO-001",
             "aoi_description": None,
@@ -136,14 +144,17 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
     assert aggregate.edit_version.id == edit_version_id
     assert aggregate.edit_version.status is EditVersionStatus.OPEN
     assert aggregate.edit_version.base_network_revision == 12
+    assert aggregate.edit_version.draft_revision == 7
+    assert aggregate.edit_version.default_state_id == default_state_id
+    assert aggregate.baseline_state.id == default_state_id
     assert aggregate.aoi.id == aoi_id
     assert aggregate.aoi.extent == [65.495, 44.795, 65.545, 44.835]
     assert aggregate.features_data[0]["asset_code"] == "J-001"
-    assert aggregate.features_data[0]["geometry_data"] == {
-        "type": "Point",
-        "coordinates": [65.5, 44.82],
-    }
-    assert "geometry_ewkb" not in aggregate.features_data[0]
+    assert (
+        aggregate.features_data[0]["geometry_ewkb"]
+        == session.row["features_data"][0]["geometry_ewkb"]
+    )
+    assert "geometry_data" not in aggregate.features_data[0]
     assert aggregate.associations_data[0]["id"] == str(association_id)
 
 

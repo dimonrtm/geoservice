@@ -75,7 +75,7 @@ def validate_transition(
         baseline,
         current,
     ):
-        raise InvalidGeometryContext("Структура current отличается от baseline.")
+        raise InvalidGeometryContext("Структура текущей геометрии отличается от исходной.")
     before = changed_vertices(
         baseline,
         current,
@@ -84,7 +84,9 @@ def validate_transition(
         before,
         len(baseline.coordinates),
     ):
-        raise InvalidGeometryContext("Current нарушает ограничение одной внутренней вершины.")
+        raise InvalidGeometryContext(
+            "Текущая геометрия нарушает ограничение изменения одной внутренней вершины."
+        )
     after = changed_vertices(
         baseline,
         prepared.geometry,

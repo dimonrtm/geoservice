@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-11
+updated: 2026-10-12
 source: repository-change:2026-10-10
 tags: [code-wiki, technical-knowledge]
 ---
@@ -28,6 +28,8 @@ tags: [code-wiki, technical-knowledge]
   `/ingest repository-change`.
 
 ## Текущий Repository Snapshot
+
+- [[архитектура/edit_version_api_readback]] — публичный geometry PUT, локальные strict errors, текущий token/changeSet/baseline и согласованный workspace snapshot; содержит follow-up к историческим описаниям decoding и отсутствия PUT.
 
 - [[архитектура/edit_version_persistence]] — root lock, transaction-bound context, PostGIS validation и ограниченная запись current snapshot.
 - [[архитектура/edit_geometry_determinism]] — Decimal canonicalization, immutable policy EditVersion, fingerprint и точный EWKB readback.

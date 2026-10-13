@@ -2,6 +2,7 @@ from utility_service.use_cases.schemas.workspace.association_out import (
     WorkspaceAssociationOut,
 )
 from utility_service.use_cases.schemas.workspace.aoi_out import WorkspaceAoiOut
+from utility_service.use_cases.schemas.workspace.change_set_out import WorkspaceChangeSetOut
 from utility_service.use_cases.schemas.workspace.edit_version_workspace_out import (
     WorkspaceEditVersionOut,
 )
@@ -18,6 +19,7 @@ from utility_service.use_cases.schemas.workspace.workspace_out import WorkspaceO
 __all__ = [
     "WorkspaceAssociationOut",
     "WorkspaceAoiOut",
+    "WorkspaceChangeSetOut",
     "WorkspaceEditVersionOut",
     "WorkspaceFeatureCollectionOut",
     "WorkspaceFeatureOut",

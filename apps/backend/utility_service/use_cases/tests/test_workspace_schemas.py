@@ -34,6 +34,10 @@ def test_workspace_schema_uses_expected_wire_aliases() -> None:
         id=uuid4(),
         status="open",
         base_network_revision=1,
+        draft_version_token="1",
+        has_persisted_change_set=False,
+        basic_validation=None,
+        change_set=None,
         features=WorkspaceFeatureCollectionOut(features=[]),
         associations=[],
     )
@@ -52,3 +56,13 @@ def test_workspace_schema_uses_expected_wire_aliases() -> None:
     assert "workOrder" in payload
     assert payload["workOrder"]["scope"]["aoi"]["name"] == "Рабочая область WO-001"
     assert payload["workOrder"]["editVersion"]["baseNetworkRevision"] == 1
+    assert payload["workOrder"]["editVersion"]["basicValidation"] is None
+    assert payload["workOrder"]["editVersion"]["changeSet"] is None
+
+
+def test_nullable_readback_fields_are_required():
+    schema = WorkspaceEditVersionOut.model_json_schema(mode="serialization")
+    for field in ("draftVersionToken", "hasPersistedChangeSet", "basicValidation", "changeSet"):
+        assert field in schema["required"]
+    for field in ("basicValidation", "changeSet"):
+        assert {"type": "null"} in schema["properties"][field]["anyOf"]

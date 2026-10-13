@@ -231,7 +231,7 @@ export function presentWorkspaceRestoreError(
       return presentation(
         error,
         error.message,
-        "Workspace невозможно сформировать. Передайте код обращения поддержке.",
+        "Рабочее пространство невозможно сформировать. Передайте код обращения поддержке.",
         null,
       );
     }

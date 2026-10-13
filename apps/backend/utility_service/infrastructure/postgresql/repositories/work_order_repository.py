@@ -4,10 +4,6 @@ from uuid import UUID
 from sqlalchemy import Integer, String, select, text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.ext.asyncio import AsyncSession
-from utility_service.infrastructure.postgresql.geometry_codec import (
-    decode_geometry,
-    geometry_to_geojson,
-)
 
 from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
@@ -17,6 +13,8 @@ from utility_service.infrastructure.postgresql.models.work_order import (
 from utility_service.infrastructure.postgresql.repository_rows.workspace import (
     WorkspaceAggregateRow,
     WorkspaceAoiRow,
+    WorkspaceBaselineStateRow,
+    WorkspaceDraftFeaturePairRow,
     WorkspaceEditVersionRow,
     WorkspaceWorkOrderRow,
 )
@@ -36,6 +34,13 @@ WORKSPACE_AGGREGATE_SQL = text(WORKSPACE_AGGREGATE_SQL_PATH.read_text(encoding="
     edit_version_id=PGUUID(as_uuid=True),
     edit_version_status=String(),
     edit_version_base_network_revision=Integer(),
+    edit_version_draft_revision=Integer(),
+    edit_version_default_state_id=PGUUID(as_uuid=True),
+    baseline_state_id=PGUUID(as_uuid=True),
+    baseline_work_order_id=PGUUID(as_uuid=True),
+    baseline_base_network_revision=Integer(),
+    baseline_status=String(),
+    draft_feature_pairs=JSONB(),
     aoi_id=PGUUID(as_uuid=True),
     aoi_name=String(),
     aoi_description=String(),
@@ -105,22 +110,39 @@ class WorkOrderRepository:
                 id=row["edit_version_id"],
                 status=EditVersionStatus(row["edit_version_status"]),
                 base_network_revision=row["edit_version_base_network_revision"],
+                draft_revision=row["edit_version_draft_revision"],
+                default_state_id=row["edit_version_default_state_id"],
             ),
-            aoi=WorkspaceAoiRow(
-                id=row["aoi_id"],
-                name=row["aoi_name"],
-                description=row["aoi_description"],
-                geometry_data=row["aoi_geometry_data"],
-                extent=row["aoi_extent"],
+            aoi=(
+                WorkspaceAoiRow(
+                    id=row["aoi_id"],
+                    name=row["aoi_name"],
+                    description=row["aoi_description"],
+                    geometry_data=row["aoi_geometry_data"],
+                    extent=row["aoi_extent"],
+                )
+                if row["aoi_id"] is not None
+                else None
             ),
-            features_data=[
-                {
-                    **{key: value for key, value in feature.items() if key != "geometry_ewkb"},
-                    "geometry_data": geometry_to_geojson(
-                        decode_geometry(bytes.fromhex(feature["geometry_ewkb"]))
-                    ),
-                }
-                for feature in row["features_data"]
-            ],
+            baseline_state=(
+                WorkspaceBaselineStateRow(
+                    id=row["baseline_state_id"],
+                    work_order_id=row["baseline_work_order_id"],
+                    base_network_revision=row["baseline_base_network_revision"],
+                    status=row["baseline_status"],
+                )
+                if row["baseline_state_id"] is not None
+                else None
+            ),
+            draft_feature_pairs=tuple(
+                WorkspaceDraftFeaturePairRow(
+                    **{
+                        **pair,
+                        "feature_id": UUID(pair["feature_id"]),
+                    },
+                )
+                for pair in row["draft_feature_pairs"]
+            ),
+            features_data=row["features_data"],
             associations_data=row["associations_data"],
         )
