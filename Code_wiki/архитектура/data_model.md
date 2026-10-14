@@ -3,9 +3,9 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-07-09
+updated: 2026-10-13
 source: repository-change:2026-07-09
-tags: [database, postgis, sqlalchemy, geojson]
+tags: [database, postgis, sqlalchemy, geojson, stale]
 ---
 
 # Data Model And Spatial Storage

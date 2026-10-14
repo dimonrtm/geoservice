@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-12
+updated: 2026-10-13
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -31,6 +31,10 @@ tags: [knowledge, index, geoservice]
 - [[docs/agent-memory/README]] - компактная инженерная память Codex.
 
 ## Свежие Изменения
+
+- 2026-10-13: Обработано [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]] — глубокий анализ роли и 15 ответов синтезированного эксперта. Новые политики разбора/основания правки и сценарий возобновления имеют `needs-review`; организационные уточнения добавлены к действующим политикам отдельно от принятых правил. Учтены 40 RAW sources; открыты 22 follow-up'а и 8 вопросов, новых blocking conflicts нет.
+
+- 2026-10-13: `/sync-vision` учёл [[Code_wiki/архитектура/edit_version_api_readback]] (ingest от 2026-10-12): публичный Save API и согласованный workspace readback. Все 39 RAW sources учтены, необработанных нет; открыты 19 follow-up'ов и 5 вопросов модели, активных blocking conflicts в `Wiki` нет. Stale-нод 5; расхождения старых технических описаний добавлены в `FU-2026-10-11-001`. Lint: 37 известных `missing_frontmatter` только в RAW. Текущее состояние и следующий шаг — [[memory/project-state]].
 
 - 2026-10-12: Пользователь [принял правила исследования сохранения/восстановления](docs/sprint_2/2026-10-12-save-recovery-rules-decision.md). Конфликт observer/operation разрешён, D5-Q1 принято; недостающие API/UI изменения оформлены как [S2-X01 вне календарных дней](docs/sprint_2/2026-10-12-s2-x01-save-recovery-followup.md), ещё не реализованы. Открыты 19 follow-up'ов и 5 вопросов; активных blocking conflicts в `Wiki` нет.
 
@@ -164,3 +168,7 @@ tags: [knowledge, index, geoservice]
 новое устойчивое техническое знание для `Code_wiki`. Завершение плана, commit
 или успешные тесты сами по себе не являются триггерами. Pre-commit не запускает
 и не проверяет repository-change ingest.
+
+## Решения условной организации
+
+[[Vision_wiki/chats/2026-10-13-simulated-organization-decisions]] — новая редакция 15 ответов: принятое поведение модели и [[Wiki/specifications/simulated_line_positional_acceptance]]. Старый RAW сохранён; отсутствие реального предприятия не является blocker. Текущие реестры: 2 открытых вопроса сверки, 19 open follow-up, 0 активных канонических blocking conflicts. Реализация отделена от решений.

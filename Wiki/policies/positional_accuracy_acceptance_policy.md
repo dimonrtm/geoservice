@@ -1,14 +1,44 @@
 ---
 title: Positional Accuracy Acceptance Policy
 type: policy
-status: planned
+status: active
 created: 2026-07-31
-updated: 2026-10-12
-source: "RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md"
+updated: 2026-10-13
+source: "RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
 tags: [domain-knowledge, policy, edit-version, geometry, accuracy, acceptance]
 confidence: high
 related: [Wiki/glossary/positional_accuracy_for_acceptance, Wiki/glossary/coordinate_storage_precision, Wiki/policies/edit_geometry_precision_policy, Wiki/specifications/edit_version_basic_draft_validation, Wiki/specifications/edit_version_ready_for_review, Wiki/commands/update_edit_version_feature_geometry]
 ---
+
+# Positional Accuracy Acceptance Policy
+
+## Действующая редакция условной организации — 2026-10-13
+
+Принято агентом по прямому поручению пользователя принять решения за условную организацию. Confidence high относится к фиксации решения, не к эмпирической проверке. Статус active не подтверждает реализацию. Эта редакция заменяет прежние ожидания реальных назначений и принятия предложений ниже.
+
+## Rule
+
+Принят [[Wiki/specifications/simulated_line_positional_acceptance]]: SIM-UGIS-POS-001 v1.0, синтетические 2D-линии, допуск 0,50 м, непрерывный критерий max(e+u) <= 0,50 м и u <= 0,10 м. Учебный метод и evidence SIM-EVID-001 заданы в новой спецификации и ответах 9–12 источника. Это решение условной организации, не реальное измерение или внешний норматив.
+
+Повторная геометрическая проверка охватывает перемещённую вершину и оба сегмента. Приёмка всей линии требует пригодного evidence для всей линии, включая неизменённые части и концы. Отдельная точка не подтверждает сегмент. Прежние данные применимы только при сохранении объекта, состояния, метода, CRS и критерия.
+
+Применимость переоценивается перед каждой приёмкой и при изменении геометрии/физического объекта сценария, CRS/transformation, метода/качества, исправлении измерения, противоречии evidence или изменении specification/scope. Календарного истечения в v1 нет; старые результаты и причины переоценки сохраняются.
+
+## Inputs
+
+Версия спецификации, scope, идентичность объекта и состояния, отдельный эталон с provenance, непрерывный охват и неопределённость, CRS/units/method. Для SRID 4326 нужен отдельно проверенный метрический метод; градусы не сравниваются с метрами.
+
+## Decision Outcome
+
+Достаточное связанное evidence и выполненный критерий допускают положительную оценку только своего scope. Недостаток evidence — UNVERIFIED, доказанное превышение — EXCEEDED. В аналитическом учебном пакете вывод маркируется как симуляция. Положительный расчёт не меняет backend POSITIONAL_ACCURACY_VERIFIED и не допускает review/post автоматически.
+
+## Exceptions
+
+Существующий first-save остаётся POSITIONAL_ACCURACY_UNVERIFIED до реализации и проверки downstream evaluator для связанного evidence; технический Save разрешён при hard guards. XY resolution/tolerance, basemap, Revert и величина сдвига не заменяют evidence. L-003 не объявлена проверенной. Функция evaluator и её mapping к статусам — FU-2026-10-13-004; доменные решения FU-2026-10-11-003 и FU-2026-10-13-002 приняты.
+
+## Историческое основание — не текущие открытые требования
+
+Текст ниже сохранён для происхождения знания; противоречащие текущей редакции требования и статусы needs-review больше не действуют.
 
 # Positional Accuracy Acceptance Policy
 
@@ -44,3 +74,15 @@ related: [Wiki/glossary/positional_accuracy_for_acceptance, Wiki/glossary/coordi
 Ответы 5 и 13 предлагают независимо показывать сохранённость правки и качество: Revert/no-op не подтверждают точность исходной линии. См. [[Wiki/glossary/editing_result_states]]. Исходное правило ниже остаётся в силе.
 
 Отсутствие позиционного evidence не превращает first save в invalid geometry и не должно подменяться `XY resolution` или `XY tolerance`. Оно является downstream acceptance blocker, а не техническим hard guard сохранения.
+
+## Предложения Исследования 2026-10-13 — Needs-review
+
+Источник: [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]], ответы 9–12. Confidence medium; конкретная спецификация, числовой допуск и реальные измерения не получены.
+
+Предложено различать область геометрической проверки, область позиционного подтверждения и непроверенный остаток. Перемещение внутренней вершины меняет два прилегающих отрезка; минимальная повторная геометрическая проверка должна охватывать их, но окончательный объём позиционной приёмки определяется спецификацией. Подтверждение одной точки не подтверждает всю линию. Прежнее evidence неизменённых частей применимо только при сохранности связи с тем же объектом и состоянием.
+
+Повторная оценка применимости нужна при физическом изменении, изменении геометрии вне подтверждённой области, исправлении CRS/transformation, ошибке измерения, противоречащем evidence или новом критерии приёмки. Новый критерий может обесценить прежний вывод о соответствии, не делая старое измерение ложным. Универсальный календарный срок не предложен.
+
+Шаблон обезличенного измерительного материала в RAW является учебным. Синтетический пример не повышает реальную позиционную точность. ASPRS рассматривается только как возможная методика после выбора организацией; стандарт статистической оценки набора данных не переносится автоматически на одну вершину.
+
+Принятие уточнений: `FU-2026-10-13-002` в [[Vision_wiki/decisions/followups/index]]. Фактические документы и измерения остаются открыты отдельно от принятия общего правила.

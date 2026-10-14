@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-12
+updated: 2026-10-13
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -37,3 +37,7 @@ tags: [domain-knowledge, ddd]
 - [[DDD_Wiki/state_machines/edit_version_persisted_change_set]] - `Unchanged` / `Updated`, save/revert/no-op/reject.
 - [[DDD_Wiki/state_machines/edit_version_save_request]] - одна operation на `CommandId`, concurrent retry, terminal result и закрытый save context.
 - [[DDD_Wiki/use_cases/utility_editor_workflow]] - end-to-end save/readback/revert proof.
+
+## Восстановление прерванной работы в условной организации
+
+[[DDD_Wiki/use_cases/interrupted_edit_work_recovery]] активно как принятое правило модели: обязанности агента, эскалация, доказательство исхода/current и возобновление без изменения baseline. Новые серверные состояния, роли доступа и restart не считаются реализованными. [[Wiki/specifications/simulated_line_positional_acceptance]] задаёт учебный критерий, но не снимает review/post guards. Реализация — FU-2026-10-13-004.

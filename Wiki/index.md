@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-12
+updated: 2026-10-13
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -59,3 +59,9 @@ tags: [domain-knowledge, ddd]
 - [[Wiki/value_objects/draft_version_token]] и [[Wiki/value_objects/command_id]] - optimistic concurrency отдельно от lifecycle-safe idempotent operation.
 - [[Wiki/domain_events/edit_version_change_set_persisted]] и [[Wiki/domain_events/edit_version_change_set_cleared]] - события save/revert.
 - [[Wiki/specifications/edit_version_basic_draft_validation]] - atomic hard guards и `topologyChecked=not_checked`.
+
+## Решения условной организации 2026-10-13
+
+[[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] заменяет ожидание принятия прежних предложений: recovery, дефекты источника, evidence, основание правки и хранение приняты как правила модели. См. [[Wiki/policies/recovery_case_resolution_policy]], [[Wiki/policies/edit_change_justification_policy]], [[Wiki/policies/geometry_quality_escalation_policy]], [[Wiki/policies/positional_accuracy_acceptance_policy]], [[Wiki/policies/change_history_retention_policy]].
+
+Новая [[Wiki/specifications/simulated_line_positional_acceptance]] задаёт SIM-UGIS-POS-001 v1.0 и аналитическое evidence. Она не подтверждает реальную точность L-003. Остались 2 вопроса сверки metadata/fixture; шесть организационных/модельных вопросов отвечены. [[Wiki/conflicts/2026-10-13-real-organization-vs-simulated-decisions]] resolved, реализация отдельно в FU-2026-10-13-004. Исторический RAW сохранён.

@@ -3,8 +3,8 @@ title: Восстановление намерения редактора пос
 type: policy
 status: active
 created: 2026-10-11
-updated: 2026-10-12
-source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md"
+updated: 2026-10-13
+source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
 tags: [domain-knowledge, policy, editing, recovery]
 confidence: high
 related: [Wiki/glossary/editing_result_states, Wiki/value_objects/command_id, Wiki/value_objects/draft_version_token, DDD_Wiki/state_machines/editor_save_recovery, Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]
@@ -39,3 +39,11 @@ related: [Wiki/glossary/editing_result_states, Wiki/value_objects/command_id, Wi
 Восстановление обычной несохранённой правки после аварийного закрытия браузера в ближайшем срезе не гарантируется. Неизвестный исход — отдельное основание удерживать данные уже отправленного действия в пределах согласованного механизма восстановления. Полноценный offline mode, новые серверные блокировки и автоматическое слияние не вводятся.
 
 Если невозможно безопасно восстановить идентичность действия либо получить доступ к актуальным данным, не объявлять успех/отказ по догадке; требуется разбор. Согласование старой диаграммы зафиксировано в разрешённом конфликте [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]].
+
+## Связанное Предложение 2026-10-13
+
+[[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]], ответы 1–4, уточняет организационный разбор за пределами обычного восстановления. [[Wiki/policies/recovery_case_resolution_policy]] имеет `needs-review`: владелец, принятая передача и доказательство завершения разбора ещё не являются утверждённым дополнением к правилам выше. Состояние серверной операции, текущие guards и принятый запрет нового автоматического намерения не меняются.
+
+## Действующее уточнение условной организации 2026-10-13
+
+[[Wiki/policies/recovery_case_resolution_policy]] принята по прямому поручению пользователя и новому [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]]. Её прежний needs-review — исторический статус. Один цикл/5 минут до разбора и 15/60 минут активной сессии не меняют retry identity, observer/operation или guards. Реализация отдельно в FU-2026-10-13-004.

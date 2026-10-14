@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-11
+updated: 2026-10-13
 source: null
 tags: [vision-wiki, product]
 ---
@@ -23,7 +23,11 @@ tags: [vision-wiki, product]
 
 ## Стартовые Ноды
 
-- [[chats/2026-10-11-save-recovery-customer-research]] — source-summary исследования: 15 предложенных ответов заказчика, девять первичных источников, canonical `Wiki/DDD_Wiki` со статусом `needs-review`.
+- [[Vision_wiki/chats/2026-10-13-simulated-organization-decisions]] — принятые решения условной организации по 15 вопросам; заменяют ожидание принятия research ниже, реализация отдельно.
+
+- [[chats/2026-10-13-expert-recovery-governance-research]] — 15 синтезированных экспертных ответов по восстановлению, качеству и ответственности; исторические предложения, пересмотренные новым источником условной организации; десять основных первичных веб-источников.
+
+- [[chats/2026-10-11-save-recovery-customer-research]] — source-summary исследования: 15 предложенных ответов заказчика, девять первичных источников, правила canonical `Wiki/DDD_Wiki` приняты пользователем 2026-10-12; реальные specification, ответственные и срок history остаются открыты.
 
 - [[../index]] - корневой индекс знаний проекта.
 - [[../memory/project-state]] - живое состояние проекта.

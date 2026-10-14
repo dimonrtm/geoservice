@@ -8,6 +8,7 @@ At the start of a new chat or task:
 
 1. Read `AGENTS.md`.
 2. Read this protocol.
+   Перед discovery, ответами на доменные вопросы, ingest и доменным планированием обязательно прочитать `docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md`. Это обязательный контекст по правилу `AGENTS.md`, а не необязательный результат поиска; противоречащие старые требования реальных организационных подтверждений не применять.
 3. Extract 3-8 search terms from the user's request: feature names, errors, domains, technologies, file names, or module names.
 4. Search the memory area with `rg`.
 5. Prefer `docs/agent-memory/file-map.md` for fast topic-to-file lookup.

@@ -3,9 +3,9 @@ title: Детерминированная геометрия EditVersion
 type: technical-note
 status: active
 created: 2026-10-08
-updated: 2026-10-08
+updated: 2026-10-13
 source: repository-change:2026-10-08
-tags: [geometry, decimal, edit-version, fingerprint, postgis]
+tags: [geometry, decimal, edit-version, fingerprint, postgis, stale]
 ---
 
 # Детерминированная геометрия EditVersion

@@ -4,6 +4,8 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 
 ## Agent Memory
 
+- Условная организация, `02_expert_oldman_ufa`, автономное доменное исследование без реальных ответственных: `docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md`
+
 - agent memory protocol workflow: `AGENTS.md`, `docs/agent-memory/protocol.md`
 - agent memory quick file lookup: `docs/agent-memory/file-map.md`
 - agent memory design spec: `docs/superpowers/specs/2026-05-30-agent-memory-design.md`

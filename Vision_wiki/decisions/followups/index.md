@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-12
+updated: 2026-10-13
 source: null
 tags: [followups, conflicts]
 ---
@@ -17,7 +17,7 @@ tags: [followups, conflicts]
 | ID | Статус | Область | Источник | Требуемое действие |
 | --- | --- | --- | --- | --- |
 | FU-2026-10-11-002 | resolved | Принятие research-правил | `docs/sprint_2/2026-10-12-save-recovery-rules-decision.md` | Пользователь принял правила 2026-10-12; конфликт observer/operation разрешён, D5-Q1 принято. Реализация отдельно запланирована в S2-X01 вне дней. Реальные ответственные, specification и срок history остаются открыты в FU-2026-10-11-003 и реестре вопросов. |
-| FU-2026-10-11-003 | open | Организационные основания точности и хранения | [[../../../Wiki/policies/positional_accuracy_acceptance_policy]], [[../../../Wiki/policies/change_history_retention_policy]] | По ответам 14–15 получить реальные specification/допуск, владельцев ответственности и records policy со сроком/исключениями. Дополняет FU-2026-07-25-001; тот остаётся открыт. Интернет-методики не заменяют документы организации. |
+| FU-2026-10-11-003 | resolved | Организационные основания точности и хранения | [[../../../Wiki/policies/positional_accuracy_acceptance_policy]], [[../../../Wiki/policies/change_history_retention_policy]]; [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] | Приняты обязанности, SIM-UGIS-POS-001 и SIM-UGIS-RET-001 v1.0 для условной организации; реальные назначения и документы не требуются. Решение принято агентом по поручению пользователя; реализация отдельно в FU-2026-10-13-004. |
 
 ### FU-2026-10-11-001 — Отставание Wiki От First-Save Реализации
 
@@ -28,6 +28,8 @@ tags: [followups, conflicts]
 Источники: [[../../../Code_wiki/архитектура/backend]], [[../../../Code_wiki/архитектура/edit_version_persistence]], [[../../../Code_wiki/архитектура/edit_geometry_determinism]], [[../../../DDD_Wiki/model_health]], [[../../../Wiki/_registry/questions]], `apps/backend/utility_service/use_cases/services/edit_version_service.py`, `apps/backend/seeds/tests/test_seed_utility_dataset_specs.py`, `docs/sprint_2/README.md`.
 
 Действие: выполнить `/ingest repository-change` для устойчивого знания о внутреннем Save/Revert, registry/replay, terminal rejection и истории событий; сверить полноту покрытия fixtures и schema/history. Утверждения об отсутствии Save service в двух технических нодах устарели. Отдельно сверить очередь модели и `FU-2026-07-25-001` с принятыми sprint-спецификациями: eligible `L-003` и geometry policy уже имеют технические источники. До содержательной сверки не закрывать вопросы metadata, positional acceptance и retention; не считать внутренний backend Save доказательством готовности публичного API/UI.
+
+Дополнение `/sync-vision` от 2026-10-13: [[../../../Code_wiki/архитектура/edit_version_api_readback]] уже описывает публичный geometry PUT и согласованный workspace readback (ingest от 2026-10-12). Зарегистрировать это как основание для отдельной post-ingest correction: в [[../../../Code_wiki/архитектура/edit_geometry_determinism]] устарели отсутствие Save endpoint и decoding в repository, а в [[../../../Code_wiki/архитектура/data_model]] — описание `ST_AsGeoJSON` для workspace feature geometry. Обе ноды помечены `stale`; смысл старых описаний этим sync не изменён. Остаток прежнего follow-up — внутренний registry/replay, terminal rejection, история событий и сверка fixture/metadata — остаётся открытым. Наличие API/readback не подтверждает Frontend Save/Revert или выполнение S2-X01.
 
 ### Реестр Остальных Follow-up'ов
 
@@ -69,3 +71,21 @@ tags: [followups, conflicts]
 
 
 После `/ingest` можно исправлять старую документацию только по конфликтам, которые уже перечислены здесь и связаны с `Code_wiki`. Нельзя менять код, конфигурацию, миграции или тесты как часть post-ingest correction.
+
+## Предложения Исследования 2026-10-13
+
+| ID | Статус | Область | Источник | Требуемое действие |
+| --- | --- | --- | --- | --- |
+| FU-2026-10-13-001 | resolved | Разбор и возобновление работы | [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]], ответы 1–8; [[Wiki/policies/recovery_case_resolution_policy]], [[DDD_Wiki/use_cases/interrupted_edit_work_recovery]]; [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] | Приняты эскалация 5/15/60 минут активной сессии, явная передача, границы влияния и доказательное возобновление без изменения baseline. Решение принято агентом по поручению пользователя; реализация отдельно в FU-2026-10-13-004. |
+| FU-2026-10-13-002 | resolved | Применимость позиционных доказательств | [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]], ответы 9–12; [[Wiki/policies/positional_accuracy_acceptance_policy]]; [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] | Приняты учебная спецификация 0,50 м, полный охват, аналитическое evidence и событийная переоценка; L-003 не объявлена проверенной. Решение принято агентом по поручению пользователя; реализация отдельно в FU-2026-10-13-004. |
+| FU-2026-10-13-003 | resolved | Основание правки и материалы разбора | [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]], ответы 13–15; [[Wiki/policies/edit_change_justification_policy]], [[Wiki/policies/change_history_retention_policy]]; [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] | Приняты основания/пояснения исключений и назначение истории отказов; сроки 10 лет/3 года/30 дней с удержаниями. Решение принято агентом по поручению пользователя; реализация отдельно в FU-2026-10-13-004. |
+
+В исходном `UtilityGisEditorRole.md` служебные citation-маркеры не дают воспроизводимых ссылок; новый RAW содержит проверяемые URL и ограничивает рыночные/региональные обобщения. Старый RAW сохранён. Нового blocking conflict с принятыми правилами не выявлено; предложения остаются `needs-review`.
+
+## Решения условной организации 2026-10-13
+
+Прежняя пометка needs-review относится к историческому research. Новый [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] принят как решения модели; конфликт [[Wiki/conflicts/2026-10-13-real-organization-vs-simulated-decisions]] разрешён. Прежние требования реальных интервью/назначений трактуются по приоритетному режиму AGENTS.md; их отсутствие не блокирует эксперимент. Другие legacy follow-up не закрываются без предметной сверки.
+
+| ID | Статус | Область | Источник | Требуемое действие |
+| --- | --- | --- | --- | --- |
+| FU-2026-10-13-004 | open | Реализация принятых правил условной организации | [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]], [[Vision_wiki/chats/2026-10-13-simulated-organization-decisions]] | Отдельной задачей сопоставить recovery с S2-X01, спроектировать evidence evaluator с привязкой scope/provenance/CRS и статусами симуляции, поддерживаемый restart на исправленном основании, хранение/архив/удержания и доступ. Верифицировать девять сценариев RAW. До реализации не менять baseline, API, авторизацию, статус L-003 и не включать очистку. Не запрашивать реальных сотрудников. |
