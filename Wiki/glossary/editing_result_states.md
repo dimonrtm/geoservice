@@ -3,8 +3,8 @@ title: Состояния результата редактирования
 type: glossary
 status: active
 created: 2026-10-11
-updated: 2026-10-12
-source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md"
+updated: 2026-10-16
+source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md"
 tags: [domain-knowledge, glossary, editing, recovery]
 confidence: high
 related: [Wiki/entities/edit_version, Wiki/policies/editor_recovery_policy, Wiki/policies/positional_accuracy_acceptance_policy, DDD_Wiki/state_machines/editor_save_recovery]
@@ -29,3 +29,13 @@ related: [Wiki/entities/edit_version, Wiki/policies/editor_recovery_policy, Wiki
 Локальное намерение, результат операции, актуальная геометрия и качество — независимые аспекты. «Сохранено в рабочей версии» не заменяет проверку формы, точности, топологии, review или post. No-op предлагается объяснять как отсутствие изменения после учёта точности хранения.
 
 Отмена несохранённой правки возвращает последнее сохранённое состояние; Revert возвращает исходное состояние работы новой операцией. История при Revert не исчезает. См. [[Wiki/policies/editor_recovery_policy]].
+
+## Уточнения 2026-10-16
+
+Источник: [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]], ответы 6–9, 15.
+
+- «Состояние начала локальной правки» — прочитанное current, относительно которого подготовлена локальная попытка; это не обязательно исходное состояние всей работы.
+- «Намерение уже удовлетворено» — после выяснения прежнего исхода актуальная геометрия соответствует желаемой, поэтому новая mutation не требуется. Это не доказательство авторства или завершения наряда.
+- «Разбор завершён, продолжение запрещено» — исход установлен, но доступ, lifecycle или основание не допускают запись. Это не positional acceptance и не разрешение публикации.
+
+No-op характеризует отсутствие нового изменения после учёта точности хранения, а не достаточность результата для задания.

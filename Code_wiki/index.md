@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-13
-source: repository-change:2026-10-12
+updated: 2026-10-16
+source: repository-change:2026-10-16
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -29,6 +29,10 @@ tags: [code-wiki, technical-knowledge]
 
 ## Текущий Repository Snapshot
 
+- [[архитектура/edit_version_save_orchestration]] — атомарные Save/Revert, terminal replay, registry, access-resume exception и append-only история.
+- [[архитектура/frontend_save_recovery]] — разделение current/draft/pending/result, storage/retry/access guards и ещё не подключённый UI.
+- [[архитектура/edit_geometry_fixture_metadata]] — seed L-003, before/after fixture, persisted policy и граница знания о фактической БД.
+
 - [[архитектура/edit_version_api_readback]] — публичный geometry PUT, локальные strict errors, текущий token/changeSet/baseline и согласованный workspace snapshot; содержит follow-up к историческим описаниям decoding и отсутствия PUT.
 
 - [[архитектура/edit_version_persistence]] — root lock, transaction-bound context, PostGIS validation и ограниченная запись current snapshot.
@@ -50,6 +54,8 @@ tags: [code-wiki, technical-knowledge]
 - [Документы Спринта 1](../docs/release_1/sprint_1/README.md) - календарный план, контракты Дня 1, design/implementation plans Дней 2-4, backend foundation Work Orders Дня 5, EditVersion from Default Дня 8, Мои наряды Дня 11 и отделенные исторические generic-планы.
 
 ## Свежие Repository-Change Знания
+
+- 2026-10-16: `/ingest repository-change` перенёс backend Save/registry/replay/history, frontend Save/recovery state и fixture/metadata. После ingest исправлены зарегистрированные в `FU-2026-10-11-001` устаревшие технические описания; метки `stale` сняты с пяти затронутых архитектурных нод. Доменные вопросы, model health и сам follow-up сохраняют статус до отдельной синхронизации; технические основания и остаток S2-X01 доступны в новых нодах выше. Прежние датированные записи ниже исторические.
 
 - 2026-10-11: `/sync-vision` выявил отставание [[архитектура/backend]] и [[архитектура/edit_version_persistence]] от внутреннего Save/Revert service; ноды помечены `stale`, содержательное обновление ожидает `/ingest repository-change` (`FU-2026-10-11-001`).
 - 2026-10-10: [[архитектура/edit_version_persistence]] и [[архитектура/backend]] отражают `EditVersionRepository`, root lock, transaction-bound context, PostGIS guards и перенос create/reopen в repository версии.
@@ -94,3 +100,7 @@ tags: [code-wiki, technical-knowledge]
 - 2026-06-22: [[архитектура/data_model]] отражает repair/idempotent migration contract для `c9d0e1f2a3b4`, `f2b3c4d5e6a7`, `a8c1f2d3e4b5`, `e4b7a9c2d5f8` и `d3a01f4e9c21`.
 - 2026-06-22: [[архитектура/api_and_realtime]], [[архитектура/frontend]], [[dev_setup/local_development]], [[сборка/ci_and_quality]] и [[правила_и_стиль/testing_strategy]] отражают экран `Мои наряды`: Editor-only assigned list API, frontend shell с пустой basemap, локальную подсветку строки без открытия `EditVersion` и jsdom component tests.
 - 2026-06-26: [[сборка/ci_and_quality]] и [[правила_и_стиль/testing_strategy]] отражают Day 13 full path API smoke: CI запускает `tests/smoke/full_path_workspace_smoke.py` внутри `utility_service`, проверяя `login -> assigned-to-me -> open/reopen EditVersion -> workspace` для seeded `WO-001`.
+
+## Уточнение recovery после исследования 2026-10-16
+
+[[архитектура/frontend_save_recovery]] уточняет существующий косвенный вызов восстановления через open/restore workspace. Отсутствие прямого component-вызова не означает отсутствие этого пути; пользовательские Save/Revert controls и S2-X01 остаются отдельным scope. Post-ingest correction выполнена по FU-2026-10-11-001, без изменений кода.

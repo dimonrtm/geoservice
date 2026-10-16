@@ -3,8 +3,8 @@ title: Осведомлённость редактора и восстановл
 type: state-machine
 status: active
 created: 2026-10-11
-updated: 2026-10-12
-source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md"
+updated: 2026-10-16
+source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md"
 tags: [domain-knowledge, ddd, state-machine, recovery]
 confidence: high
 related: [Wiki/glossary/editing_result_states, Wiki/policies/editor_recovery_policy, DDD_Wiki/state_machines/edit_version_save_request, DDD_Wiki/aggregates/edit_version, Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]
@@ -34,3 +34,19 @@ related: [Wiki/glossary/editing_result_states, Wiki/policies/editor_recovery_pol
 Повторный ответ на старое действие и свежий readback выполняют разные роли. `CommandId` защищает повтор намерения; `DraftVersionToken` — новое изменение относительно текущей версии. Не появляется отдельный aggregate или распределённая блокировка рабочей версии.
 
 Политика принята, диаграмма согласована со старой моделью по [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]]. Она не доказывает реализацию API/UI.
+
+## Пограничные переходы 2026-10-16
+
+Источник: [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]]. Уточняется только наблюдатель; server state не расширяется.
+
+| Ситуация | Переход и ограничение |
+| --- | --- |
+| Доступ вернулся | Явно подтвердить выяснение прежнего исхода; новый intent не отправляется автоматически. |
+| Success подтверждён, current недоступен | Сохранить историческую квитанцию, повторять чтение; новая mutation запрещена. |
+| Current изменился после подтверждения Revert | Вернуться к сравнению и новому подтверждению. |
+| Работа закрыта, исход доказан | Завершить разбор с явным запретом продолжения; не переоткрывать lifecycle. |
+| Current совпадает с candidate | После разрешения прежнего исхода отказаться от лишней mutation; авторство не выводится из совпадения. |
+| Принудительно прекращён доступ | Остановить действия, скрыть приватные данные; не выдавать local draft за sent intent. |
+| Несколько окон отправили действия | Установить каждый исход отдельно; закрытие окна не отменяет операцию. |
+
+Переход к новым правкам регулирует [[Wiki/specifications/editing_resumption_allowed]].

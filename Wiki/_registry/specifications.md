@@ -3,7 +3,7 @@ title: Specifications Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-31
+updated: 2026-10-16
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, specification]
 confidence: n/a
@@ -21,3 +21,6 @@ related: [Wiki/index]
 | [[Wiki/specifications/post_allowed]] | Computed `can_post`: package approved, not stale, no absolute veto, `Default` fresh, required evidence complete, pre-post gate passed. | Simulated/technical post blocked. | high | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
 
 | [[Wiki/specifications/simulated_line_positional_acceptance]] | SIM-UGIS-POS-001 v1.0: полный scope, max(e+u)<=0,50 м, u<=0,10 м | Учебные pass/fail/unverified; не автоматический backend VERIFIED | high | `RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md` |
+
+| [[Wiki/specifications/editing_resumption_allowed]] | Доказанный прежний исход, актуальное чтение, действующие права/контекст и осознанное актуальное намерение | Новая запись запрещена при невыполнении условий; recovery retry остаётся способом установить исход | high | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md` |
+| [[Wiki/specifications/saved_line_quality_assessment]] | Связанное сохранённое состояние, пригодное evidence, полный охват и доказательство прежнего критерия | Не принято или непроверено с сохранением причин по участкам; не новый server status | high | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md` |

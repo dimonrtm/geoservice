@@ -3,7 +3,7 @@ title: Публичный Save API и согласованный readback EditVe
 type: technical-note
 status: active
 created: 2026-10-12
-updated: 2026-10-12
+updated: 2026-10-16
 source: repository-change:2026-10-12
 tags: [api, edit-version, readback, baseline, geometry]
 ---
@@ -75,14 +75,11 @@ mutation root lock. Baseline/current используют обратимый EWK
 Тест с новым client/app/session подтверждает независимое чтение persisted данных,
 но не фактический restart процесса. Frontend Save/Revert и S2-X01 имеют отдельный scope.
 
-## Follow-up согласования старых описаний
+## Согласование описаний
 
-Состояние кода выше расходится с историческими утверждениями
-[[edit_geometry_determinism]] об отсутствии PUT и decoding в repository,
-а также [[data_model]] о `ST_AsGeoJSON` для workspace feature geometry.
-Эти описания требуют зарегистрированной post-ingest correction в
-`Vision_wiki/decisions/followups/index.md`; текущий repository-change ограничен
-`Code_wiki` и не переписывает старые утверждения. При работе с актуальным
-Save/readback использовать эту ноду и перечисленные исходники.
+Post-ingest correction по зарегистрированному FU-2026-10-11-001 синхронизировала
+[[edit_geometry_determinism]] и [[data_model]] с текущими PUT/decoding/EWKB.
+Backend registry/replay и frontend recovery описаны отдельно:
+[[edit_version_save_orchestration]], [[frontend_save_recovery]].
 
 Связи: [[api_and_realtime]], [[edit_version_persistence]], [[edit_geometry_determinism]], [[data_model]].

@@ -3,9 +3,9 @@ title: Детерминированная геометрия EditVersion
 type: technical-note
 status: active
 created: 2026-10-08
-updated: 2026-10-13
-source: repository-change:2026-10-08
-tags: [geometry, decimal, edit-version, fingerprint, postgis, stale]
+updated: 2026-10-16
+source: repository-change:2026-10-16
+tags: [geometry, decimal, edit-version, fingerprint, postgis]
 ---
 
 # Детерминированная геометрия EditVersion
@@ -14,7 +14,7 @@ tags: [geometry, decimal, edit-version, fingerprint, postgis, stale]
 
 `apps/backend/utility_service/domain_services/edit_geometry/` содержит чистое ядро подготовки геометрии и fingerprint. Оно не обращается к БД или global settings. Вызов получает immutable baseline, policy и context явно; current используется только для проверки перехода и no-op. Это позволяет вычислять идентичность до решения об успешности команды и повторять вычисление после изменения current.
 
-Raw JSON parser `web_api/parsers/geometry_save_request.py` читает координаты непосредственно в Decimal до float-конверсии. Ограничения чисел: token не длиннее 64 символов, абсолютная явная exponent не больше 324, X в `[-180,180]`, Y в `[-90,90]`. Форма — строгий XY LineString, без duplicate keys и дополнительных полей. Parser/DTO пока не подключены к отдельному Save endpoint.
+Raw JSON parser `web_api/parsers/geometry_save_request.py` читает координаты непосредственно в Decimal до float-конверсии. Ограничения чисел: token не длиннее 64 символов, абсолютная явная exponent не больше 324, X в `[-180,180]`, Y в `[-90,90]`. Форма — строгий XY LineString, без duplicate keys и дополнительных полей. Parser подключён к geometry PUT; ошибка формата возникает до reservation команды — [[edit_version_api_readback]].
 
 ## Canonicalization и идентичность
 
@@ -36,7 +36,7 @@ Backfill читает параметры geometry из окружения migrat
 
 `infrastructure/postgresql/geometry_codec.py` принимает только непустые XY Point/LineString SRID 4326 в EWKB. Каждая binary64 ordinate переводится через `Decimal(repr(float_value))`; обратная запись проверяет равенство после roundtrip. Signed zero сохраняется codec и baseline copying; нормализация для hash выполняется отдельно.
 
-`workspace_aggregate.sql` возвращает features как EWKB hex; `WorkOrderRepository` преобразует их в прежний `geometry_data` с JSON numbers. Остаётся один aggregate SQL execute, AOI-фильтрация, порядок и прежняя публичная форма ответа. Это предотвращает сдвиг off-grid baseline возле midpoint из-за девяти знаков `ST_AsGeoJSON`. AOI display и legacy API этим механизмом не перестраиваются.
+`workspace_aggregate.sql` возвращает features как EWKB hex; `WorkOrderRepository` передаёт raw EWKB hex, а `WorkspaceService` декодирует geometry после role/assignment/lifecycle guards и формирует JSON numbers — [[edit_version_api_readback]]. Остаётся один aggregate SQL execute, AOI-фильтрация, порядок и прежняя публичная форма ответа. Это предотвращает сдвиг off-grid baseline возле midpoint из-за девяти знаков `ST_AsGeoJSON`. AOI display и legacy API этим механизмом не перестраиваются.
 
 ## Источники и связи
 

@@ -3,8 +3,8 @@ title: Учебная позиционная приёмка линейной с�
 type: specification
 status: active
 created: 2026-10-13
-updated: 2026-10-13
-source: RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md
+updated: 2026-10-16
+source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md"
 tags: [domain-knowledge, simulated-organization]
 confidence: high
 related: [Wiki/policies/positional_accuracy_acceptance_policy, Wiki/specifications/edit_version_ready_for_review]
@@ -35,3 +35,9 @@ SIM-UGIS-POS-001 v1.0 от 2026-10-13 принята агентом за усл�
 ## Связи и пределы
 
 [[Wiki/policies/positional_accuracy_acceptance_policy]] задаёт событийную переоценку; [[Wiki/specifications/edit_version_ready_for_review]] сохраняет все downstream gates. Топология остаётся отдельной проверкой. Веб-основание различения единиц: [PostGIS ST_Distance](https://postgis.net/docs/ST_Distance.html). Числовые пределы выбраны нами для эксперимента, не заимствованы из норм.
+
+## Доказательство вычисления — 2026-10-16
+
+[[Wiki/specifications/saved_line_quality_assessment]] уточняет способ доказать прежний Predicate: для Q=max(e+u) устанавливаются границы L<=Q<=U. При достаточных входах U<=T доказывает прохождение, L>T — несоответствие учебному критерию, иначе решение пока не доказано. Это не новый допуск и не переопределение u. Неопределённость эталона остаётся детерминированным bound; стандартная неопределённость из метрологии не подставляется без модели.
+
+Численное округление отображения не решает пограничный случай. Проверяется сохранённая геометрия; влияние уже учтённого округления записи второй раз не добавляется. Несоответствие учебному консервативному критерию не тождественно доказанному превышению фактической ошибки физического объекта. Формула, T=0,50 м, u<=0,10 м и аналитический пример v1.0 сохранены.

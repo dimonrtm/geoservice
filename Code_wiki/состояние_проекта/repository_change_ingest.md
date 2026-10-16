@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-10-12
-source: repository-change:2026-10-12
+updated: 2026-10-16
+source: repository-change:2026-10-16
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,14 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-10-16 | [[архитектура/backend]] | Уточнены подключённый Save service и ответственность repository за операции registry/revision/events. | `EditVersionService.save_geometry`, `EditVersionRepository`, FU-2026-10-11-001 |
+| 2026-10-16 | [[архитектура/edit_version_persistence]] | Repository boundary связана с действующей orchestration; D5-Q1 больше не временный пробел. | `EditVersionRepository`, решение D5-Q1 от 2026-10-12, FU-2026-10-11-001 |
+| 2026-10-16 | [[архитектура/edit_geometry_determinism]] | Исправлены отсутствие endpoint и прежнее место decoding; сохранена точная EWKB boundary. | `save_feature_geometry`, `WorkspaceService`, FU-2026-10-11-001 |
+| 2026-10-16 | [[архитектура/data_model]] | Добавлены registry/history/policy и corrected workspace EWKB read path. | migrations `b7d2e9f4a6c8`/`c8e3f0a5b7d9`, `workspace_aggregate.sql`, FU-2026-10-11-001 |
+| 2026-10-16 | [[архитектура/frontend]] | Добавлены Save/recovery state и независимое хранение selected/opened/pending; обозначена граница UI. | `useWorkOrdersStore`, auth store, `6c4b6ba`, FU-2026-10-11-001 |
+| 2026-10-16 | [[архитектура/edit_version_save_orchestration]] | Атомарные Save/Revert, terminal replay, access-resume exception и append-only история. | `EditVersionService.save_geometry`, migration `b7d2e9f4a6c8`, FU-2026-10-11-001 |
+| 2026-10-16 | [[архитектура/frontend_save_recovery]] | Разделены local draft, pending identity, квитанция и current; зафиксированы storage/retry/access guards и остаток S2-X01. | `useWorkOrdersStore`, `WorkspaceRecoveryRecord`, `6c4b6ba` |
+| 2026-10-16 | [[архитектура/edit_geometry_fixture_metadata]] | Подтверждены seed L-003, before/after fixture и граница persisted policy без подмены фактической БД или positional evidence. | `UTILITY_EDITABLE_LINE_SPEC`, `GeometryPolicy`, integration helper `save_geometry_support.py` |
 | 2026-10-12 | [[архитектура/edit_version_api_readback]] | Зафиксированы публичная Save boundary, scoped strict errors и согласованная current/baseline projection после access guards. | `apps/backend/utility_service/web_api/api/work_orders.py`, `apps/backend/utility_service/use_cases/services/workspace_draft_projection.py`, `apps/backend/utility_service/infrastructure/postgresql/sql/workspace_aggregate.sql` |
 | 2026-10-10 | [[архитектура/backend]] | После фиксации FU-2026-10-10-001 уточнены разные ответственности WorkOrderRepository и нового EditVersionRepository; старое отрицание отдельного repository больше не действует. FU-2026-10-10-002 уточняет перенос создания и повторного открытия версии в EditVersionRepository. | `apps/backend/utility_service/infrastructure/postgresql/repositories/edit_version_repository.py`, `Vision_wiki/decisions/followups/index.md` |
 | 2026-10-10 | [[архитектура/edit_version_persistence]] | Зафиксирована persistence boundary агрегата EditVersion: root lock, provenance/lifetime handles, spatial validation и точная ограниченная mutation current; после решения пользователя также поиск, создание и повторное открытие версии. | `apps/backend/utility_service/infrastructure/postgresql/repositories/edit_version_repository.py`, `docs/sprint_2/2026-10-10-day-5-repository-context-design.md` |

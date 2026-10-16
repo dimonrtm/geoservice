@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-13
+updated: 2026-10-16
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -31,6 +31,12 @@ tags: [knowledge, index, geoservice]
 - [[docs/agent-memory/README]] - компактная инженерная память Codex.
 
 ## Свежие Изменения
+
+- 2026-10-16: Обработано [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]]: семь первичных веб-источников и 15 ответов условной организации. [[Wiki/specifications/editing_resumption_allowed]] отделяет восстановление исхода от новой записи и закрытия разбора. RAW sources: 42; открытых follow-up — 19, вопросов metadata/fixture — 2; новых blocking conflicts нет. Реализация и приёмка отдельно.
+
+- После предыдущей синхронизации: 2 уже обработанных RAW research sources; новых concept/decision/entity/solution нод — 0, новых policy — 2, specification — 1, use case — 1, resolved conflict — 1, source-summary chat-нод — 2. Frontend Save/recovery state из `6c4b6ba` ещё требует содержательного переноса в [[Code_wiki/архитектура/frontend]].
+
+- 2026-10-16: `/sync-vision` сверил индексы и реестры после решений условной организации от 13 октября. Все 41 RAW sources учтены; новых необработанных источников нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture, активных канонических blocking conflicts нет; 1 legacy conflict и 6 stale-нод сохраняются. Lint: 37 известных `missing_frontmatter` только в RAW. Решения recovery, позиционной приёмки и хранения приняты как правила модели, реализация проверяется отдельно. Текущее состояние — [[memory/project-state]]. Более ранние сводки ниже описывают состояние на момент соответствующего прохода.
 
 - 2026-10-13: Обработано [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]] — глубокий анализ роли и 15 ответов синтезированного эксперта. Новые политики разбора/основания правки и сценарий возобновления имеют `needs-review`; организационные уточнения добавлены к действующим политикам отдельно от принятых правил. Учтены 40 RAW sources; открыты 22 follow-up'а и 8 вопросов, новых blocking conflicts нет.
 
@@ -134,21 +140,21 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
-- Нужно выполнить `/ingest repository-change` для семи коммитов после 2026-07-09: typed `AuthUser`, workspace details UI, correlation ID и actionable errors, reusable UI controls и восстановление выбранного `WorkOrder` после reload.
-- Для first-save implementation нужно найти утверждённую positional specification, прочитать actual dataset spatial metadata, выбрать существующую line с eligible internal shape vertex и определить records-retention срок save history; канонический список — [[Wiki/_registry/questions]].
+- Нужна отдельная сверка покрытия июльских frontend-изменений и backend Save/Revert, registry/replay, terminal rejection и истории событий в `Code_wiki` по `FU-2026-10-11-001`. Публичный Save API и workspace readback уже описаны в [[Code_wiki/архитектура/edit_version_api_readback]]; недостающее устойчивое знание переносится через `/ingest repository-change`.
+- Для first-save остаются 2 вопроса сверки actual dataset spatial metadata и eligible line/fixture с кодом и Sprint 2: [[Wiki/_registry/questions]]. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 приняты условной организацией; учебное evidence не подтверждает точность L-003. Реализация принятых recovery/evidence/retention правил — `FU-2026-10-13-004`.
 - Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
 - Нужно подготовить local demo support package: README, seed/reset/`full-clean` scripts, demo сценарий, troubleshooting, observability minimum и `import GeoJSON`.
 - Нужно проверить draft P95 targets на `synthetic_utility_feeder_01` в Chrome на reference hardware.
-- Нужно снять manual baseline на 10-20 work orders и провести product evaluation на 200 started work orders с 7-дневным correction window.
-- Нужно провести реальные интервью с `Utility GIS editor` и `Reviewer`; для reviewer проверить planned policy: package approval vs technical `post`, routing по специализации, совмещение ролей, обязательность approve comment и user validation trace-boundary.
+- Методики manual baseline и product evaluation остаются сценариями проверки: синтетические прогоны маркируются отдельно от реальных измерений и не доказывают производственный эффект.
+- Проверять сценарии `Utility GIS editor` и `Reviewer` через исследование и моделирование условной организации: package approval vs technical `post`, routing по специализации, совмещение ролей, approve comment и trace-boundary. Реальные интервью не являются условием эксперимента; см. [принятый режим](docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md).
 - Для Release 2 нужно проверить, снижает ли consequence-first explanation внешние проверки и time-to-confident-decision по `geometry/association conflict`, и не дублирует ли UI обычный Conflicts view.
 - Для Release 2 Ф4 demo нужно проверить canonical transformer terminal association scenario, package evidence, `Normal/High/Critical` tiers без преждевременного `Simple`, stale decision handling и audit object.
 - Нужно подготовить отдельный integrated review/post implementation contract v0.1 для developer demo: `submit_for_review`, `ReviewPackage`, reviewer decision, computed `can_post`, pre-post check, simulated post, durable audit, system `post-gate`, safety-complete veto set, `DefaultChangedAfterReconcile`, zero false-safe gate и small-sprint rollout через существующий `WorkOrder` / `EditVersion` flow.
 - Для Release 2 Ф7 нужно подготовить measurement harness: scripted golden walkthrough, 10 deterministic repeats, 10 stale/blocker/pre-post mutations, optional 30 automated runs и manual baseline против `ArcGIS native Conflicts view + SOP + expert handoff`.
-- Для Release 2 нужно подготовить отдельный real validation checklist для `Editor`/`Reviewer`: risk wording, authority matrix, sample review для `Normal`, evidence sufficiency, repeat-review UX и trust к blocker verdict.
+- Для Release 2 нужен checklist проверки модели `Editor`/`Reviewer`: risk wording, authority matrix, sample review для `Normal`, evidence sufficiency, repeat-review UX и trust к blocker verdict. Результаты симуляции не выдаются за real validation.
 - Технические пробелы repository snapshot зафиксированы в [[Code_wiki/состояние_проекта/repository_snapshot]].
 - Очередь follow-up'ов: [[Vision_wiki/decisions/followups/index]].
 
@@ -172,3 +178,11 @@ tags: [knowledge, index, geoservice]
 ## Решения условной организации
 
 [[Vision_wiki/chats/2026-10-13-simulated-organization-decisions]] — новая редакция 15 ответов: принятое поведение модели и [[Wiki/specifications/simulated_line_positional_acceptance]]. Старый RAW сохранён; отсутствие реального предприятия не является blocker. Текущие реестры: 2 открытых вопроса сверки, 19 open follow-up, 0 активных канонических blocking conflicts. Реализация отделена от решений.
+
+## Исследование пригодности данных — 2026-10-16
+
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research]]: 17 источников и 15 ответов. Ingest: [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/saved_line_quality_assessment]], [[DDD_Wiki/use_cases/assess_saved_line_quality]]. Актуальное состояние: 43 RAW-источника; 19 открытых follow-up, 2 вопроса metadata/fixture, новых blocking conflicts нет.
+
+## Смысл правки сети — 2026-10-16
+
+Исследование: [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]]. Правила: [[Wiki/policies/network_edit_semantics_policy]]. Термины: [[Wiki/glossary/network_edit_meaning]].

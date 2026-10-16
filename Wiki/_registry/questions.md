@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-13
+updated: 2026-10-16
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -54,3 +54,10 @@ related: [Wiki/index, DDD_Wiki/model_health]
 | Принять ли порядок передачи разбора, оценки влияния исходного дефекта и разрешения возобновить работу?                                      | [[Wiki/policies/recovery_case_resolution_policy]], [[Wiki/policies/geometry_quality_escalation_policy]]    | high     | answered | `RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md`: принято агентом за условную организацию; не подтверждение реализации или натурных данных |
 | Принять ли область позиционной проверки и правила повторной оценки применимости доказательств?                                              | [[Wiki/policies/positional_accuracy_acceptance_policy]]                                                    | high     | answered | `RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md`: принято агентом за условную организацию; не подтверждение реализации или натурных данных |
 | Когда нужно отдельное объяснение правки и для каких разборов сохранять сведения об отклонённых попытках?                                    | [[Wiki/policies/edit_change_justification_policy]], [[Wiki/policies/change_history_retention_policy]]      | medium   | answered | `RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md`: принято агентом за условную организацию; не подтверждение реализации или натурных данных |
+
+| Как продолжать или завершать разбор при возврате доступа, двух окнах, позднем результате и устаревшем подтверждении возврата? | [[Wiki/specifications/editing_resumption_allowed]], [[Wiki/policies/editor_recovery_policy]] | high | answered | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md`, ответы 1–15: решения условной организации; не доказательство реализации |
+| Как квалифицировать учебные данные и доказать качество сохранённой линии при разных CRS, источниках и численной неопределённости? | [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/saved_line_quality_assessment]] | high | answered | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md`: ответы 1–15; решения модели, не runtime validation |
+
+## Ответы о смысле изменения — 2026-10-16
+
+15 discovery-вопросов отвечены в [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]] и закреплены в [[Wiki/policies/network_edit_semantics_policy]]. Это решения условной организации; они не закрывают два вопроса фактической сверки metadata/fixture и не требуют реальных интервью. Новых открытых доменных вопросов этот ingest не добавляет.

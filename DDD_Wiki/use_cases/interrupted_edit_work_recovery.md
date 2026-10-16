@@ -3,8 +3,8 @@ title: Разобрать прерванное редактирование и �
 type: use-case
 status: active
 created: 2026-10-13
-updated: 2026-10-13
-source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
+updated: 2026-10-16
+source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md"
 tags: [domain-knowledge, ddd, use-case, recovery, data-quality]
 confidence: high
 related: [DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/state_machines/editor_save_recovery, Wiki/policies/recovery_case_resolution_policy, Wiki/policies/geometry_quality_escalation_policy, Wiki/policies/positional_accuracy_acceptance_policy]
@@ -80,3 +80,13 @@ Editor удерживает намерение; ответственный за 
 У каждого открытого разбора есть владелец и следующий шаг; сохранены различия между намерением, историческим результатом и current; известны затронутые работы; разрешение продолжения имеет основание. История не стирается, старое подтверждение не перерисовывает более свежую геометрию.
 
 Проверки предложены в RAW, но не выполнены этим ingest. Принятие: `FU-2026-10-13-001` и `FU-2026-10-13-002` в [[Vision_wiki/decisions/followups/index]].
+
+## Пограничные сценарии 2026-10-16
+
+Источник: [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]], все 15 ответов; правила активны для условной организации, runtime-приёмка не заявлена.
+
+Основной выход «продолжить запись» требует [[Wiki/specifications/editing_resumption_allowed]]. Альтернативный выход «разбор завершён, запись запрещена» допускается при доказанном исходе и закрытом/недоступном/дефектном контексте. Неизвестный исход не объявляется разрешённым.
+
+Сравниваются local source, candidate и current; baseline добавляется для возврата к исходному состоянию. Проверяются delayed receipt, stale consent, переназначение, forced logout, совпадение current/candidate и отсутствие изменения после округления. Один наряд в одном окне — ограничение учебной эксплуатации, не новый aggregate или lock. Передача карточки не передаёт права чужой команды.
+
+Сценарная матрица находится в разделе 5 RAW. Существующие guards и downstream review/post сохраняются; новые UI/recovery возможности не считаются реализованными.

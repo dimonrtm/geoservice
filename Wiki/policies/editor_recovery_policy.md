@@ -3,8 +3,8 @@ title: Восстановление намерения редактора пос
 type: policy
 status: active
 created: 2026-10-11
-updated: 2026-10-13
-source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
+updated: 2026-10-16
+source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md"
 tags: [domain-knowledge, policy, editing, recovery]
 confidence: high
 related: [Wiki/glossary/editing_result_states, Wiki/value_objects/command_id, Wiki/value_objects/draft_version_token, DDD_Wiki/state_machines/editor_save_recovery, Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]
@@ -47,3 +47,19 @@ related: [Wiki/glossary/editing_result_states, Wiki/value_objects/command_id, Wi
 ## Действующее уточнение условной организации 2026-10-13
 
 [[Wiki/policies/recovery_case_resolution_policy]] принята по прямому поручению пользователя и новому [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]]. Её прежний needs-review — исторический статус. Один цикл/5 минут до разбора и 15/60 минут активной сессии не меняют retry identity, observer/operation или guards. Реализация отдельно в FU-2026-10-13-004.
+
+## Уточнение пограничных случаев — 2026-10-16
+
+Источник: [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]], ответы 1–14. Это решения условной организации, не свидетельство реализации.
+
+- После возврата доступа отдельно подтверждается выяснение прежнего исхода. Оно не разрешает новое применение candidate к изменившемуся current. Новая запись подчиняется [[Wiki/specifications/editing_resumption_allowed]].
+- Переназначение наряда передаёт задачу и разрешённые материалы разбора, но не чужую identity/авторство. Закрытый lifecycle не переоткрывается ради recovery.
+- В учебном режиме один наряд редактируется в одном окне. При двух отправленных попытках устанавливаются оба исхода; это организационное ограничение, не заявленная межоконная блокировка.
+- Для stale сравниваются source текущей локальной попытки, candidate и current. Immutable baseline всей работы показывается отдельно для Revert. Поздняя квитанция не подменяет current.
+- Если после установления исхода желаемая geometry уже совпала с current, новую mutation можно не делать. Совпадение не доказывает автора и не завершает весь наряд автоматически. No-op после canonicalization также не доказывает выполнения задания.
+- Передумавший редактор сначала выясняет исход sent intent. Закрытие окна/уведомления не отменяет отправку; автоматического компенсирующего Revert нет.
+- Переход к независимому наряду допустим только при сохранности identity и возможности вернуться к разбору. Если продукт этого не обеспечивает, переход запрещён.
+- Принудительное прекращение доступа не удерживается ради local draft. При управляемом выходе его судьба решается заранее; sent intent сохраняет отдельную семантику разбора. Другой actor не получает материалы автоматически.
+- Подтверждение Revert относится к показанному состоянию. Изменившийся current требует нового сравнения и согласия; судьба local draft решается отдельно.
+
+Backend guards, один line/vertex, immutable baseline, positional/topology gates и прежние сроки не меняются. Реализация — S2-X01 / FU-2026-10-13-004.

@@ -3,30 +3,28 @@ title: Атомарная запись current geometry в EditVersion
 type: technical-note
 status: active
 created: 2026-10-10
-updated: 2026-10-11
-source: repository-change:2026-10-10
-tags: [edit-version, repository, transaction, postgis, geometry, stale]
+updated: 2026-10-16
+source: repository-change:2026-10-16
+tags: [edit-version, repository, transaction, postgis, geometry]
 ---
 
 # Атомарная запись current geometry в EditVersion
 
-> Проверка `/sync-vision` от 2026-10-11: утверждения о будущем Save service требуют обновления после реализации `EditVersionService.save_geometry`, command registry и событий Save/Revert. Граница ниже описывает repository на 2026-10-10; см. `FU-2026-10-11-001` в [[../../Vision_wiki/decisions/followups/index]].
-
 ## Агрегат и transaction boundary
 
-`EditVersionRepository` относится к агрегату `EditVersion`. Геометрия — значение дочернего объекта, а не самостоятельный агрегат. Репозиторий ищет открытую версию (`get_open_edit_version`), создаёт её с объектами и связями из базового состояния (`create_open_edit_version`), обновляет время повторного открытия (`touch_edit_version`) и обслуживает проверку и ограниченную запись текущей геометрии. Production Save service ещё не подключён.
+`EditVersionRepository` относится к агрегату `EditVersion`. Геометрия — значение дочернего объекта, а не самостоятельный агрегат. Репозиторий ищет открытую версию (`get_open_edit_version`), создаёт её с объектами и связями из базового состояния (`create_open_edit_version`), обновляет время повторного открытия (`touch_edit_version`) и обслуживает проверку и ограниченную запись текущей геометрии. `EditVersionService.save_geometry` уже использует эти операции вместе с registry/revision/events — [[edit_version_save_orchestration]].
 
 `EditVersionService` получает репозиторий версии отдельной обязательной зависимостью. Все репозитории используют одну AsyncSession. При открытии сервис блокирует наряд через `WorkOrderRepository`, вызывает операции версии через `EditVersionRepository` и сохраняет состояние наряда через `WorkOrderRepository` в общей транзакции. Ошибка после создания снимка откатывает и версию, и состояние наряда. Обработка конфликта уникальности открытой версии остаётся в сервисе.
 
 Вызывающий сервис владеет `AsyncSession` и внешней transaction с READ COMMITTED. Последовательность: `lock_version` → `read_context` → `prepare_candidate` → `validate_candidate` → `write_current`. Repository не начинает и не завершает transaction. `SELECT FOR UPDATE` блокирует root по паре WorkOrder/EditVersion; отдельный последующий SELECT читает current feature, baseline именно по `default_state_id`, AOI и IDs остальных изменённых features всей версии. Column projection исключает stale ORM identity-map state после ожидания конкурента. Workspace AOI-filter к поиску target не применяется.
 
-Порядок будущего Save: root → command → feature. После root нельзя брать конфликтующий lock WorkOrder: существующий reopen использует WorkOrder → EditVersion. AOI, baseline и assignment считаются стабильными на время Save. Writers, обходящие root-lock protocol, этой boundary не защищены.
+Порядок Save: root → command → feature. После root нельзя брать конфликтующий lock WorkOrder: существующий reopen использует WorkOrder → EditVersion. AOI, baseline и assignment считаются стабильными на время Save. Writers, обходящие root-lock protocol, этой boundary не защищены.
 
 ## Проверка и запись
 
 Подготовка использует persisted GeometryPolicy и [[edit_geometry_determinism]]. Исходные baseline/current проверяются до candidate: связь baseline, структура, endpoints, одна внутренняя вершина, согласованность operation; повреждённый context отвергается без repair. Другая feature с operation, отличной от `unchanged`, блокирует изменение независимо от её попадания в workspace.
 
-PostGIS проверяет XY/SRID/range, nonempty, `ST_IsValid`, `ST_IsSimple`, соседние совпадающие вершины и валидность AOI. Guarded `ST_Covers` проверяет всю линию, включая сегменты между vertices: boundary разрешена, holes и разрывы MultiPolygon учитываются. Временное правило D5-Q1 отвергает нулевой сегмент после canonicalization как `GEOMETRY_INVALID`; доменная допустимость требует уточнения, источник — принятая спецификация Дня 5.
+PostGIS проверяет XY/SRID/range, nonempty, `ST_IsValid`, `ST_IsSimple`, соседние совпадающие вершины и валидность AOI. Guarded `ST_Covers` проверяет всю линию, включая сегменты между vertices: boundary разрешена, holes и разрывы MultiPolygon учитываются. Нулевой сегмент после canonicalization отвергается как `GEOMETRY_INVALID`; D5-Q1 принят решением `docs/sprint_2/2026-10-12-save-recovery-rules-decision.md`.
 
 `write_current` принимает только результат проверки, выданный repository. UPDATE меняет geometry/operation ровно одной current feature; DefaultState, associations, properties, network_version и draft_revision остаются прежними. Numeric no-op не выполняет UPDATE и сохраняет current EWKB. Revert после реального изменения восстанавливает точный baseline EWKB, включая off-grid координаты и signed zero.
 
@@ -34,7 +32,7 @@ PostGIS проверяет XY/SRID/range, nonempty, `ST_IsValid`, `ST_IsSimple`,
 
 Frozen handles проверяются по identity реально выданных объектов, session, transaction и поколению чтения. Commit/rollback освобождает ссылки. Любой savepoint во время жизни scope делает его непригодным до завершения внешней transaction. Mutation и no-op потребляют все прежние context этой версии; новое чтение под тем же root lock допустимо. Это защита от ошибочного использования протокола, не sandbox для произвольного Python-кода. Два session-local SQLAlchemy listeners живут вместе с session и не накапливаются при повторных transaction.
 
-Ожидаемые отказы представлены `RepositoryRejection`; неправильное использование handles — `RepositoryProtocolError`. HTTP mapping, actor/access/lifecycle, token/replay, registry, revision и events остаются ответственностью будущего Save service. Интеграционный сценарий подтверждает совместимость записи с существующим history trigger, но не заменяет такую orchestration.
+Ожидаемые отказы представлены `RepositoryRejection`; неправильное использование handles — `RepositoryProtocolError`. HTTP mapping выполняет web adapter; actor/access/lifecycle, token/replay и orchestration registry/revision/events реализованы в `EditVersionService.save_geometry`. `write_current` сам не меняет revision: сервис вызывает `increment_revision` только после фактической mutation, затем `complete_command` и `append_change_event` в той же transaction. Подробности terminal rejection и replay — [[edit_version_save_orchestration]].
 
 ## Источники и связи
 

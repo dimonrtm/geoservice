@@ -3,8 +3,8 @@ title: Positional Accuracy Acceptance Policy
 type: policy
 status: active
 created: 2026-07-31
-updated: 2026-10-13
-source: "RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
+updated: 2026-10-16
+source: "RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md"
 tags: [domain-knowledge, policy, edit-version, geometry, accuracy, acceptance]
 confidence: high
 related: [Wiki/glossary/positional_accuracy_for_acceptance, Wiki/glossary/coordinate_storage_precision, Wiki/policies/edit_geometry_precision_policy, Wiki/specifications/edit_version_basic_draft_validation, Wiki/specifications/edit_version_ready_for_review, Wiki/commands/update_edit_version_feature_geometry]
@@ -86,3 +86,9 @@ related: [Wiki/glossary/positional_accuracy_for_acceptance, Wiki/glossary/coordi
 Шаблон обезличенного измерительного материала в RAW является учебным. Синтетический пример не повышает реальную позиционную точность. ASPRS рассматривается только как возможная методика после выбора организацией; стандарт статистической оценки набора данных не переносится автоматически на одну вершину.
 
 Принятие уточнений: `FU-2026-10-13-002` в [[Vision_wiki/decisions/followups/index]]. Фактические документы и измерения остаются открыты отдельно от принятия общего правила.
+
+## Доказательное заключение — уточнение 2026-10-16
+
+Решения нового [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research]] не меняют числовой критерий SIM-UGIS-POS-001. [[Wiki/specifications/saved_line_quality_assessment]] уточняет связь с сохранённым состоянием, соответствие сегментов, границы численного вычисления и отдельное сохранение несоответствий/непроверенных областей. Заключение относится к конкретному состоянию и evidence; более новый источник не получает автоматического приоритета.
+
+[[Wiki/policies/demo_dataset_qualification_policy]] задаёт проверку пригодности учебных данных, но не удостоверяет metadata запущенной БД и не создаёт новый hard guard Save. Отсутствие позиционного evidence по-прежнему допускает техническое сохранение при выполнении прежних guards.

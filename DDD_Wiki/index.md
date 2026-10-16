@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-13
+updated: 2026-10-16
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -41,3 +41,15 @@ tags: [domain-knowledge, ddd]
 ## Восстановление прерванной работы в условной организации
 
 [[DDD_Wiki/use_cases/interrupted_edit_work_recovery]] активно как принятое правило модели: обязанности агента, эскалация, доказательство исхода/current и возобновление без изменения baseline. Новые серверные состояния, роли доступа и restart не считаются реализованными. [[Wiki/specifications/simulated_line_positional_acceptance]] задаёт учебный критерий, но не снимает review/post guards. Реализация — FU-2026-10-13-004.
+
+## Уточнения восстановления 2026-10-16
+
+[[DDD_Wiki/use_cases/interrupted_edit_work_recovery]] и [[DDD_Wiki/state_machines/editor_save_recovery]] учитывают позднее подтверждение, закрытый контекст, смену доступа и актуальность согласия на Revert. [[Wiki/specifications/editing_resumption_allowed]] не вводит новых серверных состояний, aggregates или access roles.
+
+## Оценка качества сохранённой правки
+
+[[DDD_Wiki/use_cases/assess_saved_line_quality]] связывает пригодность данных, сохранённое состояние и доказательное заключение. Активность сценария означает принятие правил условной организации, не готовность evaluator.
+
+## Предметная интерпретация правки
+
+[[DDD_Wiki/use_cases/utility_editor_workflow]] дополнен по [[Wiki/policies/network_edit_semantics_policy]]: идентичность и намерение до правки, область доказательства и ограничения при передаче. Сетевые расчёты остаются самостоятельными сценариями.

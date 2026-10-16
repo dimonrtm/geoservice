@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-07-04
-source: repository-change:2026-07-04
+updated: 2026-10-16
+source: repository-change:2026-10-16
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -35,7 +35,9 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
   loading/error state и локальный `selectedWorkOrderId`; выбор в списке только
   подсвечивает строку и не открывает edit version.
 - После успешного открытия workspace `src/stores/workOrders.ts` сохраняет в
-  `sessionStorage` только `{workOrderId, editVersionId}`. При reload
+  `sessionStorage` `{workOrderId, editVersionId}` под ключом opened-workspace.
+  Selected WorkOrder хранится отдельно; после `loadAssigned()` selection
+  восстанавливается лишь при наличии наряда в доступном списке. При reload
   `EditorWorkOrdersView` сначала вызывает `loadAssigned()`, затем
   `restoreOpenedWorkspace()`: store проверяет, что work order всё ещё назначен
   текущему пользователю, и восстанавливает карту через `fetchWorkspace()` без
@@ -48,6 +50,18 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
   стер cookie от нового login.
 - `src/api/layers.ts` оборачивает layer/feature HTTP API и превращает HTTP failures в `HttpError`.
 - `src/api/workOrders.ts` вызывает `GET /api/v1/work-orders/assigned-to-me` и использует компактный response contract без audit/internal date fields.
+
+## Save И Recovery
+
+`workOrders.ts` теперь хранит current workspace, local draft, неизменяемую
+pending command, recovery record и historical command result отдельно.
+`api/workOrders.ts` предоставляет geometry PUT; actor-scoped sessionStorage
+записывается до отправки, retry повторяет ту же identity, success завершается
+current GET. Auth loss останавливает recovery и поздние callbacks. Runtime
+guards, ограничения storage, stale и оставшийся UI scope — [[frontend_save_recovery]].
+Пользовательские Save/retry controls ещё не подключены; recovery уже вызывается
+косвенно из store-путей открытия/восстановления workspace. Это не является
+доказательством готовности всего UI или завершённого S2-X01.
 
 ## Карта И Загрузка Данных
 

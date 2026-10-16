@@ -3,8 +3,8 @@ title: Ответственность и завершение разбора н�
 type: policy
 status: active
 created: 2026-10-13
-updated: 2026-10-13
-source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
+updated: 2026-10-16
+source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md"
 tags: [domain-knowledge, policy, recovery, responsibility]
 confidence: high
 related: [Wiki/policies/editor_recovery_policy, Wiki/glossary/editing_result_states, DDD_Wiki/use_cases/interrupted_edit_work_recovery]
@@ -64,3 +64,9 @@ related: [Wiki/policies/editor_recovery_policy, Wiki/glossary/editing_result_sta
 Это организационный процесс, а не новый aggregate, persisted pending status или требование отдельной системы заявок. Предложенный цикл восстановления не задаёт лимит технических retries. Имена, каналы, заместители и сроки остаются открыты. Для одиночного demo обязанности может исполнять один человек с явным различением действий.
 
 Принятие и границы реализации: `FU-2026-10-13-001` в [[Vision_wiki/decisions/followups/index]].
+
+## Уточнение доказательств и закрытия — 2026-10-16
+
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]], ответы 2–4, 7, 10, 15: отсутствие записи, похожая карта, время ожидания или завершение поиска не доказывают отказ операции. Неустановленный исход остаётся основанием блокировки новых mutations; разбор нельзя закрыть как разрешённый.
+
+При установленном исходе разбор можно закрыть без разрешения продолжать: закрытая работа, отсутствие доступа или дефект основания фиксируются явно. Недоступный current в таком случае указывается как предел сведений, а не заменяется исторической квитанцией. Для возобновления записи current readback обязателен — [[Wiki/specifications/editing_resumption_allowed]]. Передача разбора не делегирует право чужого replay. Сроки и порядок владения карточкой остаются прежними.

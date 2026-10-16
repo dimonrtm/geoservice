@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-13
+updated: 2026-10-16
 source: null
 tags: [vision-wiki, product]
 ---
@@ -27,7 +27,7 @@ tags: [vision-wiki, product]
 
 - [[chats/2026-10-13-expert-recovery-governance-research]] — 15 синтезированных экспертных ответов по восстановлению, качеству и ответственности; исторические предложения, пересмотренные новым источником условной организации; десять основных первичных веб-источников.
 
-- [[chats/2026-10-11-save-recovery-customer-research]] — source-summary исследования: 15 предложенных ответов заказчика, девять первичных источников, правила canonical `Wiki/DDD_Wiki` приняты пользователем 2026-10-12; реальные specification, ответственные и срок history остаются открыты.
+- [[chats/2026-10-11-save-recovery-customer-research]] — source-summary исследования: 15 предложенных ответов заказчика, девять первичных источников, правила canonical `Wiki/DDD_Wiki` приняты пользователем 2026-10-12. Последующие решения [[Vision_wiki/chats/2026-10-13-simulated-organization-decisions]] задают specification, обязанности и срок history для условной организации; реализация остаётся отдельной задачей.
 
 - [[../index]] - корневой индекс знаний проекта.
 - [[../memory/project-state]] - живое состояние проекта.
@@ -113,3 +113,15 @@ tags: [vision-wiki, product]
 ## Открытые Вопросы
 
 - [[decisions/followups/index]] - очередь открытых вопросов и post-ingest correction candidates.
+
+## Исследование восстановления 2026-10-16
+
+[[Vision_wiki/chats/2026-10-16-recovery-use-case-research]] — разбор семейства UseCase, семь первичных источников и 15 ответов 02_expert_oldman_ufa. Решения условной организации отделены от внешних фактов и неподтверждённых гипотез.
+
+## Исследование качества данных — 2026-10-16
+
+[[Vision_wiki/chats/2026-10-16-data-quality-research]] — 17 прочитанных источников, пригодность учебного набора и 15 решений о доказательной проверке сохранённой линии.
+
+## Исследование смысла изменения — 2026-10-16
+
+[[Vision_wiki/chats/2026-10-16-network-semantics-research]] — 17 источников, 15 ответов; связность, длина, поток, границы свидетельств и передача результата.

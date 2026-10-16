@@ -3,8 +3,8 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-10-13
-source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md"
+updated: 2026-10-16
+source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md"
 tags: [domain-knowledge, ddd, health, stale]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
@@ -13,6 +13,10 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 # Model Health
 
 ## Актуальность Состояния
+
+Сверка `/sync-vision` 2026-10-16: [[Wiki/_registry/questions]] содержит 2 открытых вопроса metadata/fixture, [[Vision_wiki/decisions/followups/index]] — 19 открытых follow-up’ов; активных канонических blocking conflicts нет. Решения условной организации от 2026-10-13 приняты, [[DDD_Wiki/use_cases/interrupted_edit_work_recovery]] active. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 определяют учебную приёмку и хранение, но не доказывают реализацию или точность L-003. Требования реальных сотрудников, интервью и внутренних документов не являются блокерами. Метка `stale` сохранена до сверки реализации по `FU-2026-10-11-001`; применение новых правил — `FU-2026-10-13-004`.
+
+Датированные проверки и research-сводки ниже сохранены как исторический контекст; прежние числа вопросов и ожидания организационных входов заменены текущей сводкой и разделом «Текущее уточнение». Очередь спринтов требует отдельной сверки с кодом и не подтверждает отсутствие уже реализованных частей.
 
 Проверка `/sync-vision` от 2026-10-11: доменные контракты ниже сохранены, но очередь реализации и утверждение о неподтверждённой fixture отстают от code reality. В `apps/backend/seeds/tests/test_seed_utility_dataset_specs.py` уже определена eligible line `L-003`, а `EditVersionService.save_geometry` реализует внутренний backend Save/Revert. Источники для сверки: [[Code_wiki/архитектура/edit_geometry_determinism]], [[Code_wiki/архитектура/edit_version_persistence]] и [артефакты Sprint 2](../docs/sprint_2/README.md). Это не подтверждает готовность публичного API/UI или positional acceptance.
 
@@ -34,7 +38,7 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 | Conflict | Blocks | Status | Next Question |
 | --- | --- | --- | --- |
-| Нет активных blocking conflicts | - | clear | Выполнить S2-X01 после доступности зависимостей; получить организационные входы |
+| Нет активных blocking conflicts | - | clear | Сопоставить принятые решения с S2-X01 по FU-2026-10-13-004 и сверить metadata/fixture по FU-2026-10-11-001 |
 
 Разрешён 2026-10-12: [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]] по [решению пользователя](../docs/sprint_2/2026-10-12-save-recovery-rules-decision.md).
 
@@ -63,12 +67,12 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 ## Current Discovery Queue
 
-Основные доменные развилки first save закрыты. Следующий `/discover` не должен заново спрашивать snapshot-vs-diff, one-internal-vertex guard, AOI boundary, token/idempotency semantics, event cadence, baseline naming/mapping или состав event evidence. Открыты четыре точечных implementation/model choice:
+Основные доменные развилки first save закрыты. Следующий `/discover` не должен заново спрашивать snapshot-vs-diff, one-internal-vertex guard, AOI boundary, token/idempotency semantics, event cadence, baseline naming/mapping или состав event evidence. По [[Wiki/_registry/questions]] открыты 2 вопроса сверки с существующим кодом и Sprint 2:
 
-- Как называется утверждённая спецификация продукта данных, какова её версия, область действия и числовой positional tolerance?
 - Какие фактические CRS, coordinate unit, `xyResolution`, `xyTolerance`, origin/domain и transformations имеет сохраняющий demo dataset?
-- Какая текущая demo line имеет eligible внутреннюю shape vertex и какие before/after fixture coordinates используются? Текущий seed-контекст такого объекта не подтверждает.
-- Какой records policy задаёт долгосрочный срок хранения immutable save-operation history после закрытия `EditVersion`?
+- Как выбранная в seed eligible line `L-003` и её before/after fixture coordinates соответствуют принятым критериям? Вопрос не закрывается без содержательной сверки по `FU-2026-10-11-001`.
+
+Учебная positional specification и records policy уже приняты: [[Wiki/specifications/simulated_line_positional_acceptance]] и [[Wiki/policies/change_history_retention_policy]]. Их реализация и привязка evidence к L-003 не подтверждены этой синхронизацией.
 
 Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevant `traceResult` / `subnetworkStatus` важны после реализации persisted draft path.
 
@@ -118,3 +122,19 @@ Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevan
 Этот раздел заменяет прежние выводы об отсутствии реальных ответственных/specification/records policy и ожидании принятия новых предложений. [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] принимает правила модели, а не подтверждает их реализацию. [[Wiki/conflicts/2026-10-13-real-organization-vs-simulated-decisions]] resolved. В questions остаются 2 вопроса сверки metadata/fixture; follow-up open: 19. Активных канонических blocking conflicts: 0.
 
 [[DDD_Wiki/use_cases/interrupted_edit_work_recovery]] active. Новых агрегатов, auth roles, событий или длительных транзакций нет. SIM-UGIS-POS-001 задаёт учебную точность; SIM-UGIS-RET-001 — сроки. Existing first-save UNVERIFIED, topology not_checked и downstream guards сохранены. Legacy сведения выше исторические; фактическая реализация/metadata требуют отдельной сверки по FU-2026-10-11-001 и FU-2026-10-13-004, stale не снят.
+
+## Актуальное уточнение после ingest 2026-10-16
+
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]] добавил [[Wiki/specifications/editing_resumption_allowed]] и уточнил recovery policy/use case/state machine без новых aggregates, server states и auth roles. 15 ответов зафиксированы как решения условной организации; новых активных blocking conflicts нет. Два прежних вопроса metadata/fixture остаются открытыми до явной сверки реестра; source-level основания уже описаны в [[Code_wiki/архитектура/edit_geometry_fixture_metadata]].
+
+Технический ingest Save/recovery выполнен: [[Code_wiki/архитектура/edit_version_save_orchestration]], [[Code_wiki/архитектура/frontend_save_recovery]]. Старые требования повторить этот ingest ниже/выше исторические. Метка stale сохраняется из-за несогласованной очереди реализации и metadata/fixture. Отсутствие прямого component-вызова recovery не означает отсутствие пути: store вызывает restorePendingSave из open/restore. UI Save/Revert и явное продолжение после access block требуют отдельной реализации/приёмки; S2-X01 не закрыт.
+
+## Пригодность данных и границы вычисления — 2026-10-16
+
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research]] добавил сценарий [[DDD_Wiki/use_cases/assess_saved_line_quality]] и два канонических узла: [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/saved_line_quality_assessment]]. Критерий SIM-UGIS-POS-001 не меняется; уточнено доказательство прохождения/несоответствия при численной неопределённости, смешанные причины неприёмки и привязка к состоянию.
+
+Остаются 2 open metadata/fixture, 19 open follow-up и 0 активных канонических blocking conflicts. Новые ответы не доказывают фактическую БД, runtime acceptance или готовность reviewer/evaluator. Stale сохраняется до существующей сверки FU-2026-10-11-001. Следующий discovery не должен повторять эти 15 правил; следующий шаг — сверка паспорта и реализации в пределах отдельных задач.
+
+## Смысл правки и сетевые последствия — 2026-10-16
+
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]] уточняет существующий workflow через [[Wiki/glossary/network_edit_meaning]] и [[Wiki/policies/network_edit_semantics_policy]]. Новые aggregate/state/API не вводятся. Предметные ответы приняты для условной организации, runtime и фактическая БД не подтверждены. Остаются 19 open follow-up, 2 вопроса metadata/fixture и 0 активных канонических blocking conflicts; stale сохраняется по FU-2026-10-11-001.

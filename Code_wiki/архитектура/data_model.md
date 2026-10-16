@@ -3,9 +3,9 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-10-13
-source: repository-change:2026-07-09
-tags: [database, postgis, sqlalchemy, geojson, stale]
+updated: 2026-10-16
+source: repository-change:2026-10-16
+tags: [database, postgis, sqlalchemy, geojson]
 ---
 
 # Data Model And Spatial Storage
@@ -21,7 +21,8 @@ tags: [database, postgis, sqlalchemy, geojson, stale]
   `network_associations`, `network_states`, per-WorkOrder `default_states`,
   `default_state_features`, `default_state_associations`.
 - Work-order schema `work_order`: `aois`, `work_orders`, `edit_versions`,
-  `edit_version_features`, `edit_version_associations`.
+  `edit_version_features`, `edit_version_associations`, `edit_version_commands`,
+  `edit_version_change_events`.
 
 `utility_network` хранит актуальную инженерную сеть и baseline-срезы для
 конкретных work orders, но не владеет AOI. `work_order` хранит агрегат задачи,
@@ -59,8 +60,10 @@ Pagination использует `id > after_id`, сортировку `id ASC`, 
 `work_order_id`/`edit_version_id`: `WorkOrder`, `EditVersion`, `work_order.AOI`,
 features из `edit_version_features`, пересекающие AOI через `ST_Intersects`, и
 associations, у которых оба endpoint feature попали в рабочую область. Geometry
-возвращается как GeoJSON через `ST_AsGeoJSON(...).cast(JSONB)`, AOI дополнительно
-возвращает extent.
+features передаётся как EWKB hex, decoding выполняет WorkspaceService после
+access guards. AOI display использует `ST_AsGeoJSON` и дополнительно возвращает
+extent. Current/baseline pairs и revision читаются тем же statement; pairs не
+ограничены AOI — [[edit_version_api_readback]].
 
 SQL для workspace aggregate вынесен в
 `apps/backend/utility_service/infrastructure/postgresql/sql/workspace_aggregate.sql`.
@@ -69,6 +72,17 @@ SQL для workspace aggregate вынесен в
 `associations_data` через join к этому CTE. Это убирает повторное вычисление AOI
 membership и фиксирует правило: association попадает в workspace только когда оба
 ее endpoint feature входят в материализованный AOI-scoped набор.
+
+## First-Save Registry И История
+
+`b7d2e9f4a6c8` добавляет `draft_revision` с начальным значением 1, operational
+registry с глобальным PK CommandId и отдельную append-only историю событий.
+Deferred trigger запрещает commit `running`; terminal результат и mutation
+атомарны. История содержит before/after geometry и соседние revisions, не имеет
+FK на удаляемый рабочий контекст; UPDATE/DELETE/TRUNCATE запрещены.
+`c8e3f0a5b7d9` сохраняет immutable geometry policy версии. Подробные ограничения
+и исключение access-resume — [[edit_version_save_orchestration]]. Эти таблицы
+не реализуют архив/удержания и сроки SIM-UGIS-RET-001.
 
 ## Миграции И Seed
 
@@ -127,6 +141,12 @@ dependencies читаются через `SeedUtilityDatasetRepository`, а
 `work_order.AOI` scope и per-WorkOrder `DefaultState`. Если `WO-001` уже существует, seed не меняет
 assignee, status, title или description, но гарантирует наличие `work_order.AOI`
 и активного `DefaultState` для этого work order.
+
+## Fixture И Metadata
+
+Seed содержит eligible `L-003` с одной внутренней вершиной; before/after
+координаты и ограничения фактической БД описаны в [[edit_geometry_fixture_metadata]].
+Default geometry grid не является измеренной positional accuracy.
 
 ## Связанные Ноды
 

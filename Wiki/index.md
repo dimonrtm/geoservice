@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-13
+updated: 2026-10-16
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -65,3 +65,15 @@ tags: [domain-knowledge, ddd]
 [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] заменяет ожидание принятия прежних предложений: recovery, дефекты источника, evidence, основание правки и хранение приняты как правила модели. См. [[Wiki/policies/recovery_case_resolution_policy]], [[Wiki/policies/edit_change_justification_policy]], [[Wiki/policies/geometry_quality_escalation_policy]], [[Wiki/policies/positional_accuracy_acceptance_policy]], [[Wiki/policies/change_history_retention_policy]].
 
 Новая [[Wiki/specifications/simulated_line_positional_acceptance]] задаёт SIM-UGIS-POS-001 v1.0 и аналитическое evidence. Она не подтверждает реальную точность L-003. Остались 2 вопроса сверки metadata/fixture; шесть организационных/модельных вопросов отвечены. [[Wiki/conflicts/2026-10-13-real-organization-vs-simulated-decisions]] resolved, реализация отдельно в FU-2026-10-13-004. Исторический RAW сохранён.
+
+## Пограничные случаи восстановления 2026-10-16
+
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]] уточняет [[Wiki/policies/editor_recovery_policy]], [[Wiki/policies/recovery_case_resolution_policy]] и [[Wiki/glossary/editing_result_states]]. Новая [[Wiki/specifications/editing_resumption_allowed]] отделяет выяснение исхода, разрешение новой записи и закрытие разбора. Правила условной организации активны; реализация и проверка отдельно.
+
+## Пригодность данных и доказательная оценка
+
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research]] содержит 17 веб-источников и 15 ответов. Канонические правила: [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/saved_line_quality_assessment]]. Числовые критерии сохранены; реализация и фактическая проверка данных не заявлены.
+
+## Смысл правки инженерной сети — 2026-10-16
+
+[[Wiki/glossary/network_edit_meaning]] и [[Wiki/policies/network_edit_semantics_policy]] различают исправление сведений, физическое изменение и оформление; 15 ответов [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]] задают границы передачи без расширения реализации.

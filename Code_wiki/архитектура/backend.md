@@ -3,14 +3,12 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-11
-source: repository-change:2026-10-10
-tags: [backend, fastapi, postgis, architecture, stale]
+updated: 2026-10-16
+source: repository-change:2026-10-16
+tags: [backend, fastapi, postgis, architecture]
 ---
 
 # Backend Architecture
-
-> Проверка `/sync-vision` от 2026-10-11: описание Save service устарело — в `EditVersionService.save_geometry` уже есть orchestration сохранения, replay, отклонений и событий. Содержательная синхронизация ожидает `/ingest repository-change`; см. `FU-2026-10-11-001` в [[../../Vision_wiki/decisions/followups/index]].
 
 Backend GeoService находится в `apps/backend` и собран вокруг пакета `utility_service`.
 Код разделен на пакеты с направлением зависимостей от внешнего адаптера к use cases и
@@ -84,9 +82,14 @@ statement.
 `EditVersion`: root lock, отдельное чтение current/baseline/AOI, PostGIS validation
 и UPDATE только geometry/operation target. Геометрия не является отдельным
 агрегатом. Repository работает внутри transaction вызывающего сервиса, не
-меняет authoritative DefaultState и не управляет revision/registry/events.
+меняет authoritative DefaultState. Он предоставляет операции registry/revision/events;
+порядок вызовов и transaction определяет `EditVersionService`.
 Lifetime handles и ограничения конкурентного доступа описаны в
-[[edit_version_persistence]]. Production Save service ещё не подключён.
+[[edit_version_persistence]]. `EditVersionService.save_geometry` подключён к geometry PUT: mutation, revision,
+terminal result и событие фиксируются атомарно; domain rejection после reservation
+коммитится перед HTTP error, infrastructure failure откатывает транзакцию.
+Replay возвращает исходный result после текущих access guards, а workspace GET
+читает current — [[edit_version_save_orchestration]], [[edit_version_api_readback]].
 
 ## EditVersion Foundation
 

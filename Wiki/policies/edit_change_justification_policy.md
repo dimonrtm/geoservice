@@ -3,8 +3,8 @@ title: Основание и объяснение изменения геоме�
 type: policy
 status: active
 created: 2026-10-13
-updated: 2026-10-13
-source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
+updated: 2026-10-16
+source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research.md"
 tags: [domain-knowledge, policy, editing, evidence]
 confidence: high
 related: [Wiki/entities/work_order, Wiki/entities/edit_version, Wiki/domain_events/edit_version_change_set_persisted, Wiki/policies/change_history_retention_policy]
@@ -55,3 +55,7 @@ API, command fingerprint и event schema этим ingest не меняются. 
 ## Exceptions
 
 В ближайшем demo пояснение может находиться в наряде или обращении. Обязательность, место хранения и связь с сохранением требуют отдельного решения; этот ingest не меняет API, command fingerprint или event schema. См. `FU-2026-10-13-003` в [[Vision_wiki/decisions/followups/index]].
+
+## Смысл и передача правки — 2026-10-16
+
+[[Wiki/policies/network_edit_semantics_policy]] уточняет содержание существующего пояснения: классификация намерения, связь основания с объектом/участком, точное состояние, ограничения и следующее решение. Частичный результат не обозначает выполнение неделимого задания. Ручная карточка достаточна до отдельной реализации; новый обязательный параметр Save не вводится. Ответы 1–15 — [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]].
