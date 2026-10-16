@@ -25,6 +25,7 @@ vi.mock("@/api/auth", () => ({
 vi.mock("@/stores/workOrders", () => ({
   useWorkOrdersStore: () => ({
     reset: resetWorkOrdersMock,
+    suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
   }),
 }));
 

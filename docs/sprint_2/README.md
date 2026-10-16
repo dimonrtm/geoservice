@@ -9,6 +9,10 @@
 
 ## Артефакты По Дням
 
+- [Анализ Дня 9: frontend contracts и state](2026-10-14-day-9-frontend-state-analysis.md) — сверка frontend/backend и wiki, ответы на вопросы и согласование разделов дизайна.
+- [Спецификация Дня 9: frontend contracts и state](2026-10-14-day-9-frontend-state-design.md) — local draft, pending command, canonical readback, sessionStorage и автоматические retry; принята пользователем 14 октября 2026 года.
+- [План реализации Дня 9](2026-10-14-day-9-frontend-state-plan.md) — семь последовательных задач с интерфейсами и проверками; выполнен 15 октября 2026 года.
+
 - [Анализ Дня 8: API и durable readback](2026-10-12-day-8-api-readback-analysis.md) — сверка кода, Wiki/DDD_Wiki и уточнения, включая сохранение parsing boundary Дня 4.
 - [Спецификация Дня 8: API и durable readback](2026-10-12-day-8-api-readback-design.md) — расширение workspace и подключение Save API; принята пользователем 12 октября 2026 года.
 - [План реализации Дня 8](2026-10-12-day-8-api-readback-plan.md) — шесть выполненных задач API/readback/OpenAPI.
@@ -51,3 +55,6 @@
 - `2026-08-16-sprint-2-acceptance-report.md` — будущий отчёт о фактической приёмке; создаётся после реализации и полного прогона сценария.
 
 Все новые human-readable материалы этого спринта следует добавлять в `docs/sprint_2/` и писать на русском, сохраняя paths, commands, API names, types и identifiers без перевода.
+
+- [Отчёт реализации Дня 9](2026-10-15-day-9-frontend-state-implementation-report.md) — результат, матрица проверок и ограничения.
+- [Журнал исполнения Дня 9](2026-10-15-day-9-execution-ledger.md) — решения исполнения и review.

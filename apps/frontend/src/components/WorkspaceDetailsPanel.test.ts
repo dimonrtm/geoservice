@@ -65,6 +65,10 @@ function workspace(): WorkspaceResponse {
         id: "ev-secret-1",
         status: "open",
         baseNetworkRevision: 7,
+        draftVersionToken: "1",
+        hasPersistedChangeSet: false,
+        basicValidation: null,
+        changeSet: null,
         features: {
           type: "FeatureCollection",
           features: [

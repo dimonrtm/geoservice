@@ -5,6 +5,7 @@ import type {
   MultiPolygon,
   Polygon,
 } from "geojson";
+import type { BasicValidation, WorkspaceChangeSet } from "./workspace-edit";
 
 export type WorkOrderStatus = "assigned" | "in_progress";
 
@@ -78,6 +79,10 @@ export type WorkspaceResponse = {
       id: string;
       status: EditVersionStatus;
       baseNetworkRevision: number;
+      draftVersionToken: string;
+      hasPersistedChangeSet: boolean;
+      basicValidation: BasicValidation | null;
+      changeSet: WorkspaceChangeSet | null;
       features: WorkspaceFeatureCollection;
       associations: WorkspaceAssociation[];
     };

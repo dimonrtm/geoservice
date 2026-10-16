@@ -65,6 +65,10 @@ function workspaceResponse(
         id: editVersionId,
         status: "open",
         baseNetworkRevision: 1,
+        draftVersionToken: "1",
+        hasPersistedChangeSet: false,
+        basicValidation: null,
+        changeSet: null,
         features: {
           type: "FeatureCollection",
           features: [

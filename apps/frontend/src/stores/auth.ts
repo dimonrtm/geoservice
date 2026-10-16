@@ -63,6 +63,10 @@ export const useAuthStore = defineStore(
     actions: {
       setAuth(token: string, user: AuthUser, options: SetAuthOptions = {}) {
         const previousUserId = authUserId(this.user);
+        if (previousUserId && previousUserId !== user.id)
+          useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
+            previousUserId,
+          );
 
         this.token = token;
         this.user = user;
@@ -77,12 +81,20 @@ export const useAuthStore = defineStore(
       },
       setUser(user: AuthUser | null) {
         const previousUserId = authUserId(this.user);
+        if (previousUserId && previousUserId !== authUserId(user))
+          useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
+            previousUserId,
+          );
 
         this.user = user;
         resetWorkOrdersIfUserIdChanged(previousUserId, authUserId(user));
       },
       clearLocalSession(options: ClearLocalSessionOptions = {}) {
         const previousUserId = authUserId(this.user);
+        if (previousUserId || options.forceWorkOrdersReset)
+          useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
+            previousUserId ?? undefined,
+          );
 
         this.token = null;
         this.user = null;
@@ -108,6 +120,9 @@ export const useAuthStore = defineStore(
       },
       async loginWithPassword(email: string, password: string) {
         const result = await login(email, password);
+        useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
+          result.user.id,
+        );
         this.setAuth(result.access_token, result.user);
         this.isReady = true;
         this.isRestoring = false;
