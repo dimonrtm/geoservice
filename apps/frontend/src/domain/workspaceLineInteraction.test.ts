@@ -143,6 +143,8 @@ describe("workspace line constraints", () => {
       operation: "updated",
     };
     persisted.workOrder.editVersion.changeSet!.featureId = "different";
-    expect(lineSelectionBlockReason(persisted, target.featureId)).not.toBeNull();
+    expect(
+      lineSelectionBlockReason(persisted, target.featureId),
+    ).not.toBeNull();
   });
 });

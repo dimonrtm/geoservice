@@ -160,7 +160,10 @@ export function useWorkspaceLineInteraction(
     if (!pending || !available.value || pending.draft !== store.localDraft)
       return;
     if (pending.featureId !== null) {
-      const reason = lineSelectionBlockReason(workspace.value, pending.featureId);
+      const reason = lineSelectionBlockReason(
+        workspace.value,
+        pending.featureId,
+      );
       if (reason) {
         message.value = reason;
         return;
@@ -221,7 +224,9 @@ export function useWorkspaceLineInteraction(
     } else if (eligible.length === 1) select(eligible[0]!);
     else if (ids.length)
       message.value = [
-        ...new Set(ids.map((id) => lineSelectionBlockReason(workspace.value, id))),
+        ...new Set(
+          ids.map((id) => lineSelectionBlockReason(workspace.value, id)),
+        ),
       ].join(" ");
     else select(null);
   }
