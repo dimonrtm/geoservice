@@ -2,6 +2,7 @@ import type { FeatureCollection, Geometry } from "geojson";
 import type { GeoJSONSource, Map } from "maplibre-gl";
 
 import type { WorkspaceResponse } from "@/contracts/work-orders";
+import type { WorkspaceLocalDraft } from "@/domain/workspaceDraft";
 
 const emptyFeatureCollection: FeatureCollection<
   Geometry,
@@ -29,6 +30,7 @@ export function ensureWorkspaceLayers(map: Map | null): void {
   if (!map.getSource(featureSourceId)) {
     map.addSource(featureSourceId, {
       type: "geojson",
+      promoteId: "__workspaceFeatureId",
       data: emptyFeatureCollection,
     });
   }
@@ -95,8 +97,18 @@ export function ensureWorkspaceLayers(map: Map | null): void {
       false,
     ],
     paint: {
-      "line-color": "#0f766e",
-      "line-width": 3,
+      "line-color": [
+        "case",
+        ["==", ["get", "__workspaceSelected"], true],
+        "#ea580c",
+        "#0f766e",
+      ],
+      "line-width": [
+        "case",
+        ["==", ["get", "__workspaceSelected"], true],
+        5,
+        3,
+      ],
     },
   });
   addLayerIfMissing(map, {
@@ -122,9 +134,6 @@ export function setWorkspaceData(
   }
 
   const aoiSource = map.getSource(aoiSourceId) as GeoJSONSource | undefined;
-  const featureSource = map.getSource(featureSourceId) as
-    | GeoJSONSource
-    | undefined;
 
   aoiSource?.setData({
     type: "FeatureCollection",
@@ -139,7 +148,7 @@ export function setWorkspaceData(
       },
     ],
   });
-  featureSource?.setData(workspace.workOrder.editVersion.features);
+  setWorkspaceDraftData(map, workspace, null);
 }
 
 export function fitWorkspaceToAoi(
@@ -158,6 +167,33 @@ export function fitWorkspaceToAoi(
     ],
     { padding: 48, duration: 0 },
   );
+}
+
+export function setWorkspaceDraftData(
+  map: Map,
+  workspace: WorkspaceResponse,
+  draft: WorkspaceLocalDraft | null,
+): void {
+  const source = map.getSource(featureSourceId) as GeoJSONSource | undefined;
+  const data = {
+    type: "FeatureCollection",
+    features: workspace.workOrder.editVersion.features.features.map(
+      (feature) => ({
+        ...feature,
+        geometry:
+          draft?.featureId === feature.id
+            ? draft.candidateGeometry
+            : feature.geometry,
+        properties: {
+          ...feature.properties,
+          __workspaceFeatureId: feature.id,
+          __workspaceSelected: draft?.featureId === feature.id,
+        },
+      }),
+    ),
+  };
+  // Detach Vue proxies and mutable store references before the worker boundary.
+  source?.setData(JSON.parse(JSON.stringify(data)) as FeatureCollection);
 }
 
 function addLayerIfMissing(

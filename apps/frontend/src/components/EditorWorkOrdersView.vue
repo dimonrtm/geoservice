@@ -197,6 +197,7 @@ async function openSelectedWorkspace(): Promise<void> {
         v-if="workOrders.activeWorkspace"
         class="workspaceMap"
         mode="workspace"
+        :workspace-interactive="true"
         :workspace="workOrders.activeWorkspace"
         :workspace-key="workOrders.activeWorkspaceKey"
         :should-fit-workspace="

@@ -32,6 +32,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
+vi.mock("maplibre-gl", () => ({ Marker: vi.fn() }));
 
 vi.mock("@/stores/auth", () => ({
   useAuthStore: () => ({

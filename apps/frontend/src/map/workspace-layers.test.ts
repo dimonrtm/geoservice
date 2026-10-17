@@ -78,6 +78,19 @@ function fakeMap() {
 }
 
 describe("workspace map layers", () => {
+  it("promotes the workspace string identity through tile conversion without changing current", () => {
+    const map = fakeMap();
+    const ws = workspace();
+    ensureWorkspaceLayers(map as never);
+    setWorkspaceData(map as never, ws);
+    const source = map.getSource("workspace:features")!;
+    const data = setDataMock.mock.calls[1]![0];
+    const feature = data.features[0];
+    expect(feature.properties[source.promoteId as string]).toBe("feature-1");
+    expect(ws.workOrder.editVersion.features.features[0]!.properties).toEqual({
+      assetCode: "P-001",
+    });
+  });
   beforeEach(() => {
     vi.clearAllMocks();
   });

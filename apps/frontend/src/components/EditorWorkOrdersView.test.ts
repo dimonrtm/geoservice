@@ -7,7 +7,13 @@ import type { WorkspaceResponse } from "@/contracts/work-orders";
 vi.mock("@/components/MapView.vue", () => ({
   default: {
     name: "MapView",
-    props: ["mode", "workspace", "workspaceKey", "shouldFitWorkspace"],
+    props: [
+      "mode",
+      "workspace",
+      "workspaceKey",
+      "shouldFitWorkspace",
+      "workspaceInteractive",
+    ],
     emits: ["workspaceFitted"],
     template:
       '<div data-test="map-view" :data-mode="mode" :data-workspace-key="workspaceKey"></div>',
@@ -80,6 +86,26 @@ function workspaceResponse(): WorkspaceResponse {
 }
 
 describe("EditorWorkOrdersView", () => {
+  it("enables line interaction only for an opened workspace", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.loadAssigned = vi.fn();
+    store.restoreOpenedWorkspace = vi.fn();
+    const { default: EditorWorkOrdersView } =
+      await import("./EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    expect(
+      wrapper.findComponent({ name: "MapView" }).props("workspaceInteractive"),
+    ).not.toBe(true);
+    store.workspace = workspaceResponse();
+    store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    await flushPromises();
+    expect(
+      wrapper.findComponent({ name: "MapView" }).props("workspaceInteractive"),
+    ).toBe(true);
+    wrapper.unmount();
+  });
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();

@@ -28,6 +28,17 @@
         {{ realtimeStatusText }}
       </div>
       <div ref="mapEl" class="mapCanvas"></div>
+      <WorkspaceLineInteraction
+        v-if="
+          props.mode === 'workspace' &&
+          props.workspaceInteractive &&
+          props.workspace &&
+          map &&
+          mapReady
+        "
+        :map="map"
+        :workspace="props.workspace"
+      />
     </div>
   </div>
 </template>
@@ -43,6 +54,7 @@ import { useLayerRealtime } from "@/composables/map/useLayerRealtime";
 import { useLayerSelection } from "@/composables/map/useLayerSelection";
 import { useMapInstance } from "@/composables/map/useMapInstance";
 import { usePolygonEditing } from "@/composables/map/usePolygonEditing";
+import WorkspaceLineInteraction from "@/components/WorkspaceLineInteraction.vue";
 import {
   ensureWorkspaceLayers,
   fitWorkspaceToAoi,
@@ -55,18 +67,21 @@ const props = withDefaults(
     workspace?: WorkspaceResponse | null;
     workspaceKey?: string | null;
     shouldFitWorkspace?: boolean;
+    workspaceInteractive?: boolean;
   }>(),
   {
     mode: "editing",
     workspace: null,
     workspaceKey: null,
     shouldFitWorkspace: false,
+    workspaceInteractive: false,
   },
 );
 const emit = defineEmits<{
   workspaceFitted: [workspaceKey: string];
 }>();
 const mapEl = ref<HTMLDivElement | null>(null);
+const mapReady = ref(false);
 const auth = useAuthStore();
 const { map, createMap, destroyMap } = useMapInstance(mapEl);
 const {
@@ -184,6 +199,7 @@ onMounted(async () => {
 
     if (props.mode === "workspace") {
       renderWorkspace();
+      mapReady.value = true;
       return;
     }
 
@@ -219,6 +235,7 @@ watch(
 );
 
 onBeforeUnmount(() => {
+  mapReady.value = false;
   map.value?.off("moveend", onMoveEnd);
   unbindActiveLayerClick(activeLayer.value?.id);
   disableEditingOverlaySync();
