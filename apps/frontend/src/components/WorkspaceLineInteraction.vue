@@ -35,7 +35,9 @@ watch(
       )
         previousFocus.focus();
       else {
-        const editPanelHeading = document.getElementById("workspace-edit-heading");
+        const editPanelHeading = document.getElementById(
+          "workspace-edit-heading",
+        );
         if (editPanelHeading) editPanelHeading.focus();
         else props.map.getCanvas().focus();
       }
