@@ -54,6 +54,36 @@ function deferred<T>() {
   return { promise, resolve };
 }
 describe("Save recovery", () => {
+  it("restored success has no source evidence and never resends PUT", async () => {
+    writeRecoveryRecord({
+      schemaVersion: 1,
+      command,
+      state: "succeeded",
+      result: successFixture(),
+    });
+    const store = setup();
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    await store.restorePendingSave();
+    expect(store.didSaveChangeGeometry).toBeNull();
+    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+    expect(store.workspace?.workOrder.editVersion.draftVersionToken).toBe(
+      "revision-b",
+    );
+  });
+  it("late success cannot classify or replace another context", async () => {
+    const store = setup(true);
+    const response = deferred<ReturnType<typeof successFixture>>();
+    api.saveFeatureGeometry.mockReturnValue(response.promise);
+    const saving = store.saveLocalDraft();
+    const id = store.pendingCommand!.request.commandId;
+    store.clearOpenedWorkspace({ force: true });
+    response.resolve(successFixture(id));
+    await saving;
+    expect(store.didSaveChangeGeometry).toBeNull();
+    expect(store.submittedSourceGeometry).toBeNull();
+    expect(store.workspace).toBeNull();
+    expect(api.fetchWorkspace).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.resetAllMocks();

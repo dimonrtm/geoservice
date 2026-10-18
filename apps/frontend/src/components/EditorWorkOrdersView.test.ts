@@ -94,6 +94,9 @@ describe("EditorWorkOrdersView", () => {
     const { default: EditorWorkOrdersView } =
       await import("./EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
     expect(
       wrapper.findComponent({ name: "MapView" }).props("workspaceInteractive"),
     ).not.toBe(true);
@@ -101,6 +104,14 @@ describe("EditorWorkOrdersView", () => {
     store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
     store.openedEditVersionId = "ev-1";
     await flushPromises();
+    const commands = wrapper.get(
+      '[data-test="workspace-edit-commands"]',
+    ).element;
+    expect(
+      commands.compareDocumentPosition(
+        wrapper.get('[data-test="map-view"]').element,
+      ) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(
       wrapper.findComponent({ name: "MapView" }).props("workspaceInteractive"),
     ).toBe(true);

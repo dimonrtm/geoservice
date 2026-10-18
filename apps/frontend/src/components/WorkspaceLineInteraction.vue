@@ -6,7 +6,7 @@ import { useWorkspaceLineInteraction } from "@/composables/map/useWorkspaceLineI
 const props = defineProps<{ map: Map; workspace: WorkspaceResponse }>();
 const { message, choices, confirmation, select, confirmDiscard } =
   useWorkspaceLineInteraction(toRef(props, "map"), toRef(props, "workspace"));
-const panel = ref<HTMLElement | null>(null);
+const dialog = ref<HTMLElement | null>(null);
 let previousFocus: HTMLElement | null = null;
 watch(
   () =>
@@ -20,16 +20,38 @@ watch(
       if (previousMode === "closed")
         previousFocus = document.activeElement as HTMLElement | null;
       await nextTick();
-      panel.value?.querySelector<HTMLButtonElement>("button")?.focus();
+      if (
+        mode === "confirmation" &&
+        dialog.value instanceof HTMLDialogElement &&
+        !dialog.value.open
+      )
+        dialog.value.showModal();
+      dialog.value?.querySelector<HTMLButtonElement>("button")?.focus();
     } else {
-      if (previousFocus?.isConnected) previousFocus.focus();
-      else props.map.getCanvas().focus();
+      await nextTick();
+      if (
+        previousFocus?.isConnected &&
+        !(previousFocus instanceof HTMLButtonElement && previousFocus.disabled)
+      )
+        previousFocus.focus();
+      else {
+        const editPanelHeading = document.getElementById("workspace-edit-heading");
+        if (editPanelHeading) editPanelHeading.focus();
+        else props.map.getCanvas().focus();
+      }
     }
   },
 );
 function close() {
+  if (dialog.value instanceof HTMLDialogElement && dialog.value.open)
+    dialog.value.close();
   confirmation.value = null;
   choices.value = [];
+}
+function discard() {
+  if (dialog.value instanceof HTMLDialogElement && dialog.value.open)
+    dialog.value.close();
+  confirmDiscard();
 }
 function keydown(event: KeyboardEvent) {
   if (event.key === "Escape") {
@@ -38,7 +60,7 @@ function keydown(event: KeyboardEvent) {
     close();
   }
   if (event.key !== "Tab") return;
-  const buttons = panel.value?.querySelectorAll<HTMLButtonElement>("button");
+  const buttons = dialog.value?.querySelectorAll<HTMLButtonElement>("button");
   if (!buttons?.length) return;
   const first = buttons[0]!,
     last = buttons[buttons.length - 1]!;
@@ -67,13 +89,14 @@ function keydown(event: KeyboardEvent) {
     >
       {{ message }}
     </p>
-    <section
+    <dialog
       v-if="confirmation"
-      ref="panel"
+      ref="dialog"
       role="dialog"
       aria-modal="true"
       aria-label="Отменить несохранённую правку?"
       class="interactionPanel"
+      @cancel.prevent="close"
     >
       <h3>Отменить несохранённую правку?</h3>
       <p>Линия вернётся к последнему сохранённому состоянию.</p>
@@ -81,14 +104,14 @@ function keydown(event: KeyboardEvent) {
         <button type="button" data-test="keep-draft" @click="close">
           Продолжить правку
         </button>
-        <button type="button" data-test="discard-draft" @click="confirmDiscard">
+        <button type="button" data-test="discard-draft" @click="discard">
           Отменить правку
         </button>
       </div>
-    </section>
+    </dialog>
     <section
       v-else-if="choices.length"
-      ref="panel"
+      ref="dialog"
       role="dialog"
       aria-modal="false"
       aria-label="Выберите линию"
@@ -165,6 +188,15 @@ button:focus-visible {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+dialog.interactionPanel {
+  margin: auto;
+  max-width: min(380px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+dialog::backdrop {
+  background: rgb(15 23 42 / 35%);
 }
 </style>
 <style>

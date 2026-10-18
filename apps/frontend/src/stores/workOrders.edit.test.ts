@@ -56,6 +56,96 @@ describe("Save orchestration", () => {
     sessionStorage.clear();
     setActivePinia(createPinia());
   });
+  it("discards to persisted current while keeping the selected vertex", () => {
+    const store = editableStore();
+    store.workspace = workspaceFixture(true);
+    store.$patch({ localDraft: null });
+    store.beginLocalEdit(target.featureId, 1);
+    store.moveLocalVertex([65.1, 44.3]);
+    expect(store.discardLocalChangesKeepingSelection()).toBe(true);
+    expect(store.localDraft).toMatchObject({
+      featureId: target.featureId,
+      vertexIndex: 1,
+      sourceToken: "revision-b",
+      candidateGeometry: {
+        coordinates: [
+          [65, 44],
+          [65.1, 44.2],
+          [65.2, 44],
+        ],
+      },
+    });
+    expect(store.localDraft?.candidateGeometry).toEqual(
+      store.localDraft?.sourceGeometry,
+    );
+    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+  });
+  it.each([
+    "stale",
+    "sending",
+    "unknown",
+    "reading-current",
+    "blocked",
+  ] as const)("refuses discard during %s", (phase) => {
+    const store = editableStore();
+    const draft = store.localDraft;
+    store.phase = phase;
+    expect(store.discardLocalChangesKeepingSelection()).toBe(false);
+    expect(store.localDraft).toBe(draft);
+  });
+  it("does not resubmit the rejected candidate until it is corrected", async () => {
+    const store = editableStore();
+    api.saveFeatureGeometry.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: {
+          code: "GEOMETRY_INVALID",
+          message: "invalid",
+          correlationId: null,
+        },
+      },
+    });
+    await store.saveLocalDraft();
+    await store.saveLocalDraft();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    store.moveLocalVertex([65.1, 44.3]);
+    await store.saveLocalDraft();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(2);
+  });
+  it("starts one request for concurrent Save calls", async () => {
+    const store = editableStore();
+    let resolve!: (value: ReturnType<typeof successFixture>) => void;
+    api.saveFeatureGeometry.mockImplementation(
+      () =>
+        new Promise((r) => {
+          resolve = r;
+        }),
+    );
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    const first = store.saveLocalDraft();
+    await store.saveLocalDraft();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    resolve(
+      successFixture(api.saveFeatureGeometry.mock.calls[0]![1].commandId),
+    );
+    await first;
+  });
+  it("classifies canonical no-op against submitted current rather than baseline", async () => {
+    const store = editableStore();
+    store.workspace = workspaceFixture(true);
+    store.$patch({ localDraft: null });
+    store.beginLocalEdit(target.featureId, 1);
+    store.moveLocalVertex([65.1, 44.200000001]);
+    api.saveFeatureGeometry.mockImplementation((_t, r) =>
+      Promise.resolve(successFixture(r.commandId)),
+    );
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    await store.saveLocalDraft();
+    expect(store.didSaveChangeGeometry).toBe(false);
+    store.clearOpenedWorkspace({ force: true });
+    expect(store.didSaveChangeGeometry).toBeNull();
+  });
   it("writes before PUT and reads canonical current after success", async () => {
     const store = editableStore();
     api.saveFeatureGeometry.mockImplementation((_target, request) => {

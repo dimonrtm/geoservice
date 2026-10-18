@@ -13,6 +13,8 @@ import {
   type GeometrySaveResult,
   type WorkspaceRecoveryRecord,
   type PendingGeometryCommand,
+  type LineStringXY,
+  isLineStringXY,
 } from "@/contracts/workspace-edit";
 import { useAuthStore } from "./auth";
 import {
@@ -57,6 +59,9 @@ type ClearOpenedWorkspaceOptions = {
 };
 
 type WorkOrdersState = {
+  submittedSourceGeometry: LineStringXY | null;
+  submittedCommandId: string | null;
+  rejectedCandidateGeometry: LineStringXY | null;
   recoveryRecord: WorkspaceRecoveryRecord | null;
   editRequestSeq: number;
   saveError: string | null;
@@ -260,6 +265,9 @@ function isWorkspaceAccessFailure(error: ParsedApiError): boolean {
 
 function createInitialWorkOrdersState(): WorkOrdersState {
   return {
+    submittedSourceGeometry: null,
+    submittedCommandId: null,
+    rejectedCandidateGeometry: null,
     recoveryRecord: null,
     editRequestSeq: 0,
     saveError: null,
@@ -289,6 +297,19 @@ function createInitialWorkOrdersState(): WorkOrdersState {
 export const useWorkOrdersStore = defineStore("workOrders", {
   state: createInitialWorkOrdersState,
   getters: {
+    didSaveChangeGeometry: (state): boolean | null => {
+      if (
+        !state.commandResult ||
+        !state.submittedSourceGeometry ||
+        state.commandResult.commandId !== state.submittedCommandId
+      )
+        return null;
+      return (
+        JSON.stringify(
+          state.commandResult.updatedFeature.geometry.coordinates,
+        ) !== JSON.stringify(state.submittedSourceGeometry.coordinates)
+      );
+    },
     pendingCommand: (state): PendingGeometryCommand | null =>
       state.recoveryRecord?.command ?? null,
     canLeaveWorkspace: (state): boolean =>
@@ -426,11 +447,18 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       if (
         !auth.isAuthenticated ||
         !auth.user ||
+        auth.user.role !== "editor" ||
         !this.localDraft ||
         !isLocalDraftDirty(this.localDraft) ||
         !this.activeWorkspace ||
         this.recoveryRecord ||
         !["editing", "rejected"].includes(this.phase)
+      )
+        return;
+      if (
+        this.rejectedCandidateGeometry &&
+        JSON.stringify(this.localDraft.candidateGeometry.coordinates) ===
+          JSON.stringify(this.rejectedCandidateGeometry.coordinates)
       )
         return;
       const existing = readRecoveryRecord(auth.user.id);
@@ -458,6 +486,15 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         this.recoveryRecord = null;
         return;
       }
+      const source =
+        this.activeWorkspace.workOrder.editVersion.features.features.find(
+          (feature) => feature.id === command.target.featureId,
+        )?.geometry;
+      this.submittedSourceGeometry = isLineStringXY(source)
+        ? copyGeometry(source)
+        : null;
+      this.submittedCommandId = command.request.commandId;
+      this.rejectedCandidateGeometry = null;
       this.commandResult = null;
       this.saveError = null;
       this.readbackError = null;
@@ -507,6 +544,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           return false;
         }
         this.saveError = failure.error.code;
+        this.rejectedCandidateGeometry = copyGeometry(command.request.geometry);
         this.recoveryRecord = {
           schemaVersion: 1,
           command,
@@ -697,6 +735,10 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     beginLocalEdit(featureId: string, vertexIndex: number): boolean {
       if (
         !this.activeWorkspace ||
+        this.storageError ||
+        ["FEATURE_NOT_EDITABLE", "WORK_ORDER_CONTEXT_INVALID"].includes(
+          this.saveError ?? "",
+        ) ||
         this.recoveryRecord ||
         !["idle", "editing", "rejected"].includes(this.phase)
       )
@@ -729,6 +771,10 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     moveLocalVertex(xy: [number, number]): boolean {
       if (
         !this.localDraft ||
+        this.storageError ||
+        ["FEATURE_NOT_EDITABLE", "WORK_ORDER_CONTEXT_INVALID"].includes(
+          this.saveError ?? "",
+        ) ||
         this.recoveryRecord ||
         !["editing", "rejected"].includes(this.phase)
       )
@@ -749,8 +795,39 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       )
         return false;
       this.localDraft = null;
+      this.rejectedCandidateGeometry = null;
+      this.saveError = null;
       this.phase = "idle";
       this.editBlockReason = null;
+      return true;
+    },
+    discardLocalChangesKeepingSelection(): boolean {
+      const auth = useAuthStore();
+      if (
+        !auth.isAuthenticated ||
+        auth.user?.role !== "editor" ||
+        this.hasAccessSuspension(auth.user.id) ||
+        !this.activeWorkspace ||
+        !this.localDraft ||
+        !isLocalDraftDirty(this.localDraft) ||
+        this.recoveryRecord ||
+        this.storageError ||
+        !["editing", "rejected"].includes(this.phase)
+      )
+        return false;
+      const draft = createLocalDraft(
+        this.activeWorkspace,
+        this.localDraft.featureId,
+        this.localDraft.vertexIndex,
+      );
+      this.localDraft = draft;
+      this.phase = "editing";
+      this.saveError = null;
+      this.editBlockReason = null;
+      this.commandResult = null;
+      this.submittedSourceGeometry = null;
+      this.submittedCommandId = null;
+      this.rejectedCandidateGeometry = null;
       return true;
     },
     reset(options: ResetWorkOrdersOptions = {}): void {
@@ -1057,6 +1134,9 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     },
     clearOpenedWorkspace(options: ClearOpenedWorkspaceOptions = {}): void {
       if (!options.force && !this.allowWorkspaceNavigation()) return;
+      this.submittedSourceGeometry = null;
+      this.submittedCommandId = null;
+      this.rejectedCandidateGeometry = null;
       this.localDraft = null;
       if (options.force) {
         this.recoveryRecord = null;

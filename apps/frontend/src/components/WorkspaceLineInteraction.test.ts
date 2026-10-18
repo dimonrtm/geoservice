@@ -5,6 +5,7 @@ import { markRaw } from "vue";
 import type { Map as LibreMap } from "maplibre-gl";
 import type { FeatureCollection } from "geojson";
 import WorkspaceLineInteraction from "./WorkspaceLineInteraction.vue";
+import WorkspaceEditCommands from "./WorkspaceEditCommands.vue";
 import { useWorkOrdersStore } from "@/stores/workOrders";
 import { useAuthStore } from "@/stores/auth";
 import { workspaceFixture, target } from "@/test/workspaceEditFixture";
@@ -145,8 +146,14 @@ function setup() {
   };
   return { wrapper, store, click, drag, handlers, rendered: () => rendered };
 }
-const wrappers: Array<ReturnType<typeof setup>["wrapper"]> = [];
+const wrappers: Array<{ unmount(): void }> = [];
 beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
   doubles.markers.length = 0;
   vi.clearAllMocks();
   sessionStorage.clear();
@@ -162,6 +169,82 @@ function app() {
 }
 
 describe("workspace line interaction", () => {
+  it("panel Cancel keeps marker at persisted current and Save clears it", async () => {
+    const { store, click, drag } = app();
+    const panel = mount(WorkspaceEditCommands, { attachTo: document.body });
+    wrappers.push(panel);
+    await click(target.featureId);
+    await drag([5, 6]);
+    await panel.get('[data-test="cancel-edit"]').trigger("click");
+    expect(store.localDraft?.featureId).toBe(target.featureId);
+    expect(doubles.markers[doubles.markers.length - 1]?.xy).toEqual([5, 5]);
+    expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(false);
+    expect(doubles.save).not.toHaveBeenCalled();
+    store.localDraft = null;
+    store.phase = "idle";
+    await flushPromises();
+    expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(true);
+    panel.unmount();
+  });
+  it("opens a native modal and restores fallback focus after Escape", async () => {
+    const { click, drag, wrapper, store } = app();
+    const heading = document.createElement("h2");
+    heading.id = "workspace-edit-heading";
+    heading.tabIndex = -1;
+    document.body.append(heading);
+    const original = document.createElement("button");
+    document.body.append(original);
+    original.focus();
+    await click(target.featureId);
+    await drag([5, 6]);
+    await click();
+    expect(wrapper.get("dialog").attributes("open")).toBeDefined();
+    original.remove();
+    const keep = wrapper.get('[data-test="keep-draft"]');
+    await keep.trigger("keydown", { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(
+      wrapper.get('[data-test="discard-draft"]').element,
+    );
+    await wrapper.get("dialog").trigger("cancel");
+    await flushPromises();
+    expect(store.localDraft?.candidateGeometry.coordinates[1]).toEqual([5, 6]);
+    expect(document.activeElement).toBe(heading);
+  });
+  it("closes the modal before restoring focus after affirmative discard", async () => {
+    const { click, drag, wrapper } = app();
+    await click(target.featureId);
+    await drag([5, 6]);
+    await click();
+    const dialog = wrapper.get("dialog").element as HTMLDialogElement;
+    await wrapper.get('[data-test="discard-draft"]').trigger("click");
+    // An open detached modal cannot reliably restore browser focus to its background.
+    expect(dialog.open).toBe(false);
+  });
+  it.each(["stale", "unknown", "reading-current"] as const)(
+    "prevents map cancellation and movement in %s",
+    async (phase) => {
+      const { click, drag, wrapper, store } = app();
+      await click(target.featureId);
+      await drag([5, 6]);
+      store.phase = phase;
+      await flushPromises();
+      await click();
+      expect(wrapper.find('[data-test="discard-draft"]').exists()).toBe(false);
+      expect(store.localDraft?.candidateGeometry.coordinates[1]).toEqual([
+        5, 6,
+      ]);
+      expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(true);
+    },
+  );
+  it("blocks marker editing on storage failure before PUT", async () => {
+    const { click, drag, store } = app();
+    await click(target.featureId);
+    await drag([5, 6]);
+    store.storageError = "quota";
+    await flushPromises();
+    expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(true);
+    expect(store.moveLocalVertex([5, 7])).toBe(false);
+  });
   it("restores clicking after a drag interrupted by a temporary recovery phase", async () => {
     const { click, store } = app();
     await click(target.featureId);

@@ -6,6 +6,7 @@ import ActionableError from "@/components/ActionableError.vue";
 import MapView from "@/components/MapView.vue";
 import UiIconButton from "@/components/ui/UiIconButton.vue";
 import WorkspaceDetailsPanel from "@/components/WorkspaceDetailsPanel.vue";
+import WorkspaceEditCommands from "@/components/WorkspaceEditCommands.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
 import { useAuthStore } from "@/stores/auth";
 import { useWorkOrdersStore } from "@/stores/workOrders";
@@ -193,6 +194,7 @@ async function openSelectedWorkspace(): Promise<void> {
         {{ workspaceAnnouncement }}
       </p>
 
+      <WorkspaceEditCommands v-if="workOrders.activeWorkspace" />
       <MapView
         v-if="workOrders.activeWorkspace"
         class="workspaceMap"
@@ -320,11 +322,12 @@ async function openSelectedWorkspace(): Promise<void> {
   display: flex;
   flex-direction: column;
   background: #fff;
+  overflow-y: auto;
 }
 
 .workspaceMap {
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 220px;
 }
 
 .srOnly {
