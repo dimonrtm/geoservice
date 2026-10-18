@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-16
+updated: 2026-10-18
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -61,3 +61,7 @@ related: [Wiki/index, DDD_Wiki/model_health]
 ## Ответы о смысле изменения — 2026-10-16
 
 15 discovery-вопросов отвечены в [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]] и закреплены в [[Wiki/policies/network_edit_semantics_policy]]. Это решения условной организации; они не закрывают два вопроса фактической сверки metadata/fixture и не требуют реальных интервью. Новых открытых доменных вопросов этот ingest не добавляет.
+
+## Ответы об осознанной правке — 2026-10-18
+
+15 вопросов отвечены в [[RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers]]; правила закреплены в [[Wiki/policies/intentional_line_editing_policy]], критерий — [[Wiki/specifications/line_edit_exercise_completed]]. Это решения условной организации. Два прежних вопроса metadata/fixture остаются open; исследование не проверяло фактическую БД.

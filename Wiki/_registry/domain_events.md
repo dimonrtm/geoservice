@@ -3,7 +3,7 @@ title: Domain Events Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-07-26
+updated: 2026-10-18
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, domain-event]
 confidence: n/a
@@ -11,6 +11,10 @@ related: [Wiki/index]
 ---
 
 # Domain Events Registry
+
+## Исторические названия
+
+[[Wiki/domain_events/edit_version_feature_updated]] имеет статус `superseded`; для first persisted edit slice его заменяет [[Wiki/domain_events/edit_version_change_set_persisted]]. Ниже перечислены актуальные события.
 
 | Event | Source Aggregate | Reactions | Confidence | Source |
 | --- | --- | --- | --- | --- |

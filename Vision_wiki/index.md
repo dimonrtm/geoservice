@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-16
+updated: 2026-10-18
 source: null
 tags: [vision-wiki, product]
 ---
@@ -125,3 +125,6 @@ tags: [vision-wiki, product]
 ## Исследование смысла изменения — 2026-10-16
 
 [[Vision_wiki/chats/2026-10-16-network-semantics-research]] — 17 источников, 15 ответов; связность, длина, поток, границы свидетельств и передача результата.
+
+- [[Vision_wiki/chats/2026-10-18-utility-gis-editor-domain-research]] — 81 источник и новые знания предметной области.
+- [[Vision_wiki/chats/2026-10-18-utility-gis-editor-answers]] — 15 ответов и правила осознанной правки.

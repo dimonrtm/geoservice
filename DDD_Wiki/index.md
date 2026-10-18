@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-16
+updated: 2026-10-18
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -53,3 +53,5 @@ tags: [domain-knowledge, ddd]
 ## Предметная интерпретация правки
 
 [[DDD_Wiki/use_cases/utility_editor_workflow]] дополнен по [[Wiki/policies/network_edit_semantics_policy]]: идентичность и намерение до правки, область доказательства и ограничения при передаче. Сетевые расчёты остаются самостоятельными сценариями.
+
+- [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] — подготовка и доказательство осознанной правки линии.

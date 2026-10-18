@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-16
+updated: 2026-10-18
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -77,3 +77,10 @@ tags: [domain-knowledge, ddd]
 ## Смысл правки инженерной сети — 2026-10-16
 
 [[Wiki/glossary/network_edit_meaning]] и [[Wiki/policies/network_edit_semantics_policy]] различают исправление сведений, физическое изменение и оформление; 15 ответов [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]] задают границы передачи без расширения реализации.
+
+## Осознанная правка и новые предметные знания
+
+- [[Wiki/concepts/field_observation_acceptance]] — область принятия свидетельства.
+- [[Wiki/concepts/network_representation_and_operational_state]] — актив, отношения, состояние и расчёт.
+- [[Wiki/policies/intentional_line_editing_policy]] — правила 15 ответов discovery.
+- [[Wiki/specifications/line_edit_exercise_completed]] — граница доказательства упражнения.
