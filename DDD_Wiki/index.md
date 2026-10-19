@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-18
+updated: 2026-10-19
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -55,3 +55,7 @@ tags: [domain-knowledge, ddd]
 [[DDD_Wiki/use_cases/utility_editor_workflow]] дополнен по [[Wiki/policies/network_edit_semantics_policy]]: идентичность и намерение до правки, область доказательства и ограничения при передаче. Сетевые расчёты остаются самостоятельными сценариями.
 
 - [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] — подготовка и доказательство осознанной правки линии.
+
+## Переоценка основания
+
+[[DDD_Wiki/use_cases/reassess_line_edit_basis]] дополняет подготовку/оценку линии: revision источника, зависимости свидетельств, неизвестное время, новая причина и передача разбора. Границы WorkOrder/EditVersion и события не изменены; внешнее основание и geometry Save не образуют одну транзакцию.

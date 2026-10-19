@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-18
+updated: 2026-10-19
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -71,3 +71,5 @@ tags: [raw-inputs, source-of-truth]
 | 2026-10-16 | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research.md` | 17 первичных веб-документов; 15 ответов о смысле правки и сетевых последствиях; решения условной организации | Да: [[Vision_wiki/chats/2026-10-16-network-semantics-research]], [[Wiki/glossary/network_edit_meaning]], [[Wiki/policies/network_edit_semantics_policy]], [[DDD_Wiki/use_cases/utility_editor_workflow]] |
 | 2026-10-18 | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md` | Расширенное исследование 81 документа; 12 доменных выводов, provenance и границы применимости | Да: [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/network_representation_and_operational_state]], [[Vision_wiki/chats/2026-10-18-utility-gis-editor-domain-research]] |
 | 2026-10-18 | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md` | Ответы условной организации на 15 вопросов, аналитическая сценарная матрица | Да: [[Wiki/policies/intentional_line_editing_policy]], [[Wiki/specifications/line_edit_exercise_completed]], [[DDD_Wiki/use_cases/prepare_and_check_line_edit]], [[Vision_wiki/chats/2026-10-18-utility-gis-editor-answers]] |
+| 2026-10-19 | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md` | 77 прочитанных веб-документов, 35 новых URL относительно реестра 2026-10-18; десять уточнений: revision, зависимость evidence, время, отзыв, история и передача | Да: [[Wiki/concepts/change_basis_lifecycle]], [[Wiki/concepts/evidence_dependency]], [[Vision_wiki/chats/2026-10-19-change-basis-research]] |
+| 2026-10-19 | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md` | 15 ответов условной организации по тому же корпусу 77 документов, ручная карточка и аналитическая матрица | Да: [[Wiki/policies/change_basis_revision_policy]], [[Wiki/specifications/line_edit_basis_applicable]], [[DDD_Wiki/use_cases/reassess_line_edit_basis]], [[Vision_wiki/chats/2026-10-19-change-basis-answers]] |

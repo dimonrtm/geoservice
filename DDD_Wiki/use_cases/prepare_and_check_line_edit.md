@@ -3,8 +3,8 @@ title: Подготовить и проверить осознанную пра�
 type: use-case
 status: active
 created: 2026-10-18
-updated: 2026-10-18
-source: RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md
+updated: 2026-10-19
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_line_editing_policy]
@@ -35,3 +35,7 @@ related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_
 ## Состояние реализации
 
 Часть выбора и локального движения представлена в коде, но весь критерий и runtime не проверены. Текущее ограничение экрана ровно тремя вершинами не является общей доменной валидностью линии. Сверка очереди/metadata/fixture — FU-2026-10-11-001; полнота Save/Revert и намерения — FU-2026-10-13-004. Stale model health сохраняется. Правила: [[Wiki/policies/intentional_line_editing_policy]]. Доменный контекст: [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/network_representation_and_operational_state]].
+
+## Изменение задания или основания
+
+При уточнении задачи, отзыве/редакции источника или новом знании о происхождении используется [[DDD_Wiki/use_cases/reassess_line_edit_basis]]. Соответствие уже существующего состояния заданию может дать обоснованный результат без движения; оно не заменяет учебную ветку ненулевого Save. Самостоятельность частичного результата определяется также зависимостями, а не числом сохранений.

@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-18
+updated: 2026-10-19
 source: null
 tags: [vision-wiki, product]
 ---
@@ -128,3 +128,8 @@ tags: [vision-wiki, product]
 
 - [[Vision_wiki/chats/2026-10-18-utility-gis-editor-domain-research]] — 81 источник и новые знания предметной области.
 - [[Vision_wiki/chats/2026-10-18-utility-gis-editor-answers]] — 15 ответов и правила осознанной правки.
+
+## Основание правки — исследование 2026-10-19
+
+- [[Vision_wiki/chats/2026-10-19-change-basis-research]] — 77 документов, десять уточнений доменной модели.
+- [[Vision_wiki/chats/2026-10-19-change-basis-answers]] — 15 ответов, карточка и аналитические сценарии; правила приняты за условную организацию.

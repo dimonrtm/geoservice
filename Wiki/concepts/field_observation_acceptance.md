@@ -3,8 +3,8 @@ title: Принятие полевого свидетельства
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-10-18
-source: RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md
+updated: 2026-10-19
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/edit_change_justification_policy, Wiki/specifications/saved_line_quality_assessment]
@@ -31,3 +31,7 @@ USX допускает принятие всей съёмки, части либ
 ## Границы
 
 Это уточнение содержания существующей карточки и оценки, не новый aggregate, статус API или роль. Будущий lifecycle наблюдения остаётся гипотезой; общие обязанности уже заданы в [[Wiki/policies/edit_change_justification_policy]] и [[Wiki/specifications/saved_line_quality_assessment]]. Исправление сомнительного baseline — [[Wiki/policies/geometry_quality_escalation_policy]].
+
+## Происхождение и пересмотр принятия
+
+[[Wiki/concepts/evidence_dependency]] уточняет зависимость копий и область независимости. [[Wiki/concepts/change_basis_lifecycle]] отделяет время наблюдения, редакцию основания и историю решений. Принятие части материала фиксируется по точному фрагменту, свойству и участку; непроверенное отличается от отклонённого. Новые правила не объявляют весь файл принятым.

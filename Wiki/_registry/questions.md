@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-18
+updated: 2026-10-19
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -12,7 +12,7 @@ related: [Wiki/index, DDD_Wiki/model_health]
 
 # Questions Registry
 
-После research от 2026-10-13 открыты восемь вопросов: пять прежних организационных/фактических и три вопроса принятия новых предложений. Принятые 2026-10-12 правила восстановления остаются в силе. Новый источник — [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance]] — содержит синтез эксперта, не интервью; он не назначает сотрудников и не устанавливает числовые допуски или сроки.
+Сверка `/sync-vision` 2026-10-19: в таблице открыты 2 вопроса фактической сверки metadata/fixture. Организационные и модельные вопросы уже имеют статус `answered` по решениям условной организации от 2026-10-13; исследования 2026-10-16 и 2026-10-18 новых открытых вопросов не добавили. Статусы строк при синхронизации не изменены; решения модели не подтверждают реализацию или фактические данные.
 
 Для demo metadata и fixture уже есть технические источники: [[Code_wiki/архитектура/edit_geometry_determinism]] и [артефакты Sprint 2](../../docs/sprint_2/README.md). До следующего discovery требуется содержательная сверка по `FU-2026-10-11-001`; прежние вопросы не повторять без неё.
 

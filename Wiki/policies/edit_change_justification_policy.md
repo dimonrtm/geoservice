@@ -3,8 +3,8 @@ title: Основание и объяснение изменения геоме�
 type: policy
 status: active
 created: 2026-10-13
-updated: 2026-10-16
-source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research.md"
+updated: 2026-10-19
+source: "RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md"
 tags: [domain-knowledge, policy, editing, evidence]
 confidence: high
 related: [Wiki/entities/work_order, Wiki/entities/edit_version, Wiki/domain_events/edit_version_change_set_persisted, Wiki/policies/change_history_retention_policy]
@@ -59,3 +59,7 @@ API, command fingerprint и event schema этим ingest не меняются. 
 ## Смысл и передача правки — 2026-10-16
 
 [[Wiki/policies/network_edit_semantics_policy]] уточняет содержание существующего пояснения: классификация намерения, связь основания с объектом/участком, точное состояние, ограничения и следующее решение. Частичный результат не обозначает выполнение неделимого задания. Ручная карточка достаточна до отдельной реализации; новый обязательный параметр Save не вводится. Ответы 1–15 — [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research]].
+
+## Пересмотр пояснения и основания — 2026-10-19
+
+[[Wiki/policies/change_basis_revision_policy]] детализирует действующее правило: одно пояснение может охватывать последовательность Save при неизменном намерении и основании с указанием состояний; новая причина, существенная revision или отзыв требуют новой оценки. Позднее пояснение сохраняет фактическую дату. Опечатка определяется неизменностью смысла, а не длиной исправления. Возврат формы не стирает историю, передача разбора не означает принятия правильности. Применимость проверяется по [[Wiki/specifications/line_edit_basis_applicable]]; реквизиты остаются ручными до отдельной реализации.

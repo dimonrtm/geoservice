@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-18
+updated: 2026-10-19
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -32,8 +32,11 @@ tags: [knowledge, index, geoservice]
 
 ## Свежие Изменения
 
-- 2026-10-18: `/sync-vision` сверил весь knowledge graph. Все 44 RAW-источника обработаны и отражены в индексе; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture; активных канонических конфликтов — 0, legacy-конфликтов — 1. Единственная stale-нода — [[DDD_Wiki/model_health]]. Lint: 37 известных `missing_frontmatter` только в RAW, других замечаний нет. Текущее состояние — [[memory/project-state]]; датированные сводки ниже исторические.
-- За проверенный период Git с 2026-10-11 добавлены 6 уже обработанных RAW-источников; новых concept/decision/entity/solution нод — 0. Дополнительно: 7 policies, 3 specifications, 2 glossary, 2 resolved conflicts, 2 use cases, 1 state machine, 6 source-summary chat-нод и 4 технические ноды. Последние исследования охватывают восстановление, пригодность данных и смысл сетевой правки; индексы `Wiki/DDD_Wiki`, `Vision_wiki` и `Code_wiki` уже содержат соответствующие ссылки.
+- 2026-10-19: ingest двух исследований основания правки: 77 документов, 35 новых URL к реестру 2026-10-18, 15 ответов. Добавлены [[Wiki/concepts/change_basis_lifecycle]], [[Wiki/concepts/evidence_dependency]], [[Wiki/policies/change_basis_revision_policy]], [[Wiki/specifications/line_edit_basis_applicable]], [[DDD_Wiki/use_cases/reassess_line_edit_basis]]. Теперь все 48 RAW обработаны; 19 follow-up и два metadata/fixture вопроса остаются открытыми. Правила приняты для модели, реализация не заявлена.
+
+- 2026-10-19: `/sync-vision` сверил весь knowledge graph. Все 46 RAW-источников обработаны и отражены в индексе; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture; активных канонических конфликтов — 0, legacy-конфликтов — 1. Единственная stale-нода — [[DDD_Wiki/model_health]]. Lint: 37 известных `missing_frontmatter` только в RAW, других замечаний нет. Текущее состояние — [[memory/project-state]]; датированные сводки ниже исторические.
+- За проверенный период Git с 2026-10-12 добавлены 8 уже обработанных RAW-источников. Новых concept/decision/entity/solution нод — 2/0/0/0. Дополнительно: 8 policies, 4 specifications, 2 glossary, 2 resolved conflicts, 3 use cases, 1 state machine, 8 source-summary chat-нод и 4 технические ноды. Индексы `Wiki/DDD_Wiki`, `Vision_wiki`, `Code_wiki` и все доменные реестры содержат соответствующие ссылки.
+- Последний ingest от 2026-10-18 добавил [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/network_representation_and_operational_state]], [[Wiki/policies/intentional_line_editing_policy]], [[Wiki/specifications/line_edit_exercise_completed]] и [[DDD_Wiki/use_cases/prepare_and_check_line_edit]]. Эти ссылки уже присутствуют в профильных индексах; текущая синхронизация исправляет сводные счётчики.
 - Технический перенос Save/recovery и fixture/metadata выполнен: [[Code_wiki/архитектура/edit_version_save_orchestration]], [[Code_wiki/архитектура/frontend_save_recovery]], [[Code_wiki/архитектура/edit_geometry_fixture_metadata]]. Ожидание этого переноса в старых сводках больше не актуально; остаток проверки очереди реализации и metadata/fixture сохраняется в `FU-2026-10-11-001`.
 
 - 2026-10-16: Обработано [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]]: семь первичных веб-источников и 15 ответов условной организации. [[Wiki/specifications/editing_resumption_allowed]] отделяет восстановление исхода от новой записи и закрытия разбора. RAW sources: 42; открытых follow-up — 19, вопросов metadata/fixture — 2; новых blocking conflicts нет. Реализация и приёмка отдельно.
@@ -185,7 +188,7 @@ tags: [knowledge, index, geoservice]
 
 ## Исследование пригодности данных — 2026-10-16
 
-[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research]]: 17 источников и 15 ответов. Ingest: [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/saved_line_quality_assessment]], [[DDD_Wiki/use_cases/assess_saved_line_quality]]. Актуальное состояние: 43 RAW-источника; 19 открытых follow-up, 2 вопроса metadata/fixture, новых blocking conflicts нет.
+[[RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research]]: 17 источников и 15 ответов. Ingest: [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/saved_line_quality_assessment]], [[DDD_Wiki/use_cases/assess_saved_line_quality]]. Состояние на момент этого ingest: 43 RAW-источника; 19 открытых follow-up, 2 вопроса metadata/fixture, новых blocking conflicts нет.
 
 ## Смысл правки сети — 2026-10-16
 

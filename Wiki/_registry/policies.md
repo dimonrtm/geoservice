@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-18
+updated: 2026-10-19
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -30,3 +30,9 @@ related: [Wiki/index]
 ## Уточнение действующих правил 2026-10-16
 
 [[Wiki/policies/editor_recovery_policy]] и [[Wiki/policies/recovery_case_resolution_policy]] дополнены по [[RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research]]: независимость исхода/current, подтверждение продолжения, один наряд в одном окне учебной сессии и закрытие разбора без допуска к записи. Новая [[Wiki/specifications/editing_resumption_allowed]] сохраняет текущие guards.
+
+## Пересмотр основания
+
+| Policy | Rule | Outcome | Confidence | Source |
+| --- | --- | --- | --- | --- |
+| [[Wiki/policies/change_basis_revision_policy]] | Пересмотр задания, источника и объяснения по влиянию на утверждения | Эквивалентность, новое основание, ограничение либо разбор; без нового Save guard | high | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md` |

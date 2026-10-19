@@ -27,6 +27,16 @@ completion of implementation, or a skill instruction requiring a commit does
 not override this repository rule. Leave changes unstaged and report them for
 the user's review.
 
+## Окончания строк при записи файлов
+
+Соблюдать `.gitattributes`: текстовые файлы записывать с LF, `.bat` и `.cmd` — с CRLF.
+`.editorconfig` не управляет записью из скриптов. На Windows Python `write_text()` /
+`open()` без явного `newline` преобразует LF в CRLF. Для обычного текста использовать
+`open(path, 'w', encoding='utf-8', newline='\n')` или запись UTF-8 bytes с LF.
+После массовой генерации проверять окончания строк изменённых и новых файлов;
+`git ls-files --eol` показывает только отслеживаемые файлы. Не обходить ошибки
+окончаний строк через `core.safecrlf=false`: исправлять запись и сами файлы.
+
 Create or update agent memory only when both conditions hold:
 
 1. The knowledge is likely to remain useful for at least a week.

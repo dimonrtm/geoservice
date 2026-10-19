@@ -3,8 +3,8 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-10-18
-source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md"
+updated: 2026-10-19
+source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md"
 tags: [domain-knowledge, ddd, health, stale]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
@@ -14,7 +14,7 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 ## Актуальность Состояния
 
-Сверка `/sync-vision` 2026-10-18: 19 открытых follow-up’ов, 2 вопроса metadata/fixture, 0 активных канонических конфликтов; один legacy-конфликт остаётся active. Все 44 RAW-источника учтены. Технические основания Save/recovery и fixture доступны в [[Code_wiki/архитектура/edit_version_save_orchestration]], [[Code_wiki/архитектура/frontend_save_recovery]] и [[Code_wiki/архитектура/edit_geometry_fixture_metadata]]. Единственная stale-нода — этот документ: очередь реализации и metadata/fixture требуют сверки по `FU-2026-10-11-001`. Статусы вопросов и конфликтов не изменены; новые правила модели не означают runtime-приёмку. Lint: 37 известных `missing_frontmatter` только в RAW.
+Сверка `/sync-vision` 2026-10-19: 19 открытых follow-up’ов, 2 вопроса metadata/fixture, 0 активных канонических конфликтов; один legacy-конфликт остаётся active. После ingest двух новых исследований 2026-10-19 учтены и обработаны все 48 RAW-источников; новых необработанных нет. Технические основания Save/recovery и fixture доступны в [[Code_wiki/архитектура/edit_version_save_orchestration]], [[Code_wiki/архитектура/frontend_save_recovery]] и [[Code_wiki/архитектура/edit_geometry_fixture_metadata]]. Единственная stale-нода — этот документ: очередь реализации и metadata/fixture требуют сверки по `FU-2026-10-11-001`. Статусы вопросов и конфликтов не изменены; новые правила модели не означают runtime-приёмку. Lint: 37 известных `missing_frontmatter` только в RAW.
 
 Сверка `/sync-vision` 2026-10-16: [[Wiki/_registry/questions]] содержит 2 открытых вопроса metadata/fixture, [[Vision_wiki/decisions/followups/index]] — 19 открытых follow-up’ов; активных канонических blocking conflicts нет. Решения условной организации от 2026-10-13 приняты, [[DDD_Wiki/use_cases/interrupted_edit_work_recovery]] active. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 определяют учебную приёмку и хранение, но не доказывают реализацию или точность L-003. Требования реальных сотрудников, интервью и внутренних документов не являются блокерами. Метка `stale` сохранена до сверки реализации по `FU-2026-10-11-001`; применение новых правил — `FU-2026-10-13-004`.
 
@@ -144,3 +144,7 @@ Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevan
 ## Осознанная правка и доказательство — 2026-10-18
 
 [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] уточняет существующий workflow. Два новых предметных понятия и критерий упражнения не расширяют ближайший scope до asset lifecycle, field sync или hydraulic simulation. Корпус 81 документа — [[RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis]]. Ответы приняты за условную организацию, runtime и фактическая БД не проверены. Сохраняются 19 open follow-up, два metadata/fixture вопроса и 0 активных канонических blocking conflicts; stale не снят.
+
+## Пересмотр основания — актуальное уточнение 2026-10-19
+
+[[DDD_Wiki/use_cases/reassess_line_edit_basis]] связывает новый источник/редакцию, зависимости evidence и повторную оценку текущего результата. Правила приняты за условную организацию по двум новым RAW, общий корпус — 77 документов; не интервью и не runtime-приёмка. Нет новых aggregates, events или guards Save. Открыты прежние 19 follow-up и два metadata/fixture вопроса; активных канонических conflicts 0, stale сохраняется.
