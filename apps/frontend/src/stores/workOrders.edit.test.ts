@@ -56,6 +56,100 @@ describe("Save orchestration", () => {
     sessionStorage.clear();
     setActivePinia(createPinia());
   });
+  it("revert uses change set baseline without selection and persists before PUT", async () => {
+    const store = editableStore();
+    store.cancelLocalEdit();
+    store.workspace = workspaceFixture(true);
+    const baseline =
+      store.workspace.workOrder.editVersion.changeSet!.baselineGeometry;
+    api.saveFeatureGeometry.mockImplementation((_t, request) => {
+      expect(readRecoveryRecord("actor").kind).toBe("record");
+      return Promise.resolve({
+        ...successFixture(request.commandId),
+        operation: "unchanged",
+        hasPersistedChangeSet: false,
+        basicValidation: null,
+        updatedFeature: { id: target.featureId, geometry: baseline },
+      });
+    });
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture());
+    expect(store.beginRevert()).toBe("confirm");
+    const id = store.revertConfirmation!.confirmationId;
+    await store.confirmRevert(id);
+    await store.confirmRevert(id);
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    expect(api.saveFeatureGeometry.mock.calls[0]).toEqual([
+      target,
+      {
+        commandId: expect.any(String),
+        draftVersionToken: "revision-b",
+        geometry: baseline,
+      },
+    ]);
+    expect(store.localDraft).toBeNull();
+    expect(store.recoveryRecord).toBeNull();
+    expect(store.workspace?.workOrder.editVersion.changeSet).toBeNull();
+  });
+  it("discard dirty then cancel does not restore candidate", () => {
+    const store = editableStore();
+    store.workspace = workspaceFixture(true);
+    const draft = JSON.stringify(store.localDraft);
+    expect(store.beginRevert()).toBe("resolve-dirty");
+    store.cancelRevert(store.revertConfirmation!.confirmationId);
+    expect(JSON.stringify(store.localDraft)).toBe(draft);
+    store.beginRevert();
+    const id = store.revertConfirmation!.confirmationId;
+    expect(store.discardLocalDraftForRevert(id)).toBe(true);
+    expect(store.localDraft).toBeNull();
+    expect(store.revertConfirmation?.phase).toBe("confirm");
+    store.cancelRevert(id);
+    expect(store.localDraft).toBeNull();
+    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+  });
+  it.each(["actor", "token", "workspace", "access"])(
+    "invalidates revert confirmation on %s change",
+    async (change) => {
+      const store = editableStore();
+      store.workspace = workspaceFixture(true);
+      store.beginRevert();
+      const id = store.revertConfirmation!.confirmationId;
+      store.discardLocalDraftForRevert(id);
+      if (change === "actor") useAuthStore().user!.id = "other";
+      if (change === "token")
+        store.workspace.workOrder.editVersion.draftVersionToken = "new";
+      if (change === "workspace") store.selectedWorkOrderId = "other";
+      if (change === "access") useAuthStore().token = null;
+      expect(store.revertConfirmation).toBeNull();
+      await store.confirmRevert(id);
+      expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+    },
+  );
+  it("confirmation blocks editing, Save, Cancel and navigation even through store", async () => {
+    const store = editableStore();
+    store.workspace = workspaceFixture(true);
+    store.beginRevert();
+    expect(store.workspaceInteractionLocked).toBe(true);
+    expect(store.moveLocalVertex([65.1, 44.4])).toBe(false);
+    expect(store.beginLocalEdit(target.featureId, 1)).toBe(false);
+    expect(store.cancelLocalEdit()).toBe(false);
+    expect(store.discardLocalChangesKeepingSelection()).toBe(false);
+    expect(store.allowWorkspaceNavigation()).toBe(false);
+    await store.saveLocalDraft();
+    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+  });
+  it("revert storage failure prevents PUT", async () => {
+    const store = editableStore();
+    store.cancelLocalEdit();
+    store.workspace = workspaceFixture(true);
+    store.beginRevert();
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    await store.confirmRevert(store.revertConfirmation!.confirmationId);
+    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+    expect(store.storageError).not.toBeNull();
+    expect(store.recoveryRecord).toBeNull();
+  });
   it("discards to persisted current while keeping the selected vertex", () => {
     const store = editableStore();
     store.workspace = workspaceFixture(true);

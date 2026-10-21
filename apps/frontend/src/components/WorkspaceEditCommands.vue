@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useWorkOrdersStore } from "@/stores/workOrders";
 import { presentWorkspaceCommands } from "@/domain/workspaceCommandPresentation";
@@ -7,7 +7,8 @@ import { presentWorkspaceCommands } from "@/domain/workspaceCommandPresentation"
 const store = useWorkOrdersStore();
 const auth = useAuthStore();
 const editPanelHeading = ref<HTMLHeadingElement | null>(null);
-const notice = ref("");
+const dialog = ref<HTMLDialogElement | null>(null);
+let previousFocus: HTMLElement | null = null;
 const view = computed(() =>
   presentWorkspaceCommands(
     store,
@@ -24,20 +25,68 @@ const selectedLabel = computed(() => {
   return `Выбрана линия: ${feature?.properties?.assetCode ?? draft.featureId}`;
 });
 watch(
-  [
-    () => `${auth.user?.id ?? ""}:${store.activeWorkspaceKey ?? ""}`,
-    () => store.localDraft,
-  ],
-  () => {
-    notice.value = "";
+  () => store.revertConfirmation?.phase,
+  async (phase, oldPhase) => {
+    if (phase) {
+      if (!oldPhase)
+        previousFocus = document.activeElement as HTMLElement | null;
+      await nextTick();
+      if (store.revertConfirmation?.phase !== phase) return;
+      if (dialog.value && !dialog.value.open) dialog.value.showModal();
+      dialog.value?.querySelector<HTMLButtonElement>("button")?.focus();
+    } else {
+      const ownedFocus =
+        dialog.value?.contains(document.activeElement) ||
+        document.activeElement === document.body;
+      if (dialog.value?.open) dialog.value.close();
+      await nextTick();
+      if (!ownedFocus) return;
+      if (
+        previousFocus?.isConnected &&
+        !(previousFocus instanceof HTMLButtonElement && previousFocus.disabled)
+      )
+        previousFocus.focus();
+      else editPanelHeading.value?.focus();
+    }
   },
 );
+function closeRevert() {
+  const id = store.revertConfirmation?.confirmationId;
+  if (id) store.cancelRevert(id);
+}
+function proceedRevert() {
+  const context = store.revertConfirmation;
+  if (!context) return;
+  if (context.phase === "resolve-dirty")
+    store.discardLocalDraftForRevert(context.confirmationId);
+  else void store.confirmRevert(context.confirmationId);
+}
+function dialogKeydown(event: KeyboardEvent) {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+    closeRevert();
+  }
+  if (event.key !== "Tab") return;
+  const buttons = dialog.value?.querySelectorAll<HTMLButtonElement>("button");
+  if (!buttons?.length) return;
+  const first = buttons[0]!,
+    last = buttons[buttons.length - 1]!;
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+onBeforeUnmount(closeRevert);
 
 async function focusAfterAction(origin: EventTarget | null) {
   await nextTick();
   if (
     origin instanceof HTMLButtonElement &&
-    origin.disabled &&
+    (origin.disabled || !origin.isConnected) &&
     (document.activeElement === origin ||
       document.activeElement === document.body)
   )
@@ -45,19 +94,25 @@ async function focusAfterAction(origin: EventTarget | null) {
 }
 function save(event: MouseEvent) {
   if (!view.value.canSave) return;
-  notice.value = "";
   void store.saveLocalDraft();
   void focusAfterAction(event.currentTarget);
 }
 function cancel(event: MouseEvent) {
   if (!view.value.canCancel) return;
-  notice.value = "";
   store.discardLocalChangesKeepingSelection();
   void focusAfterAction(event.currentTarget);
 }
 function revert() {
-  if (view.value.canRevert)
-    notice.value = "Возврат к исходному состоянию пока недоступен";
+  if (view.value.canRevert) store.beginRevert();
+}
+function recover(event: MouseEvent, action: "command" | "read" | "discard") {
+  if (action === "command" && view.value.canRetryCommand)
+    void store.retryPendingSave();
+  if (action === "read" && view.value.canRetryRead)
+    void store.refreshCurrentWorkspace();
+  if (action === "discard" && view.value.canDiscardRejectedAttempt)
+    store.discardRejectedAttempt();
+  void focusAfterAction(event.currentTarget);
 }
 </script>
 
@@ -116,8 +171,79 @@ function revert() {
         <span v-if="view.busy" class="spinner" aria-hidden="true"></span
         >{{ view.statusText }}
       </p>
-      <p v-if="notice" class="notice">{{ notice }}</p>
     </div>
+    <div class="commandButtons">
+      <button
+        v-if="view.canRetryCommand"
+        data-test="retry-command"
+        type="button"
+        @click="recover($event, 'command')"
+      >
+        Повторить запрос
+      </button>
+      <button
+        v-if="view.canRetryRead"
+        data-test="retry-read"
+        type="button"
+        @click="recover($event, 'read')"
+      >
+        Повторить загрузку
+      </button>
+      <button
+        v-if="view.canDiscardRejectedAttempt"
+        data-test="discard-rejected"
+        type="button"
+        @click="recover($event, 'discard')"
+      >
+        Отказаться от отклонённой попытки
+      </button>
+    </div>
+    <dialog
+      v-if="store.revertConfirmation"
+      ref="dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="revert-title"
+      aria-describedby="revert-description"
+      @cancel.prevent="closeRevert"
+      @keydown="dialogKeydown"
+    >
+      <h3 id="revert-title">
+        {{
+          store.revertConfirmation.phase === "resolve-dirty"
+            ? "Отказаться от локальной правки?"
+            : "Вернуть исходную геометрию?"
+        }}
+      </h3>
+      <p
+        v-if="store.revertConfirmation.phase === 'resolve-dirty'"
+        id="revert-description"
+      >
+        Локальная правка будет окончательно отменена. Отмена следующего
+        подтверждения не восстановит её.
+      </p>
+      <p v-else id="revert-description">
+        Линия вернётся к исходной геометрии, сохранённое отличие исчезнет.
+        История останется. Это не подтверждает позиционную точность или
+        топологию.
+      </p>
+      <div class="commandButtons">
+        <button type="button" data-test="revert-safe" @click="closeRevert">
+          {{
+            store.revertConfirmation.phase === "resolve-dirty"
+              ? "Продолжить редактирование"
+              : "Отмена"
+          }}
+        </button>
+        <button type="button" data-test="revert-proceed" @click="proceedRevert">
+          {{
+            store.revertConfirmation.phase === "resolve-dirty"
+              ? "Отказаться от локальной правки"
+              : "Вернуть исходную геометрию"
+          }}
+        </button>
+      </div>
+    </dialog>
     <p id="workspace-revert-hint" class="hint">
       «Сбросить» — вернуть линию к исходному состоянию.
       <span
@@ -132,6 +258,24 @@ function revert() {
 </template>
 
 <style scoped>
+dialog {
+  max-width: min(480px, calc(100vw - 48px));
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  border: 1px solid #94a3b8;
+  border-radius: 8px;
+  padding: 16px;
+  color: #0f172a;
+}
+dialog::backdrop {
+  background: #0f172a80;
+}
+dialog h3 {
+  margin-top: 0;
+}
+dialog .commandButtons {
+  margin-top: 16px;
+}
 .editCommands {
   flex: 0 0 auto;
   min-width: 0;

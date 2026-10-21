@@ -1,0 +1,216 @@
+{
+  "scenario": "Revert",
+  "project": "geoservice-m4-b735583d",
+  "command": {
+    "commandId": "1827fe4c-9f97-46ee-a9dc-0ec679fbf559",
+    "draftVersionToken": "4",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    }
+  },
+  "actorId": "10000000-0000-4000-8000-000000000001",
+  "target": {
+    "workOrderId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+    "editVersionId": "d0910845-16f4-45f9-a94d-0abf88b4c586",
+    "featureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213"
+  },
+  "before": {
+    "revision": 4,
+    "owner": "10000000-0000-4000-8000-000000000001",
+    "events": 3,
+    "commands": 3,
+    "operation": "updated",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.5263534,
+          44.8198725
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baseline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+  },
+  "committed": {
+    "revision": 5,
+    "owner": "10000000-0000-4000-8000-000000000001",
+    "events": 4,
+    "commands": 4,
+    "operation": "unchanged",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baseline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+  },
+  "after": {
+    "revision": 5,
+    "owner": "10000000-0000-4000-8000-000000000001",
+    "events": 4,
+    "commands": 4,
+    "operation": "unchanged",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baseline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+  },
+  "log": [
+    {
+      "event": "first PUT",
+      "command": {
+        "commandId": "1827fe4c-9f97-46ee-a9dc-0ec679fbf559",
+        "draftVersionToken": "4",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        }
+      },
+      "url": "http://127.0.0.1:18180/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/d0910845-16f4-45f9-a94d-0abf88b4c586/features/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213/geometry"
+    },
+    {
+      "event": "committed; response withheld"
+    },
+    {
+      "event": "retry blocked before backend"
+    },
+    {
+      "event": "retry blocked before backend"
+    },
+    {
+      "event": "backend restarted",
+      "startedBefore": "2026-10-21T14:24:47.827928013Z",
+      "startedAfter": "2026-10-21T14:24:59.944019508Z"
+    },
+    {
+      "event": "GET",
+      "afterReload": true
+    },
+    {
+      "event": "replay success"
+    },
+    {
+      "event": "GET",
+      "afterReload": true
+    }
+  ],
+  "replayed": 1,
+  "blocked": 2,
+  "current": {
+    "draftVersionToken": "5",
+    "changeSet": null
+  },
+  "verifiedAt": "2026-10-21T14:25:04.946Z"
+}

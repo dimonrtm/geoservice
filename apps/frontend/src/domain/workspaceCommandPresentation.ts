@@ -15,8 +15,15 @@ export type WorkspaceCommandState = Pick<
   | "editBlockReason"
   | "didSaveChangeGeometry"
   | "rejectedCandidateGeometry"
+  | "canRetryPendingCommand"
+  | "canRetryCurrentRead"
+  | "canDiscardRejectedAttempt"
+  | "workspaceInteractionLocked"
 >;
 export type WorkspaceCommandPresentation = {
+  canRetryCommand: boolean;
+  canRetryRead: boolean;
+  canDiscardRejectedAttempt: boolean;
   canSave: boolean;
   canCancel: boolean;
   canRevert: boolean;
@@ -46,6 +53,9 @@ export function presentWorkspaceCommands(
   actorCanEdit: boolean,
 ): WorkspaceCommandPresentation {
   const view: WorkspaceCommandPresentation = {
+    canRetryCommand: false,
+    canRetryRead: false,
+    canDiscardRejectedAttempt: false,
     canSave: false,
     canCancel: false,
     canRevert: false,
@@ -81,31 +91,39 @@ export function presentWorkspaceCommands(
     return error(
       "Не удалось безопасно продолжить работу. Редактирование временно недоступно.",
     );
+  if (store.workspaceInteractionLocked)
+    return {
+      ...view,
+      statusText: "Завершите выбор в диалоге возврата к исходной геометрии.",
+    };
+  view.canRetryCommand = store.canRetryPendingCommand;
+  view.canRetryRead = store.canRetryCurrentRead;
+  view.canDiscardRejectedAttempt = store.canDiscardRejectedAttempt;
   if (store.readbackError)
     return error(
       succeeded
-        ? "Правка сохранена, но актуальные данные карты не удалось загрузить. Редактирование временно недоступно"
-        : "Правка не сохранена. Актуальные данные карты не удалось загрузить. Редактирование временно недоступно",
+        ? "Операция выполнена, но актуальные данные карты не удалось загрузить. Редактирование временно недоступно"
+        : "Изменение отклонено. Актуальные данные карты не удалось загрузить. Редактирование временно недоступно",
     );
   if (store.phase === "reading-current")
     return {
       ...view,
       busy: true,
       statusText: succeeded
-        ? "Правка сохранена. Загружаем актуальные данные…"
+        ? "Операция выполнена. Загружаем актуальные данные…"
         : "Загружаем актуальные данные…",
     };
   if (store.phase === "sending")
-    return { ...view, busy: true, statusText: "Сохраняем правку…" };
+    return { ...view, busy: true, statusText: "Отправляем запрос…" };
   if (store.phase === "retry-wait")
     return {
       ...view,
       busy: true,
-      statusText: "Ожидаем повторной попытки сохранения…",
+      statusText: "Ожидаем повторной попытки запроса…",
     };
   if (store.phase === "unknown" || recovery?.state === "unknown")
     return error(
-      "Не удалось узнать, сохранена ли правка. Редактирование временно недоступно",
+      "Результат операции неизвестен. Повторите прежний запрос. Редактирование временно недоступно",
     );
   if (stale)
     return error(

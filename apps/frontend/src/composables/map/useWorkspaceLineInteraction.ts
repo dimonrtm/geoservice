@@ -36,6 +36,7 @@ export function useWorkspaceLineInteraction(
       auth.isAuthenticated &&
       auth.user?.role === "editor" &&
       store.activeWorkspace === workspace.value &&
+      !store.workspaceInteractionLocked &&
       !store.recoveryRecord &&
       !store.storageError &&
       !["FEATURE_NOT_EDITABLE", "WORK_ORDER_CONTEXT_INVALID"].includes(

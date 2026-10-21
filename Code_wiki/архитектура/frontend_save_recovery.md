@@ -3,8 +3,8 @@ title: Frontend Save и восстановление намерения реда
 type: technical-note
 status: active
 created: 2026-10-16
-updated: 2026-10-16
-source: repository-change:2026-10-16
+updated: 2026-10-21
+source: repository-change:2026-10-21
 tags: [frontend, pinia, save, recovery, readback]
 ---
 
@@ -24,21 +24,37 @@ Save создаёт один UUID и замораживает target/request в�
 
 ## Повторы и current readback
 
-После первоначального network/timeout/5xx сбоя store допускает 5 дополнительных попыток с паузами 0/2/5/10/20 секунд. Restore неизвестного исхода выполняет 5 попыток всего; manual retry делает одну. Во всех случаях сохраняются CommandId, token, target и geometry. `AbortController`, поколения запросов и проверка текущего actor/workspace/command останавливают устаревшие callbacks.
+После первоначального network/timeout/5xx сбоя store допускает 5 дополнительных попыток с паузами 0/2/5/10/20 секунд. Restore неизвестного исхода и каждый ручной retry выполняют новую серию из 5 попыток всего. Одновременные запуски серии запрещены; общего lifetime budget нет. Во всех случаях сохраняются CommandId, token, target и geometry. `AbortController`, поколения запросов и проверка текущего actor/workspace/command останавливают устаревшие callbacks.
 
-Success сначала сохраняется в recovery как квитанция, затем выполняется workspace GET. Только GET заменяет current/token/changeSet. Ошибка GET удерживает подтверждённый результат и требует повторного чтения, а не нового PUT. Историческая квитанция replay не перезаписывает более свежий current. Recovery удаляется только после необходимого readback и успешного удаления записи storage.
+Success сначала сохраняется в recovery как квитанция, затем выполняется workspace GET. Только GET заменяет current/token/changeSet. Ошибка GET удерживает подтверждённый результат и требует повторного чтения, а не нового PUT. Ручное чтение выполняет ровно один GET; recoveryReadSeq исключает параллельные чтения. Storage/role/blocked guards проверяются в action, поэтому прямой вызов не обходит блокировку интерфейса. Историческая квитанция replay не перезаписывает более свежий current. Recovery удаляется только после необходимого readback и успешного удаления записи storage.
 
-`DRAFT_VERSION_STALE` сохраняет локальную попытку для сравнения, читает current и не делает automatic reapply. Известный domain rejection завершает recovery, оставляя возможность исправить local draft. `REQUEST_VALIDATION_ERROR` считается подтверждённым отказом лишь до неизвестного исхода; после unknown это protocol block. Неизвестный/некорректный ответ, `COMMAND_ID_REUSED` и access/lifecycle ошибки разделены как protocol/identity/access block.
+`DRAFT_VERSION_STALE` сохраняет отвергнутую локальную попытку, читает current и не делает automatic reapply. После успешного GET/cleanup действие `discardRejectedAttempt` явно очищает попытку без HTTP; новую правку начинают из current. Сравнение и перенос candidate не реализованы. После завершённого stale readback refresh может потерять отвергнутый draft — граница Дня 9 сохраняется. Известный domain rejection завершает recovery, оставляя возможность исправить local draft. `REQUEST_VALIDATION_ERROR` считается подтверждённым отказом лишь до неизвестного исхода; после unknown это protocol block. Неизвестный/некорректный ответ, `COMMAND_ID_REUSED` и access/lifecycle ошибки разделены как protocol/identity/access block.
 
 ## Доступ и навигация
 
 Store запрещает смену workspace при local draft, незавершённом recovery, readback или blocked-состоянии. Потеря назначения, auth reset/logout и смена actor останавливают retry, инвалидируют поколения и сохраняют blocked recovery. Повторный вход не разрешает автоматическое продолжение; требуется явное подтверждение. Даже при ошибке storage запись не считается безопасно очищенной.
 
+## Подтверждение Revert и общий pipeline
+
+Панель `WorkspaceEditCommands` подключает Save/Cancel, ручной retry/readback, отказ от stale и Revert. `beginRevert` создаёт временный контекст actor/workOrder/editVersion/feature/token. При dirty сначала предлагается продолжить редактирование либо окончательно отказаться от draft; затем требуется отдельное согласие на baseline. Отмена второго решения не возвращает draft.
+
+Store блокирует редактирование и другие команды при подтверждении. Синхронный watcher инвалидирует согласие при смене identity/token/доступа; `confirmRevert` повторно проверяет контекст и storage. Target и geometry берутся из change set, поэтому выбор линии не обязателен. UUID команды создаётся только после согласия. Приватный `submitGeometryCommand` обслуживает и Save, и Revert: persist → PUT → terminal result → GET → cleanup. Повторы неизвестного Revert не спрашивают согласия заново; новая попытка после stale получает новое согласие и ID.
+
+Панель использует native dialog с безопасным начальным фокусом, Tab/Shift+Tab, Escape и возвратом фокуса. Карта учитывает `workspaceInteractionLocked`; после успешного readback выбор снят, marker отсутствует. Recovery schema не расширена ради подписи операции; `operation=unchanged` не определяет Revert или no-op.
+
 ## Граница реализации и S2-X01
 
-На `6c4b6ba` реализованы contracts/API/store, локальное редактирование и recovery-механика. `openSelectedWorkOrder` и `restoreOpenedWorkspace` вызывают `restorePendingSave` после загрузки workspace, поэтому recovery включён в существующий путь восстановления косвенно через store. Отсутствие прямого component-вызова не доказывает отсутствие refresh flow. В компонентах/composables нет вызовов `saveLocalDraft`, `beginLocalEdit` или `retryPendingSave`; пользовательские controls и сквозная приёмка остаются отдельным scope. Отдельного store action для Revert к baseline также нет. Уточнение проверено по исходникам после ingest research 2026-10-16 в рамках зарегистрированного FU-2026-10-11-001.
+Recovery включён через `openSelectedWorkOrder`/`restoreOpenedWorkspace` → `restorePendingSave`. Пользовательские команды подключены; прежнее описание отсутствующих controls отражало срез 2026-10-16. Актуализация технической части относится к существующему FU-2026-10-11-001, но не закрывает его доменный остаток.
 
-Для S2-X01 доступны backend terminal replay и current GET, pending identity, ограниченный retry, stale без reapply, storage/access guards. Остаются UI wiring, явное подтверждение продолжения после возврата доступа, диалоги навигации/выхода, Revert с разрешением local draft, пользовательские сообщения и сквозная приёмка. Более поздние правила условной организации об evaluator, restart и архиве не считаются реализованными. Календарь и статус S2-X01 этим ingest не изменены.
+S2-X01 сохраняет явное продолжение после обнаруженной потери доступа, переход на другой наряд при незавершённом recovery и расширенное сравнение/перенос попытки. Evaluator, архив и организационные правила не объявляются реализованными.
+
+## Сквозная проверка recovery
+
+`infra/m4` — отдельный пакет Playwright Test и уникальный disposable Compose-проект с API, frontend и `m4_test`. Инициализация schema/seed предшествует сценариям; API entrypoint запускает только uvicorn, поэтому restart не восстанавливает данные через seed. БД сохраняется между commit и replay.
+
+Browser-context route выполняет настоящий PUT через `route.fetch()`, подтверждает commit отдельным SQL-чтением и скрывает ответ через `route.abort()`. Повторы блокируются до restart и новой навигации той же вкладки. Recovery record создаётся приложением; тест не записывает storage вручную. При refresh access token обновляется, поэтому неизменность actor проверяется по JWT subject и owner версии; исходные CommandId/draftVersionToken/geometry проверяются отдельно.
+
+Save и Revert сравнивают три снимка БД: до команды, после первого commit и после replay. Первая содержательная команда добавляет одну revision/событие/запись команды, replay — ноль. Baseline проверяется независимо, после replay требуется отдельный GET. Результаты и ограничения — в отчёте Дня 12; обычный refresh и unit tests эту проверку не заменяют. Runbook: `infra/m4/README.md`.
 
 ## Источники
 
@@ -50,6 +66,13 @@ Store запрещает смену workspace при local draft, незавер
 - `apps/frontend/src/stores/workspaceSaveErrors.ts`
 - `apps/frontend/src/stores/workspaceRetry.ts`
 - `apps/frontend/src/stores/auth.ts`
+- `apps/frontend/src/components/WorkspaceEditCommands.vue`
+- `apps/frontend/src/domain/workspaceCommandPresentation.ts`
+- `apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts`
+- `docs/sprint_2/2026-10-20-day-12-recovery-design.md`
+- `infra/m4/recovery.spec.ts`
+- `infra/m4/run.mjs`
+- `infra/m4/compose.yml`
 - `docs/sprint_2/2026-10-15-day-9-frontend-state-implementation-report.md`
 - `docs/sprint_2/2026-10-12-s2-x01-save-recovery-followup.md`
 

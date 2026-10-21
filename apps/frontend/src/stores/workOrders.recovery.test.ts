@@ -91,7 +91,7 @@ describe("Save recovery", () => {
     sessionStorage.clear();
   });
   afterEach(() => vi.useRealTimers());
-  it("initial has five additional attempts at exact delays, manual is single", async () => {
+  it("initial has five additional attempts, manual starts a new five-attempt series", async () => {
     vi.useFakeTimers();
     const store = setup(true);
     api.saveFeatureGeometry.mockRejectedValue({
@@ -116,10 +116,64 @@ describe("Save recovery", () => {
     expect(store.phase).toBe("unknown");
     for (const args of api.saveFeatureGeometry.mock.calls)
       expect(args[1]).toEqual(api.saveFeatureGeometry.mock.calls[0]?.[1]);
-    await store.retryPendingSave();
+    const retry = store.retryPendingSave();
+    const duplicate = store.retryPendingSave();
     await vi.runAllTimersAsync();
-    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(7);
+    await Promise.all([retry, duplicate]);
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(11);
+    const again = store.retryPendingSave();
+    await vi.runAllTimersAsync();
+    await again;
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(16);
+    for (const args of api.saveFeatureGeometry.mock.calls)
+      expect(args).toEqual(api.saveFeatureGeometry.mock.calls[0]);
     expect(readRecoveryRecord("actor").kind).toBe("record");
+  });
+  it("manual read is single flight and sends no PUT after known success", async () => {
+    writeRecoveryRecord({
+      schemaVersion: 1,
+      command,
+      state: "succeeded",
+      result: successFixture(),
+    });
+    const store = setup();
+    api.fetchWorkspace.mockRejectedValueOnce(new Error("offline"));
+    await store.restorePendingSave();
+    expect(store.canRetryCurrentRead).toBe(true);
+    const read = deferred<ReturnType<typeof workspaceFixture>>();
+    api.fetchWorkspace.mockReturnValue(read.promise);
+    const first = store.refreshCurrentWorkspace();
+    const second = store.refreshCurrentWorkspace();
+    expect(api.fetchWorkspace).toHaveBeenCalledTimes(2);
+    expect(store.canRetryCurrentRead).toBe(false);
+    read.resolve(workspaceFixture(true));
+    await Promise.all([first, second]);
+    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+    expect(store.phase).toBe("idle");
+  });
+  it("stale discard requires successful readback and clears the rejected attempt without HTTP", async () => {
+    const store = setup(true);
+    api.saveFeatureGeometry.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 409,
+        data: { code: "DRAFT_VERSION_STALE", message: "stale" },
+      },
+    });
+    api.fetchWorkspace.mockRejectedValue(new Error("offline"));
+    await store.saveLocalDraft();
+    expect(store.discardRejectedAttempt()).toBe(false);
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    await store.refreshCurrentWorkspace();
+    expect(store.canDiscardRejectedAttempt).toBe(true);
+    const calls = api.fetchWorkspace.mock.calls.length;
+    expect(store.discardRejectedAttempt()).toBe(true);
+    expect(store.localDraft).toBeNull();
+    expect(store.saveError).toBeNull();
+    expect(api.fetchWorkspace).toHaveBeenCalledTimes(calls);
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    expect(store.beginLocalEdit(target.featureId, 1)).toBe(true);
+    expect(store.localDraft?.sourceToken).toBe("revision-b");
   });
   it("restore has five total attempts with original token", async () => {
     vi.useFakeTimers();
@@ -133,6 +187,128 @@ describe("Save recovery", () => {
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(5);
     expect(api.saveFeatureGeometry.mock.calls[0]?.[1]).toEqual(command.request);
   });
+  it("unknown Revert retries the same command without another confirmation and refresh uses stored command", async () => {
+    vi.useFakeTimers();
+    const store = setup();
+    store.workspace = workspaceFixture(true);
+    api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
+    store.beginRevert();
+    const sending = store.confirmRevert(
+      store.revertConfirmation!.confirmationId,
+    );
+    await vi.runAllTimersAsync();
+    await sending;
+    const original = JSON.parse(JSON.stringify(store.pendingCommand));
+    expect(original.request.geometry).toEqual(
+      workspaceFixture(true).workOrder.editVersion.changeSet!.baselineGeometry,
+    );
+    expect(store.revertConfirmation).toBeNull();
+    const retry = store.retryPendingSave();
+    await vi.runAllTimersAsync();
+    await retry;
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(11);
+    setActivePinia(createPinia());
+    const restored = setup();
+    api.saveFeatureGeometry.mockResolvedValue({
+      ...successFixture(original.request.commandId),
+      operation: "unchanged",
+      hasPersistedChangeSet: false,
+      basicValidation: null,
+      updatedFeature: {
+        id: target.featureId,
+        geometry: original.request.geometry,
+      },
+    });
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture());
+    await restored.restorePendingSave();
+    expect(api.saveFeatureGeometry).toHaveBeenLastCalledWith(
+      original.target,
+      original.request,
+    );
+    expect(restored.phase).toBe("idle");
+    expect(restored.localDraft).toBeNull();
+  });
+  it("stale Revert needs new consent and new ID without a new local edit", async () => {
+    const store = setup();
+    store.workspace = workspaceFixture(true);
+    api.saveFeatureGeometry.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 409,
+        data: { code: "DRAFT_VERSION_STALE", message: "stale" },
+      },
+    });
+    const newer = workspaceFixture(true);
+    newer.workOrder.editVersion.draftVersionToken = "revision-c";
+    api.fetchWorkspace.mockResolvedValue(newer);
+    store.beginRevert();
+    await store.confirmRevert(store.revertConfirmation!.confirmationId);
+    const original = api.saveFeatureGeometry.mock.calls[0]![1];
+    expect(store.beginRevert()).toBe("blocked");
+    expect(store.discardRejectedAttempt()).toBe(true);
+    expect(store.localDraft).toBeNull();
+    expect(store.beginRevert()).toBe("confirm");
+    await store.confirmRevert(store.revertConfirmation!.confirmationId);
+    const next = api.saveFeatureGeometry.mock.calls[1]![1];
+    expect(next.commandId).not.toBe(original.commandId);
+    expect(next.draftVersionToken).toBe("revision-c");
+    expect(next.geometry).toEqual(original.geometry);
+    store.discardRejectedAttempt();
+    store.workspace = workspaceFixture();
+    expect(store.beginRevert()).toBe("blocked");
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(2);
+  });
+  it("refresh after completed stale readback does not restore the rejected draft", async () => {
+    const store = setup(true);
+    api.saveFeatureGeometry.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 409,
+        data: { code: "DRAFT_VERSION_STALE", message: "stale" },
+      },
+    });
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    await store.saveLocalDraft();
+    expect(readRecoveryRecord("actor").kind).toBe("empty");
+    setActivePinia(createPinia());
+    const restored = setup();
+    restored.workspace = workspaceFixture(true);
+    await restored.restorePendingSave();
+    expect(restored.phase).toBe("idle");
+    expect(restored.localDraft).toBeNull();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+  });
+  it.each(["success", "rejection", "block"])(
+    "manual series stops on terminal %s",
+    async (terminal) => {
+      vi.useFakeTimers();
+      writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
+      const store = setup();
+      api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
+      const restoring = store.restorePendingSave();
+      await vi.runAllTimersAsync();
+      await restoring;
+      api.saveFeatureGeometry.mockClear();
+      if (terminal === "success")
+        api.saveFeatureGeometry.mockResolvedValue(successFixture());
+      if (terminal === "rejection")
+        api.saveFeatureGeometry.mockRejectedValue({
+          isAxiosError: true,
+          response: {
+            status: 409,
+            data: { code: "DRAFT_VERSION_STALE", message: "stale" },
+          },
+        });
+      if (terminal === "block")
+        api.saveFeatureGeometry.mockResolvedValue({ malformed: true });
+      api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+      const retry = store.retryPendingSave();
+      await vi.runAllTimersAsync();
+      await retry;
+      expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+      expect(store.canRetryPendingCommand).toBe(false);
+    },
+  );
   it("refresh before first PUT restores same intent and old replay never replaces current", async () => {
     writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
     const store = setup();
@@ -373,7 +549,7 @@ describe("Save recovery", () => {
     expect(store.commandResult).toBeNull();
     expect(api.fetchWorkspace).not.toHaveBeenCalled();
   });
-  it("cleanup failure retains success and retry GET can complete without PUT", async () => {
+  it("cleanup failure retains success and direct read cannot bypass storage block", async () => {
     const store = setup(true);
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       Promise.resolve(successFixture(r.commandId)),
@@ -389,8 +565,28 @@ describe("Save recovery", () => {
     expect(store.beginLocalEdit(target.featureId, 1)).toBe(false);
     remove.mockRestore();
     await store.refreshCurrentWorkspace();
-    expect(store.phase).toBe("idle");
+    expect(store.storageError).not.toBeNull();
+    expect(store.recoveryRecord?.state).toBe("succeeded");
+    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+  });
+  it("direct read cannot bypass loss of editor role or blocked phase", async () => {
+    writeRecoveryRecord({
+      schemaVersion: 1,
+      command,
+      state: "succeeded",
+      result: successFixture(),
+    });
+    const store = setup();
+    api.fetchWorkspace.mockRejectedValue(new Error("offline"));
+    await store.restorePendingSave();
+    useAuthStore().user!.role = "reviewer";
+    await store.refreshCurrentWorkspace();
+    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
+    useAuthStore().user!.role = "editor";
+    store.phase = "blocked";
+    await store.refreshCurrentWorkspace();
+    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
   });
   it("no-op consumes a terminal result without requiring token change", async () => {
     const store = setup(true);

@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: m4_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: isolated-m4
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ../docker/postgis/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d m4_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  api:
+    build:
+      context: ../../apps/backend
+      target: dev
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:isolated-m4@db:5432/m4_test
+      DEV_MODE: "true"
+      JWT_SECRET: isolated-m4-not-for-production
+      CORS_ORIGINS: http://127.0.0.1:15173
+    command:
+      [
+        "uvicorn",
+        "utility_service.web_api.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+      ]
+    ports:
+      - "127.0.0.1:18180:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  frontend:
+    build:
+      context: ../../apps/frontend
+      target: dev
+    environment:
+      VITE_API_BASE_URL: http://127.0.0.1:18180
+    ports:
+      - "127.0.0.1:15173:5173"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5173').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 60

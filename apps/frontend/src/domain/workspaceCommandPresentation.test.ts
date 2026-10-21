@@ -89,7 +89,7 @@ describe("workspace command presentation", () => {
     expect(presentWorkspaceCommands(store, true)).toMatchObject({
       busy: false,
       statusText:
-        "Правка сохранена, но актуальные данные карты не удалось загрузить. Редактирование временно недоступно",
+        "Операция выполнена, но актуальные данные карты не удалось загрузить. Редактирование временно недоступно",
     });
     store.recoveryRecord = {
       schemaVersion: 1,
@@ -104,7 +104,7 @@ describe("workspace command presentation", () => {
       },
     };
     expect(presentWorkspaceCommands(store, true).statusText).toContain(
-      "не сохранена",
+      "отклонено",
     );
     expect(presentWorkspaceCommands(store, true).statusText).toContain(
       "не удалось загрузить",

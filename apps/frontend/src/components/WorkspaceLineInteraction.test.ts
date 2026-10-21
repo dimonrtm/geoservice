@@ -169,6 +169,33 @@ function app() {
 }
 
 describe("workspace line interaction", () => {
+  it("revert confirmation removes marker and prevents map edits without cancelling consent", async () => {
+    const { store, click, drag } = app();
+    await click(target.featureId);
+    await drag([5, 6]);
+    store.workspace!.workOrder.editVersion.hasPersistedChangeSet = true;
+    store.workspace!.workOrder.editVersion.changeSet = {
+      featureId: target.featureId,
+      vertexIndex: 1,
+      operation: "updated",
+      baselineGeometry: {
+        type: "LineString",
+        coordinates: [
+          [1, 1],
+          [5, 4],
+          [9, 1],
+        ],
+      },
+    };
+    expect(store.beginRevert()).toBe("resolve-dirty");
+    await flushPromises();
+    expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(true);
+    const draft = JSON.stringify(store.localDraft);
+    await click("line-2");
+    await drag([5, 7]);
+    expect(JSON.stringify(store.localDraft)).toBe(draft);
+    expect(store.revertConfirmation?.phase).toBe("resolve-dirty");
+  });
   it("panel Cancel keeps marker at persisted current and Save clears it", async () => {
     const { store, click, drag } = app();
     const panel = mount(WorkspaceEditCommands, { attachTo: document.body });

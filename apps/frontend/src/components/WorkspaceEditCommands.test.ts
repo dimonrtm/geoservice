@@ -47,10 +47,17 @@ function setup(changed = false) {
   return { wrapper, store, auth };
 }
 beforeEach(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
   sessionStorage.clear();
   vi.resetAllMocks();
 });
 afterEach(() => {
+  vi.useRealTimers();
   wrappers.splice(0).forEach((w) => w.unmount());
   document.body.innerHTML = "";
 });
@@ -91,65 +98,81 @@ describe("workspace commands", () => {
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(wrapper.get("h2").element);
   });
-  it("revert explains unavailability without changing draft or calling API", async () => {
+  it("dirty revert requires two decisions and Escape never restores discarded draft", async () => {
     const { wrapper, store } = setup(true);
-    const draft = JSON.stringify(store.localDraft);
-    await wrapper.get('[data-test="revert-edit"]').trigger("click");
-    expect(wrapper.text()).toContain(
-      "Возврат к исходному состоянию пока недоступен",
-    );
-    expect(wrapper.text()).toContain("Есть несохранённые изменения");
-    expect(JSON.stringify(store.localDraft)).toBe(draft);
-    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
-  });
-  it("clears the revert notice after a new vertex movement", async () => {
-    const { wrapper, store } = setup(true);
-    await wrapper.get('[data-test="revert-edit"]').trigger("click");
-    expect(wrapper.text()).toContain(
-      "Возврат к исходному состоянию пока недоступен",
-    );
-    expect(store.moveLocalVertex([65.1, 44.4])).toBe(true);
+    const button = wrapper.get('[data-test="revert-edit"]');
+    (button.element as HTMLButtonElement).focus();
+    const original = JSON.stringify(store.localDraft);
+    await button.trigger("click");
     await flushPromises();
-    expect(wrapper.text()).not.toContain(
-      "Возврат к исходному состоянию пока недоступен",
+    expect(wrapper.get('[role="dialog"]').text()).toContain("окончательно");
+    expect(document.activeElement).toBe(
+      wrapper.get('[data-test="revert-safe"]').element,
     );
-    expect(wrapper.text()).toContain("Есть несохранённые изменения");
-    expect(store.localDraft?.candidateGeometry.coordinates[1]).toEqual([
-      65.1, 44.4,
-    ]);
+    await wrapper.get('[role="dialog"]').trigger("keydown", { key: "Escape" });
+    expect(JSON.stringify(store.localDraft)).toBe(original);
+    await button.trigger("click");
+    await wrapper.get('[data-test="revert-proceed"]').trigger("click");
+    expect(store.localDraft).toBeNull();
+    expect(wrapper.get('[role="dialog"]').text()).toContain("История");
+    await wrapper.get('[role="dialog"]').trigger("keydown", { key: "Escape" });
+    await flushPromises();
+    expect(store.localDraft).toBeNull();
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(button.element);
   });
-  it("clears the revert notice when a line is selected", async () => {
+  it("traps focus and confirms clean revert without a discard step", async () => {
     const { wrapper, store } = setup(true);
     store.cancelLocalEdit();
-    await flushPromises();
+    api.saveFeatureGeometry.mockImplementation((_t, r) =>
+      Promise.resolve(successFixture(r.commandId)),
+    );
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture());
     await wrapper.get('[data-test="revert-edit"]').trigger("click");
-    expect(wrapper.text()).toContain(
-      "Возврат к исходному состоянию пока недоступен",
-    );
-    expect(store.beginLocalEdit(target.featureId, 1)).toBe(true);
     await flushPromises();
-    expect(wrapper.text()).not.toContain(
-      "Возврат к исходному состоянию пока недоступен",
-    );
-    expect(store.localDraft?.featureId).toBe(target.featureId);
-    expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+    const safe = wrapper.get('[data-test="revert-safe"]');
+    const proceed = wrapper.get('[data-test="revert-proceed"]');
+    await safe.trigger("keydown", { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBe(proceed.element);
+    await proceed.trigger("keydown", { key: "Tab" });
+    expect(document.activeElement).toBe(safe.element);
+    await proceed.trigger("click");
+    await flushPromises();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    expect(store.localDraft).toBeNull();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
   });
-  it.each(["unknown", "stale", "blocked"] as const)(
-    "offers no recovery or cancellation during %s",
-    async (phase) => {
-      const { wrapper, store } = setup(true);
-      store.phase = phase;
-      await flushPromises();
-      expect(wrapper.findAll("button")).toHaveLength(3);
-      for (const b of wrapper.findAll("button"))
-        expect(b.attributes("disabled")).toBeDefined();
-      expect(wrapper.text()).toContain("недоступно");
-    },
-  );
+  it("unknown retry launches one bounded series through the actual store", async () => {
+    vi.useFakeTimers();
+    const { wrapper, store } = setup();
+    api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
+    const save = store.saveLocalDraft();
+    await vi.runAllTimersAsync();
+    await save;
+    await wrapper.get('[data-test="retry-command"]').trigger("click");
+    await vi.runAllTimersAsync();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(11);
+    vi.useRealTimers();
+  });
+  it("stale readback exposes explicit discard without another PUT", async () => {
+    const { wrapper, store } = setup();
+    api.saveFeatureGeometry.mockRejectedValue({
+      isAxiosError: true,
+      response: {
+        status: 409,
+        data: { code: "DRAFT_VERSION_STALE", message: "stale" },
+      },
+    });
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    await wrapper.get('[data-test="save-edit"]').trigger("click");
+    await flushPromises();
+    await wrapper.get('[data-test="discard-rejected"]').trigger("click");
+    expect(store.localDraft).toBeNull();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
+  });
   it("does not steal focus on asynchronous status updates and clears context notices", async () => {
     const { wrapper, store, auth } = setup(true);
-    await wrapper.get('[data-test="revert-edit"]').trigger("click");
     const other = document.createElement("button");
     document.body.append(other);
     other.focus();
@@ -162,7 +185,7 @@ describe("workspace commands", () => {
       "Возврат к исходному состоянию пока недоступен",
     );
   });
-  it("shows known save success when GET fails without offering a retry", async () => {
+  it("retries only one GET after known success", async () => {
     const { wrapper } = setup();
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       Promise.resolve(successFixture(r.commandId)),
@@ -171,9 +194,13 @@ describe("workspace commands", () => {
     await wrapper.get('[data-test="save-edit"]').trigger("click");
     await flushPromises();
     expect(wrapper.text()).toContain(
-      "Правка сохранена, но актуальные данные карты не удалось загрузить",
+      "Операция выполнена, но актуальные данные карты не удалось загрузить",
     );
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);
-    expect(wrapper.findAll("button")).toHaveLength(3);
+    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    await wrapper.get('[data-test="retry-read"]').trigger("click");
+    await flushPromises();
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    expect(api.fetchWorkspace).toHaveBeenCalledTimes(2);
   });
 });
