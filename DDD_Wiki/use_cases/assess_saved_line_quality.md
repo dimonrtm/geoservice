@@ -3,8 +3,8 @@ title: Оценить качество сохранённой учебной п�
 type: use-case
 status: active
 created: 2026-10-16
-updated: 2026-10-16
-source: RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md
+updated: 2026-10-22
+source: RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers.md
 tags: [domain-knowledge, ddd, data-quality, use-case]
 confidence: high
 related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/demo_dataset_qualification_policy, Wiki/specifications/saved_line_quality_assessment, Wiki/specifications/simulated_line_positional_acceptance]
@@ -42,3 +42,7 @@ Editor готовит намерение, распорядитель данны�
 ## Постусловия
 
 Baseline и история не переписаны; заключение ограничено проверенным состоянием и охватом. Положительное учебное заключение не меняет автоматически backend status и не разрешает review/post. Матрица RAW — вход будущей проверки, не свидетельство её выполнения. Реализация и приёмка — FU-2026-10-13-004.
+
+## Передача результата следующему сценарию — 2026-10-22
+
+[[DDD_Wiki/use_cases/issue_and_correct_line_assessment]] принимает подготовленные результаты с точным состоянием, scope, методом/evidence, пробелами и ограничениями. Новое current допускает исторический вывод; выпуск документа не равен положительной оценке или review/post. Ошибки после передачи разбираются по [[Wiki/policies/assessment_issue_and_correction_policy]]. Это уточнение ручной модели без изменения границ EditVersion.

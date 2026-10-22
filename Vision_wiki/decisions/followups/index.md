@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-19
+updated: 2026-10-22
 source: null
 tags: [followups, conflicts]
 ---
@@ -127,3 +127,7 @@ FU-2026-06-01-002: новые первичные источники расшир
 - FU-2026-06-01-002 не закрыт: текущий корпус не доказывает рыночную распространённость и количественный эффект исходного UseCase.
 
 Новых follow-up и blocking conflicts нет; открытых follow-up по-прежнему 19.
+
+## Уточнение FU-2026-10-13-004 — 2026-10-22
+
+Существующий follow-up включает будущую реализацию/приёмку [[Wiki/policies/assessment_issue_and_correction_policy]] и [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]]: отдельная применимость утверждения, частичный охват, исправление/отзыв и уведомление известных получателей. До реализации достаточна ручная карточка из [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers]]; 15 сценариев являются аналитическими ожиданиями. Новых follow-up нет, открытых остаётся 19. Два metadata/fixture вопроса, S2-X01 и broad vendor/market follow-up не закрыты.

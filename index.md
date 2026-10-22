@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-19
+updated: 2026-10-22
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -31,6 +31,9 @@ tags: [knowledge, index, geoservice]
 - [[docs/agent-memory/README]] - компактная инженерная память Codex.
 
 ## Свежие Изменения
+
+- 2026-10-22: `/sync-vision` сверил весь граф знаний и реестры. Все 48 RAW обработаны; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture; активных канонических конфликтов — 0, legacy-конфликтов — 1. Stale-нода — [[DDD_Wiki/model_health]]. Lint: 37 известных `missing_frontmatter` только в RAW. За период 2026-10-15–2026-10-22 Git содержит 7 новых уже обработанных RAW; новых concept/decision/entity/solution нод — 4/0/0/0, дополнительно 4 policies, 4 specifications, 1 glossary, 3 use cases, 7 source-summary chat-нод и 3 технические ноды. Индексы и реестры покрывают эти добавления; текущая сводка — [[memory/project-state]].
+- 2026-10-21: [[Code_wiki/архитектура/frontend_save_recovery]] отражает подключённые Save/Revert controls, ручные retry/readback и границы S2-X01. [Отчёт M4](docs/sprint_2/2026-10-21-day-12-m4-report.md) фиксирует два успешных сценария commit → потеря ответа → restart API → refresh → replay → GET. Это результат указанного отчёта, а не новый прогон `/sync-vision`; доменные follow-up’ы не закрыты.
 
 - 2026-10-19: ingest двух исследований основания правки: 77 документов, 35 новых URL к реестру 2026-10-18, 15 ответов. Добавлены [[Wiki/concepts/change_basis_lifecycle]], [[Wiki/concepts/evidence_dependency]], [[Wiki/policies/change_basis_revision_policy]], [[Wiki/specifications/line_edit_basis_applicable]], [[DDD_Wiki/use_cases/reassess_line_edit_basis]]. Теперь все 48 RAW обработаны; 19 follow-up и два metadata/fixture вопроса остаются открытыми. Правила приняты для модели, реализация не заявлена.
 
@@ -147,7 +150,7 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
-- По `FU-2026-10-11-001` остаётся сверить доменную очередь реализации и metadata/fixture с техническими источниками; Save/Revert, registry/replay/history и frontend recovery уже описаны в `Code_wiki`. UI Save/Revert, продолжение после access block и S2-X01 требуют отдельной проверки реализации и приёмки; см. [[Code_wiki/архитектура/frontend_save_recovery]].
+- По `FU-2026-10-11-001` остаётся сверить доменную очередь реализации и metadata/fixture с техническими источниками. Save/Revert controls и ручные retry/readback подключены, два сценария M4 описаны в отчёте 2026-10-21. Остаток S2-X01 — продолжение после потери доступа, переход на другой наряд при незавершённом recovery и сравнение/перенос попытки; см. [[Code_wiki/архитектура/frontend_save_recovery]].
 - Для first-save остаются 2 вопроса сверки actual dataset spatial metadata и eligible line/fixture с кодом и Sprint 2: [[Wiki/_registry/questions]]. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 приняты условной организацией; учебное evidence не подтверждает точность L-003. Реализация принятых recovery/evidence/retention правил — `FU-2026-10-13-004`.
 - Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
@@ -199,3 +202,7 @@ tags: [knowledge, index, geoservice]
 - [[RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis]] — 81 документ, новые знания и ограничения.
 - [[RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers]] — 15 ответов.
 - [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] — результат ingest в доменной модели.
+
+## Заключения о качестве линии — 2026-10-22
+
+Исследование [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research]] содержит 84 прочитанных внешних документа; [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers]] — 15 ответов и сценарии. Результат ingest: [[Wiki/policies/assessment_issue_and_correction_policy]], [[Wiki/specifications/assessment_statement_usable]], [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]]. Приняты правила условной организации; реализация и runtime-проверки не подменены исследованием.

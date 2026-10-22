@@ -3,7 +3,7 @@ title: Specifications Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-19
+updated: 2026-10-22
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, specification]
 confidence: n/a
@@ -26,3 +26,5 @@ related: [Wiki/index]
 | [[Wiki/specifications/saved_line_quality_assessment]] | Связанное сохранённое состояние, пригодное evidence, полный охват и доказательство прежнего критерия | Не принято или непроверено с сохранением причин по участкам; не новый server status | high | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md` |
 | [[Wiki/specifications/line_edit_exercise_completed]] | Объект, пригодные условия, намерение, receipt/current/baseline и заявленная ветка проверены | Учебная цель не доказана; причина устанавливается отдельно | high | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md` |
 | [[Wiki/specifications/line_edit_basis_applicable]] | Установлены задача/состояние, редакция/охват, происхождение/время и последствия пересмотра | Недостаточно оснований для конкретного вывода; не автоматический Revert | high | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md` |
+
+| [[Wiki/specifications/assessment_statement_usable]] | Состояние/цель/scope, прослеживаемый выпуск и действующая применимость | Нельзя опираться на утверждение для этой цели; не автоматический Revert | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers.md` |

@@ -3,8 +3,8 @@ title: Доказательное заключение о качестве со�
 type: specification
 status: active
 created: 2026-10-16
-updated: 2026-10-16
-source: RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md
+updated: 2026-10-22
+source: RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers.md
 tags: [domain-knowledge, specification, positional-accuracy, evidence]
 confidence: high
 related: [Wiki/specifications/simulated_line_positional_acceptance, Wiki/policies/positional_accuracy_acceptance_policy, Wiki/policies/edit_change_justification_policy, DDD_Wiki/use_cases/assess_saved_line_quality]
@@ -44,3 +44,7 @@ related: [Wiki/specifications/simulated_line_positional_acceptance, Wiki/policie
 ## Границы
 
 Не создаёт новый server enum, aggregate, роль или Save parameter. First-save остаётся `POSITIONAL_ACCURACY_UNVERIFIED`; положительный аналитический пример не включает review/post. Отдельная топологическая и эксплуатационная проверка не заменяются позиционным заключением. Реализация — FU-2026-10-13-004; источники и аналитические контрпримеры — разделы 1, 3–4 RAW.
+
+## Выпуск и применимость результата — 2026-10-22
+
+Выпуск, пересмотр и передача оформляются по [[Wiki/policies/assessment_issue_and_correction_policy]]; допустимость использования конкретного утверждения — [[Wiki/specifications/assessment_statement_usable]]. Выпущенное заключение может быть отрицательным или непроверенным. Эти правила не ослабляют настоящий predicate позиционной оценки, не расширяют scope частичного доказательства и не снимают POSITIONAL_ACCURACY_UNVERIFIED.

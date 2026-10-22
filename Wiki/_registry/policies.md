@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-19
+updated: 2026-10-22
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -36,3 +36,5 @@ related: [Wiki/index]
 | Policy | Rule | Outcome | Confidence | Source |
 | --- | --- | --- | --- | --- |
 | [[Wiki/policies/change_basis_revision_policy]] | Пересмотр задания, источника и объяснения по влиянию на утверждения | Эквивалентность, новое основание, ограничение либо разбор; без нового Save guard | high | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md` |
+
+| [[Wiki/policies/assessment_issue_and_correction_policy]] | Выпуск, спор, исправление и уведомление по области/воздействию | Применимое ограниченное утверждение либо явный дальнейший разбор | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers.md` |

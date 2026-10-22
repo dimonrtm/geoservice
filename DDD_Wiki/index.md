@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-19
+updated: 2026-10-22
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -29,6 +29,8 @@ tags: [domain-knowledge, ddd]
 [[DDD_Wiki/state_machines/editor_save_recovery]] — принятая 2026-10-12 модель осведомлённости редактора и восстановления. Не заменяет состояние серверной операции; разграничение принято по [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]].
 
 Текущие пробелы, противоречия и готовность к discovery фиксируются в [[DDD_Wiki/model_health]].
+
+Сверка 2026-10-22: технический срез Save/Revert controls и ручного восстановления отражён в [[Code_wiki/архитектура/frontend_save_recovery]], результаты двух сценариев восстановления — в [отчёте M4](../docs/sprint_2/2026-10-21-day-12-m4-report.md). Доменная очередь и metadata/fixture остаются на сверке; `model_health` сохраняет метку `stale`, S2-X01 не закрыт.
 
 ## Актуальный First-Save Срез
 
@@ -59,3 +61,7 @@ tags: [domain-knowledge, ddd]
 ## Переоценка основания
 
 [[DDD_Wiki/use_cases/reassess_line_edit_basis]] дополняет подготовку/оценку линии: revision источника, зависимости свидетельств, неизвестное время, новая причина и передача разбора. Границы WorkOrder/EditVersion и события не изменены; внешнее основание и geometry Save не образуют одну транзакцию.
+
+## Выпуск и исправление оценки линии
+
+[[DDD_Wiki/use_cases/issue_and_correct_line_assessment]] продолжает оценку сохранённой линии: исторический вывод, частичный охват, спор, пересмотр, уведомление и явная применимость. Новых aggregate, команд и API нет; реализация остаётся отдельной задачей.

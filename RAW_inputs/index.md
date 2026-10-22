@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-19
+updated: 2026-10-22
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -73,3 +73,6 @@ tags: [raw-inputs, source-of-truth]
 | 2026-10-18 | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md` | Ответы условной организации на 15 вопросов, аналитическая сценарная матрица | Да: [[Wiki/policies/intentional_line_editing_policy]], [[Wiki/specifications/line_edit_exercise_completed]], [[DDD_Wiki/use_cases/prepare_and_check_line_edit]], [[Vision_wiki/chats/2026-10-18-utility-gis-editor-answers]] |
 | 2026-10-19 | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md` | 77 прочитанных веб-документов, 35 новых URL относительно реестра 2026-10-18; десять уточнений: revision, зависимость evidence, время, отзыв, история и передача | Да: [[Wiki/concepts/change_basis_lifecycle]], [[Wiki/concepts/evidence_dependency]], [[Vision_wiki/chats/2026-10-19-change-basis-research]] |
 | 2026-10-19 | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md` | 15 ответов условной организации по тому же корпусу 77 документов, ручная карточка и аналитическая матрица | Да: [[Wiki/policies/change_basis_revision_policy]], [[Wiki/specifications/line_edit_basis_applicable]], [[DDD_Wiki/use_cases/reassess_line_edit_basis]], [[Vision_wiki/chats/2026-10-19-change-basis-answers]] |
+
+| 2026-10-22 | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md` | Исследование 84 внешних документов; выпуск, scope, применимость и исправление заключения; внешние факты и модель разделены | Да: [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/concepts/assessment_delivery_and_acceptance]], [[Vision_wiki/chats/2026-10-22-assessment-research]] |
+| 2026-10-22 | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers.md` | 15 ответов на общем корпусе 84 документов, ручная карточка, аналитическая матрица; не интервью/runtime validation | Да: [[Wiki/policies/assessment_issue_and_correction_policy]], [[Wiki/specifications/assessment_statement_usable]], [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]], [[Vision_wiki/chats/2026-10-22-assessment-answers]] |

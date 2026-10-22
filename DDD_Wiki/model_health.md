@@ -3,7 +3,7 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-10-19
+updated: 2026-10-22
 source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md"
 tags: [domain-knowledge, ddd, health, stale]
 confidence: high
@@ -13,6 +13,10 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 # Model Health
 
 ## Актуальность Состояния
+
+Сверка `/sync-vision` 2026-10-22: все 48 RAW обработаны, новых необработанных нет; 19 открытых follow-up’ов, 2 вопроса metadata/fixture, 0 активных канонических конфликтов и 1 активный legacy-конфликт. Реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная нода с меткой `stale` — этот документ; метка сохраняется для очереди реализации и metadata/fixture по `FU-2026-10-11-001`.
+
+[[Code_wiki/архитектура/frontend_save_recovery]] в редакции 2026-10-21 подтверждает подключение Save/Revert controls и ручных retry/readback. [Отчёт M4](../docs/sprint_2/2026-10-21-day-12-m4-report.md) фиксирует два успешных сценария потери ответа после commit, restart API, refresh, replay и GET для Save/Revert. Это свидетельство указанного прогона, не повторная runtime-проверка при синхронизации. S2-X01, evaluator и организационные правила не считаются завершёнными; вопросы и конфликты не закрываются. Датированные утверждения ниже об отсутствии UI или проверок следует читать как исторические срезы.
 
 Сверка `/sync-vision` 2026-10-19: 19 открытых follow-up’ов, 2 вопроса metadata/fixture, 0 активных канонических конфликтов; один legacy-конфликт остаётся active. После ingest двух новых исследований 2026-10-19 учтены и обработаны все 48 RAW-источников; новых необработанных нет. Технические основания Save/recovery и fixture доступны в [[Code_wiki/архитектура/edit_version_save_orchestration]], [[Code_wiki/архитектура/frontend_save_recovery]] и [[Code_wiki/архитектура/edit_geometry_fixture_metadata]]. Единственная stale-нода — этот документ: очередь реализации и metadata/fixture требуют сверки по `FU-2026-10-11-001`. Статусы вопросов и конфликтов не изменены; новые правила модели не означают runtime-приёмку. Lint: 37 известных `missing_frontmatter` только в RAW.
 
@@ -148,3 +152,9 @@ Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevan
 ## Пересмотр основания — актуальное уточнение 2026-10-19
 
 [[DDD_Wiki/use_cases/reassess_line_edit_basis]] связывает новый источник/редакцию, зависимости evidence и повторную оценку текущего результата. Правила приняты за условную организацию по двум новым RAW, общий корпус — 77 документов; не интервью и не runtime-приёмка. Нет новых aggregates, events или guards Save. Открыты прежние 19 follow-up и два metadata/fixture вопроса; активных канонических conflicts 0, stale сохраняется.
+
+## Уточнение модели заключения — 2026-10-22
+
+По [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research]] и [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers]] добавлены [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/concepts/assessment_delivery_and_acceptance]], [[Wiki/policies/assessment_issue_and_correction_policy]], [[Wiki/specifications/assessment_statement_usable]] и [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]]. Приняты 15 решений условной организации на корпусе 84 документов. Отделены выпуск от pass, применимость от current geometry, доставка от приёмки; границы частичного результата и исправления сформулированы явно.
+
+Это повышение определённости модели, не готовность evaluator, journal, archive или review/post. Новых blocking conflicts нет; два metadata/fixture вопроса, FU-2026-10-13-004, S2-X01 и stale-маркер сохраняются. Позиционный критерий, baseline, guards и retention неизменны. Литература не подтверждает фактическую БД или пригодность L-003.

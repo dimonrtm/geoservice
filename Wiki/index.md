@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-19
+updated: 2026-10-22
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -88,3 +88,7 @@ tags: [domain-knowledge, ddd]
 ## Применимость основания сохранённой правки
 
 [[Wiki/concepts/change_basis_lifecycle]] и [[Wiki/concepts/evidence_dependency]] описывают новые знания корпуса 77 документов. [[Wiki/policies/change_basis_revision_policy]] и [[Wiki/specifications/line_edit_basis_applicable]] задают принятые правила условной организации при изменении задания, редакции или отзыве источника. Ручная карточка достаточна до отдельной реализации; positional status и текущий scope сохраняются.
+
+## Применимость заключения — 2026-10-22
+
+[[Wiki/concepts/assessment_statement_lifecycle]] и [[Wiki/concepts/assessment_delivery_and_acceptance]] описывают выпуск, область, редакции и передачу. [[Wiki/policies/assessment_issue_and_correction_policy]] закрепляет 15 ответов; [[Wiki/specifications/assessment_statement_usable]] проверяет пригодность конкретного утверждения для цели. Корпус 84 внешних документа, источники и ограничения находятся в RAW. Это модель ручной процедуры, без расширения Save и позиционного критерия.

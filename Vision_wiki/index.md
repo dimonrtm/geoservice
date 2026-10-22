@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-19
+updated: 2026-10-22
 source: null
 tags: [vision-wiki, product]
 ---
@@ -133,3 +133,8 @@ tags: [vision-wiki, product]
 
 - [[Vision_wiki/chats/2026-10-19-change-basis-research]] — 77 документов, десять уточнений доменной модели.
 - [[Vision_wiki/chats/2026-10-19-change-basis-answers]] — 15 ответов, карточка и аналитические сценарии; правила приняты за условную организацию.
+
+## Заключения — исследование 2026-10-22
+
+- [[Vision_wiki/chats/2026-10-22-assessment-research]] — 84 внешних документа и 12 уточнений предметной модели.
+- [[Vision_wiki/chats/2026-10-22-assessment-answers]] — 15 ответов, ручная карточка и сценарная матрица; правила условной организации.
