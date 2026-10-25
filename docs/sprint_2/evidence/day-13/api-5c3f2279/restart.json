@@ -1,0 +1,8 @@
+{
+  "runId": "5c3f2279-c3e0-475a-a3b5-1c074ced1303",
+  "status": "passed",
+  "startedBefore": "2026-10-25T12:28:16.451363196Z",
+  "databaseStartedBefore": "2026-10-25T12:28:10.611783449Z",
+  "startedAfter": "2026-10-25T12:30:40.803821143Z",
+  "databaseStartedAfter": "2026-10-25T12:28:10.611783449Z"
+}

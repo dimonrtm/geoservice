@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import argparse
 import os
 import sys
+from pathlib import Path
 from dataclasses import dataclass
 from typing import Any, Callable
 from urllib.error import HTTPError, URLError
@@ -53,6 +55,23 @@ def request_json(
     payload: JsonPayload | None = None,
     opener: UrlOpen = urlopen,
 ) -> JsonPayload:
+    status, result = request_json_response(
+        config, method, path, token=token, payload=payload, opener=opener
+    )
+    if not 200 <= status < 300:
+        raise SmokeFailure(f"HTTP {status} для {method} {path}")
+    return result
+
+
+def request_json_response(
+    config: SmokeConfig,
+    method: str,
+    path: str,
+    *,
+    token: str | None = None,
+    payload: JsonPayload | None = None,
+    opener: UrlOpen = urlopen,
+) -> tuple[int, JsonPayload]:
     url = f"{config.base_url}{path}"
     headers = {"Accept": "application/json"}
     data: bytes | None = None
@@ -70,24 +89,25 @@ def request_json(
 
     try:
         with opener(request, timeout=10) as response:
+            status = getattr(response, "status", 200)
             body = response.read().decode("utf-8")
     except HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="replace")[:500]
-        raise SmokeFailure(f"HTTP {exc.code} для {method} {path}: {body}") from exc
+        status = exc.code
+        body = exc.read().decode("utf-8", errors="replace")
     except (OSError, URLError, TimeoutError) as exc:
         raise SmokeFailure(f"HTTP-запрос не выполнен для {method} {path}: {exc}") from exc
 
     if not body:
-        return {}
+        return status, {}
 
     try:
         decoded = json.loads(body)
     except json.JSONDecodeError as exc:
-        raise SmokeFailure(f"Некорректный JSON для {method} {path}: {body[:500]}") from exc
+        raise SmokeFailure(f"Некорректный JSON для {method} {path}") from exc
 
     if not isinstance(decoded, dict):
-        raise SmokeFailure(f"Неожиданная форма JSON для {method} {path}: {decoded!r}")
-    return decoded
+        raise SmokeFailure(f"Неожиданная форма JSON для {method} {path}")
+    return status, decoded
 
 
 def login(config: SmokeConfig, *, opener: UrlOpen = urlopen) -> str:
@@ -268,7 +288,60 @@ def run_smoke(config: SmokeConfig, *, opener: UrlOpen = urlopen) -> None:
     )
 
 
-def main() -> int:
+def main(argv=None) -> int:
+    parser = argparse.ArgumentParser(description="Workspace API smoke")
+    parser.add_argument("--phase", choices=("save", "verify-retry-revert"))
+    parser.add_argument("--run-id")
+    parser.add_argument("--state-file", type=Path)
+    parser.add_argument("--evidence-file", type=Path)
+    args = parser.parse_args(argv)
+    if args.phase:
+        if not all((args.run_id, args.state_file, args.evidence_file)):
+            parser.error("Фаза требует --run-id, --state-file и --evidence-file")
+        if args.state_file.resolve() == args.evidence_file.resolve():
+            parser.error("State и evidence должны быть разными файлами")
+        from tests.smoke.save_geometry_smoke import (
+            SmokeCheckFailure,
+            run_save_phase,
+            run_verify_phase,
+            write_phase_state,
+        )
+
+        try:
+            function = run_save_phase if args.phase == "save" else run_verify_phase
+            function(
+                SmokeConfig.from_env(),
+                run_id=args.run_id,
+                state_path=args.state_file,
+                evidence_path=args.evidence_file,
+            )
+        except Exception as exc:
+            # Do not serialize DB errors, URLs or HTTP bodies containing credentials.
+            details = {}
+            try:
+                previous = json.loads(args.evidence_file.read_text(encoding="utf-8"))
+                if previous.get("runId") == args.run_id:
+                    details = previous
+            except (OSError, ValueError, AttributeError):
+                pass
+            if isinstance(exc, SmokeCheckFailure):
+                details["reason"] = str(exc)
+            write_phase_state(
+                args.evidence_file,
+                {
+                    **details,
+                    "runId": args.run_id,
+                    "status": "failed",
+                    "phase": args.phase,
+                    "errorType": type(exc).__name__,
+                },
+            )
+            print(f"Smoke {args.phase} failed: {type(exc).__name__}", file=sys.stderr)
+            return 1
+        print(f"Smoke {args.phase} passed: {args.run_id}")
+        return 0
+    if any((args.run_id, args.state_file, args.evidence_file)):
+        parser.error("Фазовые параметры требуют --phase")
     try:
         run_smoke(SmokeConfig.from_env())
     except SmokeFailure as exc:
@@ -278,4 +351,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # Keep the documented direct-script entrypoint and one SmokeFailure class identity.
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from tests.smoke.full_path_workspace_smoke import main
+
     raise SystemExit(main())

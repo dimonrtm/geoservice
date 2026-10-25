@@ -263,6 +263,52 @@ jobs:
           docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service \
             python tests/smoke/full_path_workspace_smoke.py
 
+      - name: Save geometry smoke on fresh database
+        working-directory: infra
+        run: |
+          mkdir -p "$RUNNER_TEMP/day13-smoke"
+          RUN_ID="$(python -c 'import uuid; print(uuid.uuid4())')"
+          echo "DAY13_RUN_ID=$RUN_ID" >> "$GITHUB_ENV"
+          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service \
+            python tests/smoke/full_path_workspace_smoke.py --phase save --run-id "$RUN_ID" \
+            --state-file /tmp/day13-smoke/state.json --evidence-file /tmp/day13-smoke/save.json
+          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml cp \
+            utility_service:/tmp/day13-smoke/state.json "$RUNNER_TEMP/day13-smoke/state.json"
+
+      - name: Restart backend and prove new process readiness
+        working-directory: infra
+        run: |
+          python ../apps/backend/tests/smoke/restart_backend_smoke.py \
+            --manifest "$RUNNER_TEMP/day13-smoke/restart.json" --run-id "$DAY13_RUN_ID" -- \
+            docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml
+
+      - name: Verify geometry, retry, rejections and revert
+        working-directory: infra
+        run: |
+          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml cp \
+            "$RUNNER_TEMP/day13-smoke/state.json" utility_service:/tmp/day13-smoke/state.json
+          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service \
+            python tests/smoke/full_path_workspace_smoke.py --phase verify-retry-revert --run-id "$DAY13_RUN_ID" \
+            --state-file /tmp/day13-smoke/state.json --evidence-file /tmp/day13-smoke/verify.json
+
+      - name: Collect geometry smoke evidence before cleanup
+        if: always()
+        working-directory: infra
+        run: |
+          mkdir -p "$RUNNER_TEMP/day13-smoke"
+          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml cp \
+            utility_service:/tmp/day13-smoke/. "$RUNNER_TEMP/day13-smoke/" || true
+          docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml logs \
+            --no-color --tail=200 utility_service > "$RUNNER_TEMP/day13-smoke/backend.log" 2>&1 || true
+
+      - name: Upload geometry smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: day13-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/day13-smoke/
+          retention-days: 7
+
       - name: Shutdown compose
         if: always()
         working-directory: infra

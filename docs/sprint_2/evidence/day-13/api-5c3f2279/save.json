@@ -1,0 +1,782 @@
+{
+  "runId": "5c3f2279-c3e0-475a-a3b5-1c074ced1303",
+  "stage": "save-complete",
+  "verifiedAt": "2026-10-25T12:30:28.312581+00:00",
+  "status": "passed",
+  "state": {
+    "schemaVersion": 1,
+    "runId": "5c3f2279-c3e0-475a-a3b5-1c074ced1303",
+    "status": "save-complete",
+    "target": {
+      "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+      "edit_version_id": "1ae60359-9dc9-476e-8c0c-919af8453613",
+      "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213"
+    },
+    "originalRequest": {
+      "commandId": "4c91cd0e-12fe-4801-a823-f9e78da44401",
+      "draftVersionToken": "1",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            65.52,
+            44.82
+          ],
+          [
+            65.525,
+            44.8215
+          ],
+          [
+            65.53,
+            44.82
+          ]
+        ]
+      }
+    },
+    "saveResponse": {
+      "commandId": "4c91cd0e-12fe-4801-a823-f9e78da44401",
+      "commandState": "succeeded",
+      "draftVersionToken": "2",
+      "operation": "updated",
+      "hasPersistedChangeSet": true,
+      "updatedFeature": {
+        "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8215
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        }
+      },
+      "basicValidation": {
+        "geometryStatus": "passed",
+        "aoiStatus": "passed",
+        "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED",
+        "dirtyRelativeToBaseline": "passed"
+      }
+    },
+    "savedWorkspace": {
+      "workOrder": {
+        "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "code": "WO-001",
+        "title": "Проверка участка фидера",
+        "description": "Открыть рабочий участок для последующего редактирования.",
+        "status": "in_progress",
+        "scope": {
+          "aoi": {
+            "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0100",
+            "name": "Рабочая область WO-001",
+            "description": "Рабочая область для проверки участка фидера WO-001.",
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    65.495,
+                    44.795
+                  ],
+                  [
+                    65.545,
+                    44.795
+                  ],
+                  [
+                    65.545,
+                    44.835
+                  ],
+                  [
+                    65.495,
+                    44.835
+                  ],
+                  [
+                    65.495,
+                    44.795
+                  ]
+                ]
+              ]
+            },
+            "extent": [
+              65.495,
+              44.795,
+              65.545,
+              44.835
+            ]
+          }
+        },
+        "editVersion": {
+          "id": "1ae60359-9dc9-476e-8c0c-919af8453613",
+          "status": "open",
+          "baseNetworkRevision": 1,
+          "draftVersionToken": "2",
+          "hasPersistedChangeSet": true,
+          "basicValidation": {
+            "geometryStatus": "passed",
+            "aoiStatus": "passed",
+            "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED",
+            "dirtyRelativeToBaseline": "passed"
+          },
+          "changeSet": {
+            "featureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "vertexIndex": 1,
+            "baselineGeometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  65.52,
+                  44.82
+                ],
+                [
+                  65.525,
+                  44.8205
+                ],
+                [
+                  65.53,
+                  44.82
+                ]
+              ]
+            },
+            "operation": "updated"
+          },
+          "features": {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0221",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.5,
+                    44.82
+                  ]
+                },
+                "properties": {
+                  "status": "closed",
+                  "deviceType": "breaker",
+                  "normalState": "closed",
+                  "assetCode": "D-001",
+                  "featureType": "device",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0222",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.52,
+                    44.82
+                  ]
+                },
+                "properties": {
+                  "status": "closed",
+                  "deviceType": "switch",
+                  "normalState": "closed",
+                  "assetCode": "D-002",
+                  "featureType": "device",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0223",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.53,
+                    44.82
+                  ]
+                },
+                "properties": {
+                  "status": "closed",
+                  "deviceType": "fuse",
+                  "normalState": "closed",
+                  "assetCode": "D-003",
+                  "featureType": "device",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0224",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.535,
+                    44.812
+                  ]
+                },
+                "properties": {
+                  "status": "in_service",
+                  "deviceType": "transformer",
+                  "normalState": "in_service",
+                  "assetCode": "D-004",
+                  "featureType": "device",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0225",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.525,
+                    44.83
+                  ]
+                },
+                "properties": {
+                  "status": "open",
+                  "deviceType": "switch",
+                  "normalState": "open",
+                  "assetCode": "D-005",
+                  "featureType": "device",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0226",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.54,
+                    44.805
+                  ]
+                },
+                "properties": {
+                  "status": "active",
+                  "deviceType": "meter",
+                  "normalState": "active",
+                  "assetCode": "D-006",
+                  "featureType": "device",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0201",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.5,
+                    44.82
+                  ]
+                },
+                "properties": {
+                  "junctionType": "busbar",
+                  "assetCode": "J-001",
+                  "featureType": "junction",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0202",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.51,
+                    44.82
+                  ]
+                },
+                "properties": {
+                  "junctionType": "junction",
+                  "assetCode": "J-002",
+                  "featureType": "junction",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0203",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.52,
+                    44.82
+                  ]
+                },
+                "properties": {
+                  "junctionType": "switch_node",
+                  "assetCode": "J-003",
+                  "featureType": "junction",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0204",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.53,
+                    44.82
+                  ]
+                },
+                "properties": {
+                  "junctionType": "branch",
+                  "assetCode": "J-004",
+                  "featureType": "junction",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0205",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.535,
+                    44.812
+                  ]
+                },
+                "properties": {
+                  "junctionType": "transformer_tap",
+                  "assetCode": "J-005",
+                  "featureType": "junction",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0206",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.54,
+                    44.805
+                  ]
+                },
+                "properties": {
+                  "junctionType": "service_point",
+                  "assetCode": "J-006",
+                  "featureType": "junction",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0207",
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [
+                    65.525,
+                    44.83
+                  ]
+                },
+                "properties": {
+                  "junctionType": "tie_point",
+                  "assetCode": "J-007",
+                  "featureType": "junction",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0211",
+                "type": "Feature",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.5,
+                      44.82
+                    ],
+                    [
+                      65.51,
+                      44.82
+                    ]
+                  ]
+                },
+                "properties": {
+                  "status": "in_service",
+                  "voltageKv": 10.0,
+                  "assetCode": "L-001",
+                  "featureType": "line",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0212",
+                "type": "Feature",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.51,
+                      44.82
+                    ],
+                    [
+                      65.52,
+                      44.82
+                    ]
+                  ]
+                },
+                "properties": {
+                  "status": "in_service",
+                  "voltageKv": 10.0,
+                  "assetCode": "L-002",
+                  "featureType": "line",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+                "type": "Feature",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.52,
+                      44.82
+                    ],
+                    [
+                      65.525,
+                      44.8215
+                    ],
+                    [
+                      65.53,
+                      44.82
+                    ]
+                  ]
+                },
+                "properties": {
+                  "status": "in_service",
+                  "voltageKv": 10.0,
+                  "assetCode": "L-003",
+                  "featureType": "line",
+                  "networkVersion": 1,
+                  "operation": "updated"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0214",
+                "type": "Feature",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.53,
+                      44.82
+                    ],
+                    [
+                      65.535,
+                      44.812
+                    ]
+                  ]
+                },
+                "properties": {
+                  "status": "in_service",
+                  "voltageKv": 10.0,
+                  "assetCode": "L-004",
+                  "featureType": "line",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0215",
+                "type": "Feature",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.535,
+                      44.812
+                    ],
+                    [
+                      65.54,
+                      44.805
+                    ]
+                  ]
+                },
+                "properties": {
+                  "status": "in_service",
+                  "voltageKv": 0.4,
+                  "assetCode": "L-005",
+                  "featureType": "line",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              },
+              {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0216",
+                "type": "Feature",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.52,
+                      44.82
+                    ],
+                    [
+                      65.525,
+                      44.83
+                    ]
+                  ]
+                },
+                "properties": {
+                  "status": "in_service",
+                  "voltageKv": 10.0,
+                  "assetCode": "L-006",
+                  "featureType": "line",
+                  "networkVersion": 1,
+                  "operation": "unchanged"
+                }
+              }
+            ]
+          },
+          "associations": [
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0301",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0221",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0211",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0302",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0222",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0212",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0303",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0222",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0304",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0223",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0305",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0223",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0214",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0306",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0224",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0214",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0307",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0224",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0215",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0309",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0224",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0226",
+              "associationType": "connectivity",
+              "version": 1
+            },
+            {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0308",
+              "fromFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0225",
+              "toFeatureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0216",
+              "associationType": "connectivity",
+              "version": 1
+            }
+          ]
+        }
+      }
+    },
+    "beforeSnapshot": {
+      "owner": "10000000-0000-4000-8000-000000000001",
+      "baseline": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            65.52,
+            44.82
+          ],
+          [
+            65.525,
+            44.8205
+          ],
+          [
+            65.53,
+            44.82
+          ]
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            65.52,
+            44.82
+          ],
+          [
+            65.525,
+            44.8205
+          ],
+          [
+            65.53,
+            44.82
+          ]
+        ]
+      },
+      "revision": 1,
+      "operation": "unchanged",
+      "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+      "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+      "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+      "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+      "edit_version_id": "1ae60359-9dc9-476e-8c0c-919af8453613",
+      "default_state_id": "2fd8ccf8-17b5-4b1f-8101-57924e0e4114",
+      "commands": [],
+      "events": []
+    },
+    "savedSnapshot": {
+      "owner": "10000000-0000-4000-8000-000000000001",
+      "baseline": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            65.52,
+            44.82
+          ],
+          [
+            65.525,
+            44.8205
+          ],
+          [
+            65.53,
+            44.82
+          ]
+        ]
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            65.52,
+            44.82
+          ],
+          [
+            65.525,
+            44.8215
+          ],
+          [
+            65.53,
+            44.82
+          ]
+        ]
+      },
+      "revision": 2,
+      "operation": "updated",
+      "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+      "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+      "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+      "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+      "edit_version_id": "1ae60359-9dc9-476e-8c0c-919af8453613",
+      "default_state_id": "2fd8ccf8-17b5-4b1f-8101-57924e0e4114",
+      "commands": [
+        {
+          "state": "succeeded",
+          "command_id": "4c91cd0e-12fe-4801-a823-f9e78da44401",
+          "created_at": "2026-10-25T12:30:28.21643+00:00",
+          "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+          "completed_at": "2026-10-25T12:30:28.21643+00:00",
+          "actor_user_id": "10000000-0000-4000-8000-000000000001",
+          "rejection_code": null,
+          "edit_version_id": "1ae60359-9dc9-476e-8c0c-919af8453613",
+          "response_status": 200,
+          "response_payload": {
+            "commandId": "4c91cd0e-12fe-4801-a823-f9e78da44401",
+            "operation": "updated",
+            "commandState": "succeeded",
+            "updatedFeature": {
+              "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    65.52,
+                    44.82
+                  ],
+                  [
+                    65.525,
+                    44.8215
+                  ],
+                  [
+                    65.53,
+                    44.82
+                  ]
+                ]
+              }
+            },
+            "basicValidation": {
+              "aoiStatus": "passed",
+              "geometryStatus": "passed",
+              "dirtyRelativeToBaseline": "passed",
+              "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED"
+            },
+            "draftVersionToken": "2",
+            "hasPersistedChangeSet": true
+          },
+          "rejection_message": null,
+          "request_fingerprint": "geom-v1:sha256:c8b9eebbebbb19600890c7d1af1f00daca56283f3e55478e05d567f41e7ae38a",
+          "retry_on_access_change": false
+        }
+      ],
+      "events": [
+        {
+          "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+          "command_id": "4c91cd0e-12fe-4801-a823-f9e78da44401",
+          "event_type": "change_set_persisted",
+          "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+          "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+          "occurred_at": "2026-10-25T12:30:28.21643+00:00",
+          "actor_user_id": "10000000-0000-4000-8000-000000000001",
+          "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+          "edit_version_id": "1ae60359-9dc9-476e-8c0c-919af8453613",
+          "default_state_id": "2fd8ccf8-17b5-4b1f-8101-57924e0e4114",
+          "draft_revision_after": 2,
+          "base_network_revision": 1,
+          "draft_revision_before": 1
+        }
+      ]
+    }
+  }
+}

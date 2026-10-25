@@ -1,0 +1,7 @@
+{
+  "reason": "Save не завершён или фаза уже выполнена",
+  "runId": "5c3f2279-c3e0-475a-a3b5-1c074ced1303",
+  "status": "failed",
+  "phase": "verify-retry-revert",
+  "errorType": "SmokeCheckFailure"
+}

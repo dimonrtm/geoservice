@@ -1,0 +1,13 @@
+# Local disposable API smoke. Use after docker-compose.yml + docker-compose.demo.yml.
+# No host ports, fixed container names or persistent demo database volume.
+services:
+  postgis:
+    container_name: !reset null
+    ports: !reset []
+    volumes: !override
+      - ./docker/postgis/init:/docker-entrypoint-initdb.d:ro
+    tmpfs:
+      - /var/lib/postgresql/data
+  utility_service:
+    container_name: !reset null
+    ports: !reset []

@@ -1,0 +1,15 @@
+{
+  "runId": "5c3f2279-c3e0-475a-a3b5-1c074ced1303",
+  "checks": [
+    {
+      "case": "wrong-run",
+      "exitCode": 1,
+      "persistenceUnchanged": true
+    },
+    {
+      "case": "completed-state",
+      "exitCode": 1,
+      "persistenceUnchanged": true
+    }
+  ]
+}

@@ -5,6 +5,11 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        exclude: ^infra/docker-compose\.smoke\.yml$
+      - id: check-yaml
+        name: check yaml (Compose extension tags)
+        files: ^infra/docker-compose\.smoke\.yml$
+        args: ["--unsafe"]
       - id: check-json
         exclude: ^apps/frontend/tsconfig\.(app|node)\.json$
       - id: check-merge-conflict

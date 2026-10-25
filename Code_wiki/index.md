@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-23
-source: repository-change:2026-10-23
+updated: 2026-10-25
+source: repository-change:2026-10-25
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -28,6 +28,8 @@ tags: [code-wiki, technical-knowledge]
   `/ingest repository-change`.
 
 ## Текущий Repository Snapshot
+
+- [[сборка/geometry_save_smoke]] — двухфазный live API smoke, restart штатного backend, read-only SQL evidence и изоляция локального запуска.
 
 - [[архитектура/edit_version_save_orchestration]] — атомарные Save/Revert, terminal replay, registry, access-resume exception и append-only история.
 - [[архитектура/frontend_save_recovery]] — независимый recovery store, IndexedDB/CAS, общий read generation, session barriers, навигация и сравнение.

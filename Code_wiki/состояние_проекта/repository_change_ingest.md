@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-10-23
-source: repository-change:2026-10-23
+updated: 2026-10-25
+source: repository-change:2026-10-25
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,7 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-10-25 | [[сборка/geometry_save_smoke]] | Фазовый HTTP smoke с durable replay после штатного restart, независимым read-only SQL evidence, fail-closed state и локальной Compose-изоляцией. | `tests/smoke/save_geometry_smoke.py`, `save_geometry_observer.py`, `restart_backend_smoke.py`, `.github/workflows/ci.yml`, `infra/docker-compose.smoke.yml` |
 | 2026-10-23 | [[архитектура/frontend_save_recovery]] | Независимый recovery owner, IndexedDB/CAS/import receipt, общий read generation, session/access barriers и управляемая навигация. | `useWorkspaceRecoveryStore`, `useWorkOrdersStore`, schema v2, спецификация S2-X01; FU-2026-10-11-001 |
 | 2026-10-23 | [[архитектура/frontend]] | Разделено владение workspace/recovery; подключены переходы, сравнение и per-context resume. | RecoveryHost, frontend stores/components; FU-2026-10-11-001 |
 | 2026-10-21 | [[архитектура/frontend_save_recovery]] | Ручной recovery, контекст согласия Revert и сквозная проверка потери ответа: независимый commit, restart без seed, прежний actor при обновлении access token и сравнение после первого commit. | `useWorkOrdersStore`, `WorkspaceEditCommands`, `infra/m4/README.md`, спецификация Дня 12; FU-2026-10-11-001 |
