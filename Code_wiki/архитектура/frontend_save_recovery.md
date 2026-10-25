@@ -3,79 +3,60 @@ title: Frontend Save и восстановление намерения реда
 type: technical-note
 status: active
 created: 2026-10-16
-updated: 2026-10-21
-source: repository-change:2026-10-21
-tags: [frontend, pinia, save, recovery, readback]
+updated: 2026-10-23
+source: repository-change:2026-10-23
+tags: [frontend, pinia, save, recovery, readback, indexeddb]
 ---
 
 # Frontend Save и восстановление намерения редактора
 
-## Разделение данных
+## Владение и границы
 
-Единственный `useWorkOrdersStore` разделяет workspace/current, `localDraft`, `recoveryRecord`/`pendingCommand` и `commandResult`. Локальный draft содержит копии source/candidate geometry и source token. Двигается одна внутренняя вершина; при persisted changeSet выбирается та же feature/vertex. Local dirty определяется относительно source current без клиентской canonicalization. Cancel очищает local draft без HTTP; он не отменяет уже отправленную команду.
+`useWorkspaceRecoveryStore` владеет отправленными намерениями, outcome, retry и долговременным хранением. Ключ — JSON `(actorId, workOrderId, editVersionId)`, одна незавершённая команда на версию. Неизвестный исход A не запрещает Save независимой версии B. Recovery не импортирует workOrders: явный `RecoveryHost` предоставляет session/access/readback/completion callbacks.
 
-`saveFeatureGeometry` делает один PUT без скрытых retry. Runtime guards из `contracts/workspace-edit.ts` проверяют command/feature identity успешного ответа, согласованность operation/changeSet/validation; workspace guard также проверяет пару workOrder/editVersion и единственную изменённую внутреннюю вершину относительно baseline. Это проверка контракта, не геодезическая или PostGIS validation.
+`useWorkOrdersStore` владеет current snapshots, локальным draft, selection, навигацией и временным stale-сравнением. Обычный draft не хранится как отправленная команда. `recoveryRecord` — вычисляемое совместимое представление выбранного контекста, а не второй владелец состояния.
 
-## Намерение до отправки
+Backend остаётся транзакционным: [[edit_version_save_orchestration]]. Клиентский unknown описывает осведомлённость, persisted `OutcomePending` отсутствует.
 
-Save создаёт один UUID и замораживает target/request вместе с coordinate arrays. До первого PUT обязательна запись `WorkspaceRecoveryRecord` в `sessionStorage` под `geoservice:workspace-recovery:v1:<actorId>`. Запись содержит schemaVersion, actor, target, исходный token и geometry; состояния — `unknown`, `succeeded`, `rejected`, `blocked`. Другую pending command нельзя перезаписать; malformed/недоступное storage блокирует отправку. Recovery не хранит auth token и не обещает восстановления после уничтожения sessionStorage или закрытия сессии вкладки.
+## Запись до отправки
 
-`unknown` относится к осведомлённости клиента. Backend сохраняет атомарный terminal result, см. [[edit_version_save_orchestration]]. Нельзя создавать новый CommandId, пока исход прежнего намерения не разрешён.
+IndexedDB `geoservice-workspace-recovery`, версия 1, содержит stores `recoveries` и `legacyImports`. Schema записи recovery — 2. Frozen command содержит actor/target/CommandId/source token/candidate, source evidence хранится отдельно. Outcome unknown/succeeded/rejected независим от blocks access/protocol/identity/storage. Подтверждение доступа снимает только access.
 
-## Повторы и current readback
+Первый PUT разрешён после transaction complete, а не request success. Replace/delete сверяют revision и identity в одной транзакции; старый callback не удаляет другую команду. Ошибки хранения блокируют небезопасную mutation, известный результат удерживается. Повреждённый определимый key изолируется; неопределимая запись блокирует actor. Сырые данные не удаляются автоматически.
 
-После первоначального network/timeout/5xx сбоя store допускает 5 дополнительных попыток с паузами 0/2/5/10/20 секунд. Restore неизвестного исхода и каждый ручной retry выполняют новую серию из 5 попыток всего. Одновременные запуски серии запрещены; общего lifetime budget нет. Во всех случаях сохраняются CommandId, token, target и geometry. `AbortController`, поколения запросов и проверка текущего actor/workspace/command останавливают устаревшие callbacks.
+Миграция v1 из actor-scoped sessionStorage атомарно копирует record и receipt, затем удаляет v1. Receipt не позволяет воскресить уже завершённую команду после crash между copy и cleanup. Legacy source=null показывается честно. Auth tokens в recovery не сохраняются. Нормальное закрытие браузера поддержано в том же профиле/origin; уничтожение storage, private-mode guarantees, offline drafts и координация вкладок не входят в контракт.
 
-Success сначала сохраняется в recovery как квитанция, затем выполняется workspace GET. Только GET заменяет current/token/changeSet. Ошибка GET удерживает подтверждённый результат и требует повторного чтения, а не нового PUT. Ручное чтение выполняет ровно один GET; recoveryReadSeq исключает параллельные чтения. Storage/role/blocked guards проверяются в action, поэтому прямой вызов не обходит блокировку интерфейса. Историческая квитанция replay не перезаписывает более свежий current. Recovery удаляется только после необходимого readback и успешного удаления записи storage.
+## Повторы и current
 
-`DRAFT_VERSION_STALE` сохраняет отвергнутую локальную попытку, читает current и не делает automatic reapply. После успешного GET/cleanup действие `discardRejectedAttempt` явно очищает попытку без HTTP; новую правку начинают из current. Сравнение и перенос candidate не реализованы. После завершённого stale readback refresh может потерять отвергнутый draft — граница Дня 9 сохраняется. Известный domain rejection завершает recovery, оставляя возможность исправить local draft. `REQUEST_VALIDATION_ERROR` считается подтверждённым отказом лишь до неизвестного исхода; после unknown это protocol block. Неизвестный/некорректный ответ, `COMMAND_ID_REUSED` и access/lifecycle ошибки разделены как protocol/identity/access block.
+Первоначальный PUT допускает пять дополнительных повторов с задержками 0/2/5/10/20 секунд. Restore/manual retry — пять попыток всего. FIFO scheduler допускает не более двух recovery HTTP одновременно; retry-wait освобождает слот, один key имеет один активный run. Polling отсутствует. Перед фактическим выполнением в очереди заново проверяются actor, epoch и доступ.
+
+Known success сохраняется до GET; ошибка GET не превращает результат в unknown и не запускает новый PUT. Только workspace GET обновляет current/token/changeSet; replay-result исторический. Обычные и recovery GET используют общий generation по key и session epoch. Намерение открыть workspace живёт отдельно от transient spinner: новый recovery GET может закончиться после superseded ordinary GET, и workspace всё равно откроется. Ошибка устаревшего ordinary GET не закрывает более свежий принятый workspace.
+
+Recovery удаляется после принятого необходимого readback и успешного storage cleanup. `DRAFT_VERSION_STALE` удерживает source/candidate до GET, затем материал сравнения остаётся в памяти при переключениях. После завершённого readback refresh может его потерять; автоматического reapply нет.
 
 ## Доступ и навигация
 
-Store запрещает смену workspace при local draft, незавершённом recovery, readback или blocked-состоянии. Потеря назначения, auth reset/logout и смена actor останавливают retry, инвалидируют поколения и сохраняют blocked recovery. Повторный вход не разрешает автоматическое продолжение; требуется явное подтверждение. Даже при ошибке storage запись не считается безопасно очищенной.
+Auth `sessionEpoch` ограждает callbacks и поздние 401/403 от новой сессии. Потеря роли/идентичности останавливает все recovery actor; потеря назначения — конкретный наряд. Неудача загрузки списка из-за сети не доказывает отзыв назначений. Suspend учитывает ещё не загруженные records и незавершённые записи. После обнаруженной потери доступа/login/logout каждый контекст требует отдельного согласия с текущими epoch и CommandId. Обычное восстановление действующей сессии запускает доступные recovery автоматически.
 
-## Подтверждение Revert и общий pipeline
+Управляемая навигация с dirty предлагает сохранить/отказаться/остаться. Save-and-leave связан с исходными target/command/epoch: только success и GET без промежуточного сбоя выполняют переход. Unknown, отказ, ошибка GET, storage/protocol/identity/access отменяют переход окончательно; поздний success не вызывает logout. При отправленной команде текст: «Выход не отменяет отправленную команду». Logout отдельно предупреждает о потере временных stale-материалов всех нарядов.
 
-Панель `WorkspaceEditCommands` подключает Save/Cancel, ручной retry/readback, отказ от stale и Revert. `beginRevert` создаёт временный контекст actor/workOrder/editVersion/feature/token. При dirty сначала предлагается продолжить редактирование либо окончательно отказаться от draft; затем требуется отдельное согласие на baseline. Отмена второго решения не возвращает draft.
+## Revert, сравнение и сообщения
 
-Store блокирует редактирование и другие команды при подтверждении. Синхронный watcher инвалидирует согласие при смене identity/token/доступа; `confirmRevert` повторно проверяет контекст и storage. Target и geometry берутся из change set, поэтому выбор линии не обязателен. UUID команды создаётся только после согласия. Приватный `submitGeometryCommand` обслуживает и Save, и Revert: persist → PUT → terminal result → GET → cleanup. Повторы неизвестного Revert не спрашивают согласия заново; новая попытка после stale получает новое согласие и ID.
+Revert сохраняет две стадии согласия: удалить dirty draft, затем подтвердить baseline reset. Отмена второй стадии не возвращает draft. Команда получает UUID только после согласия и использует общий pipeline persist → PUT → result → GET → cleanup. Неизвестный Revert повторяется с прежней identity без нового диалога.
 
-Панель использует native dialog с безопасным начальным фокусом, Tab/Shift+Tab, Escape и возвратом фокуса. Карта учитывает `workspaceInteractionLocked`; после успешного readback выбор снят, marker отсутствует. Recovery schema не расширена ради подписи операции; `operation=unchanged` не определяет Revert или no-op.
+`WorkspaceComparisonPanel` показывает XY source/candidate/current. Map preview — отдельный read-only overlay, canonical workspace не заменяется; drag при stale запрещён. «Отказаться от попытки» удаляет только выбранный материал. Закрытие preview его не удаляет. Разрушение MapLibre выполняет владелец карты; дочерний teardown не создаёт заново overlay на уже уничтоженной карте.
 
-## Граница реализации и S2-X01
+No-op требует source evidence, не выводится из `operation`. При недостатке доказательств восстановленная квитанция сообщает «Прежняя операция выполнена». Позиционная точность и топология остаются непроверенными; Revert не стирает историю. Диалоги удерживают Tab/Shift+Tab внутри enabled actions, Escape отменяет, фокус возвращается к инициатору.
 
-Recovery включён через `openSelectedWorkOrder`/`restoreOpenedWorkspace` → `restorePendingSave`. Пользовательские команды подключены; прежнее описание отсутствующих controls отражало срез 2026-10-16. Актуализация технической части относится к существующему FU-2026-10-11-001, но не закрывает его доменный остаток.
+## Проверяемые источники
 
-S2-X01 сохраняет явное продолжение после обнаруженной потери доступа, переход на другой наряд при незавершённом recovery и расширенное сравнение/перенос попытки. Evaluator, архив и организационные правила не объявляются реализованными.
-
-## Сквозная проверка recovery
-
-`infra/m4` — отдельный пакет Playwright Test и уникальный disposable Compose-проект с API, frontend и `m4_test`. Инициализация schema/seed предшествует сценариям; API entrypoint запускает только uvicorn, поэтому restart не восстанавливает данные через seed. БД сохраняется между commit и replay.
-
-Browser-context route выполняет настоящий PUT через `route.fetch()`, подтверждает commit отдельным SQL-чтением и скрывает ответ через `route.abort()`. Повторы блокируются до restart и новой навигации той же вкладки. Recovery record создаётся приложением; тест не записывает storage вручную. При refresh access token обновляется, поэтому неизменность actor проверяется по JWT subject и owner версии; исходные CommandId/draftVersionToken/geometry проверяются отдельно.
-
-Save и Revert сравнивают три снимка БД: до команды, после первого commit и после replay. Первая содержательная команда добавляет одну revision/событие/запись команды, replay — ноль. Baseline проверяется независимо, после replay требуется отдельный GET. Результаты и ограничения — в отчёте Дня 12; обычный refresh и unit tests эту проверку не заменяют. Runbook: `infra/m4/README.md`.
-
-## Источники
-
-- `apps/frontend/src/contracts/workspace-edit.ts`
-- `apps/frontend/src/api/workOrders.ts`
-- `apps/frontend/src/domain/workspaceDraft.ts`
-- `apps/frontend/src/stores/workOrders.ts`
-- `apps/frontend/src/stores/workspaceRecoveryStorage.ts`
-- `apps/frontend/src/stores/workspaceSaveErrors.ts`
-- `apps/frontend/src/stores/workspaceRetry.ts`
-- `apps/frontend/src/stores/auth.ts`
-- `apps/frontend/src/components/WorkspaceEditCommands.vue`
-- `apps/frontend/src/domain/workspaceCommandPresentation.ts`
+- `apps/frontend/src/contracts/workspace-recovery.ts`
+- `apps/frontend/src/stores/workspaceRecovery.ts`, `workspaceRecoveryIndexedDb.ts`, `workspaceRecoveryMigration.ts`, `workspaceRecoveryScheduler.ts`
+- `apps/frontend/src/stores/workOrders.ts`, `auth.ts`, `apps/frontend/src/api/http.ts`
+- `apps/frontend/src/components/WorkspaceRecoveryList.vue`, `WorkspaceNavigationDialog.vue`, `WorkspaceComparisonPanel.vue`, `WorkspaceEditCommands.vue`
+- `apps/frontend/src/domain/workspaceCommandPresentation.ts`, `dialogFocus.ts`
 - `apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts`
-- `docs/sprint_2/2026-10-20-day-12-recovery-design.md`
-- `infra/m4/recovery.spec.ts`
-- `infra/m4/run.mjs`
-- `infra/m4/compose.yml`
-- `docs/sprint_2/2026-10-15-day-9-frontend-state-implementation-report.md`
-- `docs/sprint_2/2026-10-12-s2-x01-save-recovery-followup.md`
+- `infra/m4/README.md`, `s2-x01-recovery.spec.ts`, `s2-x01-storage.spec.ts`
+- `docs/sprint_2/2026-10-23-s2-x01-recovery-design.md`
 
-Проверки поведения описаны в `apps/frontend/src/stores/workOrders.recovery.test.ts`, `workOrders.edit.test.ts`, `workspaceRecoveryStorage.test.ts` и `apps/frontend/src/contracts/workspace-edit.test.ts`; ingest не является повторным тестовым прогоном.
-
-Связи: [[frontend]], [[edit_version_api_readback]], [[edit_version_save_orchestration]].
+Техническая актуализация относится к FU-2026-10-11-001; его доменный остаток metadata/fixture не закрыт. Приёмочные результаты хранятся в отчёте S2-X01, а не в этой архитектурной ноде.

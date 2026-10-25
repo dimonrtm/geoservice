@@ -1,3 +1,4 @@
+import { stopRecovery } from "@/test/recoveryIntegration";
 import { mount, flushPromises } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -22,6 +23,15 @@ function setup(changed = false) {
   auth.token = "test";
   auth.user = { id: "actor", email: "editor@example.local", role: "editor" };
   const store = useWorkOrdersStore();
+  store.items = [
+    {
+      id: target.workOrderId,
+      code: "WO",
+      title: "Work",
+      description: null,
+      status: "in_progress",
+    },
+  ];
   store.workspace = workspaceFixture(changed);
   store.workspace.workOrder.scope.aoi.geometry = {
     type: "Polygon",
@@ -57,6 +67,7 @@ beforeEach(() => {
   vi.resetAllMocks();
 });
 afterEach(() => {
+  stopRecovery();
   vi.useRealTimers();
   wrappers.splice(0).forEach((w) => w.unmount());
   document.body.innerHTML = "";
@@ -75,14 +86,18 @@ describe("workspace commands", () => {
     await button.trigger("click");
     await button.trigger("click");
     await store.saveLocalDraft();
-    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() =>
+      expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1),
+    );
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
     expect(button.attributes("disabled")).toBeDefined();
     resolve(
       successFixture(api.saveFeatureGeometry.mock.calls[0]![1].commandId),
     );
     await flushPromises();
-    expect(wrapper.text()).toContain("Правка сохранена в рабочей версии");
+    await vi.waitFor(() =>
+      expect(wrapper.text()).toContain("Правка сохранена в рабочей версии"),
+    );
     expect(store.localDraft).toBeNull();
   });
   it("cancels without dialog or HTTP, keeps selection and moves focus off disabled button", async () => {
@@ -138,17 +153,19 @@ describe("workspace commands", () => {
     expect(document.activeElement).toBe(safe.element);
     await proceed.trigger("click");
     await flushPromises();
-    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
-    expect(store.localDraft).toBeNull();
+    await vi.waitFor(() =>
+      expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1),
+    );
+    await vi.waitFor(() => expect(store.localDraft).toBeNull());
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
   });
   it("unknown retry launches one bounded series through the actual store", async () => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const { wrapper, store } = setup();
     api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
     const save = store.saveLocalDraft();
-    await vi.runAllTimersAsync();
     await save;
+    await vi.runAllTimersAsync();
     await wrapper.get('[data-test="retry-command"]').trigger("click");
     await vi.runAllTimersAsync();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(11);
@@ -166,6 +183,7 @@ describe("workspace commands", () => {
     api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
     await wrapper.get('[data-test="save-edit"]').trigger("click");
     await flushPromises();
+    await vi.waitFor(() => expect(store.canDiscardRejectedAttempt).toBe(true));
     await wrapper.get('[data-test="discard-rejected"]').trigger("click");
     expect(store.localDraft).toBeNull();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
@@ -176,7 +194,7 @@ describe("workspace commands", () => {
     const other = document.createElement("button");
     document.body.append(other);
     other.focus();
-    store.phase = "unknown";
+    store.localPhase = "unknown";
     await flushPromises();
     expect(document.activeElement).toBe(other);
     auth.user = { id: "other", email: "other@example.local", role: "editor" };
@@ -186,13 +204,14 @@ describe("workspace commands", () => {
     );
   });
   it("retries only one GET after known success", async () => {
-    const { wrapper } = setup();
+    const { wrapper, store } = setup();
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       Promise.resolve(successFixture(r.commandId)),
     );
     api.fetchWorkspace.mockRejectedValue(new Error("read"));
     await wrapper.get('[data-test="save-edit"]').trigger("click");
     await flushPromises();
+    await vi.waitFor(() => expect(store.readbackError).toBeTruthy());
     expect(wrapper.text()).toContain(
       "Операция выполнена, но актуальные данные карты не удалось загрузить",
     );
@@ -201,6 +220,6 @@ describe("workspace commands", () => {
     await wrapper.get('[data-test="retry-read"]').trigger("click");
     await flushPromises();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
-    expect(api.fetchWorkspace).toHaveBeenCalledTimes(2);
+    await vi.waitFor(() => expect(api.fetchWorkspace).toHaveBeenCalledTimes(2));
   });
 });

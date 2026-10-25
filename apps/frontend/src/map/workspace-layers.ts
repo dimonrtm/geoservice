@@ -204,3 +204,36 @@ function addLayerIfMissing(
     map.addLayer(layer);
   }
 }
+
+export function setWorkspaceComparisonData(
+  map: Map,
+  geometry: import("@/contracts/workspace-edit").LineStringXY | null,
+): void {
+  const id = "workspace:comparison";
+  if (!map.getSource(id))
+    map.addSource(id, { type: "geojson", data: emptyFeatureCollection });
+  addLayerIfMissing(map, {
+    id,
+    type: "line",
+    source: id,
+    paint: {
+      "line-color": "#a21caf",
+      "line-width": 6,
+      "line-dasharray": [2, 1],
+    },
+  });
+  (map.getSource(id) as GeoJSONSource)?.setData(
+    geometry
+      ? {
+          type: "FeatureCollection",
+          features: [
+            {
+              type: "Feature",
+              properties: {},
+              geometry: JSON.parse(JSON.stringify(geometry)),
+            },
+          ],
+        }
+      : emptyFeatureCollection,
+  );
+}

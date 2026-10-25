@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import WorkspaceNavigationDialog from "@/components/WorkspaceNavigationDialog.vue";
+import { useWorkOrdersStore } from "@/stores/workOrders";
+const navigationStore = useWorkOrdersStore();
 import { LogOut } from "@lucide/vue";
 import { computed, onMounted } from "vue";
 
@@ -45,6 +48,7 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
 </script>
 
 <template>
+  <WorkspaceNavigationDialog />
   <div class="page">
     <div v-if="!auth.isReady" class="statusScreen">
       <div class="statusCard">
@@ -87,7 +91,7 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
               :icon="LogOut"
               variant="secondary"
               data-test="logout-desktop"
-              @click="auth.logout"
+              @click="navigationStore.requestNavigation({ kind: 'logout' })"
             >
               Выйти
             </UiButton>
@@ -100,7 +104,7 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
               tooltip-align="end"
               variant="secondary"
               data-test="logout-mobile"
-              @click="auth.logout"
+              @click="navigationStore.requestNavigation({ kind: 'logout' })"
             />
           </div>
         </div>

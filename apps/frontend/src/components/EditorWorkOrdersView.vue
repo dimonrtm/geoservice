@@ -6,6 +6,8 @@ import ActionableError from "@/components/ActionableError.vue";
 import MapView from "@/components/MapView.vue";
 import UiIconButton from "@/components/ui/UiIconButton.vue";
 import WorkspaceDetailsPanel from "@/components/WorkspaceDetailsPanel.vue";
+import WorkspaceRecoveryList from "@/components/WorkspaceRecoveryList.vue";
+import WorkspaceComparisonPanel from "@/components/WorkspaceComparisonPanel.vue";
 import WorkspaceEditCommands from "@/components/WorkspaceEditCommands.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
 import { useAuthStore } from "@/stores/auth";
@@ -168,6 +170,7 @@ async function openSelectedWorkspace(): Promise<void> {
           </div>
         </li>
       </ul>
+      <WorkspaceRecoveryList />
     </aside>
 
     <section class="workspacePane" aria-label="Рабочая область">
@@ -195,6 +198,7 @@ async function openSelectedWorkspace(): Promise<void> {
       </p>
 
       <WorkspaceEditCommands v-if="workOrders.activeWorkspace" />
+      <WorkspaceComparisonPanel v-if="workOrders.activeWorkspace" />
       <MapView
         v-if="workOrders.activeWorkspace"
         class="workspaceMap"

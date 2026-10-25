@@ -1,4 +1,10 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  settle,
+  readPersisted as readRecoveryRecord,
+  stopRecovery,
+} from "@/test/recoveryIntegration";
+import { IDBObjectStore } from "fake-indexeddb";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import {
   workspaceFixture,
@@ -6,7 +12,7 @@ import {
   successFixture,
 } from "@/test/workspaceEditFixture";
 import { useAuthStore } from "./auth";
-import { readRecoveryRecord } from "./workspaceRecoveryStorage";
+
 const api = vi.hoisted(() => ({
   fetchAssignedWorkOrders: vi.fn(),
   fetchWorkspace: vi.fn(),
@@ -23,6 +29,15 @@ describe("workOrders local editing", () => {
   });
   it("cancels without API and keeps current independent", () => {
     const store = useWorkOrdersStore();
+    store.items = [
+      {
+        id: target.workOrderId,
+        code: "WO",
+        title: "Work",
+        description: null,
+        status: "in_progress",
+      },
+    ];
     store.workspace = workspaceFixture();
     store.openedWorkOrderId = store.selectedWorkOrderId = target.workOrderId;
     store.openedEditVersionId = target.editVersionId;
@@ -42,6 +57,15 @@ function editableStore() {
   auth.token = "test";
   auth.user = { id: "actor", email: "editor@example.local", role: "editor" };
   const store = useWorkOrdersStore();
+  store.items = [
+    {
+      id: target.workOrderId,
+      code: "WO",
+      title: "Work",
+      description: null,
+      status: "in_progress",
+    },
+  ];
   store.workspace = workspaceFixture();
   store.openedWorkOrderId = store.selectedWorkOrderId = target.workOrderId;
   store.openedEditVersionId = target.editVersionId;
@@ -62,8 +86,8 @@ describe("Save orchestration", () => {
     store.workspace = workspaceFixture(true);
     const baseline =
       store.workspace.workOrder.editVersion.changeSet!.baselineGeometry;
-    api.saveFeatureGeometry.mockImplementation((_t, request) => {
-      expect(readRecoveryRecord("actor").kind).toBe("record");
+    api.saveFeatureGeometry.mockImplementation(async (_t, request) => {
+      expect((await readRecoveryRecord("actor")).kind).toBe("record");
       return Promise.resolve({
         ...successFixture(request.commandId),
         operation: "unchanged",
@@ -76,6 +100,7 @@ describe("Save orchestration", () => {
     expect(store.beginRevert()).toBe("confirm");
     const id = store.revertConfirmation!.confirmationId;
     await store.confirmRevert(id);
+    await settle(store);
     await store.confirmRevert(id);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
     expect(api.saveFeatureGeometry.mock.calls[0]).toEqual([
@@ -135,6 +160,7 @@ describe("Save orchestration", () => {
     expect(store.discardLocalChangesKeepingSelection()).toBe(false);
     expect(store.allowWorkspaceNavigation()).toBe(false);
     await store.saveLocalDraft();
+    await settle(store);
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
   });
   it("revert storage failure prevents PUT", async () => {
@@ -142,7 +168,7 @@ describe("Save orchestration", () => {
     store.cancelLocalEdit();
     store.workspace = workspaceFixture(true);
     store.beginRevert();
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    vi.spyOn(IDBObjectStore.prototype, "add").mockImplementation(() => {
       throw new Error("quota");
     });
     await store.confirmRevert(store.revertConfirmation!.confirmationId);
@@ -183,7 +209,7 @@ describe("Save orchestration", () => {
   ] as const)("refuses discard during %s", (phase) => {
     const store = editableStore();
     const draft = store.localDraft;
-    store.phase = phase;
+    store.localPhase = phase;
     expect(store.discardLocalChangesKeepingSelection()).toBe(false);
     expect(store.localDraft).toBe(draft);
   });
@@ -201,10 +227,13 @@ describe("Save orchestration", () => {
       },
     });
     await store.saveLocalDraft();
+    await settle(store);
     await store.saveLocalDraft();
+    await settle(store);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
     store.moveLocalVertex([65.1, 44.3]);
     await store.saveLocalDraft();
+    await settle(store);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(2);
   });
   it("starts one request for concurrent Save calls", async () => {
@@ -219,7 +248,9 @@ describe("Save orchestration", () => {
     api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
     const first = store.saveLocalDraft();
     await store.saveLocalDraft();
-    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() =>
+      expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1),
+    );
     resolve(
       successFixture(api.saveFeatureGeometry.mock.calls[0]![1].commandId),
     );
@@ -236,14 +267,15 @@ describe("Save orchestration", () => {
     );
     api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
     await store.saveLocalDraft();
+    await settle(store);
     expect(store.didSaveChangeGeometry).toBe(false);
     store.clearOpenedWorkspace({ force: true });
     expect(store.didSaveChangeGeometry).toBeNull();
   });
   it("writes before PUT and reads canonical current after success", async () => {
     const store = editableStore();
-    api.saveFeatureGeometry.mockImplementation((_target, request) => {
-      expect(readRecoveryRecord("actor")).toMatchObject({
+    api.saveFeatureGeometry.mockImplementation(async (_target, request) => {
+      expect(await readRecoveryRecord("actor")).toMatchObject({
         kind: "record",
         record: { state: "unknown", command: { request } },
       });
@@ -251,19 +283,21 @@ describe("Save orchestration", () => {
     });
     api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
     await store.saveLocalDraft();
+    await settle(store);
     expect(store.workspace?.workOrder.editVersion.draftVersionToken).toBe(
       "revision-b",
     );
     expect(store.phase).toBe("idle");
     expect(store.localDraft).toBeNull();
-    expect(readRecoveryRecord("actor").kind).toBe("empty");
+    expect((await readRecoveryRecord("actor")).kind).toBe("empty");
   });
   it("does not send when recovery write fails", async () => {
     const store = editableStore();
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+    vi.spyOn(IDBObjectStore.prototype, "add").mockImplementation(() => {
       throw new Error("quota");
     });
     await store.saveLocalDraft();
+    await settle(store);
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
     expect(store.localDraft).not.toBeNull();
   });
@@ -274,7 +308,10 @@ describe("Save orchestration", () => {
     );
     api.fetchWorkspace.mockRejectedValueOnce(new Error("readback"));
     await store.saveLocalDraft();
-    expect(store.commandResult?.commandState).toBe("succeeded");
+    await settle(store);
+    expect(store.recoveryRecord).toMatchObject({
+      result: { commandState: "succeeded" },
+    });
     expect(store.phase).toBe("reading-current");
     expect(store.moveLocalVertex([65, 44])).toBe(false);
     api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
@@ -284,16 +321,22 @@ describe("Save orchestration", () => {
   it("success storage failure blocks next mutation without losing result", async () => {
     const store = editableStore();
     api.saveFeatureGeometry.mockImplementation((_t, r) => {
-      vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      vi.spyOn(IDBObjectStore.prototype, "put").mockImplementation(() => {
         throw new Error("quota");
       });
       return Promise.resolve(successFixture(r.commandId));
     });
     api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
     await store.saveLocalDraft();
+    await settle(store);
     await store.saveLocalDraft();
-    expect(store.commandResult?.commandState).toBe("succeeded");
+    await settle(store);
+    expect(store.recoveryRecord).toMatchObject({
+      result: { commandState: "succeeded" },
+    });
     expect(store.storageError).not.toBeNull();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
   });
 });
+
+afterEach(stopRecovery);

@@ -8,7 +8,10 @@ import {
 } from "@/domain/workspaceLineInteraction";
 import { useWorkOrdersStore } from "@/stores/workOrders";
 import { useAuthStore } from "@/stores/auth";
-import { setWorkspaceDraftData } from "@/map/workspace-layers";
+import {
+  setWorkspaceDraftData,
+  setWorkspaceComparisonData,
+} from "@/map/workspace-layers";
 
 export function useWorkspaceLineInteraction(
   map: Ref<Map>,
@@ -99,7 +102,15 @@ export function useWorkspaceLineInteraction(
     if (disposed) return;
     const draft = store.localDraft;
     const matching = store.activeWorkspace === workspace.value;
-    setWorkspaceDraftData(map.value, workspace.value, matching ? draft : null);
+    setWorkspaceDraftData(
+      map.value,
+      workspace.value,
+      matching && !store.activeComparison ? draft : null,
+    );
+    setWorkspaceComparisonData(
+      map.value,
+      matching ? store.previewGeometry : null,
+    );
     if (
       !available.value ||
       !draft ||
@@ -257,7 +268,13 @@ export function useWorkspaceLineInteraction(
     { flush: "sync" },
   );
   watch(
-    () => [workspace.value, store.localDraft, available.value] as const,
+    () =>
+      [
+        workspace.value,
+        store.localDraft,
+        available.value,
+        store.previewGeometry,
+      ] as const,
     sync,
     { immediate: true, flush: "post" },
   );

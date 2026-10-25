@@ -63,7 +63,7 @@ export function presentWorkspaceCommands(
     statusText: "Нет несохранённых изменений",
     severity: "info",
     positionalAccuracyMessage:
-      "Позиционная точность не проверена. Сохранение не подтверждает точность положения линии",
+      "Позиционная точность не проверена. Топология не проверена. Сохранение не подтверждает точность положения линии",
   };
   const error = (text: string) => ({
     ...view,
@@ -173,7 +173,9 @@ export function presentWorkspaceCommands(
     view.statusText =
       store.didSaveChangeGeometry === false
         ? "Сохранение выполнено без новых изменений"
-        : "Правка сохранена в рабочей версии";
+        : store.didSaveChangeGeometry === true
+          ? "Правка сохранена в рабочей версии"
+          : "Прежняя операция выполнена";
     view.severity = "success";
   }
   return view;

@@ -1,142 +1,17 @@
-import { test, expect, type Page } from "@playwright/test";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
+import { test, expect } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-
-const exec = promisify(execFile);
-const cwd = fileURLToPath(new URL(".", import.meta.url));
-const project = process.env.M4_PROJECT;
-if (!project || !/^geoservice-m4-[a-f0-9]{8}$/.test(project)) {
-  throw new Error(
-    "Запускайте M4 через npm test: требуется отдельный Compose-проект",
-  );
-}
-async function compose(...args: string[]) {
-  return (
-    await exec(
-      "docker",
-      ["compose", "-p", project!, "-f", "compose.yml", ...args],
-      { cwd, windowsHide: true, timeout: 60_000 },
-    )
-  ).stdout.trim();
-}
-async function processStartedAt() {
-  const id = await compose("ps", "-q", "api");
-  return (
-    await exec("docker", ["inspect", "--format", "{{.State.StartedAt}}", id], {
-      windowsHide: true,
-    })
-  ).stdout.trim();
-}
-async function snapshot(version: string, feature: string) {
-  for (const id of [version, feature]) expect(id).toMatch(/^[a-f0-9-]{36}$/i);
-  const sql = `SELECT json_build_object(
-    'revision', ev.draft_revision,
-    'owner', ev.owner_user_id,
-    'events', (SELECT count(*) FROM work_order.edit_version_change_events WHERE edit_version_id=ev.id),
-    'commands', (SELECT count(*) FROM work_order.edit_version_commands WHERE edit_version_id=ev.id),
-    'operation', f.operation,
-    'geometry', ST_AsGeoJSON(f.geometry)::json,
-    'baseline', ST_AsGeoJSON(b.geometry)::json,
-    'baselineBytes', encode(ST_AsEWKB(b.geometry), 'hex')
-  ) FROM work_order.edit_versions ev
-  JOIN work_order.edit_version_features f ON f.edit_version_id=ev.id AND f.feature_id='${feature}'
-  JOIN utility_network.default_state_features b ON b.default_state_id=ev.default_state_id AND b.feature_id=f.feature_id
-  WHERE ev.id='${version}'`;
-  return JSON.parse(
-    await compose(
-      "exec",
-      "-T",
-      "db",
-      "psql",
-      "-U",
-      "postgres",
-      "-d",
-      "m4_test",
-      "-At",
-      "-v",
-      "ON_ERROR_STOP=1",
-      "-c",
-      sql,
-    ),
-  );
-}
-const workspaceResponse = (r: { url(): string; status(): number }) =>
-  r.url().endsWith("/workspace") && r.status() === 200;
-async function openWorkspace(page: Page) {
-  await page.goto("/");
-  await page
-    .getByLabel("Электронная почта")
-    .fill("alexey.editor@example.local");
-  await page
-    .getByLabel("Пароль", { exact: true })
-    .fill("alexey-editor-password");
-  await page.getByTestId("login-submit").click();
-  await page
-    .locator("button.workOrderButton")
-    .filter({ hasText: "WO-001" })
-    .click();
-  const response = page.waitForResponse(workspaceResponse);
-  await page.getByTestId("workspace-open-action").click();
-  return (await response).json();
-}
-async function ordinaryRevert(page: Page) {
-  await page.getByTestId("revert-edit").click();
-  const response = page.waitForResponse(workspaceResponse);
-  await page.getByTestId("revert-proceed").click();
-  const workspace = await (await response).json();
-  await expect(page.getByTestId("revert-edit")).toBeDisabled();
-  return workspace;
-}
-async function moveLine(page: Page, workspace: any) {
-  const feature = workspace.workOrder.editVersion.features.features.find(
-    (f: any) => f.properties.assetCode === "L-003",
-  );
-  expect(feature).toBeTruthy();
-  const canvas = page.locator(".maplibregl-canvas");
-  await expect(canvas).toBeVisible();
-  // Географическую точку переводим в пиксели по реальному AOI и размеру canvas.
-  // В приложении fitBounds использует padding=48, без поворота и наклона.
-  const mercator = (lng: number, lat: number) => [
-    lng / 360 + 0.5,
-    0.5 -
-      Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) / (2 * Math.PI),
-  ];
-  await expect(async () => {
-    const box = (await canvas.boundingBox())!;
-    const [w, s, e, n] = workspace.workOrder.scope.aoi.extent;
-    const [left, bottom] = mercator(w, s),
-      [right, top] = mercator(e, n);
-    const [x, y] = mercator(
-      ...(feature.geometry.coordinates[1] as [number, number]),
-    );
-    const scale = Math.min(
-      (box.width - 96) / (right - left),
-      (box.height - 96) / (bottom - top),
-    );
-    await page.mouse.click(
-      box.x + box.width / 2 + (x - (left + right) / 2) * scale,
-      box.y + box.height / 2 + (y - (top + bottom) / 2) * scale,
-    );
-    const option = page.getByTestId("line-option").filter({ hasText: "L-003" });
-    if (await option.isVisible()) await option.click();
-    await expect(
-      page.getByLabel("Переместить внутреннюю вершину линии"),
-    ).toBeVisible({ timeout: 1000 });
-  }).toPass({ timeout: 20_000 });
-  const marker = (await page
-    .getByLabel("Переместить внутреннюю вершину линии")
-    .boundingBox())!;
-  const x = marker.x + marker.width / 2,
-    y = marker.y + marker.height / 2;
-  await page.mouse.move(x, y);
-  await page.mouse.down();
-  await page.mouse.move(x + 12, y + 8, { steps: 8 });
-  await page.mouse.up();
-  await expect(page.getByTestId("save-edit")).toBeEnabled();
-  return feature;
-}
+import {
+  project,
+  compose,
+  snapshot,
+  openWorkspace,
+  ordinaryRevert,
+  moveLine,
+  processStartedAt,
+  workspaceResponse,
+  storedRecoveries,
+} from "./recovery-helpers";
 
 for (const action of ["Save", "Revert"] as const) {
   test(`${action}: commit → потеря ответа → restart → refresh → replay`, async ({
@@ -160,6 +35,7 @@ for (const action of ["Save", "Revert"] as const) {
     const before = await snapshot(version, feature.id);
     const startedBefore = await processStartedAt();
     const log: any[] = [];
+    const recoveryGets = new Set<unknown>();
     const errors: string[] = [];
     let command: any, originalBody: string, originalUrl: string;
     let committed: any, serverResult: any;
@@ -172,8 +48,11 @@ for (const action of ["Save", "Revert"] as const) {
       commitReject = reject;
     });
     page.on("request", (request) => {
-      if (request.url().endsWith("/workspace"))
+      if (request.url().endsWith("/workspace")) {
         log.push({ event: "GET", afterReload: reloaded });
+        if (log.some((e) => e.event === "replay success"))
+          recoveryGets.add(request);
+      }
     });
     await context.route("**/features/*/geometry", async (route) => {
       try {
@@ -237,13 +116,8 @@ for (const action of ["Save", "Revert"] as const) {
     }
     await commitReady;
     await expect.poll(() => blocked).toBeGreaterThan(0);
-    const stored = await page.evaluate(() => {
-      const key = Object.keys(sessionStorage).find((k) =>
-        k.startsWith("geoservice:workspace-recovery:v1:"),
-      );
-      return key ? JSON.parse(sessionStorage.getItem(key)!) : null;
-    });
-    expect(stored.state).toBe("unknown");
+    const stored = (await storedRecoveries(page))[0];
+    expect(stored.outcome.kind).toBe("unknown");
     expect(stored.command.request).toEqual(command);
     expect(stored.command.actorId).toBe(before.owner);
     expect(stored.command.target.editVersionId).toBe(version);
@@ -273,7 +147,7 @@ for (const action of ["Save", "Revert"] as const) {
       if (frame === page.mainFrame()) reloaded = true;
     });
     const finalReadback = page.waitForResponse(
-      (r) => workspaceResponse(r) && replayed > 0,
+      (r) => workspaceResponse(r) && recoveryGets.has(r.request()),
       { timeout: 30_000 },
     );
     await page.reload();
@@ -301,14 +175,7 @@ for (const action of ["Save", "Revert"] as const) {
       page.getByText("Выберите линию на карте для редактирования"),
     ).toBeVisible();
     await expect
-      .poll(() =>
-        page.evaluate(
-          () =>
-            Object.keys(sessionStorage).filter((key) =>
-              key.startsWith("geoservice:workspace-recovery:v1:"),
-            ).length,
-        ),
-      )
+      .poll(async () => (await storedRecoveries(page)).length)
       .toBe(0);
     await expect(page.getByTestId("revert-edit"))[
       action === "Save" ? "toBeEnabled" : "toBeDisabled"
@@ -316,7 +183,10 @@ for (const action of ["Save", "Revert"] as const) {
     const after = await snapshot(version, feature.id);
     expect(after).toEqual(committed);
     const directory = fileURLToPath(
-      new URL("../../docs/sprint_2/evidence/day-12/m4/", import.meta.url),
+      new URL(
+        "../../docs/sprint_2/evidence/s2-x01/legacy-m4/",
+        import.meta.url,
+      ),
     );
     await mkdir(directory, { recursive: true });
     const evidence = {

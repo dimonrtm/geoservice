@@ -158,7 +158,7 @@ describe("App", () => {
 
     await desktop.trigger("click");
     await mobile.trigger("click");
-    expect(auth.logout).toHaveBeenCalledTimes(2);
+    await vi.waitFor(() => expect(auth.logout).toHaveBeenCalledTimes(2));
   });
 
   it("keeps session-error logout as icon plus text", async () => {

@@ -1,3 +1,4 @@
+import { useWorkspaceRecoveryStore } from "@/stores/workspaceRecovery";
 import { mount, flushPromises } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -118,9 +119,9 @@ function setup() {
     off: (name: string) => handlers.delete(name),
     queryRenderedFeatures: () => hits.map((id) => ({ id })),
     getLayer: () => ({}),
-    getSource: () => ({
+    getSource: (id: string) => ({
       setData: (data: FeatureCollection) => {
-        rendered = structuredClone(data);
+        if (id === "workspace:features") rendered = structuredClone(data);
       },
     }),
     getCanvas: () => document.createElement("canvas"),
@@ -208,7 +209,7 @@ describe("workspace line interaction", () => {
     expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(false);
     expect(doubles.save).not.toHaveBeenCalled();
     store.localDraft = null;
-    store.phase = "idle";
+    store.localPhase = "idle";
     await flushPromises();
     expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(true);
     panel.unmount();
@@ -253,7 +254,7 @@ describe("workspace line interaction", () => {
       const { click, drag, wrapper, store } = app();
       await click(target.featureId);
       await drag([5, 6]);
-      store.phase = phase;
+      store.localPhase = phase;
       await flushPromises();
       await click();
       expect(wrapper.find('[data-test="discard-draft"]').exists()).toBe(false);
@@ -267,7 +268,7 @@ describe("workspace line interaction", () => {
     const { click, drag, store } = app();
     await click(target.featureId);
     await drag([5, 6]);
-    store.storageError = "quota";
+    useWorkspaceRecoveryStore().storageError = "quota";
     await flushPromises();
     expect(doubles.markers[doubles.markers.length - 1]?.removed).toBe(true);
     expect(store.moveLocalVertex([5, 7])).toBe(false);
@@ -276,9 +277,9 @@ describe("workspace line interaction", () => {
     const { click, store } = app();
     await click(target.featureId);
     doubles.markers[0]!.handlers.dragstart!();
-    store.phase = "reading-current";
+    store.localPhase = "reading-current";
     await flushPromises();
-    store.phase = "editing";
+    store.localPhase = "editing";
     await flushPromises();
     await click();
     expect(store.localDraft).toBeNull();

@@ -5,12 +5,20 @@ import {
   parseGeometrySaveResult,
   type WorkspaceRecoveryRecord,
 } from "@/contracts/workspace-edit";
+export {
+  createRecoveryStorage,
+  RecoveryStorageError,
+  type RecoveryStorage,
+} from "./workspaceRecoveryIndexedDb";
 export type RecoveryReadResult =
   | { kind: "empty" | "invalid" | "unavailable" }
   | { kind: "record"; record: WorkspaceRecoveryRecord };
 
 const PREFIX = "geoservice:workspace-recovery:v1:";
-function decode(value: unknown, actorId: string): WorkspaceRecoveryRecord {
+export function decode(
+  value: unknown,
+  actorId: string,
+): WorkspaceRecoveryRecord {
   if (!record(value) || value.schemaVersion !== 1 || !record(value.command))
     throw new Error("record");
   const command = value.command;

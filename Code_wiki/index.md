@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-21
-source: repository-change:2026-10-21
+updated: 2026-10-23
+source: repository-change:2026-10-23
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -30,7 +30,7 @@ tags: [code-wiki, technical-knowledge]
 ## Текущий Repository Snapshot
 
 - [[архитектура/edit_version_save_orchestration]] — атомарные Save/Revert, terminal replay, registry, access-resume exception и append-only история.
-- [[архитектура/frontend_save_recovery]] — разделение current/draft/pending/result, серии retry, одиночный readback, подключённые Save/Revert controls и границы S2-X01/M4.
+- [[архитектура/frontend_save_recovery]] — независимый recovery store, IndexedDB/CAS, общий read generation, session barriers, навигация и сравнение.
 - [[архитектура/edit_geometry_fixture_metadata]] — seed L-003, before/after fixture, persisted policy и граница знания о фактической БД.
 
 - [[архитектура/edit_version_api_readback]] — публичный geometry PUT, локальные strict errors, текущий token/changeSet/baseline и согласованный workspace snapshot; содержит follow-up к историческим описаниям decoding и отсутствия PUT.

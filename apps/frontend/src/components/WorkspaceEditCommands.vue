@@ -195,7 +195,7 @@ function recover(event: MouseEvent, action: "command" | "read" | "discard") {
         type="button"
         @click="recover($event, 'discard')"
       >
-        Отказаться от отклонённой попытки
+        Отказаться от попытки
       </button>
     </div>
     <dialog

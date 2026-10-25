@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-10-21
-source: repository-change:2026-10-21
+updated: 2026-10-23
+source: repository-change:2026-10-23
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-10-23 | [[архитектура/frontend_save_recovery]] | Независимый recovery owner, IndexedDB/CAS/import receipt, общий read generation, session/access barriers и управляемая навигация. | `useWorkspaceRecoveryStore`, `useWorkOrdersStore`, schema v2, спецификация S2-X01; FU-2026-10-11-001 |
+| 2026-10-23 | [[архитектура/frontend]] | Разделено владение workspace/recovery; подключены переходы, сравнение и per-context resume. | RecoveryHost, frontend stores/components; FU-2026-10-11-001 |
 | 2026-10-21 | [[архитектура/frontend_save_recovery]] | Ручной recovery, контекст согласия Revert и сквозная проверка потери ответа: независимый commit, restart без seed, прежний actor при обновлении access token и сравнение после первого commit. | `useWorkOrdersStore`, `WorkspaceEditCommands`, `infra/m4/README.md`, спецификация Дня 12; FU-2026-10-11-001 |
 | 2026-10-16 | [[архитектура/backend]] | Уточнены подключённый Save service и ответственность repository за операции registry/revision/events. | `EditVersionService.save_geometry`, `EditVersionRepository`, FU-2026-10-11-001 |
 | 2026-10-16 | [[архитектура/edit_version_persistence]] | Repository boundary связана с действующей orchestration; D5-Q1 больше не временный пробел. | `EditVersionRepository`, решение D5-Q1 от 2026-10-12, FU-2026-10-11-001 |

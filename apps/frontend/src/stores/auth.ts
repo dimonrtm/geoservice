@@ -14,7 +14,10 @@ import {
   type ResetWorkOrdersOptions,
 } from "@/stores/workOrders";
 
+import { useWorkspaceRecoveryStore } from "./workspaceRecovery";
+
 type AuthState = {
+  sessionEpoch: number;
   token: string | null;
   user: AuthUser | null;
   isReady: boolean;
@@ -51,6 +54,7 @@ export const useAuthStore = defineStore(
 
   {
     state: (): AuthState => ({
+      sessionEpoch: 0,
       token: null,
       user: null,
       isReady: false,
@@ -63,11 +67,18 @@ export const useAuthStore = defineStore(
     actions: {
       setAuth(token: string, user: AuthUser, options: SetAuthOptions = {}) {
         const previousUserId = authUserId(this.user);
-        if (previousUserId && previousUserId !== user.id)
+        if (
+          previousUserId &&
+          (previousUserId !== user.id || this.user?.role !== user.role)
+        )
           useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
             previousUserId,
           );
 
+        if (previousUserId !== user.id || this.user?.role !== user.role) {
+          this.sessionEpoch++;
+          useWorkspaceRecoveryStore().hideActor();
+        }
         this.token = token;
         this.user = user;
         this.sessionError = null;
@@ -81,11 +92,22 @@ export const useAuthStore = defineStore(
       },
       setUser(user: AuthUser | null) {
         const previousUserId = authUserId(this.user);
-        if (previousUserId && previousUserId !== authUserId(user))
+        if (
+          previousUserId &&
+          (previousUserId !== authUserId(user) ||
+            this.user?.role !== user?.role)
+        )
           useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
             previousUserId,
           );
 
+        if (
+          previousUserId !== authUserId(user) ||
+          this.user?.role !== user?.role
+        ) {
+          this.sessionEpoch++;
+          useWorkspaceRecoveryStore().hideActor();
+        }
         this.user = user;
         resetWorkOrdersIfUserIdChanged(previousUserId, authUserId(user));
       },
@@ -96,6 +118,8 @@ export const useAuthStore = defineStore(
             previousUserId ?? undefined,
           );
 
+        this.sessionEpoch++;
+        useWorkspaceRecoveryStore().hideActor();
         this.token = null;
         this.user = null;
         this.sessionError = null;
@@ -107,7 +131,9 @@ export const useAuthStore = defineStore(
           resetWorkOrdersIfUserIdChanged(previousUserId, null);
         }
       },
-      handleUnauthorizedResponse(error: unknown): void {
+      handleUnauthorizedResponse(error: unknown, requestEpoch?: number): void {
+        if (requestEpoch !== undefined && requestEpoch !== this.sessionEpoch)
+          return;
         const hadActiveSession = this.isAuthenticated;
         const parsed = parseApiError(error);
         this.clearLocalSession();
@@ -120,9 +146,7 @@ export const useAuthStore = defineStore(
       },
       async loginWithPassword(email: string, password: string) {
         const result = await login(email, password);
-        useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
-          result.user.id,
-        );
+        await useWorkspaceRecoveryStore().suspendActor(result.user.id);
         this.setAuth(result.access_token, result.user);
         this.isReady = true;
         this.isRestoring = false;

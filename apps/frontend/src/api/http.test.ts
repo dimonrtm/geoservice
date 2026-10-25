@@ -56,6 +56,7 @@ describe("http api", () => {
 
     expect(authStoreMock.handleUnauthorizedResponse).toHaveBeenCalledWith(
       error,
+      undefined,
     );
     expect(authStoreMock.logout).not.toHaveBeenCalled();
   });

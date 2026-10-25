@@ -8,9 +8,6 @@ import {
 } from "@/domain/workspaceDraft";
 import {
   copyGeometry,
-  freezePendingCommand,
-  parseGeometrySaveResult,
-  parseWorkspaceResponse,
   type GeometrySaveResult,
   type WorkspaceRecoveryRecord,
   type PendingGeometryCommand,
@@ -18,27 +15,27 @@ import {
   isLineStringXY,
 } from "@/contracts/workspace-edit";
 import { useAuthStore } from "./auth";
+import { useWorkspaceRecoveryStore } from "./workspaceRecovery";
 import {
-  readRecoveryRecord,
-  writeRecoveryRecord,
-  removeRecoveryRecord,
-  blockStoredRecoveriesForAccessLoss,
-} from "./workspaceRecoveryStorage";
-import { classifySaveFailure } from "./workspaceSaveErrors";
-import { AUTO_RETRY_DELAYS_MS, waitForRetry } from "./workspaceRetry";
-
-const retryControllers = new WeakMap<object, AbortController>();
+  recoveryKey,
+  type RecoveryContext,
+  type ReadTicket,
+  type RecoveryApplyResult,
+  type RecoveryCompletion,
+  type RecoverySource,
+} from "@/contracts/workspace-recovery";
+import type {
+  NavigationTarget,
+  NavigationChoice,
+  NavigationContext,
+} from "@/domain/workspaceNavigation";
 const confirmationWatchers = new WeakMap<object, WatchStopHandle>();
-const accessSuspensions = new WeakMap<
-  object,
-  Map<string, WorkspaceRecoveryRecord | null>
->();
+const recoveryBindings = new WeakMap<object, () => void>();
 
 import {
   fetchAssignedWorkOrders,
   fetchWorkspace,
   openEditVersion,
-  saveFeatureGeometry,
 } from "@/api/workOrders";
 import { parseApiError } from "@/api/parseApiError";
 import type { ErrorPresentation, ParsedApiError } from "@/contracts/api-error";
@@ -70,19 +67,30 @@ type RevertConfirmationContext = {
   phase: "resolve-dirty" | "confirm";
 };
 type WorkOrdersState = {
+  comparisonPreview: "source" | "candidate" | "current" | null;
+  navigation: NavigationContext | null;
+  navigationError: string | null;
+  snapshots: Record<string, WorkspaceResponse>;
+  readGenerations: Record<string, number>;
+  staleComparisons: Record<
+    string,
+    {
+      source: RecoverySource;
+      candidate: LineStringXY;
+      commandId: string;
+      featureId: string;
+    }
+  >;
   revertConfirmation: RevertConfirmationContext | null;
   recoveryReadSeq: number | null;
   submittedSourceGeometry: LineStringXY | null;
   submittedCommandId: string | null;
   rejectedCandidateGeometry: LineStringXY | null;
-  recoveryRecord: WorkspaceRecoveryRecord | null;
   editRequestSeq: number;
   saveError: string | null;
-  readbackError: string | null;
-  storageError: string | null;
   localDraft: WorkspaceLocalDraft | null;
   commandResult: GeometrySaveResult | null;
-  phase:
+  localPhase:
     | "idle"
     | "editing"
     | "sending"
@@ -101,6 +109,8 @@ type WorkOrdersState = {
   openedEditVersionId: string | null;
   workspace: WorkspaceResponse | null;
   openingWorkOrderId: string | null;
+  openingEditVersionId: string | null;
+  workspaceReadIntent: { key: string; openSeq: number } | null;
   openingWorkspaceRequestSeq: number | null;
   openWorkspaceErrorByWorkOrderId: Record<
     string,
@@ -278,19 +288,22 @@ function isWorkspaceAccessFailure(error: ParsedApiError): boolean {
 
 function createInitialWorkOrdersState(): WorkOrdersState {
   return {
+    comparisonPreview: null,
+    navigation: null,
+    navigationError: null,
+    snapshots: {},
+    readGenerations: {},
+    staleComparisons: {},
     revertConfirmation: null,
     recoveryReadSeq: null,
     submittedSourceGeometry: null,
     submittedCommandId: null,
     rejectedCandidateGeometry: null,
-    recoveryRecord: null,
     editRequestSeq: 0,
     saveError: null,
-    readbackError: null,
-    storageError: null,
     localDraft: null,
     commandResult: null,
-    phase: "idle",
+    localPhase: "idle",
     editBlockReason: null,
     items: [],
     isLoading: false,
@@ -300,6 +313,8 @@ function createInitialWorkOrdersState(): WorkOrdersState {
     openedEditVersionId: null,
     workspace: null,
     openingWorkOrderId: null,
+    openingEditVersionId: null,
+    workspaceReadIntent: null,
     openingWorkspaceRequestSeq: null,
     openWorkspaceErrorByWorkOrderId: {},
     openWorkspaceErrorOperationByWorkOrderId: {},
@@ -312,8 +327,95 @@ function createInitialWorkOrdersState(): WorkOrdersState {
 export const useWorkOrdersStore = defineStore("workOrders", {
   state: createInitialWorkOrdersState,
   getters: {
+    recoveryKey(state): string | null {
+      const actor = useAuthStore().user?.id;
+      return actor && state.openedWorkOrderId && state.openedEditVersionId
+        ? recoveryKey({
+            actorId: actor,
+            workOrderId: state.openedWorkOrderId,
+            editVersionId: state.openedEditVersionId,
+          })
+        : null;
+    },
+    activeComparison(): WorkOrdersState["staleComparisons"][string] | null {
+      const key = this.recoveryKey;
+      return key ? (this.staleComparisons[key] ?? null) : null;
+    },
+    previewGeometry(): LineStringXY | null {
+      const material = this.activeComparison;
+      if (!material || !this.comparisonPreview) return null;
+      if (this.comparisonPreview === "source")
+        return material.source?.geometry ?? null;
+      if (this.comparisonPreview === "candidate") return material.candidate;
+      const geometry =
+        this.activeWorkspace?.workOrder.editVersion.features.features.find(
+          (f) => f.id === material.featureId,
+        )?.geometry;
+      return isLineStringXY(geometry) ? geometry : null;
+    },
+    recoveryRecord(): WorkspaceRecoveryRecord | null {
+      const recoveryRecord = this.recoveryKey
+        ? useWorkspaceRecoveryStore().getRecord(this.recoveryKey)
+        : null;
+      if (!recoveryRecord) return null;
+      if (recoveryRecord.blocks.length)
+        return {
+          schemaVersion: 1,
+          command: recoveryRecord.command,
+          state: "blocked",
+          reason: recoveryRecord.blocks.includes("access")
+            ? "access"
+            : "protocol",
+          ...(recoveryRecord.outcome.kind === "succeeded"
+            ? { result: recoveryRecord.outcome.result }
+            : {}),
+        };
+      if (recoveryRecord.outcome.kind === "succeeded")
+        return {
+          schemaVersion: 1,
+          command: recoveryRecord.command,
+          state: "succeeded",
+          result: recoveryRecord.outcome.result,
+        };
+      if (recoveryRecord.outcome.kind === "rejected")
+        return {
+          schemaVersion: 1,
+          command: recoveryRecord.command,
+          state: "rejected",
+          error: recoveryRecord.outcome.error,
+          needsReadback: recoveryRecord.readbackRequired,
+        };
+      return {
+        schemaVersion: 1,
+        command: recoveryRecord.command,
+        state: "unknown",
+      };
+    },
+    phase(): WorkOrdersState["localPhase"] {
+      return (
+        (this.recoveryKey
+          ? useWorkspaceRecoveryStore().phases[this.recoveryKey]
+          : null) ?? this.localPhase
+      );
+    },
+    readbackError(): string | null {
+      return (
+        (this.recoveryKey
+          ? useWorkspaceRecoveryStore().readbackErrors[this.recoveryKey]
+          : null) ?? null
+      );
+    },
+    storageError(): string | null {
+      const r = useWorkspaceRecoveryStore();
+      return (
+        r.storageError ??
+        (this.recoveryKey ? r.contextErrors[this.recoveryKey] : null) ??
+        null
+      );
+    },
     workspaceInteractionLocked: (state): boolean =>
-      state.revertConfirmation !== null,
+      state.revertConfirmation !== null ||
+      (state.navigation !== null && state.navigation.phase !== "saving"),
     canStartRevert(): boolean {
       const auth = useAuthStore();
       return (
@@ -362,7 +464,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         auth.isAuthenticated &&
         auth.user?.role === "editor" &&
         !!this.activeWorkspace &&
-        this.phase === "stale" &&
+        this.localPhase === "stale" &&
         !this.recoveryRecord &&
         !this.storageError &&
         !this.readbackError
@@ -381,14 +483,18 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         ) !== JSON.stringify(state.submittedSourceGeometry.coordinates)
       );
     },
-    pendingCommand: (state): PendingGeometryCommand | null =>
-      state.recoveryRecord?.command ?? null,
-    canLeaveWorkspace: (state): boolean =>
-      state.revertConfirmation === null &&
-      state.localDraft === null &&
-      state.recoveryRecord === null &&
-      state.phase !== "reading-current" &&
-      state.phase !== "blocked",
+    pendingCommand(): PendingGeometryCommand | null {
+      return this.recoveryRecord?.command ?? null;
+    },
+    canLeaveWorkspace(): boolean {
+      return (
+        !this.revertConfirmation &&
+        (!this.localDraft ||
+          !isLocalDraftDirty(this.localDraft) ||
+          !!this.recoveryRecord ||
+          this.phase === "stale")
+      );
+    },
     isOpeningWorkspace: (state) => state.openingWorkOrderId !== null,
     selectedWorkOrder: (state) =>
       state.items.find((item) => item.id === state.selectedWorkOrderId) ?? null,
@@ -432,6 +538,109 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     },
   },
   actions: {
+    requestNavigation(target: NavigationTarget): string | null {
+      const auth = useAuthStore();
+      if (
+        !auth.user ||
+        this.revertConfirmation ||
+        this.navigation ||
+        (target.kind === "work-order" &&
+          target.workOrderId === this.selectedWorkOrderId)
+      )
+        return null;
+      const recovery = useWorkspaceRecoveryStore();
+      const sent =
+        target.kind === "logout"
+          ? Object.values(recovery.records).some(
+              (r) => r.command.actorId === auth.user!.id,
+            )
+          : !!this.recoveryRecord;
+      const stale =
+        target.kind === "logout"
+          ? Object.keys(this.staleComparisons).length > 0
+          : !!(this.recoveryKey && this.staleComparisons[this.recoveryKey]);
+      const dirty =
+        !!this.localDraft &&
+        isLocalDraftDirty(this.localDraft) &&
+        !this.recoveryRecord &&
+        !this.activeComparison;
+      if (!dirty && !sent && !stale) {
+        void this.performNavigation(target);
+        return null;
+      }
+      const id = crypto.randomUUID();
+      this.navigation = {
+        id,
+        actorId: auth.user.id,
+        sessionEpoch: auth.sessionEpoch,
+        sourceKey: this.recoveryKey,
+        target,
+        phase: dirty ? "dirty" : sent ? "sent" : "stale",
+        commandId: null,
+      };
+      this.navigationError = null;
+      return id;
+    },
+    cancelNavigation(id: string): void {
+      if (this.navigation?.id === id) this.navigation = null;
+    },
+    async prepareLogout(): Promise<boolean> {
+      const actor = useAuthStore().user?.id;
+      if (!actor) return true;
+      const recovery = useWorkspaceRecoveryStore();
+      await recovery.suspendActor(actor);
+      if (recovery.storageError) {
+        this.navigationError =
+          "Выход приостановлен: не удалось сохранить данные восстановления. Повторите попытку.";
+        return false;
+      }
+      return true;
+    },
+    async performNavigation(target: NavigationTarget): Promise<void> {
+      if (target.kind === "logout") {
+        if (await this.prepareLogout()) await useAuthStore().logout();
+        return;
+      }
+      this.clearOpenedWorkspace({ force: true });
+      this.selectedWorkOrderId = target.workOrderId;
+      storeSelectedWorkOrder(target.workOrderId);
+      this.openWorkspaceRequestSeq++;
+    },
+    async resolveNavigation(
+      id: string,
+      choice: NavigationChoice,
+    ): Promise<void> {
+      const context = this.navigation,
+        auth = useAuthStore();
+      if (!context || context.id !== id || context.phase === "saving") return;
+      if (
+        context.actorId !== auth.user?.id ||
+        context.sessionEpoch !== auth.sessionEpoch ||
+        context.sourceKey !== this.recoveryKey
+      ) {
+        this.navigation = null;
+        return;
+      }
+      if (choice === "stay") {
+        this.navigation = null;
+        return;
+      }
+      if (choice === "save" && context.phase === "dirty") {
+        context.phase = "saving";
+        await this.saveLocalDraft();
+        if (this.navigation?.id === id && !this.navigation.commandId)
+          this.navigation = null;
+        return;
+      }
+      if (
+        (choice === "discard" && context.phase === "dirty") ||
+        (choice === "leave" && context.phase !== "dirty")
+      ) {
+        this.navigation = null;
+        if (choice === "discard") this.cancelLocalEdit();
+        await this.performNavigation(context.target);
+      }
+    },
     beginRevert(): "resolve-dirty" | "confirm" | "blocked" {
       const auth = useAuthStore();
       if (
@@ -441,11 +650,6 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         this.hasAccessSuspension(auth.user.id)
       )
         return "blocked";
-      if (readRecoveryRecord(auth.user.id).kind !== "empty") {
-        this.phase = "blocked";
-        this.editBlockReason = "RECOVERY_REQUIRED";
-        return "blocked";
-      }
       const workspace = this.activeWorkspace!;
       const version = workspace.workOrder.editVersion;
       const phase =
@@ -508,7 +712,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       this.rejectedCandidateGeometry = null;
       this.saveError = null;
       this.editBlockReason = null;
-      this.phase = "idle";
+      this.localPhase = "idle";
       this.revertConfirmation.phase = "confirm";
       return true;
     },
@@ -520,12 +724,6 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         return;
       const context = this.revertConfirmation;
       if (this.hasAccessSuspension(context.actorId)) return;
-      if (readRecoveryRecord(context.actorId).kind !== "empty") {
-        this.cancelRevert(id);
-        this.phase = "blocked";
-        this.editBlockReason = "RECOVERY_REQUIRED";
-        return;
-      }
       const command: PendingGeometryCommand = {
         actorId: context.actorId,
         target: {
@@ -545,96 +743,162 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       this.cancelRevert(id);
       await submitGeometryCommand(this, command);
     },
-    suspendWorkspaceRecoveryForAccessLoss(actorId?: string): void {
-      retryControllers.get(this)?.abort();
-      retryControllers.delete(this);
-      this.editRequestSeq += 1;
-      this.openWorkspaceRequestSeq += 1;
-      const actor =
-        actorId ?? this.pendingCommand?.actorId ?? useAuthStore().user?.id;
-      const hasRecovery =
-        this.recoveryRecord !== null ||
-        (actor !== undefined && readRecoveryRecord(actor).kind !== "empty");
-      const stored = actor ? readRecoveryRecord(actor) : null;
-      const recovery =
-        this.recoveryRecord ??
-        (stored?.kind === "record" ? stored.record : null);
-      const blocked: WorkspaceRecoveryRecord | null = recovery
-        ? {
-            schemaVersion: 1,
-            command: recovery.command,
-            state: "blocked",
-            reason: "access",
-            ...("result" in recovery && recovery.result
-              ? { result: recovery.result }
-              : {}),
+    attachRecoveryHost(): () => void {
+      if (recoveryBindings.has(this)) return recoveryBindings.get(this)!;
+      const recovery = useWorkspaceRecoveryStore();
+      const detach = recovery.bindHost({
+        session: () => {
+          const auth = useAuthStore();
+          return auth.isAuthenticated && auth.user
+            ? {
+                actorId: auth.user.id,
+                epoch: auth.sessionEpoch,
+                canEdit: auth.user.role === "editor",
+              }
+            : null;
+        },
+        canAccess: (context) =>
+          useAuthStore().user?.id === context.actorId &&
+          this.items.some((item) => item.id === context.workOrderId),
+        reserveRead: (context) => this.reserveWorkspaceRead(context),
+        applyRead: (ticket, workspace) =>
+          this.applyWorkspaceRead(ticket, workspace),
+        complete: (completion) => this.completeRecovery(completion),
+        interrupted: (key, reason) => {
+          if (reason === "session") {
+            useAuthStore().clearLocalSession();
+            return;
           }
-        : null;
-      const persisted = blockStoredRecoveriesForAccessLoss(actor);
-      if (!persisted)
-        this.storageError = "Не удалось записать остановку восстановления";
-      if (blocked && !writeRecoveryRecord(blocked))
-        this.storageError = "Не удалось записать остановку восстановления";
-      if (hasRecovery || !persisted) {
-        const suspended =
-          accessSuspensions.get(this) ??
-          new Map<string, WorkspaceRecoveryRecord | null>();
-        suspended.set(
-          actor ?? "*",
-          blocked ?? suspended.get(actor ?? "*") ?? null,
-        );
-        accessSuspensions.set(this, suspended);
+          if (this.navigation?.sourceKey === key) this.navigation = null;
+          if (reason === "access" && this.recoveryKey === key)
+            this.clearOpenedWorkspace({ force: true });
+        },
+      });
+      recoveryBindings.set(this, detach);
+      return detach;
+    },
+    reserveWorkspaceRead(context: RecoveryContext): ReadTicket {
+      const key = recoveryKey(context);
+      const generation = (this.readGenerations[key] ?? 0) + 1;
+      this.readGenerations[key] = generation;
+      return { key, generation, sessionEpoch: useAuthStore().sessionEpoch };
+    },
+    applyWorkspaceRead(
+      ticket: ReadTicket,
+      workspace: WorkspaceResponse,
+    ): RecoveryApplyResult {
+      const auth = useAuthStore();
+      if (
+        !auth.isAuthenticated ||
+        !auth.user ||
+        auth.sessionEpoch !== ticket.sessionEpoch ||
+        ticket.key !==
+          recoveryKey({
+            actorId: auth.user.id,
+            workOrderId: workspace.workOrder.id,
+            editVersionId: workspace.workOrder.editVersion.id,
+          })
+      )
+        return "blocked";
+      if (this.readGenerations[ticket.key] !== ticket.generation)
+        return "superseded";
+      this.snapshots[ticket.key] = workspace;
+      if (
+        this.workspaceReadIntent?.key === ticket.key &&
+        this.workspaceReadIntent.openSeq === this.openWorkspaceRequestSeq &&
+        this.selectedWorkOrderId === workspace.workOrder.id
+      ) {
+        this.openedWorkOrderId = workspace.workOrder.id;
+        this.openedEditVersionId = workspace.workOrder.editVersion.id;
+        storeOpenedWorkspace({
+          workOrderId: this.openedWorkOrderId,
+          editVersionId: this.openedEditVersionId,
+        });
       }
-      this.clearOpenedWorkspace({ force: true });
-      if (hasRecovery || !persisted) {
-        this.phase = "blocked";
-        this.editBlockReason = "ACCESS_LOST";
+      if (
+        this.openedWorkOrderId === workspace.workOrder.id &&
+        this.openedEditVersionId === workspace.workOrder.editVersion.id
+      )
+        this.workspace = workspace;
+      return "applied";
+    },
+    completeRecovery({ record, sessionEpoch }: RecoveryCompletion): void {
+      const auth = useAuthStore();
+      if (
+        auth.user?.id !== record.command.actorId ||
+        auth.sessionEpoch !== sessionEpoch
+      )
+        return;
+      const selected = this.recoveryKey === record.key;
+      if (record.outcome.kind === "rejected") {
+        if (record.outcome.error.code === "DRAFT_VERSION_STALE")
+          this.staleComparisons[record.key] = {
+            source: record.source,
+            candidate: copyGeometry(record.command.request.geometry),
+            commandId: record.command.request.commandId,
+            featureId: record.command.target.featureId,
+          };
+        if (selected) {
+          this.saveError = record.outcome.error.code;
+          this.rejectedCandidateGeometry = copyGeometry(
+            record.command.request.geometry,
+          );
+          this.localPhase =
+            record.outcome.error.code === "DRAFT_VERSION_STALE"
+              ? "stale"
+              : "rejected";
+        }
+      } else if (record.outcome.kind === "succeeded" && selected) {
+        this.commandResult = record.outcome.result;
+        this.submittedSourceGeometry = record.source?.geometry ?? null;
+        this.submittedCommandId = record.command.request.commandId;
+        this.localDraft = null;
+        this.rejectedCandidateGeometry = null;
+        this.saveError = null;
+        this.localPhase = "idle";
+        const navigation = this.navigation;
+        if (
+          navigation?.sourceKey === record.key &&
+          navigation.commandId === record.command.request.commandId &&
+          navigation.sessionEpoch === sessionEpoch
+        ) {
+          this.navigation = null;
+          void this.performNavigation(navigation.target);
+        }
       }
     },
+    suspendWorkspaceRecoveryForAccessLoss(actorId?: string): void {
+      const actor = actorId ?? useAuthStore().user?.id;
+      if (actor) void useWorkspaceRecoveryStore().suspendActor(actor);
+      this.navigation = null;
+      this.clearOpenedWorkspace({ force: true });
+    },
+    async suspendWorkOrderRecovery(workOrderId: string): Promise<void> {
+      const auth = useAuthStore(),
+        recovery = useWorkspaceRecoveryStore();
+      const actor = auth.user?.id;
+      if (this.openedWorkOrderId === workOrderId)
+        this.clearOpenedWorkspace({ force: true });
+      if (actor) await recovery.suspendActor(actor, workOrderId);
+    },
     hasAccessSuspension(actorId: string): boolean {
-      const suspended = accessSuspensions.get(this);
-      if (!suspended?.has(actorId) && !suspended?.has("*")) return false;
-      const record = suspended.get(actorId);
-      if (record && !writeRecoveryRecord(record))
-        this.storageError = "Не удалось записать остановку восстановления";
-      this.phase = "blocked";
-      this.editBlockReason = "RECOVERY_REQUIRES_CONFIRMATION";
-      return true;
+      return (
+        this.recoveryRecord?.command.actorId === actorId &&
+        this.recoveryRecord.state === "blocked"
+      );
     },
     allowWorkspaceNavigation(): boolean {
       if (this.canLeaveWorkspace) return true;
       this.editBlockReason = "FINISH_OR_CANCEL_LOCAL_WORK";
       return false;
     },
-    persistRecovery(): boolean {
-      if (!this.recoveryRecord || !writeRecoveryRecord(this.recoveryRecord)) {
-        this.storageError = "Не удалось сохранить контекст восстановления";
-        this.editBlockReason = "RECOVERY_STORAGE_UNAVAILABLE";
-        return false;
-      }
-      this.storageError = null;
-      return true;
-    },
-    isCurrentCommand(command: PendingGeometryCommand, seq: number): boolean {
-      const auth = useAuthStore();
-      return (
-        this.editRequestSeq === seq &&
-        auth.isAuthenticated &&
-        auth.user?.id === command.actorId &&
-        this.openedWorkOrderId === command.target.workOrderId &&
-        this.openedEditVersionId === command.target.editVersionId &&
-        this.pendingCommand?.request.commandId === command.request.commandId
-      );
-    },
     async saveLocalDraft(): Promise<void> {
       const auth = useAuthStore();
-      if (auth.user && this.hasAccessSuspension(auth.user.id)) return;
       if (
         this.workspaceInteractionLocked ||
         this.storageError ||
         !auth.isAuthenticated ||
-        !auth.user ||
-        auth.user.role !== "editor" ||
+        auth.user?.role !== "editor" ||
         !this.localDraft ||
         !isLocalDraftDirty(this.localDraft) ||
         !this.activeWorkspace ||
@@ -644,16 +908,10 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         return;
       if (
         this.rejectedCandidateGeometry &&
-        JSON.stringify(this.localDraft.candidateGeometry.coordinates) ===
-          JSON.stringify(this.rejectedCandidateGeometry.coordinates)
+        JSON.stringify(this.rejectedCandidateGeometry.coordinates) ===
+          JSON.stringify(this.localDraft.candidateGeometry.coordinates)
       )
         return;
-      const existing = readRecoveryRecord(auth.user.id);
-      if (existing.kind !== "empty") {
-        this.phase = "blocked";
-        this.editBlockReason = "RECOVERY_REQUIRED";
-        return;
-      }
       const command: PendingGeometryCommand = {
         actorId: auth.user.id,
         target: {
@@ -667,255 +925,33 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           geometry: copyGeometry(this.localDraft.candidateGeometry),
         },
       };
+      if (this.navigation?.phase === "saving")
+        this.navigation.commandId = command.request.commandId;
       await submitGeometryCommand(this, command);
     },
-    async sendPendingOnce(
-      command: PendingGeometryCommand,
-      seq: number,
-      hadUnknownOutcome: boolean,
-    ): Promise<boolean> {
-      if (!this.isCurrentCommand(command, seq)) return false;
-      this.phase = "sending";
-      let result: GeometrySaveResult;
-      try {
-        result = parseGeometrySaveResult(
-          await saveFeatureGeometry(command.target, command.request),
-          command.target,
-          command.request.commandId,
-        );
-      } catch (error) {
-        if (!this.isCurrentCommand(command, seq)) return false;
-        const failure = classifySaveFailure(error, hadUnknownOutcome);
-        if (failure.kind === "retryableUnknown") {
-          this.phase = "unknown";
-          this.saveError = "Результат сохранения пока неизвестен";
-          return true;
-        }
-        if (failure.kind === "blocked") {
-          if (failure.reason === "access") {
-            this.suspendWorkspaceRecoveryForAccessLoss(command.actorId);
-            this.saveError = failure.code;
-            return false;
-          }
-          this.recoveryRecord = {
-            schemaVersion: 1,
-            command,
-            state: "blocked",
-            reason: failure.reason,
-          };
-          this.phase = "blocked";
-          this.saveError = failure.code;
-          this.editBlockReason = failure.code;
-          this.persistRecovery();
-          return false;
-        }
-        this.saveError = failure.error.code;
-        this.rejectedCandidateGeometry = copyGeometry(command.request.geometry);
-        this.recoveryRecord = {
-          schemaVersion: 1,
-          command,
-          state: "rejected",
-          error: failure.error,
-          needsReadback: failure.kind === "stale",
-        };
-        this.phase = failure.kind === "stale" ? "stale" : "rejected";
-        if (!this.persistRecovery()) {
-          this.phase = "blocked";
-          return false;
-        }
-        if (failure.kind === "stale") await this.refreshCurrentWorkspace();
-        else this.finishRecovery();
-        return false;
-      }
-      if (!this.isCurrentCommand(command, seq)) return false;
-      this.commandResult = result;
-      this.recoveryRecord = {
-        schemaVersion: 1,
-        command,
-        state: "succeeded",
-        result,
-      };
-      this.localDraft = null;
-      this.phase = "reading-current";
-      if (!this.persistRecovery()) return false;
-      await this.refreshCurrentWorkspace();
-      return false;
-    },
-    finishRecovery(): boolean {
-      const recovery = this.recoveryRecord;
-      if (
-        !recovery ||
-        (recovery.state !== "succeeded" && recovery.state !== "rejected")
-      )
-        return false;
-      if (
-        !removeRecoveryRecord(
-          recovery.command.actorId,
-          recovery.command.request.commandId,
-        )
-      ) {
-        this.storageError =
-          "Не удалось завершить очистку контекста восстановления";
-        this.editBlockReason = "RECOVERY_STORAGE_UNAVAILABLE";
-        return false;
-      }
-      this.recoveryRecord = null;
-      this.storageError = null;
-      this.editBlockReason = null;
-      this.phase =
-        recovery.state === "succeeded"
-          ? "idle"
-          : recovery.error.code === "DRAFT_VERSION_STALE"
-            ? "stale"
-            : "rejected";
-      return true;
-    },
     async refreshCurrentWorkspace(): Promise<void> {
-      if (
-        this.recoveryReadSeq !== null ||
-        this.storageError ||
-        this.phase === "blocked" ||
-        !this.activeWorkspace ||
-        useAuthStore().user?.role !== "editor"
-      )
-        return;
-      const recovery = this.recoveryRecord;
-      if (
-        !recovery ||
-        (recovery.state !== "succeeded" && recovery.state !== "rejected")
-      )
-        return;
-      const seq = this.editRequestSeq;
-      if (!this.isCurrentCommand(recovery.command, seq)) return;
-      if (!this.persistRecovery()) return;
-      if (recovery.state === "rejected" && !recovery.needsReadback) {
-        this.finishRecovery();
-        return;
-      }
-      const readSeq = ++this.openWorkspaceRequestSeq;
-      this.recoveryReadSeq = readSeq;
-      this.phase = "reading-current";
-      this.readbackError = null;
-      try {
-        const { workOrderId, editVersionId } = recovery.command.target;
-        const current = parseWorkspaceResponse(
-          await fetchWorkspace(workOrderId, editVersionId),
-          workOrderId,
-          editVersionId,
-        );
-        if (
-          !this.isCurrentCommand(recovery.command, seq) ||
-          readSeq !== this.openWorkspaceRequestSeq
-        )
-          return;
-        this.workspace = current;
-        this.finishRecovery();
-      } catch (error) {
-        if (
-          this.isCurrentCommand(recovery.command, seq) &&
-          readSeq === this.openWorkspaceRequestSeq
-        ) {
-          if (isWorkspaceAccessFailure(parseApiError(error))) {
-            this.suspendWorkspaceRecoveryForAccessLoss(
-              recovery.command.actorId,
-            );
-            return;
-          }
-          this.readbackError =
-            "Актуальные данные не загружены. Повторите чтение рабочего пространства.";
-        }
-      } finally {
-        if (this.recoveryReadSeq === readSeq) this.recoveryReadSeq = null;
+      if (this.canRetryCurrentRead && this.recoveryKey)
+        await useWorkspaceRecoveryStore().retryRead(this.recoveryKey);
+    },
+    async retryPendingSave(): Promise<void> {
+      if (this.recoveryKey)
+        await useWorkspaceRecoveryStore().retry(this.recoveryKey);
+    },
+    async restorePendingSave(): Promise<void> {
+      this.attachRecoveryHost();
+      const auth = useAuthStore();
+      if (auth.user)
+        await useWorkspaceRecoveryStore().initializeActor(auth.user.id);
+      if (this.recoveryKey && this.staleComparisons[this.recoveryKey]) {
+        this.localPhase = "stale";
+        this.saveError = "DRAFT_VERSION_STALE";
       }
     },
     discardRejectedAttempt(): boolean {
       if (!this.canDiscardRejectedAttempt) return false;
+      this.comparisonPreview = null;
+      if (this.recoveryKey) delete this.staleComparisons[this.recoveryKey];
       return this.cancelLocalEdit();
-    },
-    async retryPendingSave(): Promise<void> {
-      if (
-        !this.canRetryPendingCommand ||
-        !this.recoveryRecord ||
-        retryControllers.has(this)
-      )
-        return;
-      if (this.hasAccessSuspension(this.recoveryRecord.command.actorId)) return;
-      await this.runPendingRetries(
-        this.recoveryRecord.command,
-        ++this.editRequestSeq,
-      );
-    },
-    async runPendingRetries(
-      command: PendingGeometryCommand,
-      seq: number,
-    ): Promise<void> {
-      if (retryControllers.has(this)) return;
-      const controller = new AbortController();
-      retryControllers.set(this, controller);
-      try {
-        for (const delay of AUTO_RETRY_DELAYS_MS) {
-          if (!this.isCurrentCommand(command, seq)) return;
-          this.phase = "retry-wait";
-          if (
-            !(await waitForRetry(delay, controller.signal)) ||
-            !this.isCurrentCommand(command, seq)
-          )
-            return;
-          if (!(await this.sendPendingOnce(command, seq, true))) return;
-        }
-      } finally {
-        if (retryControllers.get(this) === controller)
-          retryControllers.delete(this);
-      }
-    },
-    async restorePendingSave(): Promise<void> {
-      const auth = useAuthStore();
-      if (auth.user && this.hasAccessSuspension(auth.user.id)) return;
-      if (
-        !auth.isAuthenticated ||
-        !auth.user ||
-        !this.activeWorkspace ||
-        this.recoveryRecord ||
-        this.localDraft ||
-        this.phase === "blocked"
-      )
-        return;
-      const stored = readRecoveryRecord(auth.user.id);
-      if (stored.kind === "empty") return;
-      if (stored.kind !== "record") {
-        this.phase = "blocked";
-        this.editBlockReason = "RECOVERY_STORAGE_INVALID";
-        return;
-      }
-      const recovery = stored.record;
-      freezePendingCommand(recovery.command);
-      if (
-        recovery.command.target.workOrderId !== this.openedWorkOrderId ||
-        recovery.command.target.editVersionId !== this.openedEditVersionId
-      ) {
-        this.phase = "blocked";
-        this.editBlockReason = "RECOVERY_OTHER_WORKSPACE";
-        return;
-      }
-      this.recoveryRecord = recovery;
-      const seq = ++this.editRequestSeq;
-      this.openWorkspaceRequestSeq += 1;
-      if (recovery.state === "blocked") {
-        this.phase = "blocked";
-        this.editBlockReason = "RECOVERY_REQUIRES_CONFIRMATION";
-        return;
-      }
-      if (recovery.state === "succeeded") {
-        this.commandResult = recovery.result;
-        await this.refreshCurrentWorkspace();
-        return;
-      }
-      if (recovery.state === "rejected") {
-        this.saveError = recovery.error.code;
-        await this.refreshCurrentWorkspace();
-        return;
-      }
-      await this.runPendingRetries(recovery.command, seq);
     },
     beginLocalEdit(featureId: string, vertexIndex: number): boolean {
       if (
@@ -946,7 +982,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           featureId,
           vertexIndex,
         );
-        this.phase = "editing";
+        this.localPhase = "editing";
         this.editBlockReason = null;
         return true;
       } catch {
@@ -968,7 +1004,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         return false;
       try {
         this.localDraft = updateLocalVertex(this.localDraft, xy);
-        this.phase = "editing";
+        this.localPhase = "editing";
         return true;
       } catch {
         this.editBlockReason = "INVALID_LOCAL_EDIT";
@@ -984,10 +1020,12 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         !["idle", "editing", "rejected", "stale"].includes(this.phase)
       )
         return false;
+      if (this.recoveryKey) delete this.staleComparisons[this.recoveryKey];
+      this.comparisonPreview = null;
       this.localDraft = null;
       this.rejectedCandidateGeometry = null;
       this.saveError = null;
-      this.phase = "idle";
+      this.localPhase = "idle";
       this.editBlockReason = null;
       return true;
     },
@@ -1012,7 +1050,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         this.localDraft.vertexIndex,
       );
       this.localDraft = draft;
-      this.phase = "editing";
+      this.localPhase = "editing";
       this.saveError = null;
       this.editBlockReason = null;
       this.commandResult = null;
@@ -1024,9 +1062,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     reset(options: ResetWorkOrdersOptions = {}): void {
       if (this.revertConfirmation)
         this.cancelRevert(this.revertConfirmation.confirmationId);
-      if (this.recoveryRecord) this.suspendWorkspaceRecoveryForAccessLoss();
-      retryControllers.get(this)?.abort();
-      retryControllers.delete(this);
+
       const nextEditRequestSeq = this.editRequestSeq + 1;
       const nextLoadAssignedRequestSeq = this.loadAssignedRequestSeq + 1;
       const nextOpenWorkspaceRequestSeq = this.openWorkspaceRequestSeq + 1;
@@ -1056,18 +1092,29 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         }
 
         this.items = result.workOrders;
+        const recovery = useWorkspaceRecoveryStore();
+        for (const record of Object.values(recovery.records)) {
+          if (
+            record.command.actorId === useAuthStore().user?.id &&
+            !this.items.some(
+              (item) => item.id === record.command.target.workOrderId,
+            )
+          )
+            void recovery.suspend(record.key);
+        }
+        this.attachRecoveryHost();
+        const actor = useAuthStore().user;
+        if (actor?.role === "editor") await recovery.initializeActor(actor.id);
         if (
           this.selectedWorkOrderId &&
           !this.items.some((item) => item.id === this.selectedWorkOrderId)
         ) {
-          this.suspendWorkspaceRecoveryForAccessLoss();
           this.clearSelection(true);
         }
         if (
           this.openedWorkOrderId &&
           !this.items.some((item) => item.id === this.openedWorkOrderId)
         ) {
-          this.suspendWorkspaceRecoveryForAccessLoss();
           this.clearOpenedWorkspace({ force: true });
         }
       } catch (error: unknown) {
@@ -1075,7 +1122,6 @@ export const useWorkOrdersStore = defineStore("workOrders", {
           return;
         }
 
-        this.items = [];
         const parsed = parseApiError(error);
         if (isWorkspaceAccessFailure(parsed))
           this.suspendWorkspaceRecoveryForAccessLoss();
@@ -1092,7 +1138,14 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         return;
       }
 
-      if (!this.allowWorkspaceNavigation()) return;
+      if (
+        !this.canLeaveWorkspace ||
+        this.recoveryRecord ||
+        (this.recoveryKey && this.staleComparisons[this.recoveryKey])
+      ) {
+        this.requestNavigation({ kind: "work-order", workOrderId });
+        return;
+      }
 
       this.openWorkspaceRequestSeq += 1;
       this.clearOpenedWorkspace();
@@ -1126,6 +1179,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         [workOrderId]: undefined,
       };
 
+      let readTicket: ReadTicket | null = null;
       try {
         const openResult = await openEditVersion(workOrderId);
         if (
@@ -1138,7 +1192,18 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         this.updateWorkOrderStatus(workOrderId, "in_progress");
 
         const editVersionId = openResult.editVersion.id;
+        this.openingEditVersionId = editVersionId;
+        const actorId = useAuthStore().user?.id;
+        if (!actorId) return;
+        const ticket = this.reserveWorkspaceRead({
+          actorId,
+          workOrderId,
+          editVersionId,
+        });
+        readTicket = ticket;
+        this.workspaceReadIntent = { key: ticket.key, openSeq: requestSeq };
         const workspace = await fetchWorkspace(workOrderId, editVersionId);
+        if (this.applyWorkspaceRead(ticket, workspace) !== "applied") return;
 
         if (
           this.openWorkspaceRequestSeq !== requestSeq ||
@@ -1162,12 +1227,18 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         await this.restorePendingSave();
       } catch (error: unknown) {
         if (
+          readTicket &&
+          (this.readGenerations[readTicket.key] !== readTicket.generation ||
+            useAuthStore().sessionEpoch !== readTicket.sessionEpoch)
+        )
+          return;
+        if (
           this.openWorkspaceRequestSeq === requestSeq &&
           this.selectedWorkOrderId === workOrderId
         ) {
           const parsed = parseApiError(error);
           if (isWorkspaceAccessFailure(parsed))
-            this.suspendWorkspaceRecoveryForAccessLoss();
+            await this.suspendWorkOrderRecovery(workOrderId);
           const errorPresentation = presentWorkspaceOpenError(parsed);
           this.openWorkspaceErrorByWorkOrderId = {
             ...this.openWorkspaceErrorByWorkOrderId,
@@ -1181,6 +1252,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       } finally {
         if (this.openingWorkspaceRequestSeq === requestSeq) {
           this.openingWorkOrderId = null;
+          this.openingEditVersionId = null;
           this.openingWorkspaceRequestSeq = null;
         }
       }
@@ -1204,7 +1276,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       }
 
       if (!this.items.some((item) => item.id === workOrderId)) {
-        this.suspendWorkspaceRecoveryForAccessLoss();
+        await this.suspendWorkOrderRecovery(workOrderId);
         this.selectedWorkOrderId = null;
         clearStoredSelectedWorkOrder();
         this.clearOpenedWorkspace({ force: true });
@@ -1228,6 +1300,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       }
 
       const editVersionId = storedWorkspace.editVersionId;
+      this.openingEditVersionId = editVersionId;
       const requestSeq = this.openWorkspaceRequestSeq + 1;
       this.openWorkspaceRequestSeq = requestSeq;
       this.openingWorkOrderId = workOrderId;
@@ -1241,8 +1314,19 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         [workOrderId]: undefined,
       };
 
+      let readTicket: ReadTicket | null = null;
       try {
+        const actorId = useAuthStore().user?.id;
+        if (!actorId) return;
+        const ticket = this.reserveWorkspaceRead({
+          actorId,
+          workOrderId,
+          editVersionId,
+        });
+        readTicket = ticket;
+        this.workspaceReadIntent = { key: ticket.key, openSeq: requestSeq };
         const workspace = await fetchWorkspace(workOrderId, editVersionId);
+        if (this.applyWorkspaceRead(ticket, workspace) !== "applied") return;
         if (
           this.openWorkspaceRequestSeq !== requestSeq ||
           this.selectedWorkOrderId !== workOrderId
@@ -1266,12 +1350,18 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         await this.restorePendingSave();
       } catch (error: unknown) {
         if (
+          readTicket &&
+          (this.readGenerations[readTicket.key] !== readTicket.generation ||
+            useAuthStore().sessionEpoch !== readTicket.sessionEpoch)
+        )
+          return;
+        if (
           this.openWorkspaceRequestSeq === requestSeq &&
           this.selectedWorkOrderId === workOrderId
         ) {
           const parsed = parseApiError(error);
           if (isWorkspaceAccessFailure(parsed))
-            this.suspendWorkspaceRecoveryForAccessLoss();
+            await this.suspendWorkOrderRecovery(workOrderId);
           const errorPresentation = presentWorkspaceRestoreError(parsed);
           this.clearOpenedWorkspace({
             force: isWorkspaceAccessFailure(parsed),
@@ -1289,6 +1379,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       } finally {
         if (this.openingWorkspaceRequestSeq === requestSeq) {
           this.openingWorkOrderId = null;
+          this.openingEditVersionId = null;
           this.openingWorkspaceRequestSeq = null;
         }
       }
@@ -1327,12 +1418,15 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     },
     clearOpenedWorkspace(options: ClearOpenedWorkspaceOptions = {}): void {
       if (!options.force && !this.allowWorkspaceNavigation()) return;
+      this.workspaceReadIntent = null;
+      this.comparisonPreview = null;
       this.submittedSourceGeometry = null;
       this.submittedCommandId = null;
       this.rejectedCandidateGeometry = null;
       this.localDraft = null;
+      this.localPhase = "idle";
+      this.saveError = null;
       if (options.force) {
-        this.recoveryRecord = null;
         this.commandResult = null;
       }
       this.openedWorkOrderId = null;
@@ -1350,26 +1444,41 @@ async function submitGeometryCommand(
   store: ReturnType<typeof useWorkOrdersStore>,
   command: PendingGeometryCommand,
 ): Promise<void> {
-  freezePendingCommand(command);
-  store.recoveryRecord = { schemaVersion: 1, command, state: "unknown" };
-  if (!store.persistRecovery()) {
-    store.recoveryRecord = null;
+  const workspace = store.activeWorkspace;
+  const submitEpoch = useAuthStore().sessionEpoch;
+  if (!workspace) return;
+  const geometry = workspace.workOrder.editVersion.features.features.find(
+    (f) => f.id === command.target.featureId,
+  )?.geometry;
+  if (!isLineStringXY(geometry)) return;
+  const vertexIndex =
+    store.localDraft?.vertexIndex ??
+    workspace.workOrder.editVersion.changeSet?.vertexIndex;
+  if (vertexIndex === undefined) return;
+  const source = { geometry: copyGeometry(geometry), vertexIndex };
+  store.localPhase = "sending";
+  store.attachRecoveryHost();
+  const recovery = useWorkspaceRecoveryStore();
+  await recovery.initializeActor(command.actorId);
+  if (
+    useAuthStore().sessionEpoch !== submitEpoch ||
+    useAuthStore().user?.id !== command.actorId ||
+    store.openedWorkOrderId !== command.target.workOrderId ||
+    store.openedEditVersionId !== command.target.editVersionId
+  )
     return;
-  }
-  const source =
-    store.activeWorkspace!.workOrder.editVersion.features.features.find(
-      (feature) => feature.id === command.target.featureId,
-    )?.geometry;
-  store.submittedSourceGeometry = isLineStringXY(source)
-    ? copyGeometry(source)
-    : null;
+  store.submittedSourceGeometry = source.geometry;
   store.submittedCommandId = command.request.commandId;
-  store.rejectedCandidateGeometry = null;
   store.commandResult = null;
   store.saveError = null;
-  store.readbackError = null;
-  store.openWorkspaceRequestSeq += 1;
-  const seq = ++store.editRequestSeq;
-  if (await store.sendPendingOnce(command, seq, false))
-    await store.runPendingRetries(command, seq);
+  store.rejectedCandidateGeometry = null;
+  const started = await recovery.submit(command, source);
+  if (
+    started === "blocked" &&
+    useAuthStore().user?.id === command.actorId &&
+    store.openedEditVersionId === command.target.editVersionId
+  ) {
+    store.localPhase = store.storageError ? "blocked" : "editing";
+    store.navigation = null;
+  }
 }

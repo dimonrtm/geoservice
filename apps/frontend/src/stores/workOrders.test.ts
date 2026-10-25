@@ -1,11 +1,15 @@
+import { useAuthStore } from "./auth";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 
 import type { WorkspaceResponse } from "@/contracts/work-orders";
 
-const fetchAssignedWorkOrdersMock = vi.fn();
-const openEditVersionMock = vi.fn();
-const fetchWorkspaceMock = vi.fn();
+const { fetchAssignedWorkOrdersMock, openEditVersionMock, fetchWorkspaceMock } =
+  vi.hoisted(() => ({
+    fetchAssignedWorkOrdersMock: vi.fn(),
+    openEditVersionMock: vi.fn(),
+    fetchWorkspaceMock: vi.fn(),
+  }));
 const SELECTED_WORK_ORDER_STORAGE_KEY = "geoservice:selected-work-order";
 const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
 
@@ -130,6 +134,9 @@ describe("work orders store", () => {
     vi.clearAllMocks();
     sessionStorage.clear();
     setActivePinia(createPinia());
+    const auth = useAuthStore();
+    auth.token = "t";
+    auth.user = { id: "actor", email: "a@local", role: "editor" };
   });
 
   it("loads assigned work orders and clears previous error", async () => {

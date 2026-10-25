@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-16
-source: repository-change:2026-10-16
+updated: 2026-10-23
+source: repository-change:2026-10-23
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -53,15 +53,13 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 
 ## Save И Recovery
 
-`workOrders.ts` теперь хранит current workspace, local draft, неизменяемую
-pending command, recovery record и historical command result отдельно.
-`api/workOrders.ts` предоставляет geometry PUT; actor-scoped sessionStorage
-записывается до отправки, retry повторяет ту же identity, success завершается
-current GET. Auth loss останавливает recovery и поздние callbacks. Runtime
-guards, ограничения storage, stale и оставшийся UI scope — [[frontend_save_recovery]].
-Пользовательские Save/retry controls ещё не подключены; recovery уже вызывается
-косвенно из store-путей открытия/восстановления workspace. Это не является
-доказательством готовности всего UI или завершённого S2-X01.
+`useWorkOrdersStore` владеет current, draft, навигацией и stale-сравнением;
+`useWorkspaceRecoveryStore` — независимыми отправленными командами по actor/наряду/версии.
+IndexedDB записывается до PUT. Retry сохраняет identity; только GET обновляет current.
+Общий read generation и session epoch защищают workspace от поздних ответов.
+Save/Revert, отдельное согласие на recovery после потери доступа, управляемые
+переходы и read-only сравнение подключены. Устройство и границы:
+[[frontend_save_recovery]]. Backend-контракт не расширен.
 
 ## Карта И Загрузка Данных
 

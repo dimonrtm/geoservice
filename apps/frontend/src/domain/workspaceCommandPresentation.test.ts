@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useWorkOrdersStore } from "@/stores/workOrders";
 import {
@@ -64,7 +64,7 @@ describe("workspace command presentation", () => {
   ] as const)("blocks every command during %s", (phase) => {
     const store = setup(true);
     store.moveLocalVertex([65.1, 44.3]);
-    store.phase = phase;
+    store.localPhase = phase;
     expect(presentWorkspaceCommands(store, true)).toMatchObject({
       canSave: false,
       canCancel: false,
@@ -73,25 +73,25 @@ describe("workspace command presentation", () => {
   });
   it("distinguishes known success and stale when current cannot be read", () => {
     const store = setup();
-    store.phase = "reading-current";
-    store.readbackError = "GET failed";
+    store.localPhase = "reading-current";
+    vi.spyOn(store, "readbackError", "get").mockReturnValue("GET failed");
     const command = {
       actorId: "actor",
       target,
       request: { commandId, draftVersionToken: "a", geometry: candidate },
     };
-    store.recoveryRecord = {
+    vi.spyOn(store, "recoveryRecord", "get").mockReturnValue({
       schemaVersion: 1,
       command,
       state: "succeeded",
       result: successFixture(),
-    };
+    });
     expect(presentWorkspaceCommands(store, true)).toMatchObject({
       busy: false,
       statusText:
         "Операция выполнена, но актуальные данные карты не удалось загрузить. Редактирование временно недоступно",
     });
-    store.recoveryRecord = {
+    vi.spyOn(store, "recoveryRecord", "get").mockReturnValue({
       schemaVersion: 1,
       command,
       state: "rejected",
@@ -102,7 +102,7 @@ describe("workspace command presentation", () => {
         message: "stale",
         correlationId: null,
       },
-    };
+    });
     expect(presentWorkspaceCommands(store, true).statusText).toContain(
       "отклонено",
     );
@@ -112,7 +112,7 @@ describe("workspace command presentation", () => {
   });
   it("explains storage failure before sending without claiming an unknown result", () => {
     const store = setup();
-    store.storageError = "quota";
+    vi.spyOn(store, "storageError", "get").mockReturnValue("quota");
     const view = presentWorkspaceCommands(store, true);
     expect(view.canSave).toBe(false);
     expect(view.busy).toBe(false);
@@ -122,7 +122,7 @@ describe("workspace command presentation", () => {
     const store = setup();
     store.moveLocalVertex([65.1, 44.2]);
     store.rejectedCandidateGeometry = structuredClone(candidate);
-    store.phase = "rejected";
+    store.localPhase = "rejected";
     store.saveError = "GEOMETRY_INVALID";
     expect(presentWorkspaceCommands(store, true)).toMatchObject({
       canSave: false,
@@ -136,10 +136,10 @@ describe("workspace command presentation", () => {
   it("only claims no-op with source evidence and always explains quality", () => {
     const store = setup(true);
     store.localDraft = null;
-    store.phase = "idle";
+    store.localPhase = "idle";
     store.commandResult = successFixture();
     expect(presentWorkspaceCommands(store, true).statusText).toBe(
-      "Правка сохранена в рабочей версии",
+      "Прежняя операция выполнена",
     );
     store.submittedSourceGeometry = structuredClone(candidate);
     store.submittedCommandId = commandId;
@@ -153,7 +153,7 @@ describe("workspace command presentation", () => {
   });
   it("does not expose an unrecognized technical code", () => {
     const store = setup();
-    store.phase = "blocked";
+    store.localPhase = "blocked";
     store.saveError = "PRIVATE_INTERNAL_CODE";
     expect(presentWorkspaceCommands(store, true).statusText).not.toContain(
       "PRIVATE_INTERNAL_CODE",
@@ -164,7 +164,7 @@ describe("workspace command presentation", () => {
     store.moveLocalVertex([65.1, 44.2]);
     store.rejectedCandidateGeometry = structuredClone(candidate);
     store.saveError = "GEOMETRY_INVALID";
-    store.phase = "rejected";
+    store.localPhase = "rejected";
     store.moveLocalVertex([65.1, 44.3]);
     store.moveLocalVertex([65.1, 44.2]);
     const view = presentWorkspaceCommands(store, true);
