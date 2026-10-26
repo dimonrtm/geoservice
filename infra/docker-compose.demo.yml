@@ -8,6 +8,7 @@ services:
       target: dev
     environment:
       DEV_MODE: "true"
+      AUTH_SESSION_COOKIE_SECURE: "false"
       CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
     command:
       [
