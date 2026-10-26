@@ -1,5 +1,6 @@
 import { ref } from "vue";
 import { http } from "@/api/http";
+import { getApiBaseUrl, layerWebSocketUrl } from "@/api/baseUrl";
 import { requestLayerWebSocketTicket } from "@/api/realtime";
 import {
   parseLayerRealtimeEvent,
@@ -294,34 +295,11 @@ export function useLayerRealtime(options: UseLayerRealtimeOptions = {}) {
 }
 
 function buildLayerWebSocketUrl(layerId: string, ticket: string): string {
-  const baseUrl = resolveWebSocketBaseUrl();
-  const url = new URL(`/api/v1/ws/layers/${layerId}`, baseUrl);
-  url.searchParams.set("ticket", ticket);
-  return url.toString();
-}
-
-function resolveWebSocketBaseUrl(): string {
-  const configuredBaseUrl =
-    import.meta.env.VITE_API_BASE_URL ??
-    http.defaults.baseURL ??
-    "http://localhost:8000";
-
-  if (
-    configuredBaseUrl.startsWith("ws://") ||
-    configuredBaseUrl.startsWith("wss://")
-  ) {
-    return configuredBaseUrl;
-  }
-
-  if (configuredBaseUrl.startsWith("http://")) {
-    return `ws://${configuredBaseUrl.slice("http://".length)}`;
-  }
-
-  if (configuredBaseUrl.startsWith("https://")) {
-    return `wss://${configuredBaseUrl.slice("https://".length)}`;
-  }
-
-  return "ws://localhost:8000";
+  return layerWebSocketUrl(
+    http.defaults.baseURL ?? getApiBaseUrl(),
+    layerId,
+    ticket,
+  );
 }
 
 export { REALTIME_RECONNECT_DELAYS_MS, TERMINAL_WEBSOCKET_CLOSE_CODE };

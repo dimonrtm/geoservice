@@ -3,8 +3,8 @@ title: Docker Compose Deployment
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-07-07
-source: repository-change:2026-07-07
+updated: 2026-10-26
+source: repository-change:2026-10-26
 tags: [deployment, docker-compose, postgis]
 ---
 
@@ -61,6 +61,38 @@ startup не выполняет автоматический repair таких v
 - `frontend-dev` и `frontend-prod` зависят от healthy `utility_service`.
 
 `infra/docker-compose.full.yml` на snapshot дату пустой.
+
+## Общий production origin для API и WebSocket
+
+`apps/frontend/nginx.conf` подключается только в production stage Dockerfile.
+nginx обслуживает статику и передаёт `/api/v1/...` внутреннему
+`utility_service:8000`, сохраняя URI/query, auth/cookie и backend status.
+Для WebSocket включены HTTP/1.1 и Upgrade/Connection; read timeout — 300 секунд.
+API responses не кэшируются, upstream retry выключен. API access log содержит
+путь без query string, поскольку ticket передаётся в URL.
+
+`apps/frontend/src/api/baseUrl.ts` задаёт общий адрес HTTP и WebSocket. Без
+`VITE_API_BASE_URL` production использует origin страницы; dev сохраняет
+localhost:8000. Пустое значение означает origin страницы, относительное
+разрешается относительно него. WebSocket использует тот же base с WS(S).
+Сайт поддерживается в корне адреса; frontend под префиксом не является
+согласованным сценарием.
+
+Внешний компонент завершает HTTPS/WSS и передаёт запросы frontend nginx.
+Base API сохраняет `DEV_MODE=false` и Secure cookie; отдельный публичный API port
+не требуется. После пересоздания backend с новым IP frontend нужно перезапустить:
+upstream разрешается при старте nginx. Это не сервис обнаружения backend.
+
+Гарантия переносимости production-образа относится к чистому build context без
+API override. Защита frontend Docker context от локальных env/dependencies
+остаётся отдельной INF-03. Dev Compose не подтверждает production routing.
+
+Локальный runner `docs/sprint_2/verify-inf-02.ps1` проверяет настоящий production
+bundle и API в отдельном project с disposable БД, выполняет браузерный
+Save/readback/Revert и отдельную legacy WebSocket-фазу. Legacy API выключен
+по умолчанию; включение в проверке не меняет эту политику. Проверка на localhost
+с Secure cookie не подтверждает TLS внешнего deployment. Детали —
+[runbook](../../docs/sprint_2/2026-10-26-inf-02-production-api-routing-runbook.md).
 
 ## Связанные Ноды
 

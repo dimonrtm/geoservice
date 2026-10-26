@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { pinia } from "@/pinia";
+import { getApiBaseUrl } from "@/api/baseUrl";
 
 declare module "axios" {
   interface InternalAxiosRequestConfig {
@@ -10,7 +11,7 @@ declare module "axios" {
 }
 
 export const http = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000",
+  baseURL: getApiBaseUrl(),
   timeout: 30000,
 });
 

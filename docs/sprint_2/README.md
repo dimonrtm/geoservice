@@ -4,7 +4,9 @@
 
 - [Глубокое ревью кода 2026-10-26](2026-10-26-deep-code-review.md) — безопасность, производительность, архитектура, качество кода и UI/UX; реестр находок, тематические отчёты и воспроизведения. Исправления кода не выполнялись.
 
-- INF-01 — безопасный старт API в базовом Compose: [анализ](2026-10-26-inf-01-production-cookie-analysis.md), [принятая спецификация](2026-10-26-inf-01-production-cookie-design.md), [выполненный план](2026-10-26-inf-01-production-cookie-plan.md), [отчёт](2026-10-26-inf-01-production-cookie-implementation-report.md), [runbook](2026-10-26-inf-01-production-cookie-runbook.md). Локальный startup smoke и 51 regression test прошли; CI не изменялся.
+- **INF-01 — решена 2026-10-26:** безопасный старт API в базовом Compose. [Анализ](2026-10-26-inf-01-production-cookie-analysis.md), [принятая спецификация](2026-10-26-inf-01-production-cookie-design.md), [выполненный план](2026-10-26-inf-01-production-cookie-plan.md), [отчёт](2026-10-26-inf-01-production-cookie-implementation-report.md), [runbook](2026-10-26-inf-01-production-cookie-runbook.md). Локальный startup smoke и 51 regression test прошли; CI не изменялся.
+
+- **INF-02 — решена 2026-10-26 в согласованных границах:** [анализ](2026-10-26-inf-02-production-api-routing-analysis.md), [спецификация](2026-10-26-inf-02-production-api-routing-design.md), [выполненный план](2026-10-26-inf-02-production-api-routing-plan.md), [отчёт](2026-10-26-inf-02-production-api-routing-implementation-report.md), [runbook](2026-10-26-inf-02-production-api-routing-runbook.md). Production HTTP/WebSocket, полный локальный браузерный smoke и 334 frontend tests прошли. HTTPS внешнее, INF-03 отдельно, CI не изменён.
 
 - [Итоговая приёмка Sprint 2](2026-08-16-sprint-2-acceptance-report.md) — принят 2026-10-26 в согласованных границах; полный локальный regression и M4 прошли, ручной кейс подтверждён пользователем.
 - [Анализ Дня 14](2026-10-26-day-14-acceptance-analysis.md), [принятая спецификация](2026-10-26-day-14-acceptance-design.md), [план](2026-10-26-day-14-acceptance-plan.md), [журнал](2026-10-26-day-14-execution-ledger.md) — границы, результаты и ограничения приёмки.

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { authStoreMock, axiosCreateMock, responseUseMock } = vi.hoisted(() => {
   const responseUseMock = vi.fn();
@@ -39,10 +39,24 @@ vi.mock("@/stores/auth", () => ({
 }));
 
 describe("http api", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
     authStoreMock.token = null;
+  });
+
+  it("использует origin страницы в production без API override", async () => {
+    vi.stubEnv("PROD", true);
+    vi.stubEnv("VITE_API_BASE_URL", undefined);
+    await import("@/api/http");
+    expect(axiosCreateMock).toHaveBeenCalledWith({
+      baseURL: window.location.origin,
+      timeout: 30000,
+    });
   });
 
   it("delegates a 401 to the auth store without backend logout", async () => {

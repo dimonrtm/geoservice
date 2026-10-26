@@ -1,0 +1,116 @@
+{
+  "project": "geoservice-inf02-a688f750",
+  "startedAt": "2026-10-26T17:15:39.815Z",
+  "status": "failed",
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "origin": "http://localhost:32768",
+  "settings": {
+    "devMode": false,
+    "secureCookie": true,
+    "legacyDefault": false
+  },
+  "nginx": "nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: configuration file /etc/nginx/nginx.conf test is successful",
+  "utility_serviceImage": "sha256:24777499ee3775959d29d882539238b6cd1c08fcdaad92d819f434d642b250f2",
+  "frontend-prodImage": "sha256:93a67b60e7674db0e191250ed371839341616c3bc78bc78958ccdf439a402aad",
+  "workflow": {
+    "browser": "156.0.8078.4",
+    "secureCookie": true,
+    "refresh": true,
+    "saveReadbackRevert": true,
+    "legacyDisabledCode": "LEGACY_GIS_API_DISABLED",
+    "negative": {
+      "refresh": 401,
+      "protected": 401,
+      "missing": 404,
+      "missingType": "application/json"
+    },
+    "requests": [
+      {
+        "method": "POST",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/auth/session/refresh"
+      },
+      {
+        "method": "POST",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/auth/login"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/assigned-to-me"
+      },
+      {
+        "method": "POST",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/cb6c54d7-58d5-47ae-9181-abf5b4723f0c/workspace"
+      },
+      {
+        "method": "PUT",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/cb6c54d7-58d5-47ae-9181-abf5b4723f0c/features/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213/geometry"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/cb6c54d7-58d5-47ae-9181-abf5b4723f0c/workspace"
+      },
+      {
+        "method": "POST",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/auth/session/refresh"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/assigned-to-me"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/cb6c54d7-58d5-47ae-9181-abf5b4723f0c/workspace"
+      },
+      {
+        "method": "PUT",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/cb6c54d7-58d5-47ae-9181-abf5b4723f0c/features/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213/geometry"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/cb6c54d7-58d5-47ae-9181-abf5b4723f0c/workspace"
+      },
+      {
+        "method": "POST",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/auth/logout"
+      },
+      {
+        "method": "POST",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/auth/session/refresh"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/work-orders/assigned-to-me"
+      },
+      {
+        "method": "GET",
+        "origin": "http://localhost:32768",
+        "path": "/api/v1/inf02-missing"
+      }
+    ],
+    "pageErrors": []
+  },
+  "baselineUnchanged": true,
+  "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:32768/\nCall log:\n\u001b[2m  - navigating to \"http://localhost:32768/\", waiting until \"load\"\u001b[22m\n",
+  "cleanup": "passed",
+  "finishedAt": "2026-10-26T17:17:32.985Z"
+}

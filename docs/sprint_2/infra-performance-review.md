@@ -6,12 +6,18 @@
 
 ### INF-01 — P1: production Compose не может запустить API с обязательной безопасной cookie
 
+**Статус: решена 2026-10-26.** Base Compose передаёт Secure=true, demo override — false; защитная валидация сохранена. Фактический startup API и `/health`, отказ при Secure=false и demo settings проверены локально; regression — 51 passed без skips. [Отчёт исправления](2026-10-26-inf-01-production-cookie-implementation-report.md), [runbook](2026-10-26-inf-01-production-cookie-runbook.md). HTTPS/browser routing и новый CI gate исключены из объёма по согласованию с пользователем; INF-02 остаётся открытой.
+
+Ниже сохранено исходное описание находки до исправления. Ограничения метода во введении относятся к первоначальному ревью; последующие runtime-проверки описаны в отчёте исправления.
+
 - Место: `infra/docker-compose.yml:41–51`; `apps/backend/utility_service/utils/settings.py:33–36,94–95`; `apps/backend/.dockerignore:17–18`.
 - Сценарий: чистая сборка и запуск base Compose с валидными `DATABASE_URL`, `JWT_SECRET` и остальными обязательными переменными. Compose выставляет `DEV_MODE=false`, но не передаёт `AUTH_SESSION_COOKIE_SECURE`. Значение Settings по умолчанию — `False`, а валидатор запрещает его при `DEV_MODE=false`. Локальный `.env` не попадает в backend image. Даже установка переменной в shell или Compose env-file не передаст её в контейнер без соответствующей записи environment/env_file.
 - Последствие: исключение при импорте Settings, API не становится healthy; зависимый frontend не стартует штатно.
 - Рекомендация: явно передать `AUTH_SESSION_COOKIE_SECURE=true` в production-конфигурации, согласовать HTTPS termination и добавить проверку фактического старта production API с минимальным разрешённым набором env. Проверка `docker compose config` этого не обнаруживает.
 
 ### INF-02 — P1: production frontend не имеет рабочего маршрута к API
+
+**Статус: решена 2026-10-26 в согласованных границах.** Production frontend использует origin страницы; nginx передаёт HTTP/WebSocket в API. Полный локальный browser Save/readback/Revert и WebSocket smoke, 334 frontend tests прошли. [Отчёт](2026-10-26-inf-02-production-api-routing-implementation-report.md), [runbook](2026-10-26-inf-02-production-api-routing-runbook.md). HTTPS остаётся внешним условием, INF-03 отдельной задачей, CI не менялся. Ниже — исходное описание находки.
 
 - Место: `apps/frontend/src/api/http.ts:12–14`; `apps/frontend/Dockerfile:21–28`; `infra/docker-compose.yml:35–88`.
 - Сценарий: чистый checkout без локальных `.env`, запуск `frontend-prod` после устранения INF-01. API URL собирается как `http://localhost:8000`; build args/ENV для его переопределения в Dockerfile отсутствуют. Base Compose публикует только frontend `8080:80`, API port наружу не опубликован. В образ копируется стандартный nginx без proxy configuration.
