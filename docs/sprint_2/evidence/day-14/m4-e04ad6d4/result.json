@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-26",
+  "head": "700888bda0fe2aaa6b7990b4a46ab6f72cf3ee0f",
+  "project": "geoservice-m4-e04ad6d4",
+  "command": "npm.cmd test (infra/m4)",
+  "evidenceType": "agent-transcribed-command-results",
+  "passed": 7,
+  "failed": 0,
+  "retries": 0,
+  "exitCode": 0,
+  "cleanup": "passed",
+  "scenarios": [
+    "Save: commit, lost response, API restart, refresh, replay",
+    "Revert: commit, lost response, API restart, refresh, replay",
+    "assignment loss and explicit access confirmation",
+    "Save recovery after actual browser close and restart",
+    "Revert recovery after actual browser close and restart",
+    "independent contexts, old replay, account isolation, recovery consent",
+    "IndexedDB CAS, corruption isolation, legacy receipt"
+  ],
+  "historicalEvidence": "original bytes restored and SHA256 verified; only changed outputs archived here",
+  "browserZoom200Percent": "not tested; nonblocking by user decision"
+}

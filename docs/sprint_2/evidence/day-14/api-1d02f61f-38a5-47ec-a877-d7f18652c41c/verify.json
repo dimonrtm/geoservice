@@ -1,0 +1,901 @@
+{
+  "runId": "1d02f61f-38a5-47ec-a877-d7f18652c41c",
+  "stage": "complete",
+  "verifiedAt": "2026-10-26T14:14:09.924166+00:00",
+  "status": "passed",
+  "afterReplay": {
+    "owner": "10000000-0000-4000-8000-000000000001",
+    "baseline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8215
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "revision": 2,
+    "operation": "updated",
+    "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+    "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+    "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+    "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+    "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+    "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+    "commands": [
+      {
+        "state": "succeeded",
+        "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+        "created_at": "2026-10-26T14:13:18.598224+00:00",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "completed_at": "2026-10-26T14:13:18.598224+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "rejection_code": null,
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "response_status": 200,
+        "response_payload": {
+          "commandId": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+          "operation": "updated",
+          "commandState": "succeeded",
+          "updatedFeature": {
+            "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  65.52,
+                  44.82
+                ],
+                [
+                  65.525,
+                  44.8215
+                ],
+                [
+                  65.53,
+                  44.82
+                ]
+              ]
+            }
+          },
+          "basicValidation": {
+            "aoiStatus": "passed",
+            "geometryStatus": "passed",
+            "dirtyRelativeToBaseline": "passed",
+            "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED"
+          },
+          "draftVersionToken": "2",
+          "hasPersistedChangeSet": true
+        },
+        "rejection_message": null,
+        "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+        "retry_on_access_change": false
+      }
+    ],
+    "events": [
+      {
+        "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+        "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+        "event_type": "change_set_persisted",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+        "occurred_at": "2026-10-26T14:13:18.598224+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+        "draft_revision_after": 2,
+        "base_network_revision": 1,
+        "draft_revision_before": 1
+      }
+    ]
+  },
+  "rejections": [
+    {
+      "code": "DRAFT_VERSION_STALE",
+      "status": 409,
+      "commandId": "6db41738-7f48-4450-9964-32d743dc4778",
+      "snapshot": {
+        "owner": "10000000-0000-4000-8000-000000000001",
+        "baseline": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8215
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "revision": 2,
+        "operation": "updated",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+        "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+        "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+        "commands": [
+          {
+            "state": "rejected",
+            "command_id": "6db41738-7f48-4450-9964-32d743dc4778",
+            "created_at": "2026-10-26T14:14:09.465952+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:14:09.465952+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": "DRAFT_VERSION_STALE",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 409,
+            "response_payload": null,
+            "rejection_message": "Рабочая версия изменилась. Обновите данные.",
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          },
+          {
+            "state": "succeeded",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "created_at": "2026-10-26T14:13:18.598224+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": null,
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 200,
+            "response_payload": {
+              "commandId": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+              "operation": "updated",
+              "commandState": "succeeded",
+              "updatedFeature": {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.52,
+                      44.82
+                    ],
+                    [
+                      65.525,
+                      44.8215
+                    ],
+                    [
+                      65.53,
+                      44.82
+                    ]
+                  ]
+                }
+              },
+              "basicValidation": {
+                "aoiStatus": "passed",
+                "geometryStatus": "passed",
+                "dirtyRelativeToBaseline": "passed",
+                "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED"
+              },
+              "draftVersionToken": "2",
+              "hasPersistedChangeSet": true
+            },
+            "rejection_message": null,
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          }
+        ],
+        "events": [
+          {
+            "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "event_type": "change_set_persisted",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+            "occurred_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+            "draft_revision_after": 2,
+            "base_network_revision": 1,
+            "draft_revision_before": 1
+          }
+        ]
+      }
+    },
+    {
+      "code": "COMMAND_ID_REUSED",
+      "status": 409,
+      "commandId": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+      "snapshot": {
+        "owner": "10000000-0000-4000-8000-000000000001",
+        "baseline": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8215
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "revision": 2,
+        "operation": "updated",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+        "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+        "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+        "commands": [
+          {
+            "state": "rejected",
+            "command_id": "6db41738-7f48-4450-9964-32d743dc4778",
+            "created_at": "2026-10-26T14:14:09.465952+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:14:09.465952+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": "DRAFT_VERSION_STALE",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 409,
+            "response_payload": null,
+            "rejection_message": "Рабочая версия изменилась. Обновите данные.",
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          },
+          {
+            "state": "succeeded",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "created_at": "2026-10-26T14:13:18.598224+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": null,
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 200,
+            "response_payload": {
+              "commandId": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+              "operation": "updated",
+              "commandState": "succeeded",
+              "updatedFeature": {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.52,
+                      44.82
+                    ],
+                    [
+                      65.525,
+                      44.8215
+                    ],
+                    [
+                      65.53,
+                      44.82
+                    ]
+                  ]
+                }
+              },
+              "basicValidation": {
+                "aoiStatus": "passed",
+                "geometryStatus": "passed",
+                "dirtyRelativeToBaseline": "passed",
+                "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED"
+              },
+              "draftVersionToken": "2",
+              "hasPersistedChangeSet": true
+            },
+            "rejection_message": null,
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          }
+        ],
+        "events": [
+          {
+            "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "event_type": "change_set_persisted",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+            "occurred_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+            "draft_revision_after": 2,
+            "base_network_revision": 1,
+            "draft_revision_before": 1
+          }
+        ]
+      }
+    },
+    {
+      "code": "GEOMETRY_INVALID",
+      "status": 422,
+      "commandId": "9c8e4b4f-7c75-4835-90c4-682469114768",
+      "snapshot": {
+        "owner": "10000000-0000-4000-8000-000000000001",
+        "baseline": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8215
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "revision": 2,
+        "operation": "updated",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+        "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+        "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+        "commands": [
+          {
+            "state": "rejected",
+            "command_id": "6db41738-7f48-4450-9964-32d743dc4778",
+            "created_at": "2026-10-26T14:14:09.465952+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:14:09.465952+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": "DRAFT_VERSION_STALE",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 409,
+            "response_payload": null,
+            "rejection_message": "Рабочая версия изменилась. Обновите данные.",
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          },
+          {
+            "state": "rejected",
+            "command_id": "9c8e4b4f-7c75-4835-90c4-682469114768",
+            "created_at": "2026-10-26T14:14:09.617844+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:14:09.617844+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": "GEOMETRY_INVALID",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 422,
+            "response_payload": null,
+            "rejection_message": "Предлагаемая геометрия недопустима.",
+            "request_fingerprint": "geom-v1:sha256:18cc6000b80aaa85fbcdcc0630e5b0781395476a72da0673df773e1f7eb15cfc",
+            "retry_on_access_change": false
+          },
+          {
+            "state": "succeeded",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "created_at": "2026-10-26T14:13:18.598224+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": null,
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 200,
+            "response_payload": {
+              "commandId": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+              "operation": "updated",
+              "commandState": "succeeded",
+              "updatedFeature": {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.52,
+                      44.82
+                    ],
+                    [
+                      65.525,
+                      44.8215
+                    ],
+                    [
+                      65.53,
+                      44.82
+                    ]
+                  ]
+                }
+              },
+              "basicValidation": {
+                "aoiStatus": "passed",
+                "geometryStatus": "passed",
+                "dirtyRelativeToBaseline": "passed",
+                "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED"
+              },
+              "draftVersionToken": "2",
+              "hasPersistedChangeSet": true
+            },
+            "rejection_message": null,
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          }
+        ],
+        "events": [
+          {
+            "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "event_type": "change_set_persisted",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+            "occurred_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+            "draft_revision_after": 2,
+            "base_network_revision": 1,
+            "draft_revision_before": 1
+          }
+        ]
+      }
+    },
+    {
+      "code": "GEOMETRY_OUTSIDE_AOI",
+      "status": 422,
+      "commandId": "8f766077-d9aa-458a-9b90-4c8bdb6011d3",
+      "snapshot": {
+        "owner": "10000000-0000-4000-8000-000000000001",
+        "baseline": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8215
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "revision": 2,
+        "operation": "updated",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+        "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+        "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+        "commands": [
+          {
+            "state": "rejected",
+            "command_id": "6db41738-7f48-4450-9964-32d743dc4778",
+            "created_at": "2026-10-26T14:14:09.465952+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:14:09.465952+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": "DRAFT_VERSION_STALE",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 409,
+            "response_payload": null,
+            "rejection_message": "Рабочая версия изменилась. Обновите данные.",
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          },
+          {
+            "state": "rejected",
+            "command_id": "8f766077-d9aa-458a-9b90-4c8bdb6011d3",
+            "created_at": "2026-10-26T14:14:09.693054+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:14:09.693054+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": "GEOMETRY_OUTSIDE_AOI",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 422,
+            "response_payload": null,
+            "rejection_message": "Предлагаемая геометрия выходит за пределы области работ.",
+            "request_fingerprint": "geom-v1:sha256:2f0c6d744595ec40ebe1f96db6fcbab4603d38ee2aeef198318aa8df9de4e5d8",
+            "retry_on_access_change": false
+          },
+          {
+            "state": "rejected",
+            "command_id": "9c8e4b4f-7c75-4835-90c4-682469114768",
+            "created_at": "2026-10-26T14:14:09.617844+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:14:09.617844+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": "GEOMETRY_INVALID",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 422,
+            "response_payload": null,
+            "rejection_message": "Предлагаемая геометрия недопустима.",
+            "request_fingerprint": "geom-v1:sha256:18cc6000b80aaa85fbcdcc0630e5b0781395476a72da0673df773e1f7eb15cfc",
+            "retry_on_access_change": false
+          },
+          {
+            "state": "succeeded",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "created_at": "2026-10-26T14:13:18.598224+00:00",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "completed_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "rejection_code": null,
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "response_status": 200,
+            "response_payload": {
+              "commandId": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+              "operation": "updated",
+              "commandState": "succeeded",
+              "updatedFeature": {
+                "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+                "geometry": {
+                  "type": "LineString",
+                  "coordinates": [
+                    [
+                      65.52,
+                      44.82
+                    ],
+                    [
+                      65.525,
+                      44.8215
+                    ],
+                    [
+                      65.53,
+                      44.82
+                    ]
+                  ]
+                }
+              },
+              "basicValidation": {
+                "aoiStatus": "passed",
+                "geometryStatus": "passed",
+                "dirtyRelativeToBaseline": "passed",
+                "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED"
+              },
+              "draftVersionToken": "2",
+              "hasPersistedChangeSet": true
+            },
+            "rejection_message": null,
+            "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+            "retry_on_access_change": false
+          }
+        ],
+        "events": [
+          {
+            "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+            "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+            "event_type": "change_set_persisted",
+            "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+            "occurred_at": "2026-10-26T14:13:18.598224+00:00",
+            "actor_user_id": "10000000-0000-4000-8000-000000000001",
+            "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+            "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+            "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+            "draft_revision_after": 2,
+            "base_network_revision": 1,
+            "draft_revision_before": 1
+          }
+        ]
+      }
+    }
+  ],
+  "finalSnapshot": {
+    "owner": "10000000-0000-4000-8000-000000000001",
+    "baseline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "revision": 3,
+    "operation": "unchanged",
+    "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+    "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+    "geometryBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+    "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+    "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+    "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+    "commands": [
+      {
+        "state": "succeeded",
+        "command_id": "48d58ae8-c2e3-4598-8a31-523a3321b1e0",
+        "created_at": "2026-10-26T14:14:09.768075+00:00",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "completed_at": "2026-10-26T14:14:09.768075+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "rejection_code": null,
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "response_status": 200,
+        "response_payload": {
+          "commandId": "48d58ae8-c2e3-4598-8a31-523a3321b1e0",
+          "operation": "unchanged",
+          "commandState": "succeeded",
+          "updatedFeature": {
+            "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  65.52,
+                  44.82
+                ],
+                [
+                  65.525,
+                  44.8205
+                ],
+                [
+                  65.53,
+                  44.82
+                ]
+              ]
+            }
+          },
+          "basicValidation": null,
+          "draftVersionToken": "3",
+          "hasPersistedChangeSet": false
+        },
+        "rejection_message": null,
+        "request_fingerprint": "geom-v1:sha256:ea54ad27db350e1863860415640d81dcd260c9c5963fc2c26c7f2284017abad9",
+        "retry_on_access_change": false
+      },
+      {
+        "state": "rejected",
+        "command_id": "6db41738-7f48-4450-9964-32d743dc4778",
+        "created_at": "2026-10-26T14:14:09.465952+00:00",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "completed_at": "2026-10-26T14:14:09.465952+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "rejection_code": "DRAFT_VERSION_STALE",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "response_status": 409,
+        "response_payload": null,
+        "rejection_message": "Рабочая версия изменилась. Обновите данные.",
+        "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+        "retry_on_access_change": false
+      },
+      {
+        "state": "rejected",
+        "command_id": "8f766077-d9aa-458a-9b90-4c8bdb6011d3",
+        "created_at": "2026-10-26T14:14:09.693054+00:00",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "completed_at": "2026-10-26T14:14:09.693054+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "rejection_code": "GEOMETRY_OUTSIDE_AOI",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "response_status": 422,
+        "response_payload": null,
+        "rejection_message": "Предлагаемая геометрия выходит за пределы области работ.",
+        "request_fingerprint": "geom-v1:sha256:2f0c6d744595ec40ebe1f96db6fcbab4603d38ee2aeef198318aa8df9de4e5d8",
+        "retry_on_access_change": false
+      },
+      {
+        "state": "rejected",
+        "command_id": "9c8e4b4f-7c75-4835-90c4-682469114768",
+        "created_at": "2026-10-26T14:14:09.617844+00:00",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "completed_at": "2026-10-26T14:14:09.617844+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "rejection_code": "GEOMETRY_INVALID",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "response_status": 422,
+        "response_payload": null,
+        "rejection_message": "Предлагаемая геометрия недопустима.",
+        "request_fingerprint": "geom-v1:sha256:18cc6000b80aaa85fbcdcc0630e5b0781395476a72da0673df773e1f7eb15cfc",
+        "retry_on_access_change": false
+      },
+      {
+        "state": "succeeded",
+        "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+        "created_at": "2026-10-26T14:13:18.598224+00:00",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "completed_at": "2026-10-26T14:13:18.598224+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "rejection_code": null,
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "response_status": 200,
+        "response_payload": {
+          "commandId": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+          "operation": "updated",
+          "commandState": "succeeded",
+          "updatedFeature": {
+            "id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+            "geometry": {
+              "type": "LineString",
+              "coordinates": [
+                [
+                  65.52,
+                  44.82
+                ],
+                [
+                  65.525,
+                  44.8215
+                ],
+                [
+                  65.53,
+                  44.82
+                ]
+              ]
+            }
+          },
+          "basicValidation": {
+            "aoiStatus": "passed",
+            "geometryStatus": "passed",
+            "dirtyRelativeToBaseline": "passed",
+            "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED"
+          },
+          "draftVersionToken": "2",
+          "hasPersistedChangeSet": true
+        },
+        "rejection_message": null,
+        "request_fingerprint": "geom-v1:sha256:703b87aa71cada06b1a16eeb9c393954f340be3fca6d9aefbddf157a85d8acb9",
+        "retry_on_access_change": false
+      }
+    ],
+    "events": [
+      {
+        "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+        "command_id": "ed787eca-76a7-41f1-a3e9-861b0a3eb995",
+        "event_type": "change_set_persisted",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+        "occurred_at": "2026-10-26T14:13:18.598224+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+        "draft_revision_after": 2,
+        "base_network_revision": 1,
+        "draft_revision_before": 1
+      },
+      {
+        "afterBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640",
+        "command_id": "48d58ae8-c2e3-4598-8a31-523a3321b1e0",
+        "event_type": "change_set_cleared",
+        "feature_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+        "beforeBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a99999999615040fed478e92669464052b81e85eb615040295c8fc2f5684640",
+        "occurred_at": "2026-10-26T14:14:09.768075+00:00",
+        "actor_user_id": "10000000-0000-4000-8000-000000000001",
+        "work_order_id": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+        "edit_version_id": "f58e7de2-5fff-42d5-bfe4-67d79f758ee5",
+        "default_state_id": "c0882f98-de95-42b9-b29f-d785cf7708f2",
+        "draft_revision_after": 3,
+        "base_network_revision": 1,
+        "draft_revision_before": 2
+      }
+    ]
+  }
+}

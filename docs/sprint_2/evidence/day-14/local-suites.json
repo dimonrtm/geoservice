@@ -1,0 +1,40 @@
+{
+  "date": "2026-10-26",
+  "head": "700888bda0fe2aaa6b7990b4a46ab6f72cf3ee0f",
+  "evidenceType": "agent-transcribed-command-results",
+  "backend": {
+    "image": "geoservice-day14-check",
+    "buildExitCode": 0,
+    "blackExitCode": 0,
+    "blackFiles": 320,
+    "ruffExitCode": 0,
+    "pytestExitCode": 0,
+    "passed": 647,
+    "skippedDbOnly": 270,
+    "warnings": 2,
+    "durationSeconds": 17.74
+  },
+  "isolatedDatabase": {
+    "command": "infra/db-tests.cmd",
+    "exitCode": 0,
+    "passed": 271,
+    "warnings": 2,
+    "durationSeconds": 45.29,
+    "cleanup": "passed"
+  },
+  "frontend": {
+    "testCommand": "npm.cmd test -- --maxWorkers=2",
+    "testExitCode": 0,
+    "passed": 323,
+    "suites": 44,
+    "durationSeconds": 106.53,
+    "typecheckExitCode": 0,
+    "lintExitCode": 0,
+    "formatExitCode": 0,
+    "buildExitCode": 0,
+    "buildModules": 1916,
+    "buildDurationSeconds": 11.52,
+    "buildWarning": "chunk exceeds 500 kB",
+    "environmentRetries": "test and build rerun with approved escalation after sandbox esbuild spawn EPERM"
+  }
+}
