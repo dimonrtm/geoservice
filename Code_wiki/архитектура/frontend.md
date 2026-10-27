@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-23
-source: repository-change:2026-10-23
+updated: 2026-10-27
+source: repository-change:2026-10-27
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -50,6 +50,29 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
   стер cookie от нового login.
 - `src/api/layers.ts` оборачивает layer/feature HTTP API и превращает HTTP failures в `HttpError`.
 - `src/api/workOrders.ts` вызывает `GET /api/v1/work-orders/assigned-to-me` и использует компактный response contract без audit/internal date fields.
+
+## Актуальность восстановления auth
+
+`App.vue` удерживает экран ожидания при `!isReady || isRestoring`, в том числе
+при retry после сетевого отказа. Во время ожидания форма login недоступна.
+В `auth.ts` отдельный `restoreGeneration` принадлежит экземпляру store:
+restore захватывает поколение, новый `loginWithPassword` инвалидирует его до
+первого await. Старые success/catch/finally не меняют сессию и workspace.
+Это защищает и новый вход того же actor, при котором `sessionEpoch` может
+не измениться. `sessionEpoch` сохраняет прежнюю роль для рабочих HTTP-запросов.
+
+Исключение из общей обработки auth-ошибок HTTP: refresh передаёт
+`authErrorHandling: "caller"`; interceptor возвращает ошибку без очистки
+сессии, а `restoreSession` проверяет актуальность и обрабатывает её сам.
+Собственная очистка или установка пользователя не отменяет завершение
+актуального restore. Initial 401, retryable failure и runtime-ошибки сохраняют
+прежнюю семантику. Новый login не возобновляет старый restore при своём отказе.
+
+Это узкая защита restore → login, не общий менеджер конкурентных auth-команд.
+Она не управляет межвкладочной ротацией и не отменяет `Set-Cookie` уже
+полученного ответа. Источники: `apps/frontend/src/stores/auth.ts`,
+`apps/frontend/src/api/http.ts`, `apps/frontend/src/api/auth.ts`,
+`apps/frontend/src/api/auth.restore.integration.test.ts`.
 
 ## Save И Recovery
 

@@ -43,7 +43,7 @@ describe("auth api", () => {
     expect(httpPostMock).toHaveBeenCalledWith(
       "/api/v1/auth/session/refresh",
       undefined,
-      { withCredentials: true },
+      { withCredentials: true, authErrorHandling: "caller" },
     );
     expect(result).toEqual(responseData);
   });

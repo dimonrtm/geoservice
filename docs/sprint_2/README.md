@@ -4,6 +4,8 @@
 
 - [Глубокое ревью кода 2026-10-26](2026-10-26-deep-code-review.md) — безопасность, производительность, архитектура, качество кода и UI/UX; реестр находок, тематические отчёты и воспроизведения. Исправления кода не выполнялись.
 
+- **FE-01 — решена 2026-10-27 в согласованных границах:** [анализ и принятое решение](2026-10-27-fe-01-session-restore-analysis.md), [план исправления](2026-10-27-fe-01-session-restore-plan.md). [Отчёт](2026-10-27-fe-01-session-restore-implementation-report.md): 368 frontend tests, typecheck/lint/build и четыре браузерных сценария с mock API прошли. AR-01 отдельно.
+
 - **INF-01 — решена 2026-10-26:** безопасный старт API в базовом Compose. [Анализ](2026-10-26-inf-01-production-cookie-analysis.md), [принятая спецификация](2026-10-26-inf-01-production-cookie-design.md), [выполненный план](2026-10-26-inf-01-production-cookie-plan.md), [отчёт](2026-10-26-inf-01-production-cookie-implementation-report.md), [runbook](2026-10-26-inf-01-production-cookie-runbook.md). Локальный startup smoke и 51 regression test прошли; CI не изменялся.
 
 - **INF-02 — решена 2026-10-26 в согласованных границах:** [анализ](2026-10-26-inf-02-production-api-routing-analysis.md), [спецификация](2026-10-26-inf-02-production-api-routing-design.md), [выполненный план](2026-10-26-inf-02-production-api-routing-plan.md), [отчёт](2026-10-26-inf-02-production-api-routing-implementation-report.md), [runbook](2026-10-26-inf-02-production-api-routing-runbook.md). Production HTTP/WebSocket, полный локальный браузерный smoke и 334 frontend tests прошли. HTTPS внешнее, INF-03 отдельно, CI не изменён.

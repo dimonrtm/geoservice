@@ -34,7 +34,7 @@ export async function refreshSession() {
   const response = await http.post<AuthLoginResponse>(
     "/api/v1/auth/session/refresh",
     undefined,
-    { withCredentials: true },
+    { withCredentials: true, authErrorHandling: "caller" },
   );
   return response.data;
 }

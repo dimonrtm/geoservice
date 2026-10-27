@@ -17,6 +17,7 @@ import {
 import { useWorkspaceRecoveryStore } from "./workspaceRecovery";
 
 type AuthState = {
+  restoreGeneration: number;
   sessionEpoch: number;
   token: string | null;
   user: AuthUser | null;
@@ -54,6 +55,7 @@ export const useAuthStore = defineStore(
 
   {
     state: (): AuthState => ({
+      restoreGeneration: 0,
       sessionEpoch: 0,
       token: null,
       user: null,
@@ -145,6 +147,10 @@ export const useAuthStore = defineStore(
         this.sessionError = null;
       },
       async loginWithPassword(email: string, password: string) {
+        // Новый вход забирает управление у ожидающего восстановления.
+        this.restoreGeneration++;
+        this.isRestoring = false;
+        this.isReady = true;
         const result = await login(email, password);
         await useWorkspaceRecoveryStore().suspendActor(result.user.id);
         this.setAuth(result.access_token, result.user);
@@ -153,16 +159,19 @@ export const useAuthStore = defineStore(
         return result;
       },
       async restoreSession() {
+        const generation = ++this.restoreGeneration;
         const restoreMode = this.isAuthenticated ? "runtime" : "initial";
         this.sessionError = null;
         this.isRestoring = true;
 
         try {
           const result = await refreshSession();
+          if (generation !== this.restoreGeneration) return;
           this.setAuth(result.access_token, result.user, {
             preserveWorkOrderStateOnInitialUser: true,
           });
         } catch (error: unknown) {
+          if (generation !== this.restoreGeneration) return;
           const parsed = parseApiError(error);
           const sessionError = presentSessionError(parsed, restoreMode);
           const initialSessionEnded =
@@ -174,8 +183,10 @@ export const useAuthStore = defineStore(
           });
           this.sessionError = sessionError;
         } finally {
-          this.isReady = true;
-          this.isRestoring = false;
+          if (generation === this.restoreGeneration) {
+            this.isReady = true;
+            this.isRestoring = false;
+          }
         }
       },
       async logout() {

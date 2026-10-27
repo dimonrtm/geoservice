@@ -50,7 +50,7 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
 <template>
   <WorkspaceNavigationDialog />
   <div class="page">
-    <div v-if="!auth.isReady" class="statusScreen">
+    <div v-if="!auth.isReady || auth.isRestoring" class="statusScreen">
       <div class="statusCard">
         <div class="statusTitle">Восстановление сессии</div>
         <div class="statusText">

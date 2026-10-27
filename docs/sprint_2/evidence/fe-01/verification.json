@@ -1,0 +1,33 @@
+{
+  "mode": "production bundle with mock API; no backend cookie validation",
+  "results": [
+    {
+      "outcome": 200,
+      "refreshes": 2,
+      "logins": 0,
+      "waitMs": 32,
+      "passed": true
+    },
+    {
+      "outcome": 401,
+      "refreshes": 2,
+      "logins": 0,
+      "waitMs": 30,
+      "passed": true
+    },
+    {
+      "outcome": 503,
+      "refreshes": 2,
+      "logins": 0,
+      "waitMs": 17,
+      "passed": true
+    },
+    {
+      "outcome": "timeout",
+      "refreshes": 2,
+      "logins": 0,
+      "waitMs": 30048,
+      "passed": true
+    }
+  ]
+}
