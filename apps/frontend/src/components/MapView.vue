@@ -1,6 +1,6 @@
 <template>
   <div class="page">
-    <div v-if="props.mode === 'editing'" class="toolbar">
+    <div v-if="props.mode === 'editing' && mapReady" class="toolbar">
       <div class="modal">
         <h3>Выберите слой</h3>
         <select v-model="activeLayerId" @change="onChangeLayer">
@@ -17,11 +17,20 @@
     </div>
 
     <div class="mapRoot">
-      <div v-if="props.mode !== 'workspace'" class="badge">
+      <div v-if="startupState === 'error'" class="startupError" role="alert">
+        <div class="startupErrorMessage">
+          <h2>Не удалось запустить карту</h2>
+          <p>Обновите страницу с помощью кнопки обновления в браузере.</p>
+        </div>
+      </div>
+      <div
+        v-if="props.mode !== 'workspace' && startupState !== 'error'"
+        class="badge"
+      >
         {{ labelText }}
       </div>
       <div
-        v-if="props.mode === 'editing'"
+        v-if="props.mode === 'editing' && startupState !== 'error'"
         class="realtimeBadge"
         :class="realtimeBadgeClass"
       >
@@ -79,9 +88,16 @@ const props = withDefaults(
 );
 const emit = defineEmits<{
   workspaceFitted: [workspaceKey: string];
+  readyChange: [ready: boolean];
 }>();
 const mapEl = ref<HTMLDivElement | null>(null);
-const mapReady = ref(false);
+const startupState = ref<"loading" | "ready" | "error">("loading");
+const mapReady = computed(() => startupState.value === "ready");
+let disposed = false;
+function setReady(ready: boolean): void {
+  startupState.value = ready ? "ready" : "loading";
+  emit("readyChange", ready);
+}
 const auth = useAuthStore();
 const { map, createMap, destroyMap } = useMapInstance(mapEl);
 const {
@@ -191,37 +207,52 @@ function renderWorkspace(): void {
 }
 
 onMounted(async () => {
+  setReady(false);
+  let currentMap;
   try {
-    const currentMap = await createMap();
+    currentMap = await createMap();
+    if (disposed) return;
     if (!currentMap) {
+      startupState.value = "error";
       return;
     }
 
     if (props.mode === "workspace") {
       renderWorkspace();
-      mapReady.value = true;
+      setReady(true);
       return;
     }
 
     if (props.mode === "empty") {
       labelText.value = "Карта готова. Выберите наряд в списке.";
+      setReady(true);
       return;
     }
+  } catch {
+    if (!disposed) startupState.value = "error";
+    return;
+  }
 
+  try {
     labelText.value = "Карта готова. Загружаю слои...";
     const loadLayersResult = await loadLayers();
+    if (disposed) return;
     if (loadLayersResult.status === "empty") {
       labelText.value = "Слоев нет";
+      setReady(true);
       return;
     }
     labelText.value = `Слои загружены: ${loadLayersResult.total}. Выбран слой: ${loadLayersResult.layer.title}`;
     bindActiveLayerClick(loadLayersResult.layer.id);
     enableEditingOverlaySync();
     await reloadFeatures(loadLayersResult.layer);
+    if (disposed) return;
     await syncRealtimeLayer(loadLayersResult.layer);
+    if (disposed) return;
     currentMap.on("moveend", onMoveEnd);
+    setReady(true);
   } catch {
-    labelText.value = "Не удалось инициализировать карту";
+    if (!disposed) labelText.value = "Не удалось загрузить данные карты";
   }
 });
 
@@ -235,7 +266,8 @@ watch(
 );
 
 onBeforeUnmount(() => {
-  mapReady.value = false;
+  disposed = true;
+  setReady(false);
   map.value?.off("moveend", onMoveEnd);
   unbindActiveLayerClick(activeLayer.value?.id);
   disableEditingOverlaySync();
@@ -320,6 +352,38 @@ async function syncRealtimeLayer(layer: LayerDto | null): Promise<void> {
 .mapCanvas {
   position: absolute;
   inset: 0;
+}
+.startupError {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow: auto;
+  background: #f8fafc;
+}
+.startupErrorMessage {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  max-width: 560px;
+  padding: 24px;
+  border: 1px solid #e5b4b4;
+  border-left: 4px solid #b42318;
+  border-radius: 6px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+.startupErrorMessage h2 {
+  margin: 0 0 10px;
+  color: #9f241b;
+  font-size: 19px;
+}
+.startupErrorMessage p {
+  margin: 0;
+  color: #334155;
+  line-height: 1.5;
 }
 .badge {
   position: absolute;

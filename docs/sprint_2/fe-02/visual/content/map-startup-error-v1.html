@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FE-02 — макет ошибки запуска карты</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#172033;background:#f1f5f9;font:15px/1.5 system-ui,sans-serif}.note{padding:15px 24px;background:#172033;color:#fff}.note span{color:#cbd5e1;font-size:13px;margin-left:16px}.shell{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 96px);margin:20px;border:1px solid #d6dde6;border-radius:8px;overflow:hidden;background:#fff}.sidebar{background:#f8fafc;border-right:1px solid #d6dde6;padding:24px}h1{font-size:21px;margin:0 0 6px}h2{font-size:19px;margin:0 0 10px}p{margin:0 0 12px}.muted{color:#64748b;font-size:14px}.order{margin-top:25px;border:1px solid #93b3db;background:#eff6ff;border-radius:6px;padding:16px}.order strong{display:block;margin-bottom:8px}.tag{display:inline-block;padding:2px 8px;background:#e0e7ef;border-radius:4px;font-size:12px}.workspace{display:flex;flex-direction:column;min-width:0}.context{padding:24px;border-bottom:1px solid #e2e8f0}.context p{margin:0}.map{flex:1;min-height:360px;display:flex;align-items:center;justify-content:center;padding:32px;background:#f8fafc}.error{max-width:560px;width:100%;padding:24px;background:#fff;border:1px solid #e5b4b4;border-left:4px solid #b42318;border-radius:6px}.error h2{color:#9f241b}.error p{margin:0;color:#334155}.icon{font-size:26px;display:block;margin-bottom:12px;color:#b42318}.foot{font-size:12px;color:#64748b;margin-top:24px}@media(max-width:720px){.shell{grid-template-columns:1fr;margin:10px}.sidebar{border-right:0;border-bottom:1px solid #d6dde6;padding:16px}.order{margin-top:12px}.context{padding:16px}.map{padding:20px;min-height:300px}.note span{display:block;margin:4px 0 0}}
+</style>
+</head>
+<body>
+<header class="note"><strong>FE-02 · Макет для обсуждения</strong><span>Ошибка первоначального запуска карты · пример workspace</span></header>
+<main class="shell">
+  <aside class="sidebar" aria-label="Наряды">
+    <h1>Мои наряды</h1>
+    <p class="muted">Рабочее пространство редактора</p>
+    <div class="order"><strong>WO-001</strong><span class="tag">Открыт</span><p style="margin:12px 0 0">Редактирование геометрии сети</p></div>
+    <p class="foot">Демонстрационные данные макета</p>
+  </aside>
+  <section class="workspace" aria-label="Рабочее пространство">
+    <header class="context"><h2>WO-001</h2><p class="muted">Рабочая версия открыта</p></header>
+    <div class="map">
+      <div class="error" role="alert">
+        <span class="icon" aria-hidden="true">⚠</span>
+        <h2>Не удалось запустить карту</h2>
+        <p>Обновите страницу с помощью кнопки обновления в браузере.</p>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

@@ -276,3 +276,144 @@ describe("MapView workspace mode", () => {
     expect(wrapper.text()).not.toContain("associations:");
   });
 });
+
+describe("MapView startup", () => {
+  const layer = { id: "layer-1", name: "lines", title: "Линии" };
+  const mapInstance = () => ({ off: mocks.mapOff, on: mocks.mapOn });
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mocks.createMap.mockResolvedValue(mapInstance());
+    mocks.loadLayers.mockResolvedValue({ status: "ready", total: 1, layer });
+  });
+
+  it.each(["workspace", "empty", "editing"] as const)(
+    "shows startup error in %s mode",
+    async (mode) => {
+      mocks.createMap.mockRejectedValue(new Error("WebGL unavailable"));
+      const { default: MapView } = await import("./MapView.vue");
+      const wrapper = mount(MapView, {
+        props: { mode, workspace: workspace() },
+      });
+      await flushPromises();
+      expect(wrapper.findAll('[role="alert"]')).toHaveLength(1);
+      const alert = wrapper.get('[role="alert"]');
+      expect(alert.text()).toContain("Не удалось запустить карту");
+      expect(alert.text()).toContain(
+        "Обновите страницу с помощью кнопки обновления в браузере.",
+      );
+      expect(alert.find("button").exists()).toBe(false);
+      expect(wrapper.find(".toolbar").exists()).toBe(false);
+      expect(wrapper.find(".badge").exists()).toBe(false);
+      expect(wrapper.find(".realtimeBadge").exists()).toBe(false);
+      expect(wrapper.emitted("readyChange")).toEqual([[false]]);
+      wrapper.unmount();
+    },
+  );
+
+  it.each(["workspace", "empty", "editing"] as const)(
+    "reports readiness only after startup completes in %s mode",
+    async (mode) => {
+      let resolve!: (value: ReturnType<typeof mapInstance>) => void;
+      mocks.createMap.mockReturnValue(
+        new Promise((done) => {
+          resolve = done;
+        }),
+      );
+      const { default: MapView } = await import("./MapView.vue");
+      const wrapper = mount(MapView, {
+        props: { mode, workspace: workspace() },
+      });
+      expect(wrapper.find(".toolbar").exists()).toBe(false);
+      expect(wrapper.emitted("readyChange")).toEqual([[false]]);
+      resolve(mapInstance());
+      await flushPromises();
+      expect(wrapper.emitted("readyChange")).toEqual([[false], [true]]);
+      expect(wrapper.find(".toolbar").exists()).toBe(mode === "editing");
+      expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+      wrapper.unmount();
+      expect(wrapper.emitted("readyChange")?.slice(-1)).toEqual([[false]]);
+    },
+  );
+
+  it("shows startup error for null map", async () => {
+    mocks.createMap.mockResolvedValue(null);
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, {
+      props: { mode: "workspace", workspace: workspace() },
+    });
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      "Не удалось запустить карту",
+    );
+    expect(wrapper.emitted("readyChange")).toEqual([[false]]);
+    wrapper.unmount();
+  });
+
+  it("shows error when initial workspace rendering throws", async () => {
+    mocks.setWorkspaceData.mockImplementation(() => {
+      throw new Error("render failed");
+    });
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, {
+      props: { mode: "workspace", workspace: workspace() },
+    });
+    await flushPromises();
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      "Не удалось запустить карту",
+    );
+    expect(wrapper.emitted("readyChange")).toEqual([[false]]);
+    wrapper.unmount();
+  });
+
+  it.each(["resolve", "reject"])(
+    "ignores startup %s after unmount",
+    async (outcome) => {
+      let resolve!: (value: ReturnType<typeof mapInstance>) => void;
+      let reject!: (reason: Error) => void;
+      mocks.createMap.mockReturnValue(
+        new Promise((done, fail) => {
+          resolve = done;
+          reject = fail;
+        }),
+      );
+      const { default: MapView } = await import("./MapView.vue");
+      const wrapper = mount(MapView, {
+        props: { mode: "workspace", workspace: workspace() },
+      });
+      wrapper.unmount();
+      const events = [...(wrapper.emitted("readyChange") ?? [])];
+      if (outcome === "resolve") resolve(mapInstance());
+      else reject(new Error("late failure"));
+      await flushPromises();
+      expect(wrapper.emitted("readyChange") ?? []).toEqual(events);
+      expect(mocks.ensureWorkspaceLayers).not.toHaveBeenCalled();
+      expect(mocks.loadLayers).not.toHaveBeenCalled();
+      expect(mocks.bindActiveLayerClick).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not classify legacy data failure as map startup failure", async () => {
+    mocks.loadLayers.mockRejectedValue(new Error("HTTP 503"));
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, { props: { mode: "editing" } });
+    await flushPromises();
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.get(".badge").text()).toContain(
+      "Не удалось загрузить данные карты",
+    );
+    expect(wrapper.find(".toolbar").exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it("keeps an empty legacy layer list as a successful startup", async () => {
+    mocks.loadLayers.mockResolvedValue({ status: "empty" });
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, { props: { mode: "editing" } });
+    await flushPromises();
+    expect(wrapper.get(".badge").text()).toBe("Слоев нет");
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.emitted("readyChange")?.slice(-1)).toEqual([[true]]);
+    wrapper.unmount();
+  });
+});

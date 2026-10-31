@@ -21,6 +21,19 @@ const workOrders = useWorkOrdersStore();
 const auth = useAuthStore();
 const detailsPanelRef = ref<WorkspaceDetailsPanelHandle | null>(null);
 const workspaceAnnouncement = ref("");
+const workspaceMapReady = ref(false);
+
+function onWorkspaceMapReadyChange(ready: boolean): void {
+  workspaceMapReady.value = ready;
+}
+
+watch(
+  () => !!workOrders.activeWorkspace,
+  (hasWorkspace) => {
+    if (!hasWorkspace) workspaceMapReady.value = false;
+  },
+  { flush: "sync" },
+);
 
 watch(
   () => workOrders.selectedWorkOrderId,
@@ -197,7 +210,9 @@ async function openSelectedWorkspace(): Promise<void> {
         {{ workspaceAnnouncement }}
       </p>
 
-      <WorkspaceEditCommands v-if="workOrders.activeWorkspace" />
+      <WorkspaceEditCommands
+        v-if="workOrders.activeWorkspace && workspaceMapReady"
+      />
       <WorkspaceComparisonPanel v-if="workOrders.activeWorkspace" />
       <MapView
         v-if="workOrders.activeWorkspace"
@@ -210,6 +225,7 @@ async function openSelectedWorkspace(): Promise<void> {
           workOrders.shouldFitWorkspace(workOrders.activeWorkspaceKey)
         "
         @workspace-fitted="workOrders.markWorkspaceFitted"
+        @ready-change="onWorkspaceMapReadyChange"
       />
       <MapView v-else class="workspaceMap" mode="empty" />
     </section>

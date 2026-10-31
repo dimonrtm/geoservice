@@ -14,7 +14,7 @@ vi.mock("@/components/MapView.vue", () => ({
       "shouldFitWorkspace",
       "workspaceInteractive",
     ],
-    emits: ["workspaceFitted"],
+    emits: ["workspaceFitted", "readyChange"],
     template:
       '<div data-test="map-view" :data-mode="mode" :data-workspace-key="workspaceKey"></div>',
   },
@@ -104,6 +104,11 @@ describe("EditorWorkOrdersView", () => {
     store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
     store.openedEditVersionId = "ev-1";
     await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
+    wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", true);
+    await flushPromises();
     const commands = wrapper.get(
       '[data-test="workspace-edit-commands"]',
     ).element;
@@ -116,6 +121,149 @@ describe("EditorWorkOrdersView", () => {
       wrapper.findComponent({ name: "MapView" }).props("workspaceInteractive"),
     ).toBe(true);
     wrapper.unmount();
+  });
+
+  it("does not inherit readiness from empty or removed map", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.loadAssigned = vi.fn();
+    store.restoreOpenedWorkspace = vi.fn();
+    const { default: EditorWorkOrdersView } =
+      await import("./EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", true);
+    store.workspace = workspaceResponse();
+    store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
+    wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", true);
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      true,
+    );
+    store.workspace = null;
+    await flushPromises();
+    store.workspace = workspaceResponse();
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
+    wrapper.unmount();
+  });
+
+  it("keeps readiness on current workspace readback and hides commands on false", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const store = useWorkOrdersStore();
+    store.loadAssigned = vi.fn();
+    store.restoreOpenedWorkspace = vi.fn();
+    store.workspace = workspaceResponse();
+    store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
+    store.openedEditVersionId = "ev-1";
+    const { default: EditorWorkOrdersView } =
+      await import("./EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
+    wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", true);
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      true,
+    );
+    store.workspace = workspaceResponse();
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      true,
+    );
+    expect(
+      wrapper.get('[data-test="save-edit"]').attributes("disabled"),
+    ).toBeDefined();
+    wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", false);
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
+    wrapper.unmount();
+  });
+
+  it("hiding commands preserves recovery and does not send mutations", async () => {
+    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+    const { useAuthStore } = await import("@/stores/auth");
+    const { useWorkspaceRecoveryStore } =
+      await import("@/stores/workspaceRecovery");
+    const { createRecoveryRecord } =
+      await import("@/contracts/workspace-recovery");
+    const { createLocalDraft } = await import("@/domain/workspaceDraft");
+    const { workspaceFixture, target, candidate, geometry, commandId } =
+      await import("@/test/workspaceEditFixture");
+    const auth = useAuthStore();
+    auth.token = "test";
+    auth.user = { id: "actor", email: "editor@example.local", role: "editor" };
+    const store = useWorkOrdersStore();
+    store.loadAssigned = vi.fn();
+    store.restoreOpenedWorkspace = vi.fn();
+    store.workspace = workspaceFixture();
+    store.selectedWorkOrderId = store.openedWorkOrderId = target.workOrderId;
+    store.openedEditVersionId = target.editVersionId;
+    store.localDraft = createLocalDraft(store.workspace, target.featureId, 1);
+    store.localDraft.candidateGeometry = structuredClone(candidate);
+    const recovery = useWorkspaceRecoveryStore();
+    const record = createRecoveryRecord(
+      {
+        actorId: "actor",
+        target,
+        request: {
+          commandId,
+          draftVersionToken: "revision-a",
+          geometry: candidate,
+        },
+      },
+      { geometry, vertexIndex: 1 },
+    );
+    recovery.records[record.key] = record;
+    recovery.phases[record.key] = "unknown";
+    const save = vi.spyOn(store, "saveLocalDraft");
+    const revert = vi.spyOn(store, "confirmRevert");
+    const retry = vi.spyOn(store, "retryPendingSave");
+    const read = vi.spyOn(store, "refreshCurrentWorkspace");
+    const snapshot = JSON.stringify({
+      draft: store.localDraft,
+      records: recovery.records,
+      phases: recovery.phases,
+    });
+    const { default: EditorWorkOrdersView } =
+      await import("./EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
+    wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", true);
+    await flushPromises();
+    expect(wrapper.find('[data-test="retry-command"]').exists()).toBe(true);
+    expect(
+      wrapper.get('[data-test="save-edit"]').attributes("disabled"),
+    ).toBeDefined();
+    wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", false);
+    await flushPromises();
+    expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
+      false,
+    );
+    expect(wrapper.find('[data-test="retry-command"]').exists()).toBe(false);
+    expect(
+      JSON.stringify({
+        draft: store.localDraft,
+        records: recovery.records,
+        phases: recovery.phases,
+      }),
+    ).toBe(snapshot);
+    for (const action of [save, revert, retry, read])
+      expect(action).not.toHaveBeenCalled();
+    wrapper.unmount();
+    recovery.stopRuntime();
   });
   beforeEach(() => {
     vi.resetModules();
