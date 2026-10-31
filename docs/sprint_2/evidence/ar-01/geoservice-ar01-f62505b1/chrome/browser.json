@@ -1,0 +1,97 @@
+{
+  "browser": "chrome",
+  "version": "156.0.8078.48",
+  "executable": "installed channel chrome",
+  "distribution": "installed branded channel",
+  "startedAt": "2026-10-27T19:36:40.639Z",
+  "cases": {
+    "parallel_restore_new_tab_close_initiator": {
+      "passed": false,
+      "durationMs": 1751,
+      "failure": "Assertion/timeout; детали без secrets доступны воспроизведением case"
+    },
+    "logout_revokes_copied_access_refresh_ticket_and_preserves_other_contexts": {
+      "passed": true,
+      "durationMs": 8383,
+      "convergenceMs": 8,
+      "accessStatus": 401,
+      "refreshStatus": 401,
+      "ticketRejected": true,
+      "cookieUnchanged": true,
+      "independentContext": true,
+      "independentBrowser": "msedge",
+      "secondaryVersion": "156.0.4314.42"
+    },
+    "lost_marker_old_active_status_polling_sla": {
+      "passed": true,
+      "durationMs": 4560,
+      "convergenceMs": 1106,
+      "oldActiveDelayedMs": 1100,
+      "markerLost": true,
+      "broadcastUnavailable": true,
+      "maxConcurrent": 1,
+      "requests": 2
+    },
+    "resume_requires_post_resume_status_before_protected_action": {
+      "passed": true,
+      "durationMs": 1738,
+      "freshStatusAfterResume": true,
+      "protectedRequests": 0,
+      "statusAfterResume": 1,
+      "maxConcurrent": 1,
+      "requests": 2
+    },
+    "undelivered_logout_preserves_workspace": {
+      "passed": true,
+      "durationMs": 1228,
+      "logoutRequests": 1,
+      "serverNotReached": true,
+      "sessionRetained": true,
+      "workspaceRetained": true,
+      "message": "Не удалось подтвердить выход (network outcome)"
+    },
+    "committed_logout_response_lost_reconciles_without_retry": {
+      "passed": true,
+      "durationMs": 2016,
+      "committed": true,
+      "reconciled": true,
+      "logoutRequests": 1
+    },
+    "late_old_logout_after_new_login_does_not_touch_new_cookie": {
+      "passed": true,
+      "durationMs": 1757,
+      "lateLogoutStatus": 200,
+      "newSidDifferent": true,
+      "cookieUnchanged": true,
+      "newSessionRestores": true
+    },
+    "lost_rotated_response_requires_explicit_login": {
+      "passed": false,
+      "durationMs": 16105,
+      "failure": "Assertion/timeout; детали без secrets доступны воспроизведением case"
+    },
+    "fe01_retry_waits_and_late_refresh_cookie_never_installs_other_sid": {
+      "passed": true,
+      "durationMs": 1639,
+      "retryWaitScreen": true,
+      "lateRealSetCookie": true,
+      "cookieOverwritten": true,
+      "newAccessStayedValid": true,
+      "revokedRefreshNeverInstalled": true,
+      "explicitLoginRecovered": true
+    },
+    "web_locks_unavailable_blocks_uncoordinated_refresh": {
+      "passed": true,
+      "durationMs": 355,
+      "refreshRequests": 0,
+      "explicitError": true
+    },
+    "same_workorder_two_tabs_stale_guard_without_lock": {
+      "passed": false,
+      "durationMs": 31718,
+      "failure": "Assertion/timeout; детали без secrets доступны воспроизведением case"
+    }
+  },
+  "finishedAt": "2026-10-27T19:37:52.801Z",
+  "passed": false
+}

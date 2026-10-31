@@ -50,7 +50,9 @@ class WebSocketTicketService:
             else settings.websocket_ticket_ttl_seconds
         )
 
-    async def issue_ticket(self, user: AuthUserDTO, layer_id: UUID) -> WebSocketTicketOut:
+    async def issue_ticket(
+        self, user: AuthUserDTO, layer_id: UUID, session_id: UUID
+    ) -> WebSocketTicketOut:
         if user.role not in ALLOWED_REALTIME_ROLES:
             raise AuthApiError(
                 status.HTTP_403_FORBIDDEN,
@@ -78,6 +80,7 @@ class WebSocketTicketService:
             expires_at = now + timedelta(seconds=self.ticket_ttl_seconds)
             await self.ticket_repository.create_ticket(
                 ticket_hash=hash_websocket_ticket(ticket),
+                browser_session_id=session_id,
                 user_id=user.id,
                 layer_id=layer_id,
                 expires_at=expires_at,
@@ -95,6 +98,7 @@ class WebSocketTicketService:
             if ticket_row is None:
                 raise WebSocketTicketError(INVALID_WEBSOCKET_TICKET_MESSAGE)
             user_id = ticket_row.user_id
+            session_id = ticket_row.browser_session_id
 
         user = await self.user_repository.get_by_id(user_id)
         if user is None or not user.is_active or user.role.value not in ALLOWED_REALTIME_ROLES:
@@ -104,4 +108,5 @@ class WebSocketTicketService:
             user_id=user.id,
             email=user.email,
             role=user.role.value,
+            session_id=session_id,
         )

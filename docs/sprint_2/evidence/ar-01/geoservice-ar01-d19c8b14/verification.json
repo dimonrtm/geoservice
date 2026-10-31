@@ -1,0 +1,375 @@
+{
+  "project": "geoservice-ar01-d19c8b14",
+  "startedAt": "2026-10-27T19:41:31.159Z",
+  "status": "passed",
+  "browsers": {
+    "chrome": {
+      "browser": "chrome",
+      "version": "156.0.8078.48",
+      "executable": "installed channel chrome",
+      "distribution": "installed branded channel",
+      "startedAt": "2026-10-27T19:42:24.515Z",
+      "cases": {
+        "parallel_restore_new_tab_close_initiator": {
+          "passed": true,
+          "durationMs": 2701,
+          "realRotations": 2,
+          "sameSid": true,
+          "newTab": true,
+          "closedInitiator": true,
+          "restoredAfterClose": false,
+          "explicitLoginIfCredentialLost": true
+        },
+        "logout_revokes_copied_access_refresh_ticket_and_preserves_other_contexts": {
+          "passed": true,
+          "durationMs": 7005,
+          "convergenceMs": 14,
+          "accessStatus": 401,
+          "refreshStatus": 401,
+          "ticketRejected": true,
+          "cookieUnchanged": true,
+          "independentContext": true,
+          "independentBrowser": "msedge",
+          "secondaryVersion": "156.0.4314.42"
+        },
+        "lost_marker_old_active_status_polling_sla": {
+          "passed": true,
+          "durationMs": 4935,
+          "convergenceMs": 1157,
+          "oldActiveDelayedMs": 1100,
+          "markerLost": true,
+          "broadcastUnavailable": true,
+          "maxConcurrent": 1,
+          "requests": 2
+        },
+        "resume_requires_post_resume_status_before_protected_action": {
+          "passed": true,
+          "durationMs": 2016,
+          "freshStatusAfterResume": true,
+          "protectedRequests": 0,
+          "statusAfterResume": 1,
+          "maxConcurrent": 1,
+          "requests": 2
+        },
+        "undelivered_logout_preserves_workspace": {
+          "passed": true,
+          "durationMs": 1305,
+          "logoutRequests": 1,
+          "serverNotReached": true,
+          "sessionRetained": true,
+          "workspaceRetained": true,
+          "message": "Не удалось подтвердить выход (network outcome)"
+        },
+        "committed_logout_response_lost_reconciles_without_retry": {
+          "passed": true,
+          "durationMs": 2148,
+          "committed": true,
+          "reconciled": true,
+          "logoutRequests": 1
+        },
+        "auth_lock_timeout_known_undelivered_logout": {
+          "passed": true,
+          "durationMs": 32084,
+          "logoutRequests": 0,
+          "lockWaitMs": 30898,
+          "sessionRetained": true,
+          "knownUndelivered": true
+        },
+        "late_old_logout_after_new_login_does_not_touch_new_cookie": {
+          "passed": true,
+          "durationMs": 1510,
+          "lateLogoutStatus": 200,
+          "newSidDifferent": true,
+          "cookieUnchanged": true,
+          "newSessionRestores": true
+        },
+        "lost_rotated_response_requires_explicit_login": {
+          "passed": true,
+          "durationMs": 1231,
+          "serverRotated": true,
+          "responseLost": true,
+          "replayRejected": true,
+          "explicitLoginRecovered": true
+        },
+        "fe01_retry_waits_and_late_refresh_cookie_never_installs_other_sid": {
+          "passed": true,
+          "durationMs": 1701,
+          "retryWaitScreen": true,
+          "lateRealSetCookie": true,
+          "cookieOverwritten": true,
+          "newAccessStayedValid": true,
+          "revokedRefreshNeverInstalled": true,
+          "explicitLoginRecovered": true
+        },
+        "web_locks_unavailable_blocks_uncoordinated_refresh": {
+          "passed": true,
+          "durationMs": 285,
+          "refreshRequests": 0,
+          "explicitError": true
+        },
+        "same_workorder_two_tabs_stale_guard_without_lock": {
+          "passed": true,
+          "durationMs": 17025,
+          "sameWorkOrderOpenedTwice": true,
+          "independentDrafts": true,
+          "staleStatus": 409,
+          "staleCode": "DRAFT_VERSION_STALE",
+          "newWorkOrderLock": false
+        }
+      },
+      "finishedAt": "2026-10-27T19:43:39.429Z",
+      "passed": true
+    },
+    "msedge": {
+      "browser": "msedge",
+      "version": "156.0.4314.42",
+      "executable": "installed channel msedge",
+      "distribution": "installed branded channel",
+      "startedAt": "2026-10-27T19:43:40.103Z",
+      "cases": {
+        "parallel_restore_new_tab_close_initiator": {
+          "passed": true,
+          "durationMs": 2817,
+          "realRotations": 2,
+          "sameSid": true,
+          "newTab": true,
+          "closedInitiator": true,
+          "restoredAfterClose": false,
+          "explicitLoginIfCredentialLost": true
+        },
+        "logout_revokes_copied_access_refresh_ticket_and_preserves_other_contexts": {
+          "passed": true,
+          "durationMs": 4960,
+          "convergenceMs": 10,
+          "accessStatus": 401,
+          "refreshStatus": 401,
+          "ticketRejected": true,
+          "cookieUnchanged": true,
+          "independentContext": true,
+          "independentBrowser": "chrome",
+          "secondaryVersion": "156.0.8078.48"
+        },
+        "lost_marker_old_active_status_polling_sla": {
+          "passed": true,
+          "durationMs": 4583,
+          "convergenceMs": 1104,
+          "oldActiveDelayedMs": 1100,
+          "markerLost": true,
+          "broadcastUnavailable": true,
+          "maxConcurrent": 1,
+          "requests": 2
+        },
+        "resume_requires_post_resume_status_before_protected_action": {
+          "passed": true,
+          "durationMs": 1793,
+          "freshStatusAfterResume": true,
+          "protectedRequests": 0,
+          "statusAfterResume": 1,
+          "maxConcurrent": 1,
+          "requests": 2
+        },
+        "undelivered_logout_preserves_workspace": {
+          "passed": true,
+          "durationMs": 1307,
+          "logoutRequests": 1,
+          "serverNotReached": true,
+          "sessionRetained": true,
+          "workspaceRetained": true,
+          "message": "Не удалось подтвердить выход (network outcome)"
+        },
+        "committed_logout_response_lost_reconciles_without_retry": {
+          "passed": true,
+          "durationMs": 1958,
+          "committed": true,
+          "reconciled": true,
+          "logoutRequests": 1
+        },
+        "auth_lock_timeout_known_undelivered_logout": {
+          "passed": true,
+          "durationMs": 32823,
+          "logoutRequests": 0,
+          "lockWaitMs": 31869,
+          "sessionRetained": true,
+          "knownUndelivered": true
+        },
+        "late_old_logout_after_new_login_does_not_touch_new_cookie": {
+          "passed": true,
+          "durationMs": 1214,
+          "lateLogoutStatus": 200,
+          "newSidDifferent": true,
+          "cookieUnchanged": true,
+          "newSessionRestores": true
+        },
+        "lost_rotated_response_requires_explicit_login": {
+          "passed": true,
+          "durationMs": 1197,
+          "serverRotated": true,
+          "responseLost": true,
+          "replayRejected": true,
+          "explicitLoginRecovered": true
+        },
+        "fe01_retry_waits_and_late_refresh_cookie_never_installs_other_sid": {
+          "passed": true,
+          "durationMs": 1880,
+          "retryWaitScreen": true,
+          "lateRealSetCookie": true,
+          "cookieOverwritten": true,
+          "newAccessStayedValid": true,
+          "revokedRefreshNeverInstalled": true,
+          "explicitLoginRecovered": true
+        },
+        "web_locks_unavailable_blocks_uncoordinated_refresh": {
+          "passed": true,
+          "durationMs": 336,
+          "refreshRequests": 0,
+          "explicitError": true
+        },
+        "same_workorder_two_tabs_stale_guard_without_lock": {
+          "passed": true,
+          "durationMs": 22465,
+          "sameWorkOrderOpenedTwice": true,
+          "independentDrafts": true,
+          "staleStatus": 409,
+          "staleCode": "DRAFT_VERSION_STALE",
+          "newWorkOrderLock": false
+        }
+      },
+      "finishedAt": "2026-10-27T19:44:58.385Z",
+      "passed": true
+    },
+    "firefox": {
+      "browser": "firefox",
+      "version": "157.0",
+      "executable": "C:\\Repositories\\geoservice\\.tmp-tests\\ar01-browsers\\firefox-1555\\firefox\\firefox.exe",
+      "distribution": "Playwright patched Firefox (revision1555), не stock binary",
+      "startedAt": "2026-10-27T19:45:02.733Z",
+      "cases": {
+        "parallel_restore_new_tab_close_initiator": {
+          "passed": true,
+          "durationMs": 18256,
+          "realRotations": 2,
+          "sameSid": true,
+          "newTab": true,
+          "closedInitiator": true,
+          "restoredAfterClose": false,
+          "explicitLoginIfCredentialLost": true
+        },
+        "logout_revokes_copied_access_refresh_ticket_and_preserves_other_contexts": {
+          "passed": true,
+          "durationMs": 13964,
+          "convergenceMs": 91,
+          "accessStatus": 401,
+          "refreshStatus": 401,
+          "ticketRejected": true,
+          "cookieUnchanged": true,
+          "independentContext": true,
+          "independentBrowser": "msedge",
+          "secondaryVersion": "156.0.4314.42"
+        },
+        "lost_marker_old_active_status_polling_sla": {
+          "passed": true,
+          "durationMs": 6960,
+          "convergenceMs": 2611,
+          "oldActiveDelayedMs": 1100,
+          "markerLost": true,
+          "broadcastUnavailable": true,
+          "maxConcurrent": 1,
+          "requests": 2
+        },
+        "resume_requires_post_resume_status_before_protected_action": {
+          "passed": true,
+          "durationMs": 2266,
+          "freshStatusAfterResume": true,
+          "protectedRequests": 0,
+          "statusAfterResume": 1,
+          "maxConcurrent": 1,
+          "requests": 2
+        },
+        "undelivered_logout_preserves_workspace": {
+          "passed": true,
+          "durationMs": 2988,
+          "logoutRequests": 1,
+          "serverNotReached": true,
+          "sessionRetained": true,
+          "workspaceRetained": true,
+          "message": "Не удалось подтвердить выход (network outcome)"
+        },
+        "committed_logout_response_lost_reconciles_without_retry": {
+          "passed": true,
+          "durationMs": 2588,
+          "committed": true,
+          "reconciled": true,
+          "logoutRequests": 1
+        },
+        "auth_lock_timeout_known_undelivered_logout": {
+          "passed": true,
+          "durationMs": 32585,
+          "logoutRequests": 0,
+          "lockWaitMs": 30170,
+          "sessionRetained": true,
+          "knownUndelivered": true
+        },
+        "late_old_logout_after_new_login_does_not_touch_new_cookie": {
+          "passed": true,
+          "durationMs": 4507,
+          "lateLogoutStatus": 200,
+          "newSidDifferent": true,
+          "cookieUnchanged": true,
+          "newSessionRestores": true
+        },
+        "lost_rotated_response_requires_explicit_login": {
+          "passed": true,
+          "durationMs": 3172,
+          "serverRotated": true,
+          "responseLost": true,
+          "replayRejected": true,
+          "explicitLoginRecovered": true
+        },
+        "fe01_retry_waits_and_late_refresh_cookie_never_installs_other_sid": {
+          "passed": true,
+          "durationMs": 3514,
+          "retryWaitScreen": true,
+          "lateRealSetCookie": true,
+          "cookieOverwritten": true,
+          "newAccessStayedValid": true,
+          "revokedRefreshNeverInstalled": true,
+          "explicitLoginRecovered": true
+        },
+        "web_locks_unavailable_blocks_uncoordinated_refresh": {
+          "passed": true,
+          "durationMs": 564,
+          "refreshRequests": 0,
+          "explicitError": true
+        },
+        "same_workorder_two_tabs_stale_guard_without_lock": {
+          "passed": true,
+          "durationMs": 5229,
+          "sameWorkOrderOpenedTwice": true,
+          "independentDrafts": true,
+          "staleStatus": 409,
+          "staleCode": "DRAFT_VERSION_STALE",
+          "newWorkOrderLock": false
+        }
+      },
+      "finishedAt": "2026-10-27T19:46:41.951Z",
+      "passed": true
+    }
+  },
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "backendImage": "sha256:c43e949bbf6a85e4321b0b6ffff2e3412612dd2b55d31c35ab16fb977e2dbab1",
+  "origin": "http://localhost:59193",
+  "targetedDB": [
+    "=============================== warnings summary ===============================",
+    "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+    "18 passed, 1 warning in 8.80s"
+  ],
+  "sql": {
+    "parents": 54,
+    "revoked": 27
+  },
+  "tmpfs": true,
+  "demoVolumesUsed": false,
+  "cleanup": "passed",
+  "finishedAt": "2026-10-27T19:46:57.873Z"
+}

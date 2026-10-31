@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
+import { flushPromises } from "@vue/test-utils";
+import { installBrowserAuthEnvironment } from "@/test/browserAuthEnvironment";
 
 const {
   loginMock,
@@ -56,9 +58,14 @@ const SELECTED_WORK_ORDER_STORAGE_KEY = "geoservice:selected-work-order";
 const OPENED_WORKSPACE_STORAGE_KEY = "geoservice:opened-workspace";
 
 function expectAuthLocalStorageNotUsed() {
-  expect(localStorage.getItem).not.toHaveBeenCalled();
-  expect(localStorage.setItem).not.toHaveBeenCalled();
-  expect(localStorage.removeItem).not.toHaveBeenCalled();
+  expect(localStorage.getItem).not.toHaveBeenCalledWith("access_token");
+  expect(localStorage.getItem).not.toHaveBeenCalledWith("auth_user");
+  for (const [key, value] of vi.mocked(localStorage.setItem).mock.calls) {
+    expect(key).not.toBe("access_token");
+    expect(key).not.toBe("auth_user");
+    expect(value).not.toContain("token-");
+    expect(value).not.toContain("password");
+  }
   expect(localStorage.clear).not.toHaveBeenCalled();
 }
 
@@ -81,6 +88,9 @@ describe("auth store", () => {
 
     const localStorageMock = createLocalStorageMock();
     vi.stubGlobal("localStorage", localStorageMock);
+    installBrowserAuthEnvironment();
+    vi.mocked(localStorage.clear).mockClear();
+    logoutSessionMock.mockResolvedValue({ ok: true, session_id: "sid-a" });
     sessionStorage.clear();
     resetWorkOrdersMock.mockImplementation(
       (options?: {
@@ -101,6 +111,7 @@ describe("auth store", () => {
     loginMock.mockResolvedValue({
       access_token: "token-1",
       token_type: "bearer",
+      session_id: "sid-a",
       user: {
         id: "user-1",
         email: "editor@example.com",
@@ -127,6 +138,7 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "editor@example.com",
@@ -159,48 +171,38 @@ describe("auth store", () => {
     expectAuthLocalStorageNotUsed();
   });
 
-  it("clears memory synchronously and blocks readiness until backend logout resolves", async () => {
-    let resolveLogout: (() => void) | undefined;
+  it("keeps memory until backend confirms logout", async () => {
+    let resolveLogout!: (result: { ok: true; session_id: string }) => void;
     logoutSessionMock.mockReturnValue(
-      new Promise<void>((resolve) => {
+      new Promise((resolve) => {
         resolveLogout = resolve;
       }),
     );
-
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
-    store.token = "token-1";
-    store.user = {
-      id: "user-1",
-      email: "editor@example.com",
-      role: "editor",
-    };
-    store.sessionError = SESSION_RETRY_PRESENTATION;
+    store.setAuth(
+      "token-1",
+      { id: "user-1", email: "editor@example.com", role: "editor" },
+      { sessionId: "sid-a" },
+    );
     store.isReady = true;
-    store.isRestoring = true;
-
-    const logoutPromise = store.logout();
-
-    expect(store.token).toBeNull();
-    expect(store.user).toBeNull();
-    expect(store.sessionError).toBeNull();
-    expect(store.isReady).toBe(false);
-    expect(store.isRestoring).toBe(false);
-    expect(resetWorkOrdersMock).toHaveBeenCalledTimes(1);
-    expect(logoutSessionMock).toHaveBeenCalledTimes(1);
-    expectAuthLocalStorageNotUsed();
-
-    resolveLogout?.();
-    await logoutPromise;
-
-    expect(store.isReady).toBe(true);
-    expect(store.isRestoring).toBe(false);
+    resetWorkOrdersMock.mockClear();
+    const logout = store.logout();
+    await flushPromises();
+    expect(store.isAuthenticated).toBe(true);
+    expect(store.isLoggingOut).toBe(true);
+    expect(resetWorkOrdersMock).not.toHaveBeenCalled();
+    resolveLogout({ ok: true, session_id: "sid-a" });
+    expect(await logout).toBe(true);
+    expect(store.isAuthenticated).toBe(false);
+    expect(store.isLoggingOut).toBe(false);
   });
 
   it("resets work orders on logout only when user id changes to null", async () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "editor@example.com",
@@ -217,17 +219,22 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "old@example.com",
       role: "editor",
     };
 
-    store.setAuth("token-2", {
-      id: "user-1",
-      email: "new-email@example.com",
-      role: "editor",
-    });
+    store.setAuth(
+      "token-2",
+      {
+        id: "user-1",
+        email: "new-email@example.com",
+        role: "editor",
+      },
+      { sessionId: "sid-a" },
+    );
 
     expect(resetWorkOrdersMock).not.toHaveBeenCalled();
   });
@@ -236,6 +243,7 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "editor@example.com",
@@ -250,11 +258,15 @@ describe("auth store", () => {
       JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
     );
 
-    store.setAuth("token-2", {
-      id: "user-2",
-      email: "other-editor@example.com",
-      role: "editor",
-    });
+    store.setAuth(
+      "token-2",
+      {
+        id: "user-2",
+        email: "other-editor@example.com",
+        role: "editor",
+      },
+      { sessionId: "sid-b" },
+    );
 
     expect(resetWorkOrdersMock).toHaveBeenCalledTimes(1);
     expect(sessionStorage.getItem(SELECTED_WORK_ORDER_STORAGE_KEY)).toBeNull();
@@ -275,6 +287,7 @@ describe("auth store", () => {
     refreshSessionMock.mockResolvedValue({
       access_token: "token-2",
       token_type: "bearer",
+      session_id: "sid-a",
       user: {
         id: "user-2",
         email: "marina.reviewer@example.local",
@@ -297,9 +310,7 @@ describe("auth store", () => {
     });
     expect(store.sessionError).toBeNull();
     expect(store.isReady).toBe(true);
-    expect(localStorage.setItem).not.toHaveBeenCalled();
-    expect(localStorage.removeItem).not.toHaveBeenCalled();
-    expect(localStorage.clear).not.toHaveBeenCalled();
+    expectAuthLocalStorageNotUsed();
   });
 
   it("preserves work order session markers when restoreSession hydrates initial user", async () => {
@@ -314,6 +325,7 @@ describe("auth store", () => {
     refreshSessionMock.mockResolvedValue({
       access_token: "token-2",
       token_type: "bearer",
+      session_id: "sid-a",
       user: {
         id: "user-1",
         email: "editor@example.com",
@@ -342,6 +354,7 @@ describe("auth store", () => {
     refreshSessionMock.mockResolvedValue({
       access_token: "token-2",
       token_type: "bearer",
+      session_id: "sid-a",
       user: {
         id: "user-1",
         email: "fresh@example.com",
@@ -352,6 +365,7 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "cached@example.com",
@@ -380,6 +394,7 @@ describe("auth store", () => {
     refreshSessionMock.mockResolvedValue({
       access_token: "token-2",
       token_type: "bearer",
+      session_id: "sid-a",
       user: {
         id: "user-2",
         email: "fresh@example.com",
@@ -390,6 +405,7 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "cached@example.com",
@@ -464,6 +480,7 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "editor@example.com",
@@ -512,6 +529,7 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "cached@example.com",
@@ -528,6 +546,7 @@ describe("auth store", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
     store.token = "token-1";
+    store.sessionId = "sid-a";
     store.user = {
       id: "user-1",
       email: "editor@example.com",
@@ -546,40 +565,27 @@ describe("auth store", () => {
     expectAuthLocalStorageNotUsed();
   });
 
-  it("re-enables readiness when backend logout fails", async () => {
-    let rejectLogout: ((error: Error) => void) | undefined;
-    logoutSessionMock.mockReturnValue(
-      new Promise<void>((_, reject) => {
-        rejectLogout = reject;
-      }),
-    );
-
+  it("preserves the current session when logout fails", async () => {
+    logoutSessionMock.mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 503 },
+    });
     const { useAuthStore } = await import("@/stores/auth");
     const store = useAuthStore();
-    store.token = "token-1";
-    store.user = {
-      id: "user-1",
-      email: "editor@example.com",
-      role: "editor",
-    };
+    store.setAuth(
+      "token-1",
+      { id: "user-1", email: "editor@example.com", role: "editor" },
+      { sessionId: "sid-a" },
+    );
     store.isReady = true;
-
-    const logoutPromise = store.logout();
-
-    expect(store.token).toBeNull();
-    expect(store.user).toBeNull();
-    expect(store.isReady).toBe(false);
-
-    rejectLogout?.(new Error("logout failed"));
-    await logoutPromise;
-
-    expect(logoutSessionMock).toHaveBeenCalledTimes(1);
-    expect(store.token).toBeNull();
-    expect(store.user).toBeNull();
-    expect(store.sessionError).toBeNull();
+    resetWorkOrdersMock.mockClear();
+    expect(await store.logout()).toBe(false);
+    expect(store.isAuthenticated).toBe(true);
     expect(store.isReady).toBe(true);
-    expect(store.isRestoring).toBe(false);
-    expect(resetWorkOrdersMock).toHaveBeenCalledTimes(1);
+    expect(store.logoutError?.summary).toBe(
+      "Не удалось выйти, попробуйте ещё раз",
+    );
+    expect(resetWorkOrdersMock).not.toHaveBeenCalled();
     expectAuthLocalStorageNotUsed();
   });
 
@@ -597,6 +603,7 @@ describe("auth store", () => {
     refreshSessionMock.mockResolvedValue({
       access_token: "token-2",
       token_type: "bearer",
+      session_id: "sid-a",
       user: {
         id: "user-2",
         email: "marina.reviewer@example.local",

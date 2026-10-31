@@ -1,0 +1,85 @@
+{
+  "project": "geoservice-ar01-2650573a",
+  "startedAt": "2026-10-27T19:47:32.806Z",
+  "status": "passed",
+  "browsers": {
+    "chrome": {
+      "browser": "chrome",
+      "version": "156.0.8078.48",
+      "executable": "C:/Program Files/Google/Chrome/Application/chrome.exe (channel chrome)",
+      "distribution": "installed branded channel",
+      "startedAt": "2026-10-27T19:48:11.861Z",
+      "cases": {
+        "real_history_resume_after_remote_logout": {
+          "passed": true,
+          "durationMs": 1495,
+          "historyResume": true,
+          "bfcacheRestored": false,
+          "protectedRequests": 0
+        }
+      },
+      "finishedAt": "2026-10-27T19:48:13.414Z",
+      "scope": "real_history_resume",
+      "passed": true
+    },
+    "msedge": {
+      "browser": "msedge",
+      "version": "156.0.4314.42",
+      "executable": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe (channel msedge)",
+      "distribution": "installed branded channel",
+      "startedAt": "2026-10-27T19:48:14.134Z",
+      "cases": {
+        "real_history_resume_after_remote_logout": {
+          "passed": true,
+          "durationMs": 4422,
+          "historyResume": true,
+          "bfcacheRestored": false,
+          "protectedRequests": 0
+        }
+      },
+      "finishedAt": "2026-10-27T19:48:18.606Z",
+      "scope": "real_history_resume",
+      "passed": true
+    },
+    "firefox": {
+      "browser": "firefox",
+      "version": "157.0",
+      "executable": "C:\\Repositories\\geoservice\\.tmp-tests\\ar01-browsers\\firefox-1555\\firefox\\firefox.exe",
+      "distribution": "Playwright patched Firefox (revision1555), не stock binary",
+      "startedAt": "2026-10-27T19:48:19.519Z",
+      "cases": {
+        "real_history_resume_after_remote_logout": {
+          "passed": true,
+          "durationMs": 4544,
+          "historyResume": true,
+          "bfcacheRestored": false,
+          "protectedRequests": 0
+        }
+      },
+      "finishedAt": "2026-10-27T19:48:24.247Z",
+      "scope": "real_history_resume",
+      "passed": true
+    }
+  },
+  "runnerHashes": {
+    "run.mjs": "597d715133c91712a7a98d3614da723f3ddcb5a489172a2987df9baaa0b2c5ae",
+    "smoke.mjs": "fd61e7fbcc7330158448672bb230e9ca85f2aab4b262cc856833d9a822bccb2c"
+  },
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "backendImage": "sha256:c43e949bbf6a85e4321b0b6ffff2e3412612dd2b55d31c35ab16fb977e2dbab1",
+  "origin": "http://localhost:54886",
+  "targetedDB": [
+    "=============================== warnings summary ===============================",
+    "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+    "18 passed, 1 warning in 8.51s"
+  ],
+  "sql": {
+    "parents": 3,
+    "revoked": 3
+  },
+  "tmpfs": true,
+  "demoVolumesUsed": false,
+  "cleanup": "passed",
+  "finishedAt": "2026-10-27T19:48:40.151Z"
+}

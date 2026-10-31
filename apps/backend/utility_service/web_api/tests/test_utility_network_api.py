@@ -4,8 +4,15 @@ from uuid import UUID, uuid4
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from utility_service.web_api.api.auth import create_access_token
-from utility_service.use_cases.deps import get_auth_service, get_utility_network_service
+from utility_service.web_api.tests.auth_user_factory import (
+    create_test_access_token as create_access_token,
+    access_service_for,
+)
+from utility_service.use_cases.deps import (
+    get_auth_service,
+    get_auth_session_access_service,
+    get_utility_network_service,
+)
 from utility_service.use_cases.dtos import AuthRole
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.utility_network import utility_network_router
@@ -32,6 +39,9 @@ def build_app(auth_service: object, utility_service: object) -> FastAPI:
     install_exception_handlers(app)
     app.include_router(utility_network_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service
+    app.dependency_overrides[get_auth_session_access_service] = lambda: access_service_for(
+        auth_service
+    )
     app.dependency_overrides[get_utility_network_service] = lambda: utility_service
     return app
 

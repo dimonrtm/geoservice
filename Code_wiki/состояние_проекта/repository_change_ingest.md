@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-10-27
-source: repository-change:2026-10-27
+updated: 2026-10-28
+source: repository-change:2026-10-28
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,10 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-10-28 | [[архитектура/browser_auth_sessions]] | Стабильный sid, server revocation, proof logout/status, Web Locks, resume freshness и durable подготовка workspace. | AuthSessionService, AuthSessionAccessService, frontend auth/coordinator/monitor; runbook AR-01 |
+| 2026-10-28 | [[архитектура/api_and_realtime]] | Post-ingest correction auth success/logout/status и ticket sid вместо устаревшего cookie-delete контракта. | browser_auth_sessions; FU-2026-10-28-001 |
+| 2026-10-28 | [[архитектура/backend]] | Post-ingest correction свежих parent/user checks, transaction lifetime и границы миграции. | browser_auth_sessions; FU-2026-10-28-001 |
+| 2026-10-28 | [[архитектура/frontend]] | Post-ingest correction Web Locks/status/resume и подтверждаемого logout с durable подготовкой workspace. | browser_auth_sessions; FU-2026-10-28-001 |
 | 2026-10-27 | [[архитектура/frontend]] | Владение ошибкой refresh в store и отдельное поколение восстановления, инвалидируемое новым login; границы epoch и cookie. | `apps/frontend/src/stores/auth.ts`, `apps/frontend/src/api/http.ts`, `apps/frontend/src/api/auth.restore.integration.test.ts` |
 | 2026-10-26 | [[deployment/docker_compose]] | Общий production origin HTTP/WebSocket, nginx proxy и границы внешнего HTTPS, чистой сборки и upstream restart. | `apps/frontend/nginx.conf`, `src/api/baseUrl.ts`, Dockerfile frontend, runbook INF-02 |
 | 2026-10-25 | [[сборка/geometry_save_smoke]] | Фазовый HTTP smoke с durable replay после штатного restart, независимым read-only SQL evidence, fail-closed state и локальной Compose-изоляцией. | `tests/smoke/save_geometry_smoke.py`, `save_geometry_observer.py`, `restart_backend_smoke.py`, `.github/workflows/ci.yml`, `infra/docker-compose.smoke.yml` |

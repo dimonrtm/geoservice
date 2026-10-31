@@ -21,6 +21,7 @@ async def authenticate_websocket_ticket(
     layer_id: UUID,
     ticket_service: WebSocketTicketService,
 ) -> WebSocketUserContext:
+    """Проверяет одноразовый ticket; свежий допуск sid выполняет manager.connect."""
     if ticket is None or not ticket.strip():
         raise _websocket_ticket_error("Realtime ticket отсутствует")
 

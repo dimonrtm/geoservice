@@ -425,11 +425,15 @@ describe("Save recovery", () => {
     await vi.advanceTimersByTimeAsync(0);
     await until(() => api.saveFeatureGeometry.mock.calls.length === 2);
     useAuthStore().clearLocalSession();
-    useAuthStore().setAuth("new", {
-      id: "other",
-      email: "other@example.local",
-      role: "editor",
-    });
+    useAuthStore().setAuth(
+      "new",
+      {
+        id: "other",
+        email: "other@example.local",
+        role: "editor",
+      },
+      { sessionId: "sid-new" },
+    );
     await vi.runAllTimersAsync();
     await saving;
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(2);
@@ -647,11 +651,15 @@ describe("Save recovery", () => {
         throw new Error("denied");
       });
     useAuthStore().clearLocalSession();
-    useAuthStore().setAuth("test", {
-      id: "actor",
-      email: "editor@example.local",
-      role: "editor",
-    });
+    useAuthStore().setAuth(
+      "test",
+      {
+        id: "actor",
+        email: "editor@example.local",
+        role: "editor",
+      },
+      { sessionId: "sid-test" },
+    );
     writes.mockRestore();
     store.workspace = workspaceFixture();
     store.selectedWorkOrderId = store.openedWorkOrderId = target.workOrderId;

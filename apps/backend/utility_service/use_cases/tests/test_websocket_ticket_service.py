@@ -47,9 +47,12 @@ class FakeTicketRepository:
         self.created = []
         self.consumed_hashes = set()
 
-    async def create_ticket(self, *, ticket_hash, user_id, layer_id, expires_at):
+    async def create_ticket(
+        self, *, ticket_hash, user_id, layer_id, expires_at, browser_session_id
+    ):
         self.created.append(
             SimpleNamespace(
+                browser_session_id=browser_session_id,
                 ticket_hash=ticket_hash,
                 user_id=user_id,
                 layer_id=layer_id,
@@ -144,7 +147,7 @@ def test_issue_ticket_stores_hash_and_returns_raw_ticket() -> None:
     layer = SimpleNamespace(id=uuid4())
     service, repository = build_service(orm_user, layer)
 
-    result = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
+    result = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id, uuid4()))
 
     assert result.ticket
     assert result.expires_at > datetime.now(timezone.utc)
@@ -163,7 +166,7 @@ def test_issue_ticket_rejects_role_not_allowed(role: str) -> None:
     service, _repository = build_service(orm_user, layer)
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
+        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id, uuid4()))
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "ROLE_NOT_ALLOWED"
@@ -177,7 +180,7 @@ def test_issue_ticket_rejects_inactive_user() -> None:
     service, _repository = build_service(orm_user, layer)
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
+        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id, uuid4()))
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "USER_INACTIVE"
@@ -191,7 +194,7 @@ def test_issue_ticket_rejects_missing_layer_with_structured_404() -> None:
     service, _repository = build_service(orm_user, None)
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer_id))
+        asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer_id, uuid4()))
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.code == "LAYER_NOT_FOUND"
@@ -203,10 +206,11 @@ def test_consume_ticket_returns_user_context_once() -> None:
     orm_user = make_orm_user(role="editor")
     layer = SimpleNamespace(id=uuid4())
     service, _repository = build_service(orm_user, layer)
-    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
+    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id, uuid4()))
 
     context = asyncio.run(service.consume_ticket(issued.ticket, layer.id))
 
+    assert context.session_id == _repository.created[0].browser_session_id
     assert context.user_id == orm_user.id
     assert context.email == orm_user.email
     assert context.role == "editor"
@@ -225,7 +229,7 @@ def test_consume_ticket_rejects_wrong_layer() -> None:
     orm_user = make_orm_user()
     layer = SimpleNamespace(id=uuid4())
     service, _repository = build_service(orm_user, layer)
-    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
+    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id, uuid4()))
 
     with pytest.raises(WebSocketTicketError):
         asyncio.run(service.consume_ticket(issued.ticket, uuid4()))
@@ -245,6 +249,7 @@ def test_consume_ticket_rejects_reviewer_user_after_ticket_row_exists() -> None:
     ticket = "reviewer-ticket"
     repository.created.append(
         SimpleNamespace(
+            browser_session_id=uuid4(),
             ticket_hash=hash_websocket_ticket(ticket),
             user_id=orm_user.id,
             layer_id=layer.id,
@@ -260,7 +265,7 @@ def test_consume_ticket_rejects_inactive_user_after_issue() -> None:
     orm_user = make_orm_user(is_active=True)
     layer = SimpleNamespace(id=uuid4())
     service, repository = build_service(orm_user, layer)
-    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id))
+    issued = asyncio.run(service.issue_ticket(make_auth_user(orm_user), layer.id, uuid4()))
     orm_user.is_active = False
 
     with pytest.raises(WebSocketTicketError):
@@ -284,6 +289,7 @@ def test_consume_ticket_rejects_expired_ticket() -> None:
     ticket = "expired-ticket"
     repository.created.append(
         SimpleNamespace(
+            browser_session_id=uuid4(),
             ticket_hash=hash_websocket_ticket(ticket),
             user_id=orm_user.id,
             layer_id=layer.id,

@@ -1,16 +1,21 @@
 from datetime import datetime, timezone
 from types import SimpleNamespace
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
+from jose import jwt
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from utility_service.web_api.api import auth as auth_api
-from utility_service.web_api.api.auth import create_access_token
+from utility_service.web_api.tests.auth_user_factory import (
+    create_test_access_token as create_access_token,
+    access_service_for,
+)
 from utility_service.use_cases.deps import (
     get_auth_service,
+    get_auth_session_access_service,
     get_layer_service,
     get_websocket_ticket_service,
 )
@@ -27,6 +32,10 @@ from utility_service.use_cases.services.realtime_connection_manager import (
 )
 
 
+async def active_session(session_id):
+    return True
+
+
 def create_test_app(
     auth_service: object,
     layer_service: object,
@@ -35,10 +44,15 @@ def create_test_app(
 ) -> FastAPI:
     app = FastAPI()
     app.add_middleware(CorrelationIdMiddleware)
-    app.state.websocket_connection_manager = connection_manager or WebSocketConnectionManager()
+    app.state.websocket_connection_manager = connection_manager or WebSocketConnectionManager(
+        active_session
+    )
     install_exception_handlers(app)
     app.include_router(ws_layers_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service
+    app.dependency_overrides[get_auth_session_access_service] = lambda: access_service_for(
+        auth_service
+    )
     app.dependency_overrides[get_layer_service] = lambda: layer_service
     if ticket_service is not None:
         app.dependency_overrides[get_websocket_ticket_service] = lambda: ticket_service
@@ -52,13 +66,14 @@ class FakeWebSocketTicketService:
         self.issued = []
         self.consumed = []
         self.user_context = WebSocketUserContext(
+            session_id=uuid4(),
             user_id=uuid4(),
             email="editor@example.local",
             role="editor",
         )
 
-    async def issue_ticket(self, user, layer_id):
-        self.issued.append((user, layer_id))
+    async def issue_ticket(self, user, layer_id, session_id):
+        self.issued.append((user, layer_id, session_id))
         if self.error is not None:
             raise self.error
         return WebSocketTicketOut(
@@ -104,7 +119,9 @@ def test_ws_layer_ticket_issue_accepts_editor_when_legacy_enabled(monkeypatch) -
         "ticket": "editor-ticket",
         "expiresAt": "2026-07-02T10:00:00Z",
     }
-    assert ticket_service.issued == [(user, layer_id)]
+    assert ticket_service.issued == [
+        (user, layer_id, UUID(jwt.get_unverified_claims(token)["sid"]))
+    ]
 
 
 def test_ws_layer_ticket_issue_rejects_editor_when_legacy_disabled(monkeypatch) -> None:
@@ -229,6 +246,7 @@ def test_ws_layer_subscription_accepts_valid_editor_ticket() -> None:
     ticket = f"{role}-ticket"
     ticket_service = FakeWebSocketTicketService(ticket=ticket)
     ticket_service.user_context = WebSocketUserContext(
+        session_id=uuid4(),
         user_id=uuid4(),
         email=f"{role}@example.com",
         role=role,
@@ -242,7 +260,7 @@ def test_ws_layer_subscription_accepts_valid_editor_ticket() -> None:
 
     auth_service = SimpleNamespace(get_user_by_id=get_user_by_id)
     layer_service = SimpleNamespace(get_layer_by_id=get_layer_by_id)
-    connection_manager = WebSocketConnectionManager()
+    connection_manager = WebSocketConnectionManager(active_session)
     app = create_test_app(auth_service, layer_service, connection_manager, ticket_service)
 
     with TestClient(app) as client:
@@ -356,3 +374,29 @@ def test_ws_layer_subscription_rejects_unknown_layer_after_ticket_consume() -> N
 
     assert ticket_service.consumed == [("valid-ticket", layer_id)]
     assert exc_info.value.code == 1008
+
+
+def test_logout_before_connected_event_closes_socket_once() -> None:
+    layer_id = uuid4()
+    ticket_service = FakeWebSocketTicketService()
+    checks = 0
+
+    async def check(session_id):
+        nonlocal checks
+        checks += 1
+        return checks == 1
+
+    async def get_layer_by_id(_layer_id):
+        return SimpleNamespace(id=layer_id)
+
+    app = create_test_app(
+        SimpleNamespace(),
+        SimpleNamespace(get_layer_by_id=get_layer_by_id),
+        WebSocketConnectionManager(check),
+        ticket_service,
+    )
+    with TestClient(app) as client:
+        with pytest.raises(WebSocketDisconnect) as error:
+            with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}?ticket=valid") as socket:
+                socket.receive_json()
+    assert error.value.code == 1008

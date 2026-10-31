@@ -3,7 +3,8 @@ import {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import { beforeEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { installBrowserAuthEnvironment } from "@/test/browserAuthEnvironment";
 import { setActivePinia } from "pinia";
 import { pinia } from "@/pinia";
 import { http } from "./http";
@@ -33,6 +34,7 @@ function payload(id: string, token = id) {
   return {
     access_token: token,
     token_type: "bearer",
+    session_id: `sid-${id}`,
     user: { id, email: `${id}@example.local`, role: "editor" as const },
   };
 }
@@ -69,11 +71,13 @@ function failure(config: InternalAxiosRequestConfig, status: number) {
   );
 }
 beforeEach(() => {
+  installBrowserAuthEnvironment();
   setActivePinia(pinia);
   useAuthStore().$reset();
   vi.resetAllMocks();
   effects.suspendActor.mockResolvedValue(undefined);
 });
+afterEach(() => useAuthStore().stopBrowserSessionSync());
 
 it.each(
   [200, 401, 403, 503, 0].flatMap((status) =>
@@ -83,19 +87,23 @@ it.each(
   "старый refresh $status не меняет новый login (тот же actor: $same)",
   async ({ status, same }) => {
     const auth = useAuthStore();
-    if (same) auth.setAuth("previous", payload("new").user);
+    if (same)
+      auth.setAuth("previous", payload("new").user, { sessionId: "sid-new" });
     const pending = deferred<AxiosResponse>();
     const started = deferred<InternalAxiosRequestConfig>();
+    const loginResponse = deferred<AxiosResponse>();
+    const loginStarted = deferred<InternalAxiosRequestConfig>();
     http.defaults.adapter = async (config) => {
       if (config.url?.endsWith("/session/refresh")) {
         started.resolve(config);
         return pending.promise;
       }
-      return response(config, "new");
+      loginStarted.resolve(config);
+      return loginResponse.promise;
     };
     const restore = auth.restoreSession();
     const config = await started.promise;
-    await auth.loginWithPassword("new@example.local", "synthetic");
+    const login = auth.loginWithPassword("new@example.local", "synthetic");
     const snapshot = JSON.stringify(auth.$state);
     const calls = Object.values(effects).map((mock) => mock.mock.calls.length);
     if (status === 200)
@@ -109,6 +117,8 @@ it.each(
     expect(
       Object.values(effects).map((mock) => mock.mock.calls.length),
     ).toEqual(calls);
+    loginResponse.resolve(response(await loginStarted.promise, "new"));
+    await login;
   },
 );
 
@@ -139,6 +149,10 @@ it.each(["request", "recovery", "failed"])(
     const oldConfig = await started.promise;
     const login = auth.loginWithPassword("new", "synthetic");
     const handled = login.catch((error) => error);
+    const beforeOldResponse = JSON.stringify(auth.$state);
+    old.resolve(response(oldConfig, "old"));
+    await restore;
+    expect(JSON.stringify(auth.$state)).toBe(beforeOldResponse);
     const config = await loginStarted.promise;
     if (phase === "recovery") {
       next.resolve(response(config, "new"));
@@ -149,10 +163,6 @@ it.each(["request", "recovery", "failed"])(
       await handled;
     }
     expect(auth.isRestoring).toBe(false);
-    const snapshot = JSON.stringify(auth.$state);
-    old.resolve(response(oldConfig, "old"));
-    await restore;
-    expect(JSON.stringify(auth.$state)).toBe(snapshot);
     if (phase === "request") next.resolve(response(config, "new"));
     recovery.resolve();
     await handled;
@@ -168,7 +178,10 @@ it.each(
   "актуальный refresh $status завершается (runtime: $runtime)",
   async ({ status, runtime }) => {
     const auth = useAuthStore();
-    if (runtime) auth.setAuth("current", payload("current").user);
+    if (runtime)
+      auth.setAuth("current", payload("current").user, {
+        sessionId: "sid-current",
+      });
     http.defaults.adapter = async (config) => {
       if (status !== 200) throw failure(config, status);
       return response(config, "current");
@@ -192,16 +205,25 @@ it.each([false, true])(
   "обычный 401 сохраняет epoch-защиту (старый: %s)",
   async (stale) => {
     const auth = useAuthStore();
-    auth.setAuth("first", payload("first").user);
+    auth.setAuth("first", payload("first").user, { sessionId: "sid-first" });
     const pending = deferred<AxiosResponse>();
     const started = deferred<InternalAxiosRequestConfig>();
     http.defaults.adapter = (config) => {
+      if (config.url?.endsWith("/session/status"))
+        return Promise.resolve({
+          ...response(config, "first"),
+          data: {
+            session_id: JSON.parse(config.data).session_id,
+            state: "active",
+          },
+        });
       started.resolve(config);
       return pending.promise;
     };
     const request = http.get("/work").catch((error) => error);
     const config = await started.promise;
-    if (stale) auth.setAuth("new", payload("new").user);
+    if (stale)
+      auth.setAuth("new", payload("new").user, { sessionId: "sid-new" });
     pending.reject(failure(config, 401));
     await request;
     expect(auth.user?.id ?? null).toBe(stale ? "new" : null);

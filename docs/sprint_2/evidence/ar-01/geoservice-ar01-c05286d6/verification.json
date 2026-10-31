@@ -1,0 +1,9 @@
+{
+  "project": "geoservice-ar01-c05286d6",
+  "startedAt": "2026-10-27T19:31:47.439Z",
+  "status": "failed",
+  "browsers": {},
+  "error": "Ошибка harness; чувствительный output не сохранён",
+  "cleanup": "failed",
+  "finishedAt": "2026-10-27T19:31:47.804Z"
+}

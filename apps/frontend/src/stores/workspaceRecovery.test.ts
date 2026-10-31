@@ -1,6 +1,6 @@
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
-import { IDBFactory } from "fake-indexeddb";
+import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
 import {
   candidate,
   commandId,
@@ -175,4 +175,37 @@ it("context access loss stops only its own work order", async () => {
     store.getRecord(recoveryKey(commandContext(command())))
       ?.requiresAccessConfirmation,
   ).toBe(true);
+});
+
+it("prepareActorLogout verifies durable sent intent without suspending or hiding it", async () => {
+  const store = useWorkspaceRecoveryStore();
+  store.bindHost(host);
+  await store.initializeActor("actor");
+  api.saveFeatureGeometry.mockReturnValue(new Promise(() => {}));
+  const pending = command();
+  await store.submit(pending, { geometry, vertexIndex: 1 });
+  const key = recoveryKey(commandContext(pending));
+  expect(await store.prepareActorLogout("actor")).toBe(true);
+  expect(store.initializedActor).toBe("actor");
+  expect(store.isRunning(key)).toBe(true);
+  expect(store.getRecord(key)?.blocks).toEqual([]);
+  expect(store.getRecord(key)?.requiresAccessConfirmation).toBe(false);
+});
+
+it("prepareActorLogout waits for a pending insert and refuses its failed durability", async () => {
+  const store = useWorkspaceRecoveryStore();
+  store.bindHost(host);
+  await store.initializeActor("actor");
+  const insert = vi
+    .spyOn(IDBObjectStore.prototype, "add")
+    .mockImplementation(() => {
+      throw new Error("storage");
+    });
+  const submitting = store.submit(command(), { geometry, vertexIndex: 1 });
+  const preparation = store.prepareActorLogout("actor");
+  expect(await submitting).toBe("blocked");
+  insert.mockRestore();
+  expect(await preparation).toBe(false);
+  expect(store.initializedActor).toBe("actor");
+  expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
 });

@@ -1,0 +1,19 @@
+{
+  "browser": "firefox",
+  "version": "157.0",
+  "executable": "C:\\Repositories\\geoservice\\.tmp-tests\\ar01-browsers\\firefox-1555\\firefox\\firefox.exe",
+  "distribution": "Playwright patched Firefox (revision1555), не stock binary",
+  "startedAt": "2026-10-27T19:48:19.519Z",
+  "cases": {
+    "real_history_resume_after_remote_logout": {
+      "passed": true,
+      "durationMs": 4544,
+      "historyResume": true,
+      "bfcacheRestored": false,
+      "protectedRequests": 0
+    }
+  },
+  "finishedAt": "2026-10-27T19:48:24.247Z",
+  "scope": "real_history_resume",
+  "passed": true
+}

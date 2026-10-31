@@ -1,0 +1,19 @@
+{
+  "browser": "msedge",
+  "version": "156.0.4314.42",
+  "executable": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe (channel msedge)",
+  "distribution": "installed branded channel",
+  "startedAt": "2026-10-27T19:48:14.134Z",
+  "cases": {
+    "real_history_resume_after_remote_logout": {
+      "passed": true,
+      "durationMs": 4422,
+      "historyResume": true,
+      "bfcacheRestored": false,
+      "protectedRequests": 0
+    }
+  },
+  "finishedAt": "2026-10-27T19:48:18.606Z",
+  "scope": "real_history_resume",
+  "passed": true
+}

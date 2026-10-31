@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from utility_service.use_cases.deps import (
     get_auth_service,
+    get_auth_session_access_service,
     get_edit_version_service,
     get_work_order_service,
     get_workspace_service,
@@ -24,7 +25,10 @@ from utility_service.use_cases.schemas.workspace import (
     WorkspaceWorkOrderOut,
 )
 from utility_service.use_cases.services.edit_version_service import OpenEditVersionResult
-from utility_service.web_api.api.auth import create_access_token
+from utility_service.web_api.tests.auth_user_factory import (
+    create_test_access_token as create_access_token,
+    access_service_for,
+)
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.work_orders import work_orders_router
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
@@ -42,6 +46,9 @@ def build_app(
     install_exception_handlers(app)
     app.include_router(work_orders_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service
+    app.dependency_overrides[get_auth_session_access_service] = lambda: access_service_for(
+        auth_service
+    )
     app.dependency_overrides[get_edit_version_service] = lambda: edit_version_service
     if workspace_service is not None:
         app.dependency_overrides[get_workspace_service] = lambda: workspace_service

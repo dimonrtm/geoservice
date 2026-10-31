@@ -1,0 +1,18 @@
+{
+  "project": "geoservice-ar01-f62505b1",
+  "startedAt": "2026-10-27T19:36:00.189Z",
+  "status": "failed",
+  "browsers": {},
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "backendImage": "sha256:c43e949bbf6a85e4321b0b6ffff2e3412612dd2b55d31c35ab16fb977e2dbab1",
+  "origin": "http://localhost:57505",
+  "targetedDB": [
+    "=============================== warnings summary ===============================",
+    "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+    "18 passed, 1 warning in 8.40s"
+  ],
+  "error": "chrome: failed cases: parallel_restore_new_tab_close_initiator, lost_rotated_response_requires_explicit_login, same_workorder_two_tabs_stale_guard_without_lock",
+  "cleanup": "passed",
+  "finishedAt": "2026-10-27T19:38:07.727Z"
+}

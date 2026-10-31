@@ -131,3 +131,11 @@ FU-2026-06-01-002: новые первичные источники расшир
 ## Уточнение FU-2026-10-13-004 — 2026-10-22
 
 Существующий follow-up включает будущую реализацию/приёмку [[Wiki/policies/assessment_issue_and_correction_policy]] и [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]]: отдельная применимость утверждения, частичный охват, исправление/отзыв и уведомление известных получателей. До реализации достаточна ручная карточка из [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers]]; 15 сценариев являются аналитическими ожиданиями. Новых follow-up нет, открытых остаётся 19. Два metadata/fixture вопроса, S2-X01 и broad vendor/market follow-up не закрыты.
+
+## Технический конфликт auth AR-01 — 2026-10-28
+
+| ID | Статус | Область | Источники | Требуется |
+| --- | --- | --- | --- | --- |
+| FU-2026-10-28-001 | resolved | Code_wiki auth | [[Code_wiki/архитектура/browser_auth_sessions]], [[Code_wiki/архитектура/api_and_realtime]], [[Code_wiki/архитектура/backend]], [[Code_wiki/архитектура/frontend]] | После repository-change ingest синхронизировать только устаревшие технические auth-факты: logout без sid/с удалением cookie, JWT без parent check и отсутствие межвкладочной координации. Основание — production services/auth frontend и принятый AR-01; доменную модель и legacy history не менять. |
+
+Correction 2026-10-28 по FU-2026-10-28-001: после отдельной регистрации конфликта обновлены только auth-разделы трёх указанных Code_wiki нод по browser_auth_sessions и production sources. Технический конфликт разрешён; прежние записи реестра, доменная модель и другие follow-up’ы сохранены.

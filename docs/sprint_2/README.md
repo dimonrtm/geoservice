@@ -4,6 +4,8 @@
 
 - [Глубокое ревью кода 2026-10-26](2026-10-26-deep-code-review.md) — безопасность, производительность, архитектура, качество кода и UI/UX; реестр находок, тематические отчёты и воспроизведения. Исправления кода не выполнялись.
 
+- **AR-01 — реализована, локальные gates пройдены 2026-10-28; итоговый review и re-review исправлений пройдены без открытых замечаний:** [анализ и уточнения](2026-10-27-ar-01-session-restore-analysis.md), [дизайн](2026-10-27-ar-01-browser-session-design.md), [план](2026-10-27-ar-01-browser-session-plan.md), [отчёт](2026-10-27-ar-01-browser-session-implementation-report.md), [runbook](2026-10-27-ar-01-browser-session-runbook.md). Реальные Chrome/Edge/Playwright Firefox: 13 сценариев на каждый, frontend 438 tests, DB 310 tests. Native BFCache/OS suspend не подтверждены; точные ограничения в отчёте. WorkOrder lock исключён.
+
 - **FE-01 — решена 2026-10-27 в согласованных границах:** [анализ и принятое решение](2026-10-27-fe-01-session-restore-analysis.md), [план исправления](2026-10-27-fe-01-session-restore-plan.md). [Отчёт](2026-10-27-fe-01-session-restore-implementation-report.md): 368 frontend tests, typecheck/lint/build и четыре браузерных сценария с mock API прошли. AR-01 отдельно.
 
 - **INF-01 — решена 2026-10-26:** безопасный старт API в базовом Compose. [Анализ](2026-10-26-inf-01-production-cookie-analysis.md), [принятая спецификация](2026-10-26-inf-01-production-cookie-design.md), [выполненный план](2026-10-26-inf-01-production-cookie-plan.md), [отчёт](2026-10-26-inf-01-production-cookie-implementation-report.md), [runbook](2026-10-26-inf-01-production-cookie-runbook.md). Локальный startup smoke и 51 regression test прошли; CI не изменялся.

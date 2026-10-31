@@ -70,6 +70,7 @@ type WorkOrdersState = {
   comparisonPreview: "source" | "candidate" | "current" | null;
   navigation: NavigationContext | null;
   navigationError: string | null;
+  logoutAttempt: { id: string; sessionId: string; sessionEpoch: number } | null;
   snapshots: Record<string, WorkspaceResponse>;
   readGenerations: Record<string, number>;
   staleComparisons: Record<
@@ -291,6 +292,7 @@ function createInitialWorkOrdersState(): WorkOrdersState {
     comparisonPreview: null,
     navigation: null,
     navigationError: null,
+    logoutAttempt: null,
     snapshots: {},
     readGenerations: {},
     staleComparisons: {},
@@ -414,11 +416,15 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       );
     },
     workspaceInteractionLocked: (state): boolean =>
+      (state.logoutAttempt !== null &&
+        state.logoutAttempt.sessionId === useAuthStore().sessionId &&
+        state.logoutAttempt.sessionEpoch === useAuthStore().sessionEpoch) ||
       state.revertConfirmation !== null ||
       (state.navigation !== null && state.navigation.phase !== "saving"),
     canStartRevert(): boolean {
       const auth = useAuthStore();
       return (
+        !this.logoutAttempt &&
         auth.isAuthenticated &&
         auth.user?.role === "editor" &&
         !!this.activeWorkspace?.workOrder.editVersion.changeSet &&
@@ -434,6 +440,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     canRetryPendingCommand(): boolean {
       const auth = useAuthStore();
       return (
+        !this.workspaceInteractionLocked &&
         auth.isAuthenticated &&
         auth.user?.role === "editor" &&
         !!this.activeWorkspace &&
@@ -446,6 +453,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     canRetryCurrentRead(): boolean {
       const auth = useAuthStore();
       return (
+        !this.workspaceInteractionLocked &&
         auth.isAuthenticated &&
         auth.user?.role === "editor" &&
         !!this.activeWorkspace &&
@@ -461,6 +469,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     canDiscardRejectedAttempt(): boolean {
       const auth = useAuthStore();
       return (
+        !this.workspaceInteractionLocked &&
         auth.isAuthenticated &&
         auth.user?.role === "editor" &&
         !!this.activeWorkspace &&
@@ -488,6 +497,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
     },
     canLeaveWorkspace(): boolean {
       return (
+        !this.workspaceInteractionLocked &&
         !this.revertConfirmation &&
         (!this.localDraft ||
           !isLocalDraftDirty(this.localDraft) ||
@@ -542,6 +552,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       const auth = useAuthStore();
       if (
         !auth.user ||
+        this.workspaceInteractionLocked ||
         this.revertConfirmation ||
         this.navigation ||
         (target.kind === "work-order" &&
@@ -585,22 +596,45 @@ export const useWorkOrdersStore = defineStore("workOrders", {
       if (this.navigation?.id === id) this.navigation = null;
     },
     async prepareLogout(): Promise<boolean> {
-      const actor = useAuthStore().user?.id;
+      const auth = useAuthStore();
+      const actor = auth.user?.id;
       if (!actor) return true;
+      const sid = auth.sessionId;
+      const epoch = auth.sessionEpoch;
       const recovery = useWorkspaceRecoveryStore();
-      await recovery.suspendActor(actor);
-      if (recovery.storageError) {
+      const ready = await recovery.prepareActorLogout(actor);
+      if (auth.sessionId !== sid || auth.sessionEpoch !== epoch) return false;
+      if (!ready) {
         this.navigationError =
           "Выход приостановлен: не удалось сохранить данные восстановления. Повторите попытку.";
         return false;
       }
+      this.navigationError = null;
       return true;
     },
     async performNavigation(target: NavigationTarget): Promise<void> {
       if (target.kind === "logout") {
-        if (await this.prepareLogout()) await useAuthStore().logout();
+        const auth = useAuthStore();
+        if (this.logoutAttempt || !auth.sessionId) return;
+        const attempt = {
+          id: crypto.randomUUID(),
+          sessionId: auth.sessionId,
+          sessionEpoch: auth.sessionEpoch,
+        };
+        this.logoutAttempt = attempt;
+        const isCurrent = () =>
+          auth.sessionId === attempt.sessionId &&
+          auth.sessionEpoch === attempt.sessionEpoch;
+        try {
+          if (!(await this.prepareLogout()) || !isCurrent()) return;
+          const ended = await auth.logout();
+          if (ended && isCurrent()) auth.clearLocalSession();
+        } finally {
+          if (this.logoutAttempt?.id === attempt.id) this.logoutAttempt = null;
+        }
         return;
       }
+      if (this.workspaceInteractionLocked) return;
       this.clearOpenedWorkspace({ force: true });
       this.selectedWorkOrderId = target.workOrderId;
       storeSelectedWorkOrder(target.workOrderId);
@@ -934,7 +968,7 @@ export const useWorkOrdersStore = defineStore("workOrders", {
         await useWorkspaceRecoveryStore().retryRead(this.recoveryKey);
     },
     async retryPendingSave(): Promise<void> {
-      if (this.recoveryKey)
+      if (!this.workspaceInteractionLocked && this.recoveryKey)
         await useWorkspaceRecoveryStore().retry(this.recoveryKey);
     },
     async restorePendingSave(): Promise<void> {
@@ -1467,6 +1501,10 @@ async function submitGeometryCommand(
     store.openedEditVersionId !== command.target.editVersionId
   )
     return;
+  if (store.logoutAttempt) {
+    store.localPhase = "editing";
+    return;
+  }
   store.submittedSourceGeometry = source.geometry;
   store.submittedCommandId = command.request.commandId;
   store.commandResult = null;

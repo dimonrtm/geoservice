@@ -1,0 +1,13 @@
+{
+  "project": "geoservice-ar01-689b51d1",
+  "startedAt": "2026-10-27T19:34:45.189Z",
+  "status": "failed",
+  "browsers": {},
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "backendImage": "sha256:c43e949bbf6a85e4321b0b6ffff2e3412612dd2b55d31c35ab16fb977e2dbab1",
+  "origin": "http://localhost:57489",
+  "error": "docker pytest: exit 3",
+  "cleanup": "passed",
+  "finishedAt": "2026-10-27T19:35:31.683Z"
+}

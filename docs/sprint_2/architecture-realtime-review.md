@@ -4,6 +4,14 @@
 
 ## AR-01 — P2: параллельное восстановление двух вкладок завершает одну сессию в UI
 
+Статус 2026-10-28: решена в согласованных границах; локальные gates, итоговый review и re-review исправлений пройдены без открытых замечаний. [Отчёт](2026-10-27-ar-01-browser-session-implementation-report.md):
+настоящие Chrome 156/Edge 156/Playwright Firefox 157, реальные ротации и отзыв sid,
+status fallback ≤5 s, независимые входы, WorkOrder stale без нового lock.
+Native BFCache/OS suspend не подтверждены; fresh lifecycle fence проверен
+injected pageshow с реальным status, настоящий history back — с новым document.
+Повторный login при фактической потере rotated credential допустим по принятому
+дизайну. Ниже сохранены описание дефекта и ссылки исходного ревью до исправления.
+
 Категории: корректность, UX, интеграция auth.
 
 Код: `apps/backend/utility_service/use_cases/services/auth_session_service.py:79–118`, `apps/backend/utility_service/infrastructure/postgresql/repositories/auth_session_repository.py:79–94`, `apps/frontend/src/stores/auth.ts:155–179`, `apps/frontend/src/App.vue:33–36`.

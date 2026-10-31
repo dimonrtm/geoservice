@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-27
-source: repository-change:2026-10-27
+updated: 2026-10-28
+source: repository-change:2026-10-28
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -21,9 +21,10 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 
 ## State И API
 
-- `src/stores/auth.ts` хранит `accessToken` и `user` только in-memory в Pinia,
-  не читает и не пишет `localStorage`, восстанавливает сессию через
-  `refreshSession()` и очищает локальное состояние при 401.
+- `src/stores/auth.ts` хранит token/user/sid только in-memory в Pinia;
+  coordinator пишет в `localStorage` лишь version/revision/sessionId/state.
+  Restore выполняет `refreshSession()` под общим Web Lock; рабочий 401 очищает
+  локальный доступ без глобального ended.
 - `src/api/auth.ts` вызывает `login`, `refreshSession` и `logoutSession` с
   `withCredentials: true`, чтобы browser отправлял HttpOnly
   `geoservice_session`; `fetchMe()` остается Bearer-only.
@@ -45,9 +46,11 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 - `src/api/http.ts` централизует axios base URL, добавляет Bearer token из
   Pinia и при HTTP 401 вызывает только local `clearLocalSession()`, чтобы не
   запускать повторный backend logout из interceptor.
-- `logout()` в auth store очищает local state сразу, но держит app в not-ready
-  состоянии до завершения `/api/v1/auth/logout`, чтобы поздний ответ logout не
-  стер cookie от нового login.
+- `logout(): Promise<boolean>` сохраняет auth/workspace до подтверждения исходного
+  sid. Failure до HTTP — достоверно недоставлено; network/timeout после dispatch —
+  uncertain со status reconciliation, без автоматического повторного logout.
+  Подтверждённый ended очищает локальный UI до ожидания публикации marker.
+  Поздний старый ответ не очищает новый sid; backend logout не меняет cookie.
 - `src/api/layers.ts` оборачивает layer/feature HTTP API и превращает HTTP failures в `HttpError`.
 - `src/api/workOrders.ts` вызывает `GET /api/v1/work-orders/assigned-to-me` и использует компактный response contract без audit/internal date fields.
 
@@ -58,8 +61,10 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 В `auth.ts` отдельный `restoreGeneration` принадлежит экземпляру store:
 restore захватывает поколение, новый `loginWithPassword` инвалидирует его до
 первого await. Старые success/catch/finally не меняют сессию и workspace.
-Это защищает и новый вход того же actor, при котором `sessionEpoch` может
-не измениться. `sessionEpoch` сохраняет прежнюю роль для рабочих HTTP-запросов.
+Поколение отменяет прежнюю попытку до завершения нового login, в том числе
+при его отказе. Успешный login с новым sid повышает `sessionEpoch`, даже для
+того же actor; refresh прежнего sid сохраняет epoch. `sessionEpoch` защищает
+рабочие HTTP-запросы от поздних ответов.
 
 Исключение из общей обработки auth-ошибок HTTP: refresh передаёт
 `authErrorHandling: "caller"`; interceptor возвращает ошибку без очистки
@@ -68,9 +73,12 @@ restore захватывает поколение, новый `loginWithPassword
 актуального restore. Initial 401, retryable failure и runtime-ошибки сохраняют
 прежнюю семантику. Новый login не возобновляет старый restore при своём отказе.
 
-Это узкая защита restore → login, не общий менеджер конкурентных auth-команд.
-Она не управляет межвкладочной ротацией и не отменяет `Set-Cookie` уже
-полученного ответа. Источники: `apps/frontend/src/stores/auth.ts`,
+Дополнительно `browserSessionCoordinator` сериализует auth-команды вкладок;
+monitor с общим transport выполняет status timeout 1500 ms, паузу 1000 ms и
+свежую resume-проверку до protected actions. Замена sid того же actor повышает
+epoch, refresh прежнего sid сохраняет workspace. Поздний browser `Set-Cookie`
+не отменяется поколением; при потере credential допустим явный login.
+Полный контракт — [[browser_auth_sessions]]. Источники: `apps/frontend/src/stores/auth.ts`,
 `apps/frontend/src/api/http.ts`, `apps/frontend/src/api/auth.ts`,
 `apps/frontend/src/api/auth.restore.integration.test.ts`.
 
@@ -79,6 +87,10 @@ restore захватывает поколение, новый `loginWithPassword
 `useWorkOrdersStore` владеет current, draft, навигацией и stale-сравнением;
 `useWorkspaceRecoveryStore` — независимыми отправленными командами по actor/наряду/версии.
 IndexedDB записывается до PUT. Retry сохраняет identity; только GET обновляет current.
+`prepareActorLogout` проверяет durable sent identity без suspension; managed
+logout временно блокирует новые действия инициатора. External ended сразу
+приостанавливает workspace без dirty autosave, сохраняя frozen command за access
+barrier. Новый login не отправляет прежнюю mutation автоматически.
 Общий read generation и session epoch защищают workspace от поздних ответов.
 Save/Revert, отдельное согласие на recovery после потери доступа, управляемые
 переходы и read-only сравнение подключены. Устройство и границы:

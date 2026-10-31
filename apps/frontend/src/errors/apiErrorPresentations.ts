@@ -6,6 +6,19 @@ import type {
 
 type SessionMode = "initial" | "runtime";
 
+export function presentLogoutError(uncertain: boolean): ErrorPresentation {
+  return {
+    summary: uncertain
+      ? "Не удалось подтвердить выход"
+      : "Не удалось выйти, попробуйте ещё раз",
+    guidance: uncertain
+      ? "Проверяем состояние сессии. Повторите выход после проверки соединения."
+      : "Проверьте соединение и попробуйте ещё раз.",
+    action: null,
+    diagnostics: { code: null, correlationId: null },
+  };
+}
+
 const ACTION_LABELS: Record<ErrorActionId, string> = {
   retry: "Повторить",
   refresh: "Обновить список",

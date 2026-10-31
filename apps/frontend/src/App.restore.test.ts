@@ -1,14 +1,20 @@
 import { mount, flushPromises } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, expect, it, vi } from "vitest";
+import { installBrowserAuthEnvironment } from "@/test/browserAuthEnvironment";
 import App from "./App.vue";
 import { useAuthStore } from "./stores/auth";
 
-const { refresh } = vi.hoisted(() => ({ refresh: vi.fn() }));
+const { refresh, statusCheck, logout } = vi.hoisted(() => ({
+  refresh: vi.fn(),
+  statusCheck: vi.fn(),
+  logout: vi.fn(),
+}));
 vi.mock("@/api/auth", () => ({
   refreshSession: refresh,
   login: vi.fn(),
-  logoutSession: vi.fn(),
+  logoutSession: logout,
+  fetchSessionStatus: statusCheck,
 }));
 vi.mock("@/stores/workOrders", () => ({
   useWorkOrdersStore: () => ({
@@ -35,6 +41,12 @@ vi.mock("./components/ReviewerHome.vue", () => ({
 beforeEach(() => {
   setActivePinia(createPinia());
   refresh.mockReset();
+  installBrowserAuthEnvironment();
+  statusCheck.mockReset().mockImplementation(async (session_id: string) => ({
+    session_id,
+    state: "active",
+  }));
+  logout.mockReset();
 });
 it.each([200, 401, 503, 0])(
   "retry удерживает ожидание до исхода %s",
@@ -66,6 +78,8 @@ it.each([200, 401, 503, 0])(
     if (status === 200)
       resolve({
         access_token: "synthetic",
+        token_type: "bearer",
+        session_id: "sid-a",
         user: { id: "a", email: "a@example.local", role: "editor" },
       });
     else reject(error(status));
@@ -81,3 +95,47 @@ it.each([200, 401, 503, 0])(
     wrapper.unmount();
   },
 );
+
+it("confirmed_ended_immediately_replaces_workspace_with_login", async () => {
+  const auth = useAuthStore();
+  auth.setAuth(
+    "a",
+    { id: "a", email: "a@example.local", role: "editor" },
+    { sessionId: "sid-a" },
+  );
+  auth.isReady = true;
+  statusCheck.mockResolvedValue({ session_id: "sid-a", state: "ended" });
+  const wrapper = mount(App);
+  expect(wrapper.find('[data-test="editor"]').exists()).toBe(true);
+  await flushPromises();
+  expect(wrapper.find('[data-test="login-screen"]').exists()).toBe(true);
+  expect(wrapper.find('[data-test="editor"]').exists()).toBe(false);
+  wrapper.unmount();
+});
+
+it("failed_logout_keeps_workspace_and_renders_logout_error", async () => {
+  const auth = useAuthStore();
+  auth.setAuth(
+    "a",
+    { id: "a", email: "a@example.local", role: "editor" },
+    { sessionId: "sid-a" },
+  );
+  auth.isReady = true;
+  logout.mockRejectedValue({ isAxiosError: true, response: { status: 503 } });
+  const wrapper = mount(App);
+  await auth.logout();
+  await flushPromises();
+  expect(wrapper.find('[data-test="editor"]').exists()).toBe(true);
+  expect(wrapper.text()).toContain("Не удалось выйти, попробуйте ещё раз");
+  wrapper.unmount();
+});
+
+it("initial_retry_error_can_be_dismissed_to_allow_explicit_login", async () => {
+  refresh.mockRejectedValue({ isAxiosError: true, response: { status: 503 } });
+  const wrapper = mount(App);
+  await flushPromises();
+  await wrapper.get('[data-test="session-logout"]').trigger("click");
+  await flushPromises();
+  expect(wrapper.find('[data-test="login-screen"]').exists()).toBe(true);
+  wrapper.unmount();
+});

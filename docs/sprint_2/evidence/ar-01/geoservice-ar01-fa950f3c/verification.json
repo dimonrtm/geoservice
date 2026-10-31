@@ -1,0 +1,136 @@
+{
+  "project": "geoservice-ar01-fa950f3c",
+  "startedAt": "2026-10-27T19:49:13.018Z",
+  "status": "passed",
+  "browsers": {
+    "chrome": {
+      "browser": "chrome",
+      "version": "156.0.8078.48",
+      "executable": "C:/Program Files/Google/Chrome/Application/chrome.exe (channel chrome)",
+      "distribution": "installed branded channel",
+      "startedAt": "2026-10-27T19:49:50.950Z",
+      "cases": {
+        "logout_revokes_copied_access_refresh_ticket_and_preserves_other_contexts": {
+          "passed": true,
+          "durationMs": 6468,
+          "convergenceMs": 8,
+          "dispatchToLoginMs": 1994,
+          "accessStatus": 401,
+          "refreshStatus": 401,
+          "ticketRejected": true,
+          "cookieUnchanged": true,
+          "independentContext": true,
+          "independentBrowser": "msedge",
+          "secondaryVersion": "156.0.4314.42"
+        },
+        "lost_marker_old_active_status_polling_sla": {
+          "passed": true,
+          "durationMs": 4826,
+          "convergenceMs": 1103,
+          "dispatchToLoginMs": 2647,
+          "oldActiveDelayedMs": 1100,
+          "markerLost": true,
+          "broadcastUnavailable": true,
+          "maxConcurrent": 1,
+          "requests": 2
+        }
+      },
+      "finishedAt": "2026-10-27T19:50:02.384Z",
+      "scope": "logout_revokes,lost_marker",
+      "passed": true
+    },
+    "msedge": {
+      "browser": "msedge",
+      "version": "156.0.4314.42",
+      "executable": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe (channel msedge)",
+      "distribution": "installed branded channel",
+      "startedAt": "2026-10-27T19:50:02.977Z",
+      "cases": {
+        "logout_revokes_copied_access_refresh_ticket_and_preserves_other_contexts": {
+          "passed": true,
+          "durationMs": 6771,
+          "convergenceMs": 7,
+          "dispatchToLoginMs": 1976,
+          "accessStatus": 401,
+          "refreshStatus": 401,
+          "ticketRejected": true,
+          "cookieUnchanged": true,
+          "independentContext": true,
+          "independentBrowser": "chrome",
+          "secondaryVersion": "156.0.8078.48"
+        },
+        "lost_marker_old_active_status_polling_sla": {
+          "passed": true,
+          "durationMs": 6217,
+          "convergenceMs": 1118,
+          "dispatchToLoginMs": 3036,
+          "oldActiveDelayedMs": 1100,
+          "markerLost": true,
+          "broadcastUnavailable": true,
+          "maxConcurrent": 1,
+          "requests": 2
+        }
+      },
+      "finishedAt": "2026-10-27T19:50:16.088Z",
+      "scope": "logout_revokes,lost_marker",
+      "passed": true
+    },
+    "firefox": {
+      "browser": "firefox",
+      "version": "157.0",
+      "executable": "C:\\Repositories\\geoservice\\.tmp-tests\\ar01-browsers\\firefox-1555\\firefox\\firefox.exe",
+      "distribution": "Playwright patched Firefox (revision1555), не stock binary",
+      "startedAt": "2026-10-27T19:50:17.200Z",
+      "cases": {
+        "logout_revokes_copied_access_refresh_ticket_and_preserves_other_contexts": {
+          "passed": true,
+          "durationMs": 7126,
+          "convergenceMs": 66,
+          "dispatchToLoginMs": 161,
+          "accessStatus": 401,
+          "refreshStatus": 401,
+          "ticketRejected": true,
+          "cookieUnchanged": true,
+          "independentContext": true,
+          "independentBrowser": "msedge",
+          "secondaryVersion": "156.0.4314.42"
+        },
+        "lost_marker_old_active_status_polling_sla": {
+          "passed": true,
+          "durationMs": 5478,
+          "convergenceMs": 2494,
+          "dispatchToLoginMs": 2549,
+          "oldActiveDelayedMs": 1100,
+          "markerLost": true,
+          "broadcastUnavailable": true,
+          "maxConcurrent": 1,
+          "requests": 2
+        }
+      },
+      "finishedAt": "2026-10-27T19:50:30.035Z",
+      "scope": "logout_revokes,lost_marker",
+      "passed": true
+    }
+  },
+  "runnerHashes": {
+    "run.mjs": "597d715133c91712a7a98d3614da723f3ddcb5a489172a2987df9baaa0b2c5ae",
+    "smoke.mjs": "7d7a733844728c1a3e319695c10804a73fe654e41a28b17e8dcb82cc0c6f70a4"
+  },
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "backendImage": "sha256:c43e949bbf6a85e4321b0b6ffff2e3412612dd2b55d31c35ab16fb977e2dbab1",
+  "origin": "http://localhost:60346",
+  "targetedDB": [
+    "=============================== warnings summary ===============================",
+    "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+    "18 passed, 1 warning in 8.56s"
+  ],
+  "sql": {
+    "parents": 12,
+    "revoked": 6
+  },
+  "tmpfs": true,
+  "demoVolumesUsed": false,
+  "cleanup": "passed",
+  "finishedAt": "2026-10-27T19:50:45.703Z"
+}

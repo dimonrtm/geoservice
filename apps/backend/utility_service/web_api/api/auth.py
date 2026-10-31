@@ -8,29 +8,45 @@ Created on Thu Jan  8 22:52:16 2026
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Cookie, Depends, Header, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
+from jose import jwt
 
-from utility_service.use_cases.deps import get_auth_service, get_auth_session_service
-from utility_service.use_cases.dtos import AuthUserDTO
+from utility_service.use_cases.deps import (
+    get_auth_service,
+    get_auth_session_service,
+    get_auth_session_access_service,
+    get_websocket_connection_manager,
+)
+from utility_service.use_cases.dtos import AuthUserDTO, AuthenticatedSession
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.schemas.auth.auth_login_in import AuthLoginIn
 from utility_service.use_cases.schemas.auth.auth_me_out import AuthMeOut
 from utility_service.use_cases.schemas.auth.auth_success_out import AuthSuccessOut
 from utility_service.use_cases.schemas.auth.auth_user_out import AuthUserOut
+from utility_service.use_cases.schemas.auth.browser_session_in import BrowserSessionIn
+from utility_service.use_cases.schemas.auth.browser_session_out import (
+    BrowserSessionStatusOut,
+    BrowserSessionLogoutOut,
+)
+from utility_service.use_cases.services.auth_session_access_service import AuthSessionAccessService
 from utility_service.use_cases.services.auth_session_service import AuthSessionService
 from utility_service.use_cases.services.auth_service import AuthService
+from utility_service.use_cases.services.realtime_connection_manager import (
+    WebSocketConnectionManager,
+)
 from utility_service.utils.settings import settings
 
 
 bearer = HTTPBearer(auto_error=False)
-auth_router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+auth_router = APIRouter(
+    prefix="/api/v1/auth",
+    tags=["auth"],
+)
 EDITOR_ROLE = "editor"
 REVIEWER_ROLE = "reviewer"
 LEGACY_GIS_API_DISABLED_CODE = "LEGACY_GIS_API_DISABLED"
 LEGACY_GIS_API_DISABLED_MESSAGE = "Legacy GIS API отключен."
-SUPPORTED_AUTH_ROLES = {EDITOR_ROLE, REVIEWER_ROLE}
 SESSION_COOKIE_PATH = "/api/v1/auth"
 
 
@@ -38,7 +54,10 @@ def _cookie_max_age_seconds() -> int:
     return settings.auth_session_ttl_hours * 60 * 60
 
 
-def set_session_cookie(response: Response, token: str) -> None:
+def set_session_cookie(
+    response: Response,
+    token: str,
+) -> None:
     response.set_cookie(
         key=settings.auth_session_cookie_name,
         value=token,
@@ -50,65 +69,43 @@ def set_session_cookie(response: Response, token: str) -> None:
     )
 
 
-def clear_session_cookie(response: Response) -> None:
-    response.delete_cookie(
-        key=settings.auth_session_cookie_name,
-        path=SESSION_COOKIE_PATH,
-        httponly=True,
-        secure=settings.auth_session_cookie_secure,
-        samesite=settings.auth_session_cookie_samesite,
-    )
-
-
-def create_access_token(user_id: str, role: str) -> str:
+def create_access_token(
+    user_id: str,
+    role: str,
+    session_id: UUID,
+) -> str:
     now = datetime.now(timezone.utc)
     payload = {
         "sub": user_id,
+        "sid": str(session_id),
         "role": role,
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(minutes=settings.access_token_ttl_min)).timestamp()),
     }
-    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_alg)
+    return jwt.encode(
+        payload,
+        settings.jwt_secret,
+        algorithm=settings.jwt_alg,
+    )
 
 
-def decode_token(token: str) -> dict:
-    try:
-        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_alg])
-        return payload
-    except JWTError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Токен недействителен или срок его действия истёк",
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from exc
+async def get_auth_context(
+    cred: HTTPAuthorizationCredentials = Depends(bearer),
+    access_service: AuthSessionAccessService = Depends(get_auth_session_access_service),
+) -> AuthenticatedSession:
+    if cred is None or not cred.credentials:
+        raise AuthApiError(
+            401,
+            "AUTH_REQUIRED",
+            "Требуется вход в систему.",
+        )
+    return await access_service.authenticate(cred.credentials)
 
 
 async def get_current_user(
-    cred: HTTPAuthorizationCredentials = Depends(bearer),
-    auth_service: AuthService = Depends(get_auth_service),
+    context: AuthenticatedSession = Depends(get_auth_context),
 ) -> AuthUserDTO:
-    if cred is None or not cred.credentials:
-        raise AuthApiError(401, "AUTH_REQUIRED", "Требуется вход в систему.")
-
-    try:
-        payload = decode_token(cred.credentials)
-    except HTTPException as exc:
-        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.") from exc
-
-    if "sub" not in payload or payload.get("role") not in SUPPORTED_AUTH_ROLES:
-        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.")
-
-    try:
-        user_id = UUID(str(payload["sub"]))
-    except ValueError as exc:
-        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.") from exc
-
-    current_user = await auth_service.get_user_by_id(user_id)
-    if current_user is None:
-        raise AuthApiError(401, "AUTH_REQUIRED", "Сессия недействительна.")
-    if not current_user.is_active:
-        raise AuthApiError(403, "USER_INACTIVE", "Учетная запись отключена.")
-    return current_user
+    return context.user
 
 
 def require_editor(user: AuthUserDTO = Depends(get_current_user)) -> AuthUserDTO:
@@ -143,19 +140,40 @@ def require_reviewer(user: AuthUserDTO = Depends(get_current_user)) -> AuthUserD
     return user
 
 
-@auth_router.post("/login", response_model=AuthSuccessOut)
+@auth_router.post(
+    "/login",
+    response_model=AuthSuccessOut,
+)
 async def login(
     body: AuthLoginIn,
     response: Response,
+    session_token: str | None = Cookie(
+        default=None,
+        alias=settings.auth_session_cookie_name,
+    ),
     auth_service: AuthService = Depends(get_auth_service),
     auth_session_service: AuthSessionService = Depends(get_auth_session_service),
 ) -> AuthSuccessOut:
-    user = await auth_service.authenticate_user(body.email, body.password)
-    session = await auth_session_service.issue_session(user)
-    set_session_cookie(response, session.token)
-    token = create_access_token(str(user.id), user.role)
+    user = await auth_service.authenticate_user(
+        body.email,
+        body.password,
+    )
+    session = await auth_session_service.issue_session(
+        user,
+        previous_token=session_token,
+    )
+    set_session_cookie(
+        response,
+        session.token,
+    )
+    token = create_access_token(
+        str(user.id),
+        user.role,
+        session.session_id,
+    )
     return AuthSuccessOut(
         access_token=token,
+        session_id=session.session_id,
         token_type="bearer",
         user=AuthUserOut(
             id=str(user.id),
@@ -165,21 +183,39 @@ async def login(
     )
 
 
-@auth_router.post("/session/refresh", response_model=AuthSuccessOut)
+@auth_router.post(
+    "/session/refresh",
+    response_model=AuthSuccessOut,
+)
 async def refresh_session(
     response: Response,
+    expected_session_id: UUID | None = Header(
+        default=None,
+        alias="X-Expected-Session-Id",
+    ),
     session_token: str | None = Cookie(
         default=None,
         alias=settings.auth_session_cookie_name,
     ),
     auth_session_service: AuthSessionService = Depends(get_auth_session_service),
 ) -> AuthSuccessOut:
-    session = await auth_session_service.refresh_session(session_token)
-    set_session_cookie(response, session.token)
+    session = await auth_session_service.refresh_session(
+        session_token,
+        expected_session_id=expected_session_id,
+    )
+    set_session_cookie(
+        response,
+        session.token,
+    )
     user = session.user
-    token = create_access_token(str(user.id), user.role)
+    token = create_access_token(
+        str(user.id),
+        user.role,
+        session.session_id,
+    )
     return AuthSuccessOut(
         access_token=token,
+        session_id=session.session_id,
         token_type="bearer",
         user=AuthUserOut(
             id=str(user.id),
@@ -189,21 +225,61 @@ async def refresh_session(
     )
 
 
-@auth_router.post("/logout")
+@auth_router.post(
+    "/logout",
+    response_model=BrowserSessionLogoutOut,
+)
 async def logout(
-    response: Response,
+    body: BrowserSessionIn,
+    cred: HTTPAuthorizationCredentials = Depends(bearer),
     session_token: str | None = Cookie(
         default=None,
         alias=settings.auth_session_cookie_name,
     ),
-    auth_session_service: AuthSessionService = Depends(get_auth_session_service),
-) -> dict[str, bool]:
-    await auth_session_service.revoke_session(session_token)
-    clear_session_cookie(response)
-    return {"ok": True}
+    access_service: AuthSessionAccessService = Depends(get_auth_session_access_service),
+    connection_manager: WebSocketConnectionManager = Depends(get_websocket_connection_manager),
+) -> BrowserSessionLogoutOut:
+    await access_service.logout(
+        body.session_id,
+        cred.credentials if cred else None,
+        session_token,
+    )
+    # Commit отзыва уже завершён; transport failure не меняет результат logout.
+    try:
+        await connection_manager.disconnect_session(body.session_id)
+    except Exception:
+        pass
+    return BrowserSessionLogoutOut(session_id=body.session_id)
 
 
-@auth_router.get("/me", response_model=AuthMeOut)
+@auth_router.post(
+    "/session/status",
+    response_model=BrowserSessionStatusOut,
+)
+async def session_status(
+    body: BrowserSessionIn,
+    cred: HTTPAuthorizationCredentials = Depends(bearer),
+    session_token: str | None = Cookie(
+        default=None,
+        alias=settings.auth_session_cookie_name,
+    ),
+    access_service: AuthSessionAccessService = Depends(get_auth_session_access_service),
+) -> BrowserSessionStatusOut:
+    state = await access_service.status(
+        body.session_id,
+        cred.credentials if cred else None,
+        session_token,
+    )
+    return BrowserSessionStatusOut(
+        session_id=body.session_id,
+        state=state,
+    )
+
+
+@auth_router.get(
+    "/me",
+    response_model=AuthMeOut,
+)
 async def me(user: AuthUserDTO = Depends(get_current_user)) -> AuthMeOut:
     return AuthMeOut(
         user=AuthUserOut(

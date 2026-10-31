@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-07-05
-source: repository-change:2026-07-05
+updated: 2026-10-28
+source: repository-change:2026-10-28
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -15,18 +15,24 @@ Backend публикует REST API под `/api/v1` и WebSocket endpoint дл�
 ## Auth API
 
 - `POST /api/v1/auth/login` принимает email/password, возвращает
-  short-lived Bearer `access_token`, `token_type` и user DTO, а долгую
+  short-lived Bearer `access_token` с обязательным `sid`, `session_id`, `token_type` и user DTO, а долгую
   auth-сессию кладет только в HttpOnly cookie `geoservice_session`.
 - Auth session cookie ограничена `Path=/api/v1/auth`; raw session token не
   попадает в JSON response и хранится в БД только как SHA-256 hash в
   `user.auth_sessions`. TTL по умолчанию - 12 часов.
 - `POST /api/v1/auth/session/refresh` читает session cookie, атомарно
   ротирует active session в БД, ставит новый HttpOnly cookie и возвращает
-  новый Bearer `access_token`. Missing/expired/revoked/replayed session
+  новый Bearer `access_token` и прежний `session_id`. Optional header
+  `X-Expected-Session-Id` ограждает замену входа. Missing/expired/revoked/replayed session
   возвращает structured `401 AUTH_REQUIRED`; inactive user - `403 USER_INACTIVE`.
-- `POST /api/v1/auth/logout` идемпотентно отзывает active session по cookie и
-  очищает cookie.
-- `GET /api/v1/auth/me` возвращает текущего пользователя по Bearer token.
+- `POST /api/v1/auth/logout` принимает `{session_id}`, доказывает именно этот sid
+  по неистёкшему JWT или известной cookie и идемпотентно отзывает родителя.
+  Возвращает `{ok: true, session_id}` после commit; cookie не меняет.
+- `POST /api/v1/auth/session/status` принимает `{session_id}` и возвращает
+  `{session_id, state: active|ended}` без credentials/TTL mutation/Set-Cookie.
+  Только status допускает истёкший exp доказанного JWT; DB error не равен ended.
+- `GET /api/v1/auth/me` возвращает текущего пользователя по Bearer token после
+  свежей проверки parent/user. Старые JWT без sid отвергаются.
 
 Auth session cookies требуют credentials-enabled CORS. Backend запрещает
 wildcard CORS origins, валидирует `AUTH_SESSION_COOKIE_SAMESITE`
@@ -36,6 +42,9 @@ wildcard CORS origins, валидирует `AUTH_SESSION_COOKIE_SAMESITE`
 Frontend не хранит `access_token`/user в `localStorage`: Pinia держит их
 только in-memory, `restoreSession()` выполняет cookie refresh, а axios 401
 interceptor очищает локальное состояние без дополнительного backend logout.
+Общий marker содержит только revision/sid/state. Web Locks упорядочивает auth
+HTTP, а status monitor защищает от потерянного marker и устаревшего resume.
+Полный контракт и migration boundary — [[browser_auth_sessions]].
 
 ## Layers And Features API
 
@@ -143,12 +152,15 @@ Server-side:
   `Editor`;
 - raw ticket возвращается только клиенту и хранится в БД только как SHA-256 hash;
 - ticket короткоживущий, одноразовый и привязан к `layer_id`;
+- ticket также связан с sid; parent проверяется при issue/admission/send;
 - WebSocket handshake атомарно consumes ticket через `UPDATE ... used_at IS NULL ... RETURNING`;
 - missing/invalid/expired/reused/wrong-layer ticket отклоняется с policy violation `1008`;
 - старый `?token=<jwt>` больше не авторизует WebSocket;
 - `Reviewer` не получает legacy layer realtime ticket;
 - inactive user и unsupported role отклоняются с policy violation;
 - подписки группируются по `layer_id` в `WebSocketConnectionManager`;
+- после commit logout manager закрывает connections sid в текущем процессе;
+  немедленный active close ограничен одним worker;
 - feature create/update/delete публикуют события `feature_created`, `feature_updated`, `feature_deleted`.
 
 Client-side:

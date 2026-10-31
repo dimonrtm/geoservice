@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-25
-source: repository-change:2026-10-25
+updated: 2026-10-28
+source: repository-change:2026-10-28
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -28,6 +28,8 @@ tags: [code-wiki, technical-knowledge]
   `/ingest repository-change`.
 
 ## Текущий Repository Snapshot
+
+- [[архитектура/browser_auth_sessions]] — стабильный sid, одноразовые refresh generations, немедленный серверный отзыв, status/resume gates и координация вкладок.
 
 - [[сборка/geometry_save_smoke]] — двухфазный live API smoke, restart штатного backend, read-only SQL evidence и изоляция локального запуска.
 

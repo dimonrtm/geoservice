@@ -1,0 +1,13 @@
+{
+  "project": "geoservice-ar01-6f7b08db",
+  "startedAt": "2026-10-27T19:32:01.737Z",
+  "status": "failed",
+  "browsers": {},
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "backendImage": "sha256:c43e949bbf6a85e4321b0b6ffff2e3412612dd2b55d31c35ab16fb977e2dbab1",
+  "origin": "http://localhost:49207",
+  "error": "Ошибка harness (Error); чувствительный output не сохранён",
+  "cleanup": "passed",
+  "finishedAt": "2026-10-27T19:33:10.085Z"
+}

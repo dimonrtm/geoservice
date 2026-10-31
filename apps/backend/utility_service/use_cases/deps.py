@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from fastapi import Depends, Request, WebSocket
+from uuid import UUID
+
+from fastapi import Depends, Request
+from starlette.requests import HTTPConnection
 from sqlalchemy.ext.asyncio import AsyncSession
 from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
     EditVersionRepository,
@@ -10,6 +13,9 @@ from utility_service.utils.settings import settings
 
 from utility_service.infrastructure.postgresql.repositories.auth_session_repository import (
     AuthSessionRepository,
+)
+from utility_service.infrastructure.postgresql.repositories.browser_auth_session_repository import (
+    BrowserAuthSessionRepository,
 )
 from utility_service.infrastructure.postgresql.repositories.layer_repository import LayerRepository
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
@@ -25,8 +31,9 @@ from utility_service.infrastructure.postgresql.repositories.websocket_ticket_rep
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
     WorkOrderRepository,
 )
-from utility_service.infrastructure.postgresql.session import engine, get_session
+from utility_service.infrastructure.postgresql.session import SessionFactory, engine, get_session
 from utility_service.use_cases.services.auth_session_service import AuthSessionService
+from utility_service.use_cases.services.auth_session_access_service import AuthSessionAccessService
 from utility_service.use_cases.services.auth_service import AuthService
 from utility_service.use_cases.services.edit_version_service import EditVersionService
 from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
@@ -34,6 +41,7 @@ from utility_service.use_cases.services.feature_service import FeatureService
 from utility_service.use_cases.services.layer_service import LayerService
 from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
+    SessionActivityChecker,
 )
 from utility_service.use_cases.services.utility_network_service import UtilityNetworkService
 from utility_service.use_cases.services.websocket_ticket_service import WebSocketTicketService
@@ -45,6 +53,17 @@ def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthServic
     return AuthService(session, UserRepository(session))
 
 
+def get_auth_session_access_service(
+    session: AsyncSession = Depends(get_session),
+) -> AuthSessionAccessService:
+    return AuthSessionAccessService(
+        session,
+        BrowserAuthSessionRepository(session),
+        AuthSessionRepository(session),
+        UserRepository(session),
+    )
+
+
 def get_auth_session_service(
     session: AsyncSession = Depends(get_session),
 ) -> AuthSessionService:
@@ -52,6 +71,7 @@ def get_auth_session_service(
         session,
         AuthSessionRepository(session),
         UserRepository(session),
+        BrowserAuthSessionRepository(session),
     )
 
 
@@ -127,8 +147,16 @@ def get_workspace_service(
     )
 
 
-def get_websocket_connection_manager(websocket: WebSocket) -> WebSocketConnectionManager:
-    return websocket.app.state.websocket_connection_manager
+def get_realtime_session_checker(session_factory=SessionFactory) -> SessionActivityChecker:
+    async def is_session_active(session_id: UUID) -> bool:
+        async with session_factory() as session:
+            return await get_auth_session_access_service(session).is_session_active(session_id)
+
+    return is_session_active
+
+
+def get_websocket_connection_manager(connection: HTTPConnection) -> WebSocketConnectionManager:
+    return connection.app.state.websocket_connection_manager
 
 
 async def close_runtime_resources() -> None:

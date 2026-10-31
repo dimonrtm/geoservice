@@ -6,6 +6,8 @@ import { getApiBaseUrl } from "@/api/baseUrl";
 declare module "axios" {
   interface AxiosRequestConfig {
     authErrorHandling?: "caller";
+    /** undefined: текущий store; null: без bearer; string: явный bearer запроса. */
+    authToken?: string | null;
   }
   interface InternalAxiosRequestConfig {
     sessionEpoch?: number;
@@ -18,13 +20,28 @@ export const http = axios.create({
   timeout: 30000,
 });
 
-http.interceptors.request.use((config) => {
+http.interceptors.request.use(async (config) => {
   const auth = useAuthStore(pinia);
+  const epoch = auth.sessionEpoch;
+  const authMutationOrStatus =
+    /\/api\/v1\/auth\/(?:login|logout|session\/(?:refresh|status))$/.test(
+      config.url ?? "",
+    );
+  if (
+    auth.sessionId &&
+    !authMutationOrStatus &&
+    (!(await auth.ensureSessionReady()) || epoch !== auth.sessionEpoch)
+  ) {
+    throw new axios.CanceledError("Состояние сессии не подтверждено");
+  }
   config.sessionEpoch = auth.sessionEpoch;
   config.sessionActorId = auth.user?.id ?? null;
-  if (auth.token) {
+  const token = config.authToken === undefined ? auth.token : config.authToken;
+  if (token) {
     config.headers = config.headers || {};
-    config.headers.Authorization = `Bearer ${auth.token}`;
+    config.headers.Authorization = `Bearer ${token}`;
+  } else if (config.authToken === null) {
+    config.headers.delete("Authorization");
   }
   return config;
 });

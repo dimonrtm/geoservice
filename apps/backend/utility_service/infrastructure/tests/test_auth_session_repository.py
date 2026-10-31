@@ -63,6 +63,8 @@ def test_get_active_session_by_hash_filters_revoked_and_expired() -> None:
     assert '"user".auth_sessions.session_token_hash =' in sql
     assert '"user".auth_sessions.revoked_at IS NULL' in sql
     assert '"user".auth_sessions.expires_at >' in sql
+    assert '"user".browser_auth_sessions.revoked_at IS NULL' in sql
+    assert '"user".browser_auth_sessions.expires_at >' in sql
     assert params["session_token_hash_1"] == "session-hash"
     assert params["expires_at_1"] == now
 
@@ -91,12 +93,14 @@ def test_create_session_hash_inserts_user_and_expiry() -> None:
     session = CapturingSession()
     repository = AuthSessionRepository(session)
     user_id = uuid4()
+    browser_session_id = uuid4()
     expires_at = datetime(2026, 7, 3, 22, 0, tzinfo=timezone.utc)
 
     result = asyncio.run(
         repository.create_session(
             session_token_hash="session-hash",
             user_id=user_id,
+            browser_session_id=browser_session_id,
             expires_at=expires_at,
         )
     )
@@ -109,7 +113,20 @@ def test_create_session_hash_inserts_user_and_expiry() -> None:
     assert "expires_at" in sql
     assert params["session_token_hash"] == "session-hash"
     assert params["user_id"] == user_id
+    assert params["browser_session_id"] == browser_session_id
     assert params["expires_at"] == expires_at
+
+
+def test_history_lookup_keeps_revoked_credentials_available_for_proof() -> None:
+    session = CapturingSession()
+    repository = AuthSessionRepository(session)
+
+    assert asyncio.run(repository.get_session_by_hash(session_token_hash="old-hash")) is None
+
+    sql, params = compile_sql(session.statements[0])
+    assert params["session_token_hash_1"] == "old-hash"
+    assert "revoked_at IS NULL" not in sql
+    assert "expires_at >" not in sql
 
 
 def test_mark_session_used_updates_only_matching_active_session() -> None:

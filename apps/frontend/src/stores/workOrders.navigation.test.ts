@@ -158,3 +158,29 @@ it("domain rejection cancels save-and-leave and retains the editable attempt", a
   expect(s.localDraft).not.toBeNull();
   expect(api.fetchWorkspace).not.toHaveBeenCalled();
 });
+
+it("logout preparation cannot revoke a replacement session", async () => {
+  const s = setup();
+  const auth = useAuthStore();
+  auth.sessionId = "sid-a";
+  let prepared!: (ready: boolean) => void;
+  vi.spyOn(useWorkspaceRecoveryStore(), "prepareActorLogout").mockReturnValue(
+    new Promise<boolean>((resolve) => (prepared = resolve)),
+  );
+  const logout = vi.spyOn(auth, "logout");
+  const leaving = s.performNavigation({ kind: "logout" });
+  auth.setAuth(
+    "new",
+    { id: "actor", email: "a@local", role: "editor" },
+    { sessionId: "sid-b" },
+  );
+  s.workspace = workspaceFixture();
+  s.selectedWorkOrderId = s.openedWorkOrderId = target.workOrderId;
+  s.openedEditVersionId = target.editVersionId;
+  prepared(true);
+  await leaving;
+  expect(logout).not.toHaveBeenCalled();
+  expect(auth.sessionId).toBe("sid-b");
+  expect(s.activeWorkspace).not.toBeNull();
+  logout.mockRestore();
+});

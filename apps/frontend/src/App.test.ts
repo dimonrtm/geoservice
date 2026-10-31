@@ -137,13 +137,14 @@ describe("App", () => {
     const { useAuthStore } = await import("@/stores/auth");
     const auth = useAuthStore();
     auth.token = "token-1";
+    auth.sessionId = "sid-editor-1";
     auth.user = {
       id: "editor-1",
       email: "editor@example.local",
       role: "editor",
     };
     auth.isReady = true;
-    auth.logout = vi.fn();
+    auth.logout = vi.fn().mockResolvedValue(false);
 
     const { default: App } = await import("@/App.vue");
     const wrapper = mount(App);
@@ -157,6 +158,7 @@ describe("App", () => {
     expect(mobile.element.closest(".logoutMobile")).not.toBeNull();
 
     await desktop.trigger("click");
+    await vi.waitFor(() => expect(auth.logout).toHaveBeenCalledTimes(1));
     await mobile.trigger("click");
     await vi.waitFor(() => expect(auth.logout).toHaveBeenCalledTimes(2));
   });

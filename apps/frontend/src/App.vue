@@ -3,7 +3,7 @@ import WorkspaceNavigationDialog from "@/components/WorkspaceNavigationDialog.vu
 import { useWorkOrdersStore } from "@/stores/workOrders";
 const navigationStore = useWorkOrdersStore();
 import { LogOut } from "@lucide/vue";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, onUnmounted } from "vue";
 
 import ActionableError from "./components/ActionableError.vue";
 import EditorWorkOrdersView from "./components/EditorWorkOrdersView.vue";
@@ -31,10 +31,12 @@ const showEditorWorkspace = computed(
 );
 
 onMounted(() => {
+  auth.startBrowserSessionSync();
   if (!auth.isReady && !auth.isRestoring) {
     void auth.restoreSession();
   }
 });
+onUnmounted(() => auth.stopBrowserSessionSync());
 
 function handleSessionErrorAction(actionId: ErrorActionId): void {
   if (actionId === "retry") {
@@ -44,6 +46,11 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
   if (actionId === "sign-in") {
     auth.dismissSessionError();
   }
+}
+
+async function handleSessionLogout(): Promise<void> {
+  const ended = await auth.logout();
+  if (!ended && !auth.sessionId) auth.dismissSessionError();
 }
 </script>
 
@@ -71,7 +78,7 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
             :icon="LogOut"
             variant="secondary"
             data-test="session-logout"
-            @click="auth.logout"
+            @click="handleSessionLogout"
           >
             Выйти
           </UiButton>
@@ -111,6 +118,10 @@ function handleSessionErrorAction(actionId: ErrorActionId): void {
       </div>
 
       <div class="content">
+        <ActionableError
+          v-if="auth.logoutError"
+          :presentation="auth.logoutError"
+        />
         <EditorWorkOrdersView v-if="showEditorWorkspace" class="mapSlot" />
         <ReviewerHome v-else />
       </div>

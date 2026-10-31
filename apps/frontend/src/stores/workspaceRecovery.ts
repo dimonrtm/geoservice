@@ -47,6 +47,8 @@ export const useWorkspaceRecoveryStore = defineStore(
     const runs = new Map<RecoveryKey, Run>(),
       preparing = new Set<RecoveryKey>();
     const writes = new Map<RecoveryKey, Promise<unknown>>();
+    const preparationWrites = new Map<RecoveryKey, Promise<void>>();
+    const storageFailures = new Set<RecoveryKey>();
     const suspensions = new Map<string, Promise<void>>();
     const suspensionErrors = new Set<string>();
     function getRecord(key: RecoveryKey) {
@@ -63,6 +65,7 @@ export const useWorkspaceRecoveryStore = defineStore(
       );
     }
     function failStorage(key: RecoveryKey) {
+      storageFailures.add(key);
       host?.interrupted(key, "blocked");
       phases.value[key] = "blocked";
       contextErrors.value[key] = "Не удалось сохранить контекст восстановления";
@@ -362,6 +365,7 @@ export const useWorkspaceRecoveryStore = defineStore(
       phases.value = {};
       readbackErrors.value = {};
       contextErrors.value = {};
+      storageFailures.clear();
       storageError.value = suspensionErrors.has(actorId)
         ? "Не удалось сохранить остановку восстановления"
         : null;
@@ -416,6 +420,11 @@ export const useWorkspaceRecoveryStore = defineStore(
       )
         return "blocked";
       preparing.add(key);
+      let prepared!: () => void;
+      preparationWrites.set(
+        key,
+        new Promise<void>((resolve) => (prepared = resolve)),
+      );
       try {
         const record = createRecoveryRecord(command, source);
         await storage.insert(record);
@@ -434,6 +443,34 @@ export const useWorkspaceRecoveryStore = defineStore(
         return "blocked";
       } finally {
         preparing.delete(key);
+        preparationWrites.delete(key);
+        prepared();
+      }
+    }
+    async function prepareActorLogout(actorId: string): Promise<boolean> {
+      await Promise.all([...preparationWrites.values()]);
+      await Promise.allSettled([...writes.values()]);
+      try {
+        await migrateLegacyRecovery(actorId, storage);
+        const loaded = await storage.list(actorId);
+        if (
+          loaded.invalid.length ||
+          storageError.value ||
+          [...storageFailures].some((key) => JSON.parse(key)[0] === actorId)
+        )
+          return false;
+        return Object.values(records.value)
+          .filter((record) => record.command.actorId === actorId)
+          .every((record) => {
+            const durable = loaded.records.find((r) => r.key === record.key);
+            return (
+              !record.blocks.includes("storage") &&
+              !!durable &&
+              JSON.stringify(durable.command) === JSON.stringify(record.command)
+            );
+          });
+      } catch {
+        return false;
       }
     }
     async function retry(key: RecoveryKey) {
@@ -550,6 +587,7 @@ export const useWorkspaceRecoveryStore = defineStore(
       bindHost,
       initializeActor,
       submit,
+      prepareActorLogout,
       retry,
       retryRead,
       suspend,

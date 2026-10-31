@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from utility_service.use_cases.deps import (
-    get_auth_service,
+    get_auth_session_access_service,
     get_feature_service,
     get_layer_service,
 )
@@ -24,7 +24,10 @@ from utility_service.use_cases.schemas.feature.feature_out import FeatureOut
 from utility_service.use_cases.schemas.layer.layer_list_out import LayerListOut
 from utility_service.use_cases.schemas.layer.layer_out import LayerOut
 from utility_service.web_api.api import auth as auth_api
-from utility_service.web_api.api.auth import create_access_token
+from utility_service.web_api.tests.auth_user_factory import (
+    create_test_access_token as create_access_token,
+    access_service_for,
+)
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.api.layers import layers_router
@@ -151,8 +154,9 @@ def build_app(role: str, layer_service: FakeLayerService, feature_service: FakeF
     app.add_middleware(CorrelationIdMiddleware)
     install_exception_handlers(app)
     app.include_router(layers_router)
-    app.dependency_overrides[get_auth_service] = lambda: SimpleNamespace(
-        get_user_by_id=get_user_by_id
+    auth_service = SimpleNamespace(get_user_by_id=get_user_by_id)
+    app.dependency_overrides[get_auth_session_access_service] = lambda: access_service_for(
+        auth_service
     )
     app.dependency_overrides[get_layer_service] = lambda: layer_service
     app.dependency_overrides[get_feature_service] = lambda: feature_service

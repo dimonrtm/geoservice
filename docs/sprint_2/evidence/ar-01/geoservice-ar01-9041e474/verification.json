@@ -1,0 +1,16 @@
+{
+  "project": "geoservice-ar01-9041e474",
+  "startedAt": "2026-10-27T19:46:12.806Z",
+  "status": "failed",
+  "browsers": {},
+  "runnerHashes": {
+    "run.mjs": "f37c5cc7f8bae801a15ddc3ccbe1159e20e2b10ed06bae51a22bdd40d57f4a9c",
+    "smoke.mjs": "fd61e7fbcc7330158448672bb230e9ca85f2aab4b262cc856833d9a822bccb2c"
+  },
+  "docker": "28.1.1",
+  "compose": "2.35.1-desktop.1",
+  "backendImage": "sha256:c43e949bbf6a85e4321b0b6ffff2e3412612dd2b55d31c35ab16fb977e2dbab1",
+  "error": "Ошибка harness (ERR_ASSERTION); чувствительный output не сохранён",
+  "cleanup": "passed",
+  "finishedAt": "2026-10-27T19:47:10.887Z"
+}

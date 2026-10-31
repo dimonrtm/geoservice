@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-16
-source: repository-change:2026-10-16
+updated: 2026-10-28
+source: repository-change:2026-10-28
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -133,10 +133,19 @@ cross-schema FK или прямые обращения к чужим модел�
 
 HTTP auth использует JWT Bearer:
 
-- `/api/v1/auth/login` выдает token и user payload.
-- `/api/v1/auth/me` валидирует token и перечитывает пользователя из БД.
+- `/api/v1/auth/login` выдаёт token с sid, `session_id`, user payload и refresh cookie.
+- `/api/v1/auth/me` валидирует token и свежие parent/user rows без positive cache.
 - `/api/v1/auth/dev-login` удален; пользовательский вход поддерживается через
   `/api/v1/auth/login` и `/api/v1/auth/me`.
+
+`BrowserAuthSession` объединяет refresh generations, JWT и tickets одного входа.
+Refresh/logout захватывают parent до credential; refresh сохраняет sid,
+logout commit немедленно запрещает новые проверки этого sid, не затрагивая
+другие входы user id. Logout/status требуют proof ожидаемого sid и не пишут
+cookie. Status отдельно допускает expired exp JWT. Auth read transaction
+закрывается до business service; уже допущенная операция может завершиться.
+Миграция завершает legacy credentials/tickets; совместный выпуск и повторный
+login обязательны. Подробности — [[browser_auth_sessions]].
 
 WebSocket realtime не принимает JWT в query string. Клиент сначала получает
 short-lived ticket через `POST /api/v1/ws/layers/{layer_id}/ticket` с обычным
@@ -161,7 +170,7 @@ JWT или cookie напрямую.
 - `require_legacy_gis_editor` сначала проверяет feature flag, затем применяет
   editor role guard.
 - `get_current_user` после JWT decode загружает актуального `User` из БД и проверяет
-  `is_active`; роль из JWT не является source of truth.
+  `is_active` вместе с parent sid; роль из JWT не является source of truth.
 - `require_editor` и `require_reviewer` реализуют взаимоисключающие role guards без прямой
   зависимости `web_api` от SQLAlchemy model enum.
 

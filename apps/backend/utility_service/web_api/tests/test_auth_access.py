@@ -8,8 +8,12 @@ from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
 
 from utility_service.web_api.api import auth as auth_api
-from utility_service.web_api.api.auth import create_access_token, get_current_user
-from utility_service.use_cases.deps import get_auth_service
+from utility_service.web_api.api.auth import get_auth_context
+from utility_service.web_api.tests.auth_user_factory import (
+    create_test_access_token as create_access_token,
+    access_service_for,
+)
+from utility_service.use_cases.deps import get_auth_service, get_auth_session_access_service
 from utility_service.web_api.api.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.secure_router import secure_router
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
@@ -28,16 +32,18 @@ def test_get_current_user_uses_current_database_role() -> None:
     auth_service = AsyncMock()
     auth_service.get_user_by_id.return_value = current_user
 
-    result = asyncio.run(get_current_user(credentials(token), auth_service))
+    result = asyncio.run(
+        get_auth_context(credentials(token), access_service_for(auth_service))
+    ).user
 
-    assert result is current_user
+    assert result == current_user
 
 
 def test_get_current_user_rejects_legacy_viewer_token() -> None:
     token = create_access_token(str(uuid4()), "viewer")
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(get_current_user(credentials(token), AsyncMock()))
+        asyncio.run(get_auth_context(credentials(token), access_service_for(AsyncMock())))
 
     assert exc_info.value.status_code == 401
     assert exc_info.value.code == "AUTH_REQUIRED"
@@ -54,7 +60,7 @@ def test_get_current_user_rejects_inactive_user() -> None:
     )
 
     with pytest.raises(AuthApiError) as exc_info:
-        asyncio.run(get_current_user(credentials(token), auth_service))
+        asyncio.run(get_auth_context(credentials(token), access_service_for(auth_service))).user
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "USER_INACTIVE"
@@ -109,6 +115,9 @@ def build_secure_app(auth_service: object) -> FastAPI:
     install_exception_handlers(app)
     app.include_router(secure_router)
     app.dependency_overrides[get_auth_service] = lambda: auth_service
+    app.dependency_overrides[get_auth_session_access_service] = lambda: access_service_for(
+        auth_service
+    )
     return app
 
 

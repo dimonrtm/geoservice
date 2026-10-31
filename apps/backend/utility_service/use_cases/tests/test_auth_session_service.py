@@ -11,6 +11,9 @@ from utility_service.infrastructure.postgresql.repositories.auth_session_reposit
     AuthSessionRepository,
 )
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
+from utility_service.infrastructure.postgresql.repositories.browser_auth_session_repository import (
+    BrowserAuthSessionRepository,
+)
 from utility_service.use_cases.deps import get_auth_session_service
 from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
@@ -61,18 +64,36 @@ class FakeAuthSessionRepository:
         self.rotated_session = None
         self.created = []
         self.get_active_calls = []
+        self.history_calls = []
         self.rotate_calls = []
         self.revoke_calls = []
 
-    async def create_session(self, *, session_token_hash, user_id, expires_at):
+    async def create_session(
+        self,
+        *,
+        session_token_hash,
+        user_id,
+        browser_session_id,
+        expires_at,
+    ):
         self.events.append("create_session")
         row = SimpleNamespace(
             session_token_hash=session_token_hash,
             user_id=user_id,
+            browser_session_id=browser_session_id,
             expires_at=expires_at,
         )
         self.created.append(row)
         return row
+
+    async def get_session_by_hash(
+        self,
+        *,
+        session_token_hash,
+    ):
+        self.events.append("get_history")
+        self.history_calls.append(session_token_hash)
+        return self.active_session
 
     async def get_active_session_by_hash(self, *, session_token_hash, now):
         self.events.append("get_active_session")
@@ -107,6 +128,59 @@ class FakeUserRepository:
         return self.users_by_id.get(user_id)
 
 
+class FakeBrowserSessionRepository:
+    def __init__(
+        self,
+        events,
+        user_id,
+    ):
+        self.events = events
+        self.parent = SimpleNamespace(
+            id=uuid4(),
+            user_id=user_id,
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=12),
+            revoked_at=None,
+        )
+
+    async def create_session(
+        self,
+        *,
+        user_id,
+        expires_at,
+    ):
+        self.parent.user_id = user_id
+        self.parent.expires_at = expires_at
+        return self.parent
+
+    async def get_session(
+        self,
+        session_id,
+        *,
+        for_update=False,
+    ):
+        self.events.append("lock_parent" if for_update else "get_parent")
+        return self.parent if session_id == self.parent.id else None
+
+    async def extend_session(
+        self,
+        session_id,
+        *,
+        expires_at,
+    ):
+        self.events.append("extend_parent")
+        assert session_id == self.parent.id
+        self.parent.expires_at = expires_at
+
+    async def revoke_session(
+        self,
+        session_id,
+        *,
+        now,
+    ):
+        assert session_id == self.parent.id
+        self.parent.revoked_at = now
+
+
 def make_user(*, is_active: bool = True):
     return SimpleNamespace(
         id=uuid4(),
@@ -131,13 +205,36 @@ def build_service(*, user=None, users=None, ttl_hours=12):
     repository_users = users if users is not None else ([user] if user is not None else [])
     session_repository = FakeAuthSessionRepository(events)
     user_repository = FakeUserRepository(repository_users, session, events)
+    browser_repository = FakeBrowserSessionRepository(
+        events,
+        repository_users[0].id if repository_users else uuid4(),
+    )
+    session_repository.parent = browser_repository.parent
     service = AuthSessionService(
         session=session,
         session_repository=session_repository,
         user_repository=user_repository,
+        browser_session_repository=browser_repository,
         ttl_hours=ttl_hours,
     )
     return service, session, session_repository, user_repository, events
+
+
+def make_credential(
+    repository,
+    user_id,
+):
+    return SimpleNamespace(
+        id=uuid4(),
+        browser_session_id=repository.parent.id,
+        user_id=user_id,
+        session_token_hash="a" * 64,
+        expires_at=repository.parent.expires_at,
+        created_at=datetime.now(timezone.utc),
+        revoked_at=None,
+        rotated_at=None,
+        last_used_at=None,
+    )
 
 
 def assert_auth_required(exc_info) -> None:
@@ -158,6 +255,26 @@ def test_auth_session_service_uses_auth_user_dto_contract() -> None:
     assert RefreshedAuthSessionOut.model_fields["user"].annotation is AuthUserDTO
 
 
+def test_refresh_rejects_expected_sid_mismatch() -> None:
+    user = make_user()
+    service, _session, repository, _users, _events = build_service(user=user)
+    repository.active_session = make_credential(
+        repository,
+        user.id,
+    )
+
+    with pytest.raises(AuthApiError) as error:
+        asyncio.run(
+            service.refresh_session(
+                "old-token",
+                expected_session_id=uuid4(),
+            )
+        )
+
+    assert_auth_required(error)
+    assert repository.created == []
+
+
 def test_issue_session_creates_hash_and_12_hour_expiry() -> None:
     user = make_user()
     service, session, repository, _user_repository, _events = build_service(user=user)
@@ -173,6 +290,7 @@ def test_issue_session_creates_hash_and_12_hour_expiry() -> None:
     assert repository.created[0].session_token_hash != result.token
     assert repository.created[0].user_id == user.id
     assert repository.created[0].expires_at == result.expires_at
+    assert repository.created[0].browser_session_id == result.session_id
     assert session.begin_calls == 1
     assert session.completed_begin_calls == 1
 
@@ -182,7 +300,10 @@ def test_refresh_session_rotates_old_hash_and_creates_new_session() -> None:
     service, session, repository, user_repository, events = build_service(user=user)
     old_token = "old-session-token"
     old_hash = hash_auth_session_token(old_token)
-    old_session = SimpleNamespace(user_id=user.id)
+    old_session = make_credential(
+        repository,
+        user.id,
+    )
     repository.active_session = old_session
     repository.rotated_session = old_session
 
@@ -203,36 +324,35 @@ def test_refresh_session_rotates_old_hash_and_creates_new_session() -> None:
     assert user_repository.get_by_id_calls == [user.id]
     assert user_repository.get_by_id_in_transaction == [True]
     assert events == [
+        "get_history",
+        "lock_parent",
         "get_active_session",
         "get_user",
         "mark_session_rotated",
         "create_session",
+        "extend_parent",
     ]
     assert session.begin_calls == 1
     assert session.completed_begin_calls == 1
 
 
-def test_refresh_session_uses_rotated_session_user_id_after_successful_rotation() -> None:
+def test_refresh_session_rejects_credential_with_another_parent_owner() -> None:
     active_user = make_user()
     rotated_user = make_user()
-    service, _session, repository, user_repository, events = build_service(
-        users=[active_user, rotated_user]
+    service, _session, repository, user_repository, _events = build_service(
+        users=[active_user, rotated_user],
     )
-    repository.active_session = SimpleNamespace(user_id=active_user.id)
-    repository.rotated_session = SimpleNamespace(user_id=rotated_user.id)
+    repository.active_session = make_credential(
+        repository,
+        rotated_user.id,
+    )
 
-    result = asyncio.run(service.refresh_session("old-session-token"))
+    with pytest.raises(AuthApiError) as error:
+        asyncio.run(service.refresh_session("old-session-token"))
 
-    assert result.user == auth_user_dto(rotated_user)
-    assert user_repository.get_by_id_calls == [active_user.id, rotated_user.id]
-    assert repository.created[0].user_id == rotated_user.id
-    assert events == [
-        "get_active_session",
-        "get_user",
-        "mark_session_rotated",
-        "get_user",
-        "create_session",
-    ]
+    assert_auth_required(error)
+    assert user_repository.get_by_id_calls == []
+    assert repository.created == []
 
 
 def test_refresh_session_rejects_missing_token_without_transaction() -> None:
@@ -264,7 +384,10 @@ def test_refresh_session_rejects_replay_when_rotation_loses_race() -> None:
     user = make_user()
     service, _session, repository, user_repository, _events = build_service(user=user)
     old_token = "old-session-token"
-    repository.active_session = SimpleNamespace(user_id=user.id)
+    repository.active_session = make_credential(
+        repository,
+        user.id,
+    )
     repository.rotated_session = None
 
     with pytest.raises(AuthApiError) as exc_info:
@@ -279,7 +402,11 @@ def test_refresh_session_rejects_replay_when_rotation_loses_race() -> None:
 def test_refresh_session_rejects_missing_user_as_auth_required() -> None:
     user_id = uuid4()
     service, _session, repository, _user_repository, _events = build_service(user=None)
-    old_session = SimpleNamespace(user_id=user_id)
+    old_session = make_credential(
+        repository,
+        user_id,
+    )
+    service.browser_session_repository.parent.user_id = user_id
     repository.active_session = old_session
     repository.rotated_session = old_session
 
@@ -294,7 +421,10 @@ def test_refresh_session_rejects_missing_user_as_auth_required() -> None:
 def test_refresh_session_rejects_inactive_user() -> None:
     user = make_user(is_active=False)
     service, _session, repository, _user_repository, _events = build_service(user=user)
-    old_session = SimpleNamespace(user_id=user.id)
+    old_session = make_credential(
+        repository,
+        user.id,
+    )
     repository.active_session = old_session
     repository.rotated_session = old_session
 
@@ -321,11 +451,15 @@ def test_revoke_session_is_idempotent_without_token() -> None:
 def test_revoke_session_hashes_token_before_repository_revoke() -> None:
     service, session, repository, _user_repository, _events = build_service()
     token = "raw-session-token"
+    repository.active_session = make_credential(
+        repository,
+        uuid4(),
+    )
 
     asyncio.run(service.revoke_session(token))
 
-    assert repository.revoke_calls[0].session_token_hash == hash_auth_session_token(token)
-    assert repository.revoke_calls[0].session_token_hash != token
+    assert service.browser_session_repository.parent.revoked_at is not None
+    assert repository.history_calls == [hash_auth_session_token(token)]
     assert session.begin_calls == 1
     assert session.completed_begin_calls == 1
 
@@ -341,3 +475,5 @@ def test_get_auth_session_service_wires_repositories() -> None:
     assert service.session_repository.session is session
     assert isinstance(service.user_repository, UserRepository)
     assert service.user_repository.session is session
+    assert isinstance(service.browser_session_repository, BrowserAuthSessionRepository)
+    assert service.browser_session_repository.session is session

@@ -3,9 +3,10 @@ from typing import get_type_hints
 
 import pytest
 
-from utility_service.use_cases.dtos import AuthUserDTO
+from utility_service.use_cases.dtos import AuthUserDTO, AuthenticatedSession
 from utility_service.web_api.api.auth import (
     get_current_user,
+    get_auth_context,
     me,
     require_editor,
     require_legacy_gis_editor,
@@ -42,6 +43,7 @@ def test_web_api_auth_parameters_use_auth_user_dto(function, parameter: str) -> 
 
 
 def test_auth_dependencies_return_auth_user_dto() -> None:
+    assert get_type_hints(get_auth_context)["return"] is AuthenticatedSession
     assert get_type_hints(get_current_user)["return"] is AuthUserDTO
     assert get_type_hints(require_editor)["return"] is AuthUserDTO
     assert get_type_hints(require_legacy_gis_editor)["return"] is AuthUserDTO

@@ -7,6 +7,7 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.models.auth_session import AuthSession
+from utility_service.infrastructure.postgresql.models.browser_auth_session import BrowserAuthSession
 
 
 class AuthSessionRepository:
@@ -18,6 +19,7 @@ class AuthSessionRepository:
         *,
         session_token_hash: str,
         user_id: UUID,
+        browser_session_id: UUID,
         expires_at: datetime,
     ) -> AuthSession:
         stmt = (
@@ -25,12 +27,25 @@ class AuthSessionRepository:
             .values(
                 session_token_hash=session_token_hash,
                 user_id=user_id,
+                browser_session_id=browser_session_id,
                 expires_at=expires_at,
             )
             .returning(AuthSession)
         )
         result = await self.session.execute(stmt)
         return result.scalar_one()
+
+    async def get_session_by_hash(
+        self,
+        *,
+        session_token_hash: str,
+    ) -> AuthSession | None:
+        result = await self.session.execute(
+            select(AuthSession)
+            .where(AuthSession.session_token_hash == session_token_hash)
+            .execution_options(populate_existing=True)
+        )
+        return result.scalar_one_or_none()
 
     async def get_active_session_by_hash(
         self,
@@ -40,9 +55,16 @@ class AuthSessionRepository:
     ) -> AuthSession | None:
         stmt = (
             select(AuthSession)
+            .join(
+                BrowserAuthSession,
+                BrowserAuthSession.id == AuthSession.browser_session_id,
+            )
             .where(AuthSession.session_token_hash == session_token_hash)
             .where(AuthSession.revoked_at.is_(None))
             .where(AuthSession.expires_at > now)
+            .where(BrowserAuthSession.revoked_at.is_(None))
+            .where(BrowserAuthSession.expires_at > now)
+            .execution_options(populate_existing=True)
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
