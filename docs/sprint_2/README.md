@@ -2,7 +2,11 @@
 
 В этой папке хранятся план, критерии приёмки и итоговые артефакты Sprint 2. Исторические материалы Sprint 1 не изменяются ради описания нового спринта.
 
-- [Глубокое ревью кода 2026-10-26](2026-10-26-deep-code-review.md) — безопасность, производительность, архитектура, качество кода и UI/UX; реестр находок, тематические отчёты и воспроизведения. Исправления кода не выполнялись.
+- **FE-03 — исправлена 2026-10-31:** [дизайн](2026-10-31-fe-03-workspace-style-readiness-design.md), [план](2026-10-31-fe-03-workspace-style-readiness-plan.md), [отчёт](2026-10-31-fe-03-workspace-style-readiness-implementation-report.md). Watcher ожидает готовности карты; удаление отменяет ожидание load и поздние вызовы API. 467 frontend tests, build/typecheck и два браузерных сценария MapLibre прошли. Timeout и runtime-сбои остаются вне изменения.
+
+- [Глубокое ревью кода 2026-10-26](2026-10-26-deep-code-review.md) — безопасность, производительность, архитектура, качество кода и UI/UX; реестр находок, тематические отчёты и воспроизведения. В рамках самого ревью код не менялся; последующие исправления отмечены в реестре.
+
+- **FE-02 — исправлена 2026-10-31 в согласованных границах:** [дизайн](2026-10-31-fe-02-map-initialization-design.md), [план](2026-10-31-fe-02-map-initialization-plan.md), [отчёт](2026-10-31-fe-02-map-initialization-implementation-report.md). Ошибка первоначального запуска видна во всех режимах; команды скрыты до готовности карты. 454 frontend tests, build/typecheck и browser WebGL smoke прошли. FE-03, timeout/load cancellation и runtime-сбои карты остаются вне исправления.
 
 - **AR-01 — реализована, локальные gates пройдены 2026-10-28; итоговый review и re-review исправлений пройдены без открытых замечаний:** [анализ и уточнения](2026-10-27-ar-01-session-restore-analysis.md), [дизайн](2026-10-27-ar-01-browser-session-design.md), [план](2026-10-27-ar-01-browser-session-plan.md), [отчёт](2026-10-27-ar-01-browser-session-implementation-report.md), [runbook](2026-10-27-ar-01-browser-session-runbook.md). Реальные Chrome/Edge/Playwright Firefox: 13 сценариев на каждый, frontend 438 tests, DB 310 tests. Native BFCache/OS suspend не подтверждены; точные ограничения в отчёте. WorkOrder lock исключён.
 

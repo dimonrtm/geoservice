@@ -38,6 +38,8 @@
 
 ## FE-03 · P2 · Workspace watcher пишет слои до готовности стиля
 
+**Статус: исправлена 2026-10-31 в согласованных границах.** [Дизайн](2026-10-31-fe-03-workspace-style-readiness-design.md), [отчёт](2026-10-31-fe-03-workspace-style-readiness-implementation-report.md): watcher ожидает готовности, первичная отрисовка использует актуальные props, уничтожение карты прекращает ожидание и отложенные вызовы useMapInstance. Описание ниже относится к исходному дефекту. Timeout и runtime-сбои остаются вне исправления.
+
 **Код:** `apps/frontend/src/components/MapView.vue:178–184,228–234`; `apps/frontend/src/composables/map/useMapInstance.ts:24–35`; `apps/frontend/src/map/workspace-layers.ts:25–37`.
 
 **Сценарий:** Map instance уже помещён в `map.value`, но `load` ещё не пришёл; в этот промежуток recovery/readback заменяет `props.workspace`. Watcher сразу вызывает `renderWorkspace()`. Проверяется наличие map/workspace, но не `mapReady` или `isStyleLoaded`. `ensureWorkspaceLayers` вызывает `addSource` у неготового стиля.

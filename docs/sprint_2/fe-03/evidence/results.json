@@ -1,0 +1,56 @@
+[
+  {
+    "scenario": "latest-workspace",
+    "before": {
+      "writes": [],
+      "afterRemove": [],
+      "ready": [
+        false
+      ],
+      "fit": []
+    },
+    "after": {
+      "writes": [
+        "addSource",
+        "addSource",
+        "addLayer",
+        "addLayer",
+        "addLayer",
+        "addLayer",
+        "addLayer",
+        "addLayer"
+      ],
+      "afterRemove": [],
+      "ready": [
+        false,
+        true,
+        false
+      ],
+      "fit": [
+        "latest"
+      ]
+    },
+    "errors": []
+  },
+  {
+    "scenario": "unmount-before-load",
+    "before": {
+      "writes": [],
+      "afterRemove": [],
+      "ready": [
+        false
+      ],
+      "fit": []
+    },
+    "after": {
+      "writes": [],
+      "afterRemove": [],
+      "ready": [
+        false,
+        false
+      ],
+      "fit": []
+    },
+    "errors": []
+  }
+]

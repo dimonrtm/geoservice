@@ -259,7 +259,7 @@ onMounted(async () => {
 watch(
   () => [props.mode, props.workspace, props.shouldFitWorkspace] as const,
   () => {
-    if (props.mode === "workspace") {
+    if (!disposed && mapReady.value && props.mode === "workspace") {
       renderWorkspace();
     }
   },

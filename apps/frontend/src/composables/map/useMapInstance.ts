@@ -7,6 +7,7 @@ export function useMapInstance(
   style: StyleSpecification = baseMapStyle,
 ) {
   const map = shallowRef<Map | null>(null);
+  let cancelStartup: (() => void) | null = null;
 
   async function createMap(): Promise<Map | null> {
     if (!mapEl.value) {
@@ -23,21 +24,49 @@ export function useMapInstance(
     nextMap.addControl(new NavigationControl(), "top-right");
     map.value = nextMap;
 
-    await nextTick();
-    nextMap.resize();
-
-    await new Promise<void>((resolve) => {
-      nextMap.once("load", async () => {
-        await nextTick();
-        nextMap.resize();
-        resolve();
-      });
+    return new Promise<Map | null>((resolve, reject) => {
+      let cancelled = false;
+      const isActive = () => !cancelled && map.value === nextMap;
+      const fail = (error: unknown) => {
+        if (!isActive()) return;
+        cancelled = true;
+        nextMap.off("load", onLoad);
+        reject(error);
+      };
+      const onLoad = async () => {
+        if (!isActive()) return;
+        nextMap.off("load", onLoad);
+        try {
+          await nextTick();
+          if (!isActive()) return;
+          nextMap.resize();
+          resolve(nextMap);
+        } catch (error) {
+          fail(error);
+        }
+      };
+      cancelStartup = () => {
+        if (!cancelled) {
+          cancelled = true;
+          nextMap.off("load", onLoad);
+        }
+        resolve(null);
+      };
+      nextMap.on("load", onLoad);
+      void (async () => {
+        try {
+          await nextTick();
+          if (isActive()) nextMap.resize();
+        } catch (error) {
+          fail(error);
+        }
+      })();
     });
-
-    return nextMap;
   }
 
   function destroyMap(): void {
+    cancelStartup?.();
+    cancelStartup = null;
     map.value?.remove();
     map.value = null;
   }

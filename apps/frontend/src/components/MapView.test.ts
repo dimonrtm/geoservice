@@ -287,6 +287,144 @@ describe("MapView startup", () => {
     mocks.loadLayers.mockResolvedValue({ status: "ready", total: 1, layer });
   });
 
+  it("defers_workspace_updates_until_startup", async () => {
+    let resolve!: (value: ReturnType<typeof mapInstance>) => void;
+    mocks.createMap.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, {
+      props: {
+        mode: "workspace",
+        workspace: workspace(),
+        workspaceKey: "old",
+        shouldFitWorkspace: true,
+      },
+    });
+    const latest = workspace();
+    latest.workOrder.editVersion.draftVersionToken = "3";
+    latest.workOrder.editVersion.features.features[0]!.geometry = {
+      type: "Point",
+      coordinates: [65.53, 44.83],
+    };
+    const middle = workspace();
+    middle.workOrder.editVersion.draftVersionToken = "2";
+    await wrapper.setProps({ workspace: middle });
+    await wrapper.setProps({ workspace: latest, workspaceKey: "latest" });
+    expect(mocks.ensureWorkspaceLayers).not.toHaveBeenCalled();
+    expect(mocks.setWorkspaceData).not.toHaveBeenCalled();
+    expect(mocks.fitWorkspaceToAoi).not.toHaveBeenCalled();
+    expect(wrapper.emitted("workspaceFitted")).toBeUndefined();
+    expect(wrapper.emitted("readyChange")).toEqual([[false]]);
+    mocks.setWorkspaceData.mockImplementation(() => {
+      expect(wrapper.emitted("readyChange")).toEqual([[false]]);
+    });
+    resolve(mapInstance());
+    await flushPromises();
+    expect(mocks.setWorkspaceData).toHaveBeenCalledTimes(1);
+    expect(mocks.setWorkspaceData).toHaveBeenCalledWith(
+      expect.anything(),
+      latest,
+    );
+    expect(wrapper.emitted("workspaceFitted")).toEqual([["latest"]]);
+    expect(wrapper.emitted("readyChange")).toEqual([[false], [true]]);
+    wrapper.unmount();
+  });
+
+  it("uses_latest_fit_request_and_renders_readback_without_refit", async () => {
+    let resolve!: (value: ReturnType<typeof mapInstance>) => void;
+    mocks.createMap.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, {
+      props: {
+        mode: "workspace",
+        workspace: workspace(),
+        workspaceKey: "old",
+        shouldFitWorkspace: true,
+      },
+    });
+    await wrapper.setProps({ workspaceKey: "new", shouldFitWorkspace: false });
+    expect(mocks.setWorkspaceData).not.toHaveBeenCalled();
+    resolve(mapInstance());
+    await flushPromises();
+    const readback = workspace();
+    readback.workOrder.editVersion.draftVersionToken = "4";
+    await wrapper.setProps({ workspace: readback });
+    expect(mocks.setWorkspaceData).toHaveBeenLastCalledWith(
+      expect.anything(),
+      readback,
+    );
+    expect(mocks.fitWorkspaceToAoi).not.toHaveBeenCalled();
+    expect(wrapper.emitted("workspaceFitted")).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it("fit_ack_does_not_repeat_fit", async () => {
+    const { defineComponent, h, ref } = await import("vue");
+    const { default: MapView } = await import("./MapView.vue");
+    const parent = defineComponent({
+      setup() {
+        const shouldFit = ref(true);
+        const snapshot = workspace();
+        return () =>
+          h(MapView, {
+            mode: "workspace",
+            workspace: snapshot,
+            workspaceKey: "current",
+            shouldFitWorkspace: shouldFit.value,
+            onWorkspaceFitted: () => {
+              shouldFit.value = false;
+            },
+          });
+      },
+    });
+    const wrapper = mount(parent);
+    await flushPromises();
+    expect(mocks.fitWorkspaceToAoi).toHaveBeenCalledTimes(1);
+    expect(wrapper.findComponent(MapView).emitted("readyChange")).toEqual([
+      [false],
+      [true],
+    ]);
+    wrapper.unmount();
+  });
+
+  it("ignores_resolve_before_unmount_continuation", async () => {
+    let resolve!: (value: ReturnType<typeof mapInstance>) => void;
+    mocks.createMap.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, {
+      props: { mode: "workspace", workspace: workspace() },
+    });
+    resolve(mapInstance());
+    wrapper.unmount();
+    await flushPromises();
+    expect(mocks.setWorkspaceData).not.toHaveBeenCalled();
+    expect(wrapper.emitted("readyChange")).not.toContainEqual([true]);
+  });
+
+  it("does_not_write_workspace_after_startup_failure", async () => {
+    mocks.createMap.mockRejectedValue(new Error("startup failed"));
+    const { default: MapView } = await import("./MapView.vue");
+    const wrapper = mount(MapView, {
+      props: { mode: "workspace", workspace: workspace() },
+    });
+    await flushPromises();
+    await wrapper.setProps({ workspace: workspace() });
+    expect(mocks.setWorkspaceData).not.toHaveBeenCalled();
+    expect(wrapper.emitted("readyChange")).toEqual([[false]]);
+    wrapper.unmount();
+  });
+
   it.each(["workspace", "empty", "editing"] as const)(
     "shows startup error in %s mode",
     async (mode) => {
