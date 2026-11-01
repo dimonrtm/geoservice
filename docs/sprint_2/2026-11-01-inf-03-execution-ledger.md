@@ -21,3 +21,5 @@
 - Final: отложенных minor нет. GitHub CI run не запускался; YAML и локальный сценарий проверены.
 - Задача 3: завершена. Code_wiki обновлена через repository-change и FU-2026-11-01-001; wiki lint — 37 прежних RAW missing_frontmatter, новых замечаний нет.
 - Изменения оставлены unstaged; merge/push/commit не выполняются по AGENTS.md.
+
+- Follow-up CI: пользователь сообщил exit 13 после prod-static. Исправлено отсутствие referenced HTTP deadline; 3 standalone RED cases exit13 → GREEN, 11/11 Linux/Windows tests; реальный Vite HTTP и локальный Docker smoke прошли. Точный GitHub network trigger не воспроизведён; см. 2026-11-01-inf-03-ci-exit13-fix.md.

@@ -36,6 +36,15 @@ failure.integration.test.mjs меняет команду build только во
 
 Runner использует уникальные имена, динамический loopback port и удаляет только свои контейнеры, теги и временный каталог. Общий BuildKit cache не чистится; Docker prune не выполняется. При принудительном завершении самого Node-процесса средствами ОС выполнение finally не гарантируется: оставшиеся ресурсы искать по id из вывода и удалять адресно после проверки принадлежности. Не очищать весь Docker ради INF-03.
 
+## Exit 13 на этапе dev HTTP
+
+Exit 13 означает незавершённый top-level await, а не Docker build error.
+HTTP helper использует referenced deadline на заголовки и тело, abort запроса
+и Promise.race; AbortSignal.timeout сам по себе не удерживает CLI-процесс.
+Регрессия запускается отдельными Node-процессами внутри run.test.mjs, чтобы
+handles тестового runner не скрывали дефект. Подробности и границы доказательства:
+[исправление CI exit 13](2026-11-01-inf-03-ci-exit13-fix.md).
+
 ## CI и границы гарантии
 
 Workflow выполняет unit tests runner и обычный загрязнённый сценарий без установки frontend dependencies на host job. Старые npm jobs продолжают работать. Образы не публикуются. Workflow с ошибкой получает failed; блокирование merge требует отдельно настроенного required status check frontend_docker_isolation в GitHub branch protection. Настройки репозитория эта задача не меняет.

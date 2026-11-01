@@ -17,6 +17,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { prepareContext, assertFixturesPresent } from "./fixtures.mjs";
+import { readHttpResponse } from "./http-probe.mjs";
 
 const repo = fileURLToPath(new URL("../../../", import.meta.url));
 
@@ -197,6 +198,7 @@ export async function runVerification({
     check(`${mode}:prod-static`);
   }
   async function inspectDev(tag, mode) {
+    console.log(`${id}: проверка ${mode}/dev-runtime`);
     const name = `${id}-${mode}-dev`;
     containers.add(name);
     await docker([
@@ -226,10 +228,7 @@ export async function runVerification({
     let ready = false;
     while (Date.now() < deadline) {
       try {
-        const response = await fetch(origin, {
-          signal: AbortSignal.timeout(2000),
-        });
-        await response.arrayBuffer();
+        const response = await readHttpResponse(origin, 2000);
         if (response.status === 200) {
           ready = true;
           break;
@@ -240,12 +239,13 @@ export async function runVerification({
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
     assert.ok(ready, "Vite не ответил за 60 секунд");
-    const response = await fetch(`${origin}/src/api/baseUrl.ts`, {
-      signal: AbortSignal.timeout(10000),
-    });
+    const response = await readHttpResponse(
+      `${origin}/src/api/baseUrl.ts`,
+      10000,
+    );
     assert.equal(response.status, 200);
     assert.match(
-      await response.text(),
+      response.text,
       /"VITE_API_BASE_URL"\s*:\s*"https:\/\/inf03-runtime\.invalid"/,
       "Vite не подставил явный runtime API URL",
     );
