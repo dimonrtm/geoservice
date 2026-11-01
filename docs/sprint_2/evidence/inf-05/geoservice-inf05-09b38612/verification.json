@@ -1,0 +1,95 @@
+{
+  "project": "geoservice-inf05-09b38612",
+  "startedAt": "2026-11-01T10:53:02.786Z",
+  "status": "failed",
+  "docker": "28.1.1",
+  "nginxSha256": "dd059435d1f682f05654bcaa695e7199fa7cbb142b7851ca0a7ccfaf6619af4d",
+  "proxy": {
+    "passed": true,
+    "results": [
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry",
+        "bytes": 1048577,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry?probe=1",
+        "bytes": 1048577,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      },
+      {
+        "uri": "/api/v1/auth/login",
+        "bytes": 1048577,
+        "status": 413,
+        "expected": 413
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry/extra",
+        "bytes": 1048577,
+        "status": 413,
+        "expected": 413
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry-extra",
+        "bytes": 1048577,
+        "status": 413,
+        "expected": 413
+      },
+      {
+        "uri": "/api/v1/auth/login",
+        "bytes": 13,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry",
+        "bytes": 13,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      }
+    ]
+  },
+  "fixture": {
+    "workOrderId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401",
+    "featureId": "6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213",
+    "checks": {
+      "valid": true,
+      "simple": true,
+      "covered": true,
+      "vertices": 60003,
+      "nonzeroSegments": true
+    }
+  },
+  "utility_serviceImage": "sha256:8a7315590bd8ea27f6cba3ea2fbc04cf5b2c98d4252ef060117e9fcd870da8e4",
+  "frontend-prodImage": "sha256:d3b8f6dc73396eaf8f7613359ee1ab6d183c590afe46aa30c78dde66ed64f747",
+  "largeApi": {
+    "vertices": 60003,
+    "commands": [
+      {
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/096db4f6-f410-4478-9bf9-ade385e64cbd/features/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213/geometry",
+        "commandId": "f187bc58-a799-42a7-8d89-510f45a5a90b",
+        "bytes": 1654616,
+        "operation": "updated"
+      },
+      {
+        "path": "/api/v1/work-orders/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0401/edit-versions/096db4f6-f410-4478-9bf9-ade385e64cbd/features/6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0213/geometry",
+        "commandId": "a227fadf-68b0-46f3-b87d-4fd22c3ec974",
+        "bytes": 1654616,
+        "operation": "unchanged"
+      }
+    ],
+    "saveReadbackRevertReadback": true,
+    "replayConfirmed": true
+  },
+  "baselineUnchanged": true,
+  "networkUnchanged": true,
+  "error": "expect(locator).toBeVisible() failed\n\nLocator: getByLabel('Переместить внутреннюю вершину линии')\nExpected: visible\nTimeout: 1000ms\nError: element(s) not found\n\nCall log:\n  - Expect \"toBeVisible\" getByLabel('Переместить внутреннюю вершину линии') with timeout 1000ms\n  - waiting for getByLabel('Переместить внутреннюю вершину линии')\n\n\nCall Log:\n- Timeout 20000ms exceeded while waiting on the predicate",
+  "cleanup": "passed",
+  "finishedAt": "2026-11-01T10:55:37.706Z"
+}

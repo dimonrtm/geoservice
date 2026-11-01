@@ -1,0 +1,60 @@
+{
+  "project": "geoservice-inf05-9ad6b299",
+  "startedAt": "2026-11-01T10:34:57.444Z",
+  "status": "passed",
+  "docker": "28.1.1",
+  "nginxSha256": "dd059435d1f682f05654bcaa695e7199fa7cbb142b7851ca0a7ccfaf6619af4d",
+  "proxy": {
+    "passed": true,
+    "results": [
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry",
+        "bytes": 1048577,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry?probe=1",
+        "bytes": 1048577,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      },
+      {
+        "uri": "/api/v1/auth/login",
+        "bytes": 1048577,
+        "status": 413,
+        "expected": 413
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry/extra",
+        "bytes": 1048577,
+        "status": 413,
+        "expected": 413
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry-extra",
+        "bytes": 1048577,
+        "status": 413,
+        "expected": 413
+      },
+      {
+        "uri": "/api/v1/auth/login",
+        "bytes": 13,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      },
+      {
+        "uri": "/api/v1/work-orders/11111111-1111-4111-8111-111111111111/edit-versions/22222222-2222-4222-8222-222222222222/features/33333333-3333-4333-8333-333333333333/geometry",
+        "bytes": 13,
+        "status": 200,
+        "expected": 200,
+        "bodyIntact": true
+      }
+    ]
+  },
+  "cleanup": "passed",
+  "finishedAt": "2026-11-01T10:35:14.230Z"
+}

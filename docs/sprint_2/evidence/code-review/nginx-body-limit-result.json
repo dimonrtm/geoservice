@@ -1,0 +1,33 @@
+{
+  "scope": "real parser + real nginx; no auth, database or domain Save",
+  "results": [
+    {
+      "vertices": 3,
+      "body_bytes": 191,
+      "direct_parser": {
+        "status": 200,
+        "content_type": "application/json",
+        "response": "{\"vertices\": 3}"
+      },
+      "current_nginx": {
+        "status": 200,
+        "content_type": "application/json",
+        "response": "{\"vertices\": 3}"
+      }
+    },
+    {
+      "vertices": 60000,
+      "body_bytes": 1433457,
+      "direct_parser": {
+        "status": 200,
+        "content_type": "application/json",
+        "response": "{\"vertices\": 60000}"
+      },
+      "current_nginx": {
+        "status": 413,
+        "content_type": "text/html",
+        "response": "<html>\r\n<head><title>413 Request Entity Too Large</title></head>\r\n<body>\r\n<center><h1>413 Request Entity Too Large</h1></center>\r\n<hr><center>nginx/1.27.5</center>\r\n</body>\r\n</html>\r\n"
+      }
+    }
+  ]
+}

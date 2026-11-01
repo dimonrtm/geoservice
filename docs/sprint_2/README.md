@@ -1,5 +1,17 @@
 # Sprint 2
 
+- **INF-04 — снята 2026-11-01:** infra contract tests остаются локальными
+  по решению пользователя; [основание](2026-11-01-inf-04-infra-contract-tests-analysis.md).
+- **INF-05 — исправлена 2026-11-01:** отдельный geometry location пропускает
+  большие Save/Revert; [исходное воспроизведение](2026-11-01-inf-05-nginx-body-limit-review.md).
+  [Уточнение требований](2026-11-01-inf-05-save-size-analysis.md),
+  [принятый дизайн](2026-11-01-inf-05-save-size-design.md),
+  [план реализации](2026-11-01-inf-05-save-size-plan.md): отдельный geometry
+  location, приёмка только локальная, без CI.
+  [Отчёт](2026-11-01-inf-05-save-size-implementation-report.md),
+  [runbook](2026-11-01-inf-05-save-size-runbook.md): большой API/DB цикл и
+  штатный browser Save/reload/Revert/reload прошли; UI больших линий не расширялся.
+
 В этой папке хранятся план, критерии приёмки и итоговые артефакты Sprint 2. Исторические материалы Sprint 1 не изменяются ради описания нового спринта.
 
 - **FE-03 — исправлена 2026-10-31:** [дизайн](2026-10-31-fe-03-workspace-style-readiness-design.md), [план](2026-10-31-fe-03-workspace-style-readiness-plan.md), [отчёт](2026-10-31-fe-03-workspace-style-readiness-implementation-report.md). Watcher ожидает готовности карты; удаление отменяет ожидание load и поздние вызовы API. 467 frontend tests, build/typecheck и два браузерных сценария MapLibre прошли. Timeout и runtime-сбои остаются вне изменения.

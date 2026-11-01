@@ -34,12 +34,33 @@
 - Последствие: сборка зависит от локального состояния, в контекст уходит тяжёлое дерево зависимостей; возможны несовместимые native modules/исполняемые файлы и незапланированный API endpoint. Локальные env попадают в build layers. Наличие секретов в этих файлах не утверждается.
 - Рекомендация: добавить `.dockerignore` для `node_modules`, `dist`, локальных env и артефактов; передавать разрешённые frontend settings явно. Сравнить сборку чистого checkout и checkout с установленными Windows dependencies.
 
-### INF-04 — P2: CI пропускает существующие infra contract tests
+### INF-04 — снята: infra contract tests остаются локальными
+
+**Снята по прямому решению пользователя 2026-11-01.** Существующие tests
+остаются локальными; их skip в backend-only image разрешён прежним планом
+и не требует нового CI gate. Исходное описание ниже сохранено только как
+история ревью; рекомендация переноса в CI больше не действует.
+[Анализ и решение](2026-11-01-inf-04-infra-contract-tests-analysis.md).
 
 - Место: `.github/workflows/ci.yml:62–70`; `apps/backend/Dockerfile:20`; `apps/backend/tests/test_compose_security_contract.py:5–19`; `apps/backend/tests/test_compose_startup_contract.py:7–20`.
 - Сценарий: стандартный backend CI строит image с context `./apps/backend` и запускает `pytest` только внутри него. Файлов `infra` там нет, поэтому `find_repo_root` возвращает None, весь security-contract модуль и repo-dependent startup проверки получают skip.
 - Последствие: зелёный backend CI не подтверждает contract tests для Compose и Windows launchers. Отдельные shell guards в smoke проверяют часть Compose, но не выполняют эти тесты и не стартуют production mode: `.github/workflows/ci.yml:96–127`.
 - Рекомендация: запускать infra tests отдельно с доступом к checkout либо монтировать требуемые файлы read-only в runner. Контролировать отсутствие неожиданных skips в этом отдельном наборе.
+
+### INF-05 — P2: production nginx отклоняет крупные Save requests до backend
+
+**Исправлена 2026-11-01:** отдельный geometry location снимает предел тела.
+[Отчёт](2026-11-01-inf-05-save-size-implementation-report.md): локальные proxy
+7/7, настоящий большой API/DB цикл (1 654 616 байт), штатный browser cycle,
+cleanup passed. CI не изменён. UI ограничен тремя вершинами; внешний proxy
+покрывается инструкцией, не локальной проверкой.
+
+До исправления в `apps/frontend/nginx.conf` не был задан `client_max_body_size`.
+В изолированном воспроизведении 2026-11-01 запрос с 60 000 вершинами
+(1 433 457 байт) принят настоящим parser через тестовый HTTP upstream,
+но через nginx 1.27.5 получил `413 text/html`. Запрос из трёх вершин прошёл
+обоими путями. Доменная запись в БД этим probe не проверялась.
+[Отдельный отчёт и evidence](2026-11-01-inf-05-nginx-body-limit-review.md).
 
 ## Риски, требующие измерений или отдельного решения
 
