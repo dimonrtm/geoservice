@@ -1,0 +1,23 @@
+# Зависимости устанавливаются внутри Linux-образа.
+**/node_modules
+
+# Docker не наследует локальные или mode-specific настройки Vite.
+**/.env
+**/.env.*
+
+# Результаты сборки, тестов и кэши.
+**/dist
+**/dist-ssr
+**/coverage
+**/.vite
+**/.vite-temp
+**/.cache
+**/*.tsbuildinfo
+**/*.log
+
+# Метаданные репозитория, редакторов и ОС.
+**/.git
+**/.idea
+**/.vscode
+**/.DS_Store
+**/Thumbs.db

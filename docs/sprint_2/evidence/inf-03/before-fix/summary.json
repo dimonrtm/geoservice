@@ -1,0 +1,17 @@
+{
+  "id": "geoservice-inf03-50a747ae-727",
+  "status": "failed",
+  "acceptance": false,
+  "node": "v24.12.0",
+  "checks": [
+    {
+      "name": "fixtures-present",
+      "status": "passed",
+      "count": 15
+    }
+  ],
+  "cleanupErrors": [],
+  "docker": "28.1.1",
+  "buildx": "github.com/docker/buildx v0.23.0-desktop.1 503f948aadbddb6de3ec5581f766e1d27f6975a1",
+  "error": "Локальные файлы попали в общий слой: node_modules/inf03-marker.txt, nested/node_modules/inf03-marker.txt, .env, .env.local, .env.production, .env.production.local, .env.example, nested/.env.local, dist/inf03-stale.txt, dist-ssr/inf03-stale.txt, coverage/inf03-marker.txt, .vite/inf03-marker.txt, .vscode/inf03-marker.txt, inf03.tsbuildinfo, inf03.log\n+ actual - expected\n\n+ [\n+   'node_modules/inf03-marker.txt',\n+   'nested/node_modules/inf03-marker.txt',\n+   '.env',\n+   '.env.local',\n+   '.env.production',\n+   '.env.production.local',\n+   '.env.example',\n+   'nested/.env.local',\n+   'dist/inf03-stale.txt',\n+   'dist-ssr/inf03-stale.txt',\n+   'coverage/inf03-marker.txt',\n+   '.vite/inf03-marker.txt',\n+   '.vscode/inf03-marker.txt',\n+   'inf03.tsbuildinfo',\n+   'inf03.log'\n+ ]\n- []\n"
+}

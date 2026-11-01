@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-10-28
-source: repository-change:2026-10-28
+updated: 2026-11-01
+source: repository-change:2026-11-01
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-11-01 | [[deployment/docker_compose]] | Post-ingest correction: единая фильтрация frontend context, разделение локальных и контейнерных env. | .dockerignore frontend; FU-2026-11-01-001 |
+| 2026-11-01 | [[сборка/ci_and_quality]] | Постоянная проверка Docker context через синтетическое загрязнение, общий слой и итоговую статику; отдельная граница required status check. | workflow CI; runner/runbook INF-03 |
 | 2026-10-28 | [[архитектура/browser_auth_sessions]] | Стабильный sid, server revocation, proof logout/status, Web Locks, resume freshness и durable подготовка workspace. | AuthSessionService, AuthSessionAccessService, frontend auth/coordinator/monitor; runbook AR-01 |
 | 2026-10-28 | [[архитектура/api_and_realtime]] | Post-ingest correction auth success/logout/status и ticket sid вместо устаревшего cookie-delete контракта. | browser_auth_sessions; FU-2026-10-28-001 |
 | 2026-10-28 | [[архитектура/backend]] | Post-ingest correction свежих parent/user checks, transaction lifetime и границы миграции. | browser_auth_sessions; FU-2026-10-28-001 |

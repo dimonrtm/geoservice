@@ -1,0 +1,77 @@
+{
+  "id": "geoservice-inf03-77859086-3ec",
+  "status": "passed",
+  "acceptance": true,
+  "node": "v24.12.0",
+  "checks": [
+    {
+      "name": "fixtures-present",
+      "status": "passed",
+      "count": 15
+    },
+    {
+      "name": "dirty:base-isolation",
+      "status": "passed",
+      "fixtureCount": 15
+    },
+    {
+      "name": "dirty:prod-static",
+      "status": "passed"
+    },
+    {
+      "name": "dirty:dev-runtime",
+      "status": "passed"
+    },
+    {
+      "name": "clean:base-isolation",
+      "status": "passed",
+      "fixtureCount": 15
+    },
+    {
+      "name": "clean:prod-static",
+      "status": "passed"
+    },
+    {
+      "name": "clean:dev-runtime",
+      "status": "passed"
+    },
+    {
+      "name": "negative-control",
+      "status": "passed",
+      "detected": [
+        "node_modules/inf03-marker.txt",
+        "nested/node_modules/inf03-marker.txt",
+        ".env",
+        ".env.local",
+        ".env.production",
+        ".env.production.local",
+        ".env.example",
+        "nested/.env.local",
+        "dist/inf03-stale.txt",
+        "dist-ssr/inf03-stale.txt",
+        "coverage/inf03-marker.txt",
+        ".vite/inf03-marker.txt",
+        ".vscode/inf03-marker.txt",
+        "inf03.tsbuildinfo",
+        "inf03.log"
+      ]
+    },
+    {
+      "name": "workspace:base-isolation",
+      "status": "passed",
+      "fixtureCount": 15
+    },
+    {
+      "name": "workspace:prod-static",
+      "status": "passed"
+    },
+    {
+      "name": "workspace:dev-runtime",
+      "status": "passed"
+    }
+  ],
+  "cleanupErrors": [],
+  "docker": "28.1.1",
+  "buildx": "github.com/docker/buildx v0.23.0-desktop.1 503f948aadbddb6de3ec5581f766e1d27f6975a1",
+  "ignoreSha256": "e88749be4bea5db810cc1bf20a05e4b0199efdf1a0d936559b91fa6d1ccefcc1"
+}

@@ -26,6 +26,8 @@
 
 ### INF-03 — P2: frontend Docker build включает локальные зависимости и env-файлы
 
+**Статус: решена 2026-11-01 в согласованных границах.** .dockerignore изолирует dev/prod от локальных dependencies/env; CI job добавлен. Локальная приёмка clean/dirty/workspace и отрицательный контроль прошли, реальный GitHub CI run не запускался. [Отчёт](2026-11-01-inf-03-frontend-build-implementation-report.md), [runbook](2026-11-01-inf-03-frontend-build-runbook.md). Ниже — исходная находка.
+
 - Место: `apps/frontend/Dockerfile:7–13`; отсутствует `apps/frontend/.dockerignore` и Dockerfile-specific ignore.
 - Доказательство: Docker сначала выполняет `npm ci`, затем `COPY . .`. В текущем workspace существуют `apps/frontend/node_modules` и `.env.local`; проверены только факт наличия и имена, содержимое env не выводилось.
 - Сценарий: разработчик запускает Docker build после локального `npm ci`, как в обычном Windows workspace. Дерево host dependencies копируется поверх результата Linux `npm ci`; `.env.local` также меняет Vite build environment.

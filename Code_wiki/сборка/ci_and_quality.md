@@ -3,8 +3,8 @@ title: CI And Quality Gates
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-07-09
-source: repository-change:2026-07-09
+updated: 2026-11-01
+source: repository-change:2026-11-01
 tags: [ci, tests, lint, build]
 ---
 
@@ -93,6 +93,22 @@ Frontend unit tests лежат рядом с TypeScript modules как `*.test.t
 Vitest использует `jsdom`, поэтому CI покрывает не только store/contract modules,
 но и Vue component shell tests для `App.vue`, `EditorWorkOrdersView.vue` и
 `MapView.vue`.
+
+## Изоляция frontend Docker build
+
+Отдельный job frontend_docker_isolation собирает dev/prod из искусственно
+загрязнённого context через docs/sprint_2/inf-03/run.mjs. Проверяет общий слой
+до Vite build, итоговую статику и явный runtime API URL dev. Подготовка fixtures
+не читает реальные env и не заменяет проверяемые Docker ignore-правила.
+Существующие npm jobs сохраняются; этот job не устанавливает host dependencies.
+
+Локальный --acceptance добавляет чистый context, контроль без ignore и сборку
+рабочего каталога. Ошибка сборки/проверки/cleanup даёт ненулевой exit, отсутствие
+Docker не приводит к skip. Образы не публикуются. Evidence хранится в CI 7 дней.
+Required status check для merge настраивается отдельно в branch protection.
+
+Источник: .github/workflows/ci.yml, docs/sprint_2/inf-03/run.mjs,
+[runbook INF-03](../../docs/sprint_2/2026-11-01-inf-03-frontend-build-runbook.md).
 
 ## Wiki Checks
 

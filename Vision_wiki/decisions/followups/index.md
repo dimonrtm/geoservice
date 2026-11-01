@@ -16,6 +16,7 @@ tags: [followups, conflicts]
 
 | ID | Статус | Область | Источник | Требуемое действие |
 | --- | --- | --- | --- | --- |
+| FU-2026-11-01-001 | resolved | Code_wiki: frontend Docker context | apps/frontend/.dockerignore; [[Code_wiki/сборка/ci_and_quality]]; runbook INF-03 | Post-ingest correction: deployment/docker_compose отражает фильтрацию локальных env/dependencies; границы внешнего HTTPS и same-origin сохранены. |
 | FU-2026-10-11-002 | resolved | Принятие research-правил | `docs/sprint_2/2026-10-12-save-recovery-rules-decision.md` | Пользователь принял правила 2026-10-12; конфликт observer/operation разрешён, D5-Q1 принято. Реализация отдельно запланирована в S2-X01 вне дней. Реальные ответственные, specification и срок history остаются открыты в FU-2026-10-11-003 и реестре вопросов. |
 | FU-2026-10-11-003 | resolved | Организационные основания точности и хранения | [[../../../Wiki/policies/positional_accuracy_acceptance_policy]], [[../../../Wiki/policies/change_history_retention_policy]]; [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] | Приняты обязанности, SIM-UGIS-POS-001 и SIM-UGIS-RET-001 v1.0 для условной организации; реальные назначения и документы не требуются. Решение принято агентом по поручению пользователя; реализация отдельно в FU-2026-10-13-004. |
 

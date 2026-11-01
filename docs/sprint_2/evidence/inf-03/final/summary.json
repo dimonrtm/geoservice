@@ -1,0 +1,29 @@
+{
+  "id": "geoservice-inf03-0d53f99f-e5b",
+  "status": "passed",
+  "acceptance": false,
+  "node": "v24.12.0",
+  "checks": [
+    {
+      "name": "fixtures-present",
+      "status": "passed",
+      "count": 15
+    },
+    {
+      "name": "dirty:base-isolation",
+      "status": "passed",
+      "fixtureCount": 15
+    },
+    {
+      "name": "dirty:prod-static",
+      "status": "passed"
+    },
+    {
+      "name": "dirty:dev-runtime",
+      "status": "passed"
+    }
+  ],
+  "cleanupErrors": [],
+  "docker": "28.1.1",
+  "buildx": "github.com/docker/buildx v0.23.0-desktop.1 503f948aadbddb6de3ec5581f766e1d27f6975a1"
+}

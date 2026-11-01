@@ -3,8 +3,8 @@ title: Docker Compose Deployment
 type: runbook
 status: active
 created: 2026-05-30
-updated: 2026-10-26
-source: repository-change:2026-10-26
+updated: 2026-11-01
+source: repository-change:2026-11-01
 tags: [deployment, docker-compose, postgis]
 ---
 
@@ -83,9 +83,17 @@ Base API сохраняет `DEV_MODE=false` и Secure cookie; отдельны�
 не требуется. После пересоздания backend с новым IP frontend нужно перезапустить:
 upstream разрешается при старте nginx. Это не сервис обнаружения backend.
 
-Гарантия переносимости production-образа относится к чистому build context без
-API override. Защита frontend Docker context от локальных env/dependencies
-остаётся отдельной INF-03. Dev Compose не подтверждает production routing.
+Frontend context фильтруется apps/frontend/.dockerignore для всех targets:
+локальные node_modules, .env/.env.*, dist и служебные артефакты исключаются.
+Зависимости устанавливаются в Linux-образе. Локальный npm run dev продолжает
+читать env; Docker dev получает VITE_API_BASE_URL явно из demo Compose.
+Production использует существующий same-origin fallback без новых build args.
+Изоляция локальных файлов не означает побайтовую идентичность образов в разные
+дни. Dev Compose не подтверждает production routing.
+
+Проверка общего слоя и итоговой статики описана в [[../сборка/ci_and_quality]] и
+[runbook INF-03](../../docs/sprint_2/2026-11-01-inf-03-frontend-build-runbook.md).
+Исправление прежнего ограничения: FU-2026-11-01-001.
 
 Локальный runner `docs/sprint_2/verify-inf-02.ps1` проверяет настоящий production
 bundle и API в отдельном project с disposable БД, выполняет браузерный
