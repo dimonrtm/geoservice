@@ -162,8 +162,10 @@ class FeatureService:
                 await self.version_error_handler(feature_id, request.version, model_type)
 
             geometry = request.geometry or (current_feature.geometry if current_feature else None)
-            properties = request.properties or (
-                current_feature.properties if current_feature else None
+            properties = (
+                request.properties
+                if request.properties is not None
+                else (current_feature.properties if current_feature else None)
             )
             if geometry is None or properties is None:
                 raise BusinessValidationException(

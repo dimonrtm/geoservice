@@ -4,7 +4,9 @@
 
 ## Подтверждённые находки
 
-### BE-02 · P2 · Очистка properties в legacy PATCH даёт неверный ответ либо откатывается
+### BE-02 · P2 · Исправлена 2026-11-01: очистка properties в legacy PATCH
+
+Исправлен выбор properties по `is not None` при сборке ответа сервиса. Оба варианта очистки возвращают `{}`; обязательность полей, repository и Utility Save не изменены. Проверки: 45 целевых и 348 общих unit-тестов, 6 интеграционных сценариев в disposable PostGIS, Black/Ruff. [Дизайн](2026-11-01-be-02-design.md), [результаты и границы проверки](evidence/be-02/verification.md). Ниже сохранено описание исходного дефекта; указанные номера строк относятся к ревью 2026-10-26.
 
 - Место: `apps/backend/utility_service/use_cases/services/feature_service.py:165`–`:170`; условие загрузки старого объекта — `:150`–`:152`. Запись repository корректно различает `{}` и `None`: `apps/backend/utility_service/infrastructure/postgresql/repositories/layer_repository.py:86`.
 - Условие доступности: legacy API включён через `LEGACY_GIS_API_ENABLED=true`; по умолчанию он выключен. Utility Save не использует этот метод.

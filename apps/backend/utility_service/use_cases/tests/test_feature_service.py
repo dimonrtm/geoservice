@@ -271,7 +271,8 @@ def test_delete_feature_publishes_deleted_event_after_success() -> None:
     publisher.publish_feature_deleted.assert_awaited_once_with(layer_id, feature_id)
 
 
-def test_update_feature_does_not_publish_event_on_version_mismatch() -> None:
+@pytest.mark.parametrize("properties", [{"name": "After"}, {}])
+def test_update_feature_does_not_publish_event_on_version_mismatch(properties) -> None:
     layer_id = uuid4()
     feature_id = uuid4()
     layer = SimpleNamespace(
@@ -295,9 +296,81 @@ def test_update_feature_does_not_publish_event_on_version_mismatch() -> None:
         layer_repository=repository,
         realtime_publisher=publisher,
     )
-    request = PatchFeatureRequest(version=2, geometry=None, properties={"name": "After"})
-
+    request = PatchFeatureRequest(version=2, geometry=None, properties=properties)
     with pytest.raises(VersionMismatchException):
         asyncio.run(service.update_feature(layer_id, feature_id, request))
 
     publisher.publish_feature_updated.assert_not_awaited()
+
+
+def make_update_service(initial_properties):
+    layer_id, feature_id = uuid4(), uuid4()
+    repository = AsyncMock()
+    repository.get_layer_by_id.return_value = SimpleNamespace(
+        id=layer_id, geometry_type="Polygon", storage_table="feature_polygons"
+    )
+    repository.get_feature.return_value = SimpleNamespace(
+        id=feature_id,
+        version=2,
+        properties=initial_properties,
+        geometry_data=POLYGON_GEOMETRY,
+    )
+    repository.update_feature_if_version_matches.return_value = (
+        SimpleNamespace(id=feature_id, version=3),
+        object,
+    )
+    publisher = AsyncMock()
+    service = FeatureService(DummySession(), repository, publisher)
+    return service, repository, publisher, layer_id, feature_id
+
+
+@pytest.mark.parametrize("geometry", [None, UPDATED_POLYGON_GEOMETRY])
+@pytest.mark.parametrize("initial_properties", [{"name": "Before"}, {}])
+def test_update_feature_clears_properties(geometry, initial_properties) -> None:
+    service, repository, publisher, layer_id, feature_id = make_update_service(initial_properties)
+    request = PatchFeatureRequest(version=2, geometry=geometry, properties={})
+
+    result = asyncio.run(service.update_feature(layer_id, feature_id, request))
+
+    assert repository.update_feature_if_version_matches.await_args.args[3] == {}
+    assert result.id == feature_id
+    assert result.properties == {}
+    assert result.version == 3
+    expected_geometry = POLYGON_GEOMETRY if geometry is None else UPDATED_POLYGON_GEOMETRY
+    assert result.geometry.model_dump(mode="python") == expected_geometry
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+    if geometry is not None:
+        repository.get_feature.assert_not_awaited()
+
+
+@pytest.mark.parametrize("initial_properties", [{"name": "Before"}, {}])
+def test_update_feature_preserves_properties_when_null(initial_properties) -> None:
+    service, repository, publisher, layer_id, feature_id = make_update_service(initial_properties)
+    request = PatchFeatureRequest(version=2, geometry=UPDATED_POLYGON_GEOMETRY, properties=None)
+
+    result = asyncio.run(service.update_feature(layer_id, feature_id, request))
+
+    assert repository.update_feature_if_version_matches.await_args.args[3] is None
+    assert result.properties == initial_properties
+    assert result.version == 3
+    assert result.geometry.model_dump(mode="python") == UPDATED_POLYGON_GEOMETRY
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+
+
+def test_update_feature_preserves_falsy_property_values() -> None:
+    service, repository, publisher, layer_id, feature_id = make_update_service({"name": "Before"})
+    request = PatchFeatureRequest(
+        version=2, geometry=None, properties={"enabled": False, "count": 0, "note": None}
+    )
+
+    result = asyncio.run(service.update_feature(layer_id, feature_id, request))
+
+    assert repository.update_feature_if_version_matches.await_args.args[3] == {
+        "enabled": False,
+        "count": 0,
+        "note": None,
+    }
+    assert result.properties == {"enabled": False, "count": 0, "note": None}
+    assert result.version == 3
+    assert result.geometry.model_dump(mode="python") == POLYGON_GEOMETRY
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
