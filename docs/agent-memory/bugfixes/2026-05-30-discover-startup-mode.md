@@ -2,6 +2,7 @@
 
 Date: 2026-05-30
 Type: bugfix
+Superseded by: .agents/skills/source-command-discover/SKILL.md
 Tags: wiki, discover, skills, discovery
 Related files:
 
