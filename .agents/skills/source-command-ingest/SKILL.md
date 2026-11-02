@@ -1,15 +1,13 @@
 ---
 name: source-command-ingest
-description: Ручная процедура /ingest для обработки RAW_inputs и значимых источников проекта в Vision_wiki/Code_wiki.
+description: Ручная обработка RAW-файлов в Wiki и DDD_Wiki и технических источников в Code_wiki через /ingest.
 ---
 
 # /ingest
 
-## Текущая Нормативная Процедура
+## Выбор режима
 
-Этот раздел является приоритетным для обычного `/ingest`. Более старые разделы ниже применяются только там, где они не противоречат этому разделу.
-
-Обычный `/ingest` работает только с сырыми файлами в `RAW_inputs/`. Отдельный режим `domain-bootstrap` не используется: первичная доменная модель для текущего репозитория строится отдельным проходом после создания skill'ов, а перенос на другой репозиторий выполняется через обработку первых raw-файлов. Режимы `/ingest repository-snapshot` и `/ingest repository-change` сохраняются только для `Code_wiki`.
+Перед ingest прочитать `docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md`. Обычный `/ingest` обрабатывает источники в `RAW_inputs/`. Для технического знания из репозитория предусмотрены `repository-snapshot` и `repository-change`, которые записывают результат в `Code_wiki/`.
 
 Перед ingest прочитать `Wiki/index.md`, нужные `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, `Vision_wiki/index.md`, `Code_wiki/index.md`, `RAW_inputs/index.md`, если он есть, `memory/llm-wiki-method.md` и `memory/project-state.md`.
 
@@ -25,17 +23,6 @@ description: Ручная процедура /ingest для обработки R
 
 `/ingest` превращает сырой источник в атомарные wiki-ноды с источниками, связями и follow-up'ами. Он не должен менять код, конфигурацию, миграции или тесты.
 
-## Обязательный Контекст
-
-Перед ingest прочитать:
-
-- `Vision_wiki/index.md` - что уже есть в продуктовой wiki.
-- `Code_wiki/index.md` - что уже есть в технической wiki.
-- `Vision_wiki/_templates/_info.md` и нужные шаблоны.
-- `Code_wiki/_templates/_info.md` и нужные шаблоны.
-- `memory/llm-wiki-method.md` - правила атомарных нод, source, frontmatter и wikilinks.
-- `memory/project-state.md` - текущее состояние pipeline.
-
 ## Шаг 1. Определить Объект Ingest
 
 - Если пользователь указал путь, работать с ним.
@@ -44,16 +31,10 @@ description: Ручная процедура /ingest для обработки R
 - Если найдено 1-5 однозначных RAW-кандидатов, обработать их по очереди в одном запуске `/ingest`: для каждого источника выполнить шаги 2-8, затем в финальном отчете перечислить все обработанные файлы и созданные/обновленные wiki-ноды.
 - Если найдено больше 5 RAW-кандидатов, показать список, сгруппированный по папкам `RAW_inputs/`, и попросить подтверждение: обработать все, выбрать часть или начать с одного файла.
 - Если есть неоднозначность, не запускать batch без подтверждения. Неоднозначность: непонятен тип источника, файл слишком большой для надежного прохода, несколько файлов выглядят как версии одного документа, уже есть похожая wiki-нода, есть возможный конфликт с существующей документацией, либо источник содержит потенциальные секреты/персональные данные.
-- Если источник не из `RAW_inputs/`, явно указать, почему он значим для wiki.
 
 ## Шаг 2. Классифицировать Источник
 
-- `RAW_inputs/meetings/` - транскрипт встречи: summary в `Vision_wiki/chats/`, факты в `concepts/`, `decisions/`, `entities/`, `solution/`.
-- `RAW_inputs/documents/` - ТЗ, спека, презентация: требования в `Vision_wiki/solution/`, концепты в `Vision_wiki/concepts/`, технические следствия в `Code_wiki/`.
-- `RAW_inputs/code/` - фрагменты или обзоры кода: `Code_wiki/архитектура/`, `Code_wiki/состояние_проекта/`, ADR/runbook candidates.
-- `RAW_inputs/docs/` - документация проекта: `Vision_wiki/` или `Code_wiki/` по смыслу.
-- `RAW_inputs/chats/` - переписка: summary в `Vision_wiki/chats/`, факты по соответствующим нодам.
-- `RAW_inputs/research_results/` - research: concepts, decisions, risks, follow-up'ы.
+- Встречи, документы, переписку и исследования классифицировать по содержанию. Доменное знание направить в `Wiki/` и `DDD_Wiki/`, технические выводы — в `Code_wiki/`. Для встреч и переписки сохранить связь с исходным материалом по шагу 6.
 - Уже существующее состояние репозитория - первично фиксируется агентом через `/ingest repository-snapshot` в `Code_wiki/`.
 - Значимые изменения репозитория - фиксируются агентом через `/ingest repository-change` в `Code_wiki/состояние_проекта/`.
 
@@ -145,18 +126,7 @@ ingest. Триггер не привязан к commit.
 
 ## Шаг 5. Разнести По Wiki
 
-- Концепты: `Vision_wiki/concepts/<slug>.md`, шаблон `Vision_wiki/_templates/concept.md`.
-- Краткое описание проекта: `Vision_wiki/concepts/about_project.md`, шаблон `Vision_wiki/_templates/about_project.md`.
-- Product Vision Board: `Vision_wiki/concepts/product_vision_board.md`, шаблон `Vision_wiki/_templates/product_vision_board.md`.
-- Lean Canvas: `Vision_wiki/concepts/lean_canvas.md`, шаблон `Vision_wiki/_templates/lean_canvas.md`.
-- JTBD: `Vision_wiki/concepts/jtbd.md`, шаблон `Vision_wiki/_templates/jtbd.md`.
-- Персоны: `Vision_wiki/entities/personas/<slug>.md`, шаблон `Vision_wiki/_templates/persona.md`.
-- Решения: `Vision_wiki/decisions/<slug>.md` или ADR в `Code_wiki/архитектура/ADR/`.
-- Конфликты: `Vision_wiki/decisions/conflicts/YYYY-MM-DD-<topic>.md`.
-- Допущения: `Vision_wiki/decisions/assumptions/<slug>.md`.
-- Follow-up'ы: строка в `Vision_wiki/decisions/followups/index.md`.
-- Solution: `Vision_wiki/solution/USM.md`, `roadmap.md`, `nfr.md`, `architecture_vision.md`.
-- Технические знания: `Code_wiki/архитектура/`, `dev_setup/`, `сборка/`, `deployment/`, `правила_и_стиль/`, `глоссарий/`, `состояние_проекта/`.
+Применить порядок обновления из раздела «Выбор режима». Для конфликтов обновить `Wiki/conflicts/` и связанный follow-up. В `Vision_wiki/` хранить происхождение продуктовых решений и материалы источника. Для технических решений использовать соответствующий узел или ADR в `Code_wiki/`.
 
 ## Шаг 6. Создать Summary Источника
 
@@ -171,6 +141,8 @@ ingest. Триггер не привязан к commit.
 - links на созданные ноды.
 
 ## Шаг 7. Обновить Индексы И State
+
+Обновить затронутые индексы `Wiki/`, реестры `Wiki/_registry/` и `DDD_Wiki/`.
 
 - `RAW_inputs/index.md` - отметить обработанный источник.
 - `Vision_wiki/index.md` - добавить ссылки на важные новые ноды.
