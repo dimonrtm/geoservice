@@ -34,7 +34,7 @@ P1 — исправить до использования соответству
 | INF-03 | P2, решена 2026-11-01 | Build, supply chain | Изоляция dev/prod context и постоянная CI-проверка | [Отчёт](2026-11-01-inf-03-frontend-build-implementation-report.md); локальная приёмка прошла, GitHub run не запускался |
 | INF-05 | P2 — исправлена 2026-11-01 | Production proxy | Отдельный geometry location пропускает большие Save/Revert, остальные API сохраняют предел | [Отчёт](2026-11-01-inf-05-save-size-implementation-report.md): proxy 7/7, большой API/DB и штатный browser cycle, локально без CI |
 | BE-02 | P2 — исправлена 2026-11-01 | Legacy correctness | Очистка properties возвращает записанное состояние; ошибочный rollback устранён | [Проверки](evidence/be-02/verification.md): 348 unit-тестов, 6 PostGIS-сценариев |
-| BE-03 | P2 | Legacy availability | WebSocket удерживает PostgreSQL connection на срок подписки | [Backend](backend-review.md), lifecycle session/handler |
+| BE-03 | P2 · исправлена 2026-11-02 | Legacy availability | 11 открытых подписок, 0 занятых соединений PostgreSQL, Auth и Save доступны | [Приёмка](evidence/be-03/verification.md) |
 | AR-02 | P2 | Legacy performance | Медленный WebSocket задерживает остальные события и ответ CRUD | [Сквозные сценарии](architecture-realtime-review.md), детерминированный probe |
 | FE-04 | P3 | Accessibility | Русскоязычная страница объявлена `lang=en` | [Frontend](frontend-review.md), HTML |
 | AR-03 | P3 | Legacy code quality | Ошибки публикации скрываются без диагностического следа | [Сквозные сценарии](architecture-realtime-review.md), except/pass chain |
@@ -51,7 +51,7 @@ P1 — исправить до использования соответству
 1. **INF-05 исправлена в согласованных границах**: локальный большой API/DB и штатный browser cycle прошли, CI не менялся. INF-04 снята 2026-11-01: существующие infra contract tests остаются локальными по прямому решению пользователя. INF-03 закрыта с локальной проверкой изоляции context и добавленным CI job. INF-01/02 закрыты с локальными проверками старта API и browser → API/WebSocket маршрута; HTTPS остаётся внешним условием.
 2. **AR-01 закрыта в согласованных границах**: browser/DB/frontend gates, общий review и re-review исправлений пройдены. Проверка replay не ослаблена; native BFCache/OS suspend остаются непроверенной границей. FE-01 сохранена отдельно generation guard и ожиданием retry.
 3. **Оставшаяся номерная проблема карты**: FE-04. FE-02 и FE-03 исправлены; отмена ожидания load при удалении включена в FE-03. Timeout, общее управление ошибками загрузки и отказ уже работающей карты остаются отдельными рисками.
-4. **До повторного включения legacy**: BE-03, AR-02/03. Освободить DB session до receive-loop, ограничить fanout и добавить диагностический след. BE-02 исправлена: очистка properties проверена unit-тестами и на disposable PostGIS.
+4. **До повторного включения legacy** остаются AR-02/03 — ограничить задержку рассылки и добавить диагностику. BE-02 и BE-03 прошли отдельные проверки на изолированной PostGIS.
 5. **Упростить границы модулей при их развитии**: CQ-01–CQ-03. Отделить ORM mapping от домена, выделить координацию frontend-переходов и определить минимальный контракт persistence для Save. Сохранить поведение существующими regression-тестами и проверками транзакций.
 
 ## Архитектура, code smells и performance-риски

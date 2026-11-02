@@ -3,9 +3,11 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, WebSocketException, status
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from utility_service.use_cases.deps import (
     get_layer_service,
+    get_session_factory,
     get_websocket_connection_manager,
     get_websocket_ticket_service,
 )
@@ -13,9 +15,9 @@ from utility_service.use_cases.dtos import AuthUserDTO, AuthenticatedSession
 from utility_service.web_api.api.auth import get_auth_context, require_legacy_gis_editor
 from utility_service.utils.websocket_ticket_auth import authenticate_websocket_ticket
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
-from utility_service.use_cases.services.layer_service import LayerService
 from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
+    WebSocketUserContext,
 )
 from utility_service.use_cases.services.websocket_ticket_service import WebSocketTicketService
 
@@ -39,21 +41,29 @@ async def issue_layer_websocket_ticket(
     return await ticket_service.issue_ticket(user, layer_id, context.session_id)
 
 
+async def get_layer_subscription_context(
+    websocket: WebSocket,
+    layer_id: UUID,
+    session_factory: async_sessionmaker[AsyncSession] = Depends(get_session_factory),
+) -> WebSocketUserContext:
+    ticket = websocket.query_params.get("ticket")
+    async with session_factory() as session:
+        user_context = await authenticate_websocket_ticket(
+            ticket, layer_id, get_websocket_ticket_service(session)
+        )
+        layer = await get_layer_service(session).get_layer_by_id(layer_id)
+        if layer is None:
+            raise _websocket_route_error("Слой не найден")
+    return user_context
+
+
 @ws_layers_router.websocket("/api/v1/ws/layers/{layer_id}")
 async def subscribe_to_layer_updates(
     websocket: WebSocket,
     layer_id: UUID,
-    layer_service: LayerService = Depends(get_layer_service),
-    ticket_service: WebSocketTicketService = Depends(get_websocket_ticket_service),
+    user_context: WebSocketUserContext = Depends(get_layer_subscription_context),
     connection_manager: WebSocketConnectionManager = Depends(get_websocket_connection_manager),
 ) -> None:
-    ticket = websocket.query_params.get("ticket")
-    user_context = await authenticate_websocket_ticket(ticket, layer_id, ticket_service)
-
-    layer = await layer_service.get_layer_by_id(layer_id)
-    if layer is None:
-        raise _websocket_route_error("Слой не найден")
-
     await connection_manager.connect(layer_id, websocket, user_context)
     try:
         if not await connection_manager.send_to_connection(

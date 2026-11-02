@@ -1,5 +1,7 @@
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from types import SimpleNamespace
+from unittest.mock import Mock
 from uuid import UUID, uuid4
 
 import pytest
@@ -9,6 +11,7 @@ from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from utility_service.web_api.api import auth as auth_api
+from utility_service.web_api.api import ws_layers
 from utility_service.web_api.tests.auth_user_factory import (
     create_test_access_token as create_access_token,
     access_service_for,
@@ -16,7 +19,7 @@ from utility_service.web_api.tests.auth_user_factory import (
 from utility_service.use_cases.deps import (
     get_auth_service,
     get_auth_session_access_service,
-    get_layer_service,
+    get_session_factory,
     get_websocket_ticket_service,
 )
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
@@ -38,7 +41,6 @@ async def active_session(session_id):
 
 def create_test_app(
     auth_service: object,
-    layer_service: object,
     connection_manager: WebSocketConnectionManager | None = None,
     ticket_service: object | None = None,
 ) -> FastAPI:
@@ -53,7 +55,6 @@ def create_test_app(
     app.dependency_overrides[get_auth_session_access_service] = lambda: access_service_for(
         auth_service
     )
-    app.dependency_overrides[get_layer_service] = lambda: layer_service
     if ticket_service is not None:
         app.dependency_overrides[get_websocket_ticket_service] = lambda: ticket_service
     return app
@@ -98,13 +99,9 @@ def test_ws_layer_ticket_issue_accepts_editor_when_legacy_enabled(monkeypatch) -
     async def get_user_by_id(_user_id):
         return user
 
-    async def get_layer_by_id(_layer_id):
-        return SimpleNamespace(id=layer_id)
-
     ticket_service = FakeWebSocketTicketService(ticket="editor-ticket")
     app = create_test_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
-        SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
     )
 
@@ -134,13 +131,9 @@ def test_ws_layer_ticket_issue_rejects_editor_when_legacy_disabled(monkeypatch) 
     async def get_user_by_id(_user_id):
         return user
 
-    async def get_layer_by_id(_layer_id):
-        return SimpleNamespace(id=layer_id)
-
     ticket_service = FakeWebSocketTicketService(ticket="editor-ticket")
     app = create_test_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
-        SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
     )
 
@@ -165,13 +158,9 @@ def test_ws_layer_ticket_issue_rejects_reviewer_when_legacy_enabled(monkeypatch)
     async def get_user_by_id(_user_id):
         return user
 
-    async def get_layer_by_id(_layer_id):
-        return SimpleNamespace(id=layer_id)
-
     ticket_service = FakeWebSocketTicketService(ticket="reviewer-ticket")
     app = create_test_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
-        SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
     )
 
@@ -192,12 +181,8 @@ def test_ws_layer_ticket_issue_rejects_missing_auth() -> None:
     async def get_user_by_id(_user_id):
         return None
 
-    async def get_layer_by_id(_layer_id):
-        return SimpleNamespace(id=layer_id)
-
     app = create_test_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
-        SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=FakeWebSocketTicketService(),
     )
 
@@ -218,15 +203,11 @@ def test_ws_layer_ticket_issue_returns_structured_layer_not_found(monkeypatch) -
     async def get_user_by_id(_user_id):
         return user
 
-    async def get_layer_by_id(_layer_id):
-        return None
-
     ticket_service = FakeWebSocketTicketService(
         error=AuthApiError(404, "LAYER_NOT_FOUND", "Слой не найден.")
     )
     app = create_test_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
-        SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
     )
 
@@ -240,7 +221,19 @@ def test_ws_layer_ticket_issue_returns_structured_layer_not_found(monkeypatch) -
     assert response.json()["code"] == "LAYER_NOT_FOUND"
 
 
-def test_ws_layer_subscription_accepts_valid_editor_ticket() -> None:
+@pytest.fixture
+def subscription_app(monkeypatch):
+    def build(auth_service, layer_service, connection_manager=None, ticket_service=None):
+        monkeypatch.setattr(ws_layers, "get_layer_service", lambda session: layer_service)
+        monkeypatch.setattr(
+            ws_layers, "get_websocket_ticket_service", lambda session: ticket_service
+        )
+        return create_test_app(auth_service, connection_manager, ticket_service)
+
+    return build
+
+
+def test_ws_layer_subscription_accepts_valid_editor_ticket(subscription_app) -> None:
     role = "editor"
     layer_id = uuid4()
     ticket = f"{role}-ticket"
@@ -261,7 +254,7 @@ def test_ws_layer_subscription_accepts_valid_editor_ticket() -> None:
     auth_service = SimpleNamespace(get_user_by_id=get_user_by_id)
     layer_service = SimpleNamespace(get_layer_by_id=get_layer_by_id)
     connection_manager = WebSocketConnectionManager(active_session)
-    app = create_test_app(auth_service, layer_service, connection_manager, ticket_service)
+    app = subscription_app(auth_service, layer_service, connection_manager, ticket_service)
 
     with TestClient(app) as client:
         with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}?ticket={ticket}") as websocket:
@@ -272,7 +265,50 @@ def test_ws_layer_subscription_accepts_valid_editor_ticket() -> None:
     assert connection_manager.get_connection_count(layer_id) == 0
 
 
-def test_ws_layer_subscription_rejects_missing_ticket() -> None:
+def test_subscription_releases_db_session_before_connect(monkeypatch) -> None:
+    events = []
+    layer_id = uuid4()
+    ticket_service = FakeWebSocketTicketService()
+    handshake_session = object()
+
+    @asynccontextmanager
+    async def tracked_session():
+        events.append("session_open")
+        try:
+            yield handshake_session
+        finally:
+            events.append("session_closed")
+
+    async def get_layer_by_id(_layer_id):
+        events.append("layer_checked")
+        return SimpleNamespace(id=layer_id)
+
+    async def check_session(_session_id):
+        events.append("check_session")
+        return True
+
+    layer_service = SimpleNamespace(get_layer_by_id=get_layer_by_id)
+    manager = WebSocketConnectionManager(check_session)
+    build_layer_service = Mock(return_value=layer_service)
+    build_ticket_service = Mock(return_value=ticket_service)
+    monkeypatch.setattr(ws_layers, "get_layer_service", build_layer_service)
+    monkeypatch.setattr(ws_layers, "get_websocket_ticket_service", build_ticket_service)
+    app = create_test_app(SimpleNamespace(), manager, ticket_service)
+    app.dependency_overrides[get_session_factory] = lambda: tracked_session
+    with TestClient(app) as client:
+        with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}?ticket=valid") as socket:
+            assert socket.receive_json() == {"type": "connected", "layerId": str(layer_id)}
+            build_layer_service.assert_called_once_with(handshake_session)
+            build_ticket_service.assert_called_once_with(handshake_session)
+            assert events[:4] == [
+                "session_open",
+                "layer_checked",
+                "session_closed",
+                "check_session",
+            ]
+
+
+def test_ws_layer_subscription_rejects_missing_ticket(subscription_app) -> None:
     layer_id = uuid4()
     ticket_service = FakeWebSocketTicketService()
 
@@ -282,7 +318,7 @@ def test_ws_layer_subscription_rejects_missing_ticket() -> None:
     async def get_layer_by_id(_layer_id):
         return SimpleNamespace(id=layer_id)
 
-    app = create_test_app(
+    app = subscription_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
         SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
@@ -297,7 +333,7 @@ def test_ws_layer_subscription_rejects_missing_ticket() -> None:
     assert exc_info.value.code == 1008
 
 
-def test_ws_layer_subscription_rejects_legacy_jwt_query_token() -> None:
+def test_ws_layer_subscription_rejects_legacy_jwt_query_token(subscription_app) -> None:
     layer_id = uuid4()
     user_id = uuid4()
     token = create_access_token(str(user_id), "editor")
@@ -309,7 +345,7 @@ def test_ws_layer_subscription_rejects_legacy_jwt_query_token() -> None:
     async def get_layer_by_id(_layer_id):
         return SimpleNamespace(id=layer_id)
 
-    app = create_test_app(
+    app = subscription_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
         SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
@@ -324,7 +360,7 @@ def test_ws_layer_subscription_rejects_legacy_jwt_query_token() -> None:
     assert exc_info.value.code == 1008
 
 
-def test_ws_layer_subscription_rejects_invalid_or_reused_ticket() -> None:
+def test_ws_layer_subscription_rejects_invalid_or_reused_ticket(subscription_app) -> None:
     layer_id = uuid4()
     ticket_service = FakeWebSocketTicketService(
         error=WebSocketTicketError("ticket already consumed")
@@ -336,7 +372,7 @@ def test_ws_layer_subscription_rejects_invalid_or_reused_ticket() -> None:
     async def get_layer_by_id(_layer_id):
         return SimpleNamespace(id=layer_id)
 
-    app = create_test_app(
+    app = subscription_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
         SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
@@ -351,7 +387,7 @@ def test_ws_layer_subscription_rejects_invalid_or_reused_ticket() -> None:
     assert exc_info.value.code == 1008
 
 
-def test_ws_layer_subscription_rejects_unknown_layer_after_ticket_consume() -> None:
+def test_ws_layer_subscription_rejects_unknown_layer_after_ticket_consume(subscription_app) -> None:
     layer_id = uuid4()
     ticket_service = FakeWebSocketTicketService(ticket="valid-ticket")
 
@@ -361,7 +397,7 @@ def test_ws_layer_subscription_rejects_unknown_layer_after_ticket_consume() -> N
     async def get_layer_by_id(_layer_id):
         return None
 
-    app = create_test_app(
+    app = subscription_app(
         SimpleNamespace(get_user_by_id=get_user_by_id),
         SimpleNamespace(get_layer_by_id=get_layer_by_id),
         ticket_service=ticket_service,
@@ -376,7 +412,46 @@ def test_ws_layer_subscription_rejects_unknown_layer_after_ticket_consume() -> N
     assert exc_info.value.code == 1008
 
 
-def test_logout_before_connected_event_closes_socket_once() -> None:
+@pytest.mark.parametrize("missing_layer", [True, False], ids=["missing_layer", "db_error"])
+def test_subscription_releases_session_on_layer_failure(subscription_app, missing_layer) -> None:
+    layer_id = uuid4()
+    events = []
+
+    @asynccontextmanager
+    async def tracked_session():
+        try:
+            yield object()
+        finally:
+            events.append("closed")
+
+    async def read_layer(_layer_id):
+        events.append("read")
+        if missing_layer:
+            return None
+        raise RuntimeError("layer read failed")
+
+    manager = WebSocketConnectionManager(active_session)
+    app = subscription_app(
+        SimpleNamespace(),
+        SimpleNamespace(get_layer_by_id=read_layer),
+        manager,
+        FakeWebSocketTicketService(),
+    )
+    app.dependency_overrides[get_session_factory] = lambda: tracked_session
+    with TestClient(app) as client:
+        with pytest.raises(WebSocketDisconnect if missing_layer else RuntimeError) as error:
+            with client.websocket_connect(f"/api/v1/ws/layers/{layer_id}?ticket=valid"):
+                pytest.fail("Unexpected WebSocket admission")
+    if missing_layer:
+        assert error.value.code == 1008
+        assert error.value.reason == "Слой не найден"
+    else:
+        assert str(error.value) == "layer read failed"
+    assert events == ["read", "closed"]
+    assert manager.get_connection_count(layer_id) == 0
+
+
+def test_logout_before_connected_event_closes_socket_once(subscription_app) -> None:
     layer_id = uuid4()
     ticket_service = FakeWebSocketTicketService()
     checks = 0
@@ -389,7 +464,7 @@ def test_logout_before_connected_event_closes_socket_once() -> None:
     async def get_layer_by_id(_layer_id):
         return SimpleNamespace(id=layer_id)
 
-    app = create_test_app(
+    app = subscription_app(
         SimpleNamespace(),
         SimpleNamespace(get_layer_by_id=get_layer_by_id),
         WebSocketConnectionManager(check),

@@ -4,7 +4,7 @@ from uuid import UUID
 
 from fastapi import Depends, Request
 from starlette.requests import HTTPConnection
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
     EditVersionRepository,
 )
@@ -85,6 +85,10 @@ def get_feature_service(
     realtime_publisher: FeatureRealtimePublisher = Depends(get_feature_realtime_publisher),
 ) -> FeatureService:
     return FeatureService(session, LayerRepository(session), realtime_publisher)
+
+
+def get_session_factory() -> async_sessionmaker[AsyncSession]:
+    return SessionFactory
 
 
 def get_layer_service(session: AsyncSession = Depends(get_session)) -> LayerService:

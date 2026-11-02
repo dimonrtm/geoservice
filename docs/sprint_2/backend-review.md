@@ -16,7 +16,9 @@
 - Рекомендация: выбирать новое значение по `is not None`, а не по истинности словаря; одинаково использовать его в ответе и публикации события.
 - Проверка исправления: отдельно обновление только `properties={}`, одновременно geometry и `{}`, сохранение свойств при `properties=None`; ответ и event должны совпадать с записанным значением. Интеграционную проверку проводить только в disposable test-БД.
 
-### BE-03 · P2 · Legacy WebSocket удерживает соединение PostgreSQL весь срок подписки
+### BE-03 · P2 · Исправлена 2026-11-02 · Освобождение соединения PostgreSQL при подписке
+
+DB-сессия начальных проверок закрывается до входа в менеджер подключений. В разовой приёмке 11 открытых WebSocket оставили пул свободным. Auth и Save завершились успешно, повторное чтение подтвердило геометрию. Ниже сохранены выводы исходного ревью от 26.10.2026. [Результаты приёмки](evidence/be-03/verification.md)
 
 - Места: `apps/backend/utility_service/use_cases/services/websocket_ticket_service.py:99`; `apps/backend/utility_service/web_api/api/ws_layers.py:52`, `:59`–`:60`; `apps/backend/utility_service/infrastructure/postgresql/session.py:6`, `:15`–`:20`.
 - Условие доступности: legacy realtime включён. Это дефект legacy-пути, не текущего Utility Save.
