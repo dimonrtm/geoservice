@@ -71,9 +71,7 @@ async def subscribe_to_layer_updates(
     websocket: WebSocket,
     layer_id: UUID,
     user_context: WebSocketUserContext = Depends(get_layer_subscription_context),
-    connection_manager: WebSocketConnectionManager = Depends(
-        get_websocket_connection_manager
-    ),
+    connection_manager: WebSocketConnectionManager = Depends(get_websocket_connection_manager),
 ) -> None:
     await connection_manager.connect(layer_id, websocket, user_context)
     try:

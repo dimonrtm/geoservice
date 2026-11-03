@@ -63,16 +63,12 @@ async def realtime_context(engine):
 
 async def ticket_for(engine, user, layer, sid):
     async with AsyncSession(engine, expire_on_commit=False) as session:
-        return await get_websocket_ticket_service(session).issue_ticket(
-            user, layer, sid
-        )
+        return await get_websocket_ticket_service(session).issue_ticket(user, layer, sid)
 
 
 async def consume(engine, ticket, layer):
     async with AsyncSession(engine, expire_on_commit=False) as session:
-        return await get_websocket_ticket_service(session).consume_ticket(
-            ticket.ticket, layer
-        )
+        return await get_websocket_ticket_service(session).consume_ticket(ticket.ticket, layer)
 
 
 async def logout(engine, user, sid):
@@ -150,9 +146,7 @@ def test_revoked_session_receives_no_new_admitted_event():
 
 @pytest.mark.parametrize("close_failure", [False, True])
 @pytest.mark.parametrize("legacy_enabled", [False, True])
-def test_disconnect_session_preserves_other_browser(
-    close_failure, legacy_enabled, monkeypatch
-):
+def test_disconnect_session_preserves_other_browser(close_failure, legacy_enabled, monkeypatch):
     monkeypatch.setattr(settings, "legacy_gis_api_enabled", legacy_enabled)
 
     async def scenario(engine):
@@ -169,9 +163,7 @@ def test_disconnect_session_preserves_other_browser(
             first_socket, other_socket = Socket(), DummyWebSocket()
             for issued, socket in [(first, first_socket), (other, other_socket)]:
                 ticket = await ticket_for(engine, user, layer, issued.session_id)
-                await manager.connect(
-                    layer, socket, await consume(engine, ticket, layer)
-                )
+                await manager.connect(layer, socket, await consume(engine, ticket, layer))
             app = build_workspace_api(engine)
             app.state.websocket_connection_manager = manager
             async with AsyncClient(
@@ -194,9 +186,9 @@ def test_disconnect_session_preserves_other_browser(
             assert await other_socket.next_event() == {"type": "after"}
             await manager.shutdown()
             async with AsyncSession(engine) as session:
-                assert not await get_auth_session_access_service(
-                    session
-                ).is_session_active(first.session_id)
+                assert not await get_auth_session_access_service(session).is_session_active(
+                    first.session_id
+                )
 
     run_committed_scenario(scenario)
 
@@ -214,13 +206,8 @@ def test_expired_ticket_does_not_revoke_active_parent_or_sibling_ticket():
             async with AsyncSession(engine) as session, session.begin():
                 await session.execute(
                     update(WebSocketTicket)
-                    .where(
-                        WebSocketTicket.ticket_hash
-                        == hash_websocket_ticket(expired.ticket)
-                    )
-                    .values(
-                        expires_at=datetime.now(timezone.utc) - timedelta(seconds=1)
-                    )
+                    .where(WebSocketTicket.ticket_hash == hash_websocket_ticket(expired.ticket))
+                    .values(expires_at=datetime.now(timezone.utc) - timedelta(seconds=1))
                 )
             with pytest.raises(WebSocketTicketError):
                 await consume(engine, expired, layer)

@@ -13,9 +13,7 @@ class FeatureRealtimePublisher:
     def __init__(self, connection_manager: WebSocketConnectionManager):
         self.connection_manager = connection_manager
 
-    async def publish_feature_created(
-        self, layer_id: UUID, feature: FeatureOut
-    ) -> None:
+    async def publish_feature_created(self, layer_id: UUID, feature: FeatureOut) -> None:
         await self.connection_manager.broadcast_to_layer(
             layer_id,
             {
@@ -27,9 +25,7 @@ class FeatureRealtimePublisher:
             },
         )
 
-    async def publish_feature_updated(
-        self, layer_id: UUID, feature: FeatureOut
-    ) -> None:
+    async def publish_feature_updated(self, layer_id: UUID, feature: FeatureOut) -> None:
         await self.connection_manager.broadcast_to_layer(
             layer_id,
             {
@@ -60,9 +56,4 @@ class FeatureRealtimePublisher:
         return f"evt_{uuid4()}"
 
     def _generate_occurred_at(self) -> str:
-        return (
-            datetime.now(timezone.utc)
-            .replace(microsecond=0)
-            .isoformat()
-            .replace("+00:00", "Z")
-        )
+        return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")

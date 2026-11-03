@@ -45,9 +45,7 @@ def test_crud_and_fast_subscription_complete_while_slow_transport_is_blocked(
         async with browser_context(engine) as user:
             session = await issue(engine, user)
             token = create_access_token(str(user.id), user.role, session.session_id)
-            context = WebSocketUserContext(
-                user.id, user.email, user.role, session.session_id
-            )
+            context = WebSocketUserContext(user.id, user.email, user.role, session.session_id)
             slow, fast = SlowSocket(), DummyWebSocket()
             for socket in (slow, fast):
                 await manager.connect(layer, socket, context)
@@ -76,29 +74,16 @@ def test_crud_and_fast_subscription_complete_while_slow_transport_is_blocked(
                         },
                     )
                     assert patched.status_code == 200, patched.text
-                    assert (await fast.next_event())["feature"] == patched.json()[
-                        "feature"
-                    ]
+                    assert (await fast.next_event())["feature"] == patched.json()["feature"]
                     assert (await client.get(feature_url)).json()["version"] == 2
-                    conflict = await client.request(
-                        "DELETE", feature_url, json={"version": 1}
-                    )
+                    conflict = await client.request("DELETE", feature_url, json={"version": 1})
                     assert conflict.status_code == 409
-                    deleted = await client.request(
-                        "DELETE", feature_url, json={"version": 2}
-                    )
+                    deleted = await client.request("DELETE", feature_url, json={"version": 2})
                     assert deleted.status_code == 200, deleted.text
                     event = await fast.next_event()
-                    assert (
-                        event["type"] == "feature_deleted"
-                        and event["deletedVersion"] == 2
-                    )
+                    assert event["type"] == "feature_deleted" and event["deletedVersion"] == 2
                     assert (await client.get(feature_url)).status_code == 404
-                    assert (
-                        not slow.closed
-                        and not release.is_set()
-                        and slow.received.empty()
-                    )
+                    assert not slow.closed and not release.is_set() and slow.received.empty()
             finally:
                 release.set()
                 await manager.shutdown()

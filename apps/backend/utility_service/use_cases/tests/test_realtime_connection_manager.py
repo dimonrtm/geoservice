@@ -79,9 +79,7 @@ def test_slow_socket_does_not_block_fast_subscriber_or_publisher():
         manager, layer = WebSocketConnectionManager(active_session), uuid4()
         for subscriber in [slow, fast]:
             await manager.connect(layer, subscriber, build_user_context())
-        publication = asyncio.create_task(
-            manager.broadcast_to_layer(layer, {"type": "update"})
-        )
+        publication = asyncio.create_task(manager.broadcast_to_layer(layer, {"type": "update"}))
         try:
             await asyncio.wait_for(slow_entered.wait(), 1)
             await asyncio.wait_for(fast_received.wait(), 1)
@@ -242,9 +240,7 @@ def test_broadcast_removes_stale_connections():
 def test_utf8_byte_budget_allows_exact_size_and_closes_on_one_extra_byte():
     async def scenario():
         event = {"type": "изменение", "name": "ж" * 50}
-        size = len(
-            json.dumps(event, separators=(",", ":"), ensure_ascii=False).encode()
-        )
+        size = len(json.dumps(event, separators=(",", ":"), ensure_ascii=False).encode())
         manager = WebSocketConnectionManager(active_session, max_pending_bytes=size)
         layer, socket = uuid4(), DummyWebSocket()
         await manager.connect(layer, socket, build_user_context())

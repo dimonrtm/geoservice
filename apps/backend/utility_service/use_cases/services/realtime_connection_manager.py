@@ -46,9 +46,7 @@ class WebSocketConnectionManager:
         self._send_timeout_seconds = send_timeout_seconds
         self._max_pending_frames = max_pending_frames
         self._max_pending_bytes = max_pending_bytes
-        self._connections: dict[UUID, dict[WebSocket, LayerSubscription]] = defaultdict(
-            dict
-        )
+        self._connections: dict[UUID, dict[WebSocket, LayerSubscription]] = defaultdict(dict)
         self._tasks: set[asyncio.Task] = set()
 
     async def _session_active(self, session_id: UUID) -> bool:
@@ -92,18 +90,14 @@ class WebSocketConnectionManager:
                 await self.disconnect_session(subscription.context.session_id)
                 return
             if (
-                self._connections.get(subscription.layer_id, {}).get(
-                    subscription.socket
-                )
+                self._connections.get(subscription.layer_id, {}).get(subscription.socket)
                 is not subscription
             ):
                 return
             try:
                 sending = self._track(subscription.socket.send_text(text))
                 try:
-                    done, _ = await asyncio.wait(
-                        [sending], timeout=self._send_timeout_seconds
-                    )
+                    done, _ = await asyncio.wait([sending], timeout=self._send_timeout_seconds)
                     if not done:
                         self._retire(subscription, 1013)
                         return
@@ -115,17 +109,13 @@ class WebSocketConnectionManager:
                 self._retire(subscription, 1013)
                 return
 
-    async def broadcast_to_layer(
-        self, layer_id: UUID, event: dict[str, object]
-    ) -> None:
+    async def broadcast_to_layer(self, layer_id: UUID, event: dict[str, object]) -> None:
         connections = self._connections.get(layer_id)
         if connections:
             self._publish(tuple(connections.values()), event)
 
     def _publish(self, subscriptions, event):
-        text = json.dumps(
-            event, ensure_ascii=False, separators=(",", ":"), allow_nan=False
-        )
+        text = json.dumps(event, ensure_ascii=False, separators=(",", ":"), allow_nan=False)
         size = len(text.encode("utf-8"))
         for subscription in subscriptions:
             if (
@@ -187,9 +177,7 @@ class WebSocketConnectionManager:
             for subscription in tuple(connections.values()):
                 self._retire(subscription, 1001)
         if self._tasks:
-            _, pending = await asyncio.wait(
-                tuple(self._tasks), timeout=self._close_timeout_seconds
-            )
+            _, pending = await asyncio.wait(tuple(self._tasks), timeout=self._close_timeout_seconds)
             for task in pending:
                 task.cancel()
             if pending:
