@@ -111,47 +111,52 @@ const {
 const {
   labelText,
   reloadFeatures,
+  clearLayerCache,
+  getSubscriptionGeneration,
   createMoveEndHandler,
   applyCreatedFeature,
   applyPatchedFeature,
   applyDeletedFeature,
   stopPendingFeatureWork,
-} = useFeatureLoading(map);
+} = useFeatureLoading(map, () => restartSubscription());
 const {
   handleLayerChange: handleRealtimeLayerChange,
   disconnect: disconnectRealtime,
+  restartSubscription,
   isConnected,
   isReconnecting,
   isSyncingAfterReconnect,
   hasStoppedReconnect,
   isAuthError,
 } = useLayerRealtime({
+  onSubscriptionEnded: clearLayerCache,
   onFeatureCreated: async (layerId, feature) => {
     const currentLayer = activeLayer.value;
     if (!currentLayer || currentLayer.id !== layerId) {
       return;
     }
-    await applyCreatedFeature(currentLayer, feature);
+    await applyCreatedFeature(currentLayer, feature, true);
   },
   onFeatureUpdated: async (layerId, feature) => {
     const currentLayer = activeLayer.value;
     if (!currentLayer || currentLayer.id !== layerId) {
       return;
     }
-    await applyPatchedFeature(currentLayer, feature);
+    await applyPatchedFeature(currentLayer, feature, true);
   },
-  onFeatureDeleted: (layerId, featureId) => {
+  onFeatureDeleted: (layerId, featureId, version) => {
     const currentLayer = activeLayer.value;
     if (!currentLayer || currentLayer.id !== layerId) {
       return;
     }
-    applyDeletedFeature(currentLayer, featureId);
+    applyDeletedFeature(currentLayer, featureId, version);
   },
   onReconnectSynced: async (layerId) => {
     const currentLayer = activeLayer.value;
     if (!currentLayer || currentLayer.id !== layerId) {
       return;
     }
+    clearLayerCache(layerId);
     await reloadFeatures(currentLayer, { force: true });
   },
 });
@@ -245,8 +250,6 @@ onMounted(async () => {
     labelText.value = `Слои загружены: ${loadLayersResult.total}. Выбран слой: ${loadLayersResult.layer.title}`;
     bindActiveLayerClick(loadLayersResult.layer.id);
     enableEditingOverlaySync();
-    await reloadFeatures(loadLayersResult.layer);
-    if (disposed) return;
     await syncRealtimeLayer(loadLayersResult.layer);
     if (disposed) return;
     currentMap.on("moveend", onMoveEnd);
@@ -255,6 +258,15 @@ onMounted(async () => {
     if (!disposed) labelText.value = "Не удалось загрузить данные карты";
   }
 });
+
+watch(
+  () => auth.sessionEpoch,
+  () => {
+    disconnectRealtime();
+    if (activeLayer.value && auth.isAuthenticated)
+      void syncRealtimeLayer(activeLayer.value);
+  },
+);
 
 watch(
   () => [props.mode, props.workspace, props.shouldFitWorkspace] as const,
@@ -288,7 +300,6 @@ async function onChangeLayer(): Promise<void> {
       bindActiveLayerClick(layer.id);
       resetInteractionState();
       stopPendingFeatureWork();
-      await reloadFeatures(layer);
       await syncRealtimeLayer(layer);
     },
   });
@@ -298,15 +309,35 @@ async function onChangeLayer(): Promise<void> {
 }
 
 async function deleteFeature(): Promise<void> {
-  const deletedFeatureId = await deleteEditingFeature();
-  if (activeLayer.value && deletedFeatureId) {
-    applyDeletedFeature(activeLayer.value, deletedFeatureId);
+  const layer = activeLayer.value;
+  const epoch = auth.sessionEpoch;
+  const generation = getSubscriptionGeneration();
+  const deleted = await deleteEditingFeature();
+  if (
+    !disposed &&
+    generation === getSubscriptionGeneration() &&
+    epoch === auth.sessionEpoch &&
+    layer &&
+    activeLayer.value === layer &&
+    deleted
+  ) {
+    applyDeletedFeature(layer, deleted.id, deleted.version);
   }
 }
 
 async function saveFeature(): Promise<void> {
+  const layer = activeLayer.value;
+  const epoch = auth.sessionEpoch;
+  const generation = getSubscriptionGeneration();
   const savedFeature = await saveChange();
-  if (activeLayer.value && savedFeature) {
+  if (
+    !disposed &&
+    generation === getSubscriptionGeneration() &&
+    layer &&
+    layer === activeLayer.value &&
+    epoch === auth.sessionEpoch &&
+    savedFeature
+  ) {
     await applyPatchedFeature(activeLayer.value, savedFeature);
   }
 }

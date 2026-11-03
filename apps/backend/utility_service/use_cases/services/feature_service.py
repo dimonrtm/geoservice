@@ -16,10 +16,16 @@ from utility_service.use_cases.domain.exceptions.version_mismatch_exception impo
     VersionMismatchException,
 )
 from utility_service.infrastructure.postgresql.models.layer import Layer
-from utility_service.infrastructure.postgresql.repositories.layer_repository import LayerRepository
+from utility_service.infrastructure.postgresql.repositories.layer_repository import (
+    LayerRepository,
+)
 from utility_service.use_cases.schemas.feature.create_feature_in import CreateFeatureIn
-from utility_service.use_cases.schemas.feature.delete_feature_request import DeleteFeatureRequest
-from utility_service.use_cases.schemas.feature.delete_feature_response import DeleteFeatureResponse
+from utility_service.use_cases.schemas.feature.delete_feature_request import (
+    DeleteFeatureRequest,
+)
+from utility_service.use_cases.schemas.feature.delete_feature_response import (
+    DeleteFeatureResponse,
+)
 from utility_service.use_cases.schemas.feature.feature_collection_out import (
     FeatureCollectionMetaOut,
     FeatureCollectionOut,
@@ -29,8 +35,12 @@ from utility_service.use_cases.schemas.geojson.geojson import (
     FeatureProperties,
     dump_feature_geometry,
 )
-from utility_service.use_cases.schemas.feature.patch_feature_request import PatchFeatureRequest
-from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
+from utility_service.use_cases.schemas.feature.patch_feature_request import (
+    PatchFeatureRequest,
+)
+from utility_service.use_cases.services.feature_realtime_publisher import (
+    FeatureRealtimePublisher,
+)
 
 
 class FeatureService:
@@ -110,14 +120,20 @@ class FeatureService:
         rows, truncated, next_cursor = await self.layer_repository.list_features_bbox(
             layer, bbox, limit_value, after_id
         )
-        return self.to_feature_collection_out(rows, bbox, limit_value, truncated, next_cursor)
+        return self.to_feature_collection_out(
+            rows, bbox, limit_value, truncated, next_cursor
+        )
 
-    async def create_feature(self, layer_id: UUID, request: CreateFeatureIn) -> FeatureOut:
+    async def create_feature(
+        self, layer_id: UUID, request: CreateFeatureIn
+    ) -> FeatureOut:
         feature: FeatureOut
         async with self.session.begin():
             layer = await self.layer_repository.get_layer_by_id(layer_id)
             if layer is None:
-                raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
+                raise LayerNotFoundException(
+                    f"Слой с идентификатором {layer_id} не найден"
+                )
             if not self.check_geometry_type_match(request, layer):
                 raise BusinessValidationException(
                     "Тип создаваемой геометрии не соответствует типу геометрии слоя"
@@ -141,7 +157,9 @@ class FeatureService:
         async with self.session.begin():
             layer = await self.layer_repository.get_layer_by_id(layer_id)
             if layer is None:
-                raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
+                raise LayerNotFoundException(
+                    f"Слой с идентификатором {layer_id} не найден"
+                )
             if request.geometry and not self.check_geometry_type_match(request, layer):
                 raise BusinessValidationException(
                     "Тип обновляемой геометрии не соответствует типу геометрии слоя"
@@ -151,17 +169,27 @@ class FeatureService:
             if request.geometry is None or request.properties is None:
                 current_feature = await self.get_feature(layer_id, feature_id)
 
-            (row, model_type) = await self.layer_repository.update_feature_if_version_matches(
-                layer,
-                feature_id,
-                dump_feature_geometry(request.geometry) if request.geometry else None,
-                request.properties,
-                request.version,
+            (row, model_type) = (
+                await self.layer_repository.update_feature_if_version_matches(
+                    layer,
+                    feature_id,
+                    (
+                        dump_feature_geometry(request.geometry)
+                        if request.geometry
+                        else None
+                    ),
+                    request.properties,
+                    request.version,
+                )
             )
             if row is None:
-                await self.version_error_handler(feature_id, request.version, model_type)
+                await self.version_error_handler(
+                    feature_id, request.version, model_type
+                )
 
-            geometry = request.geometry or (current_feature.geometry if current_feature else None)
+            geometry = request.geometry or (
+                current_feature.geometry if current_feature else None
+            )
             properties = (
                 request.properties
                 if request.properties is not None
@@ -188,14 +216,20 @@ class FeatureService:
         async with self.session.begin():
             layer = await self.layer_repository.get_layer_by_id(layer_id)
             if layer is None:
-                raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
-            deleted, model_type = await self.layer_repository.delete_feature_if_version_matches(
-                layer, feature_id, request.version
+                raise LayerNotFoundException(
+                    f"Слой с идентификатором {layer_id} не найден"
+                )
+            deleted, model_type = (
+                await self.layer_repository.delete_feature_if_version_matches(
+                    layer, feature_id, request.version
+                )
             )
             if not deleted:
-                await self.version_error_handler(feature_id, request.version, model_type)
+                await self.version_error_handler(
+                    feature_id, request.version, model_type
+                )
             response = DeleteFeatureResponse(featureId=feature_id)
-        await self.publish_feature_deleted(layer_id, feature_id)
+        await self.publish_feature_deleted(layer_id, feature_id, request.version)
         return response
 
     async def get_feature(self, layer_id: UUID, feature_id: UUID) -> FeatureOut:
@@ -204,7 +238,9 @@ class FeatureService:
             raise LayerNotFoundException(f"Слой с идентификатором {layer_id} не найден")
         row = await self.layer_repository.get_feature(layer, feature_id)
         if row is None:
-            raise FeatureNotFoundException(f"Feature с идентификатором {feature_id} не найдена")
+            raise FeatureNotFoundException(
+                f"Feature с идентификатором {feature_id} не найдена"
+            )
         return self.to_feature_out(
             feature_id=row.id,
             version=row.version,
@@ -229,9 +265,13 @@ class FeatureService:
     async def version_error_handler(
         self, feature_id: UUID, expected_version: int, model_type: type
     ):
-        current = await self.layer_repository.get_current_version(model_type, feature_id)
+        current = await self.layer_repository.get_current_version(
+            model_type, feature_id
+        )
         if current is None:
-            raise FeatureNotFoundException(f"Feature с идентификатором {feature_id} не найдена")
+            raise FeatureNotFoundException(
+                f"Feature с идентификатором {feature_id} не найдена"
+            )
         raise VersionMismatchException(
             feature_id=feature_id,
             request_version=expected_version,
@@ -242,7 +282,9 @@ class FeatureService:
             ),
         )
 
-    async def publish_feature_created(self, layer_id: UUID, feature: FeatureOut) -> None:
+    async def publish_feature_created(
+        self, layer_id: UUID, feature: FeatureOut
+    ) -> None:
         if self.realtime_publisher is None:
             return
         try:
@@ -250,7 +292,9 @@ class FeatureService:
         except Exception:
             return
 
-    async def publish_feature_updated(self, layer_id: UUID, feature: FeatureOut) -> None:
+    async def publish_feature_updated(
+        self, layer_id: UUID, feature: FeatureOut
+    ) -> None:
         if self.realtime_publisher is None:
             return
         try:
@@ -258,10 +302,14 @@ class FeatureService:
         except Exception:
             return
 
-    async def publish_feature_deleted(self, layer_id: UUID, feature_id: UUID) -> None:
+    async def publish_feature_deleted(
+        self, layer_id: UUID, feature_id: UUID, deleted_version: int
+    ) -> None:
         if self.realtime_publisher is None:
             return
         try:
-            await self.realtime_publisher.publish_feature_deleted(layer_id, feature_id)
+            await self.realtime_publisher.publish_feature_deleted(
+                layer_id, feature_id, deleted_version
+            )
         except Exception:
             return

@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-11-01
-source: repository-change:2026-11-01
+updated: 2026-11-02
+source: repository-change:2026-11-02
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,8 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-11-02 | [[архитектура/api_and_realtime]] | Изоляция подписок после commit, ограничения очереди, коды закрытия и версия удаления. | WebSocketConnectionManager, FeatureRealtimePublisher, дизайн AR-02 |
+| 2026-11-02 | [[архитектура/frontend]] | Версионное слияние кеша и автоматическое восстановление подписки после длительного разрыва. | useLayerRealtime, useFeatureLoading, useFeatureTileCache |
 | 2026-11-01 | [[deployment/docker_compose]] | Post-ingest correction: единая фильтрация frontend context, разделение локальных и контейнерных env. | .dockerignore frontend; FU-2026-11-01-001 |
 | 2026-11-01 | [[сборка/ci_and_quality]] | Постоянная проверка Docker context через синтетическое загрязнение, общий слой и итоговую статику; отдельная граница required status check. | workflow CI; runner/runbook INF-03 |
 | 2026-10-28 | [[архитектура/browser_auth_sessions]] | Стабильный sid, server revocation, proof logout/status, Web Locks, resume freshness и durable подготовка workspace. | AuthSessionService, AuthSessionAccessService, frontend auth/coordinator/monitor; runbook AR-01 |

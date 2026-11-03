@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -13,8 +13,12 @@ from utility_service.use_cases.domain.exceptions.version_mismatch_exception impo
     VersionMismatchException,
 )
 from utility_service.use_cases.schemas.feature.create_feature_in import CreateFeatureIn
-from utility_service.use_cases.schemas.feature.delete_feature_request import DeleteFeatureRequest
-from utility_service.use_cases.schemas.feature.patch_feature_request import PatchFeatureRequest
+from utility_service.use_cases.schemas.feature.delete_feature_request import (
+    DeleteFeatureRequest,
+)
+from utility_service.use_cases.schemas.feature.patch_feature_request import (
+    PatchFeatureRequest,
+)
 from utility_service.use_cases.services.feature_service import FeatureService
 
 
@@ -201,7 +205,9 @@ def test_update_feature_uses_current_feature_for_missing_geometry() -> None:
         object,
     )
     service = FeatureService(session=DummySession(), layer_repository=repository)
-    request = PatchFeatureRequest(version=2, geometry=None, properties={"name": "After"})
+    request = PatchFeatureRequest(
+        version=2, geometry=None, properties={"name": "After"}
+    )
 
     result = asyncio.run(service.update_feature(layer_id, feature_id, request))
 
@@ -237,7 +243,9 @@ def test_update_feature_publishes_updated_event_after_success() -> None:
         layer_repository=repository,
         realtime_publisher=publisher,
     )
-    request = PatchFeatureRequest(version=2, geometry=None, properties={"name": "After"})
+    request = PatchFeatureRequest(
+        version=2, geometry=None, properties={"name": "After"}
+    )
 
     result = asyncio.run(service.update_feature(layer_id, feature_id, request))
 
@@ -268,7 +276,7 @@ def test_delete_feature_publishes_deleted_event_after_success() -> None:
     )
 
     assert result.featureId == feature_id
-    publisher.publish_feature_deleted.assert_awaited_once_with(layer_id, feature_id)
+    publisher.publish_feature_deleted.assert_awaited_once_with(layer_id, feature_id, 3)
 
 
 @pytest.mark.parametrize("properties", [{"name": "After"}, {}])
@@ -327,7 +335,9 @@ def make_update_service(initial_properties):
 @pytest.mark.parametrize("geometry", [None, UPDATED_POLYGON_GEOMETRY])
 @pytest.mark.parametrize("initial_properties", [{"name": "Before"}, {}])
 def test_update_feature_clears_properties(geometry, initial_properties) -> None:
-    service, repository, publisher, layer_id, feature_id = make_update_service(initial_properties)
+    service, repository, publisher, layer_id, feature_id = make_update_service(
+        initial_properties
+    )
     request = PatchFeatureRequest(version=2, geometry=geometry, properties={})
 
     result = asyncio.run(service.update_feature(layer_id, feature_id, request))
@@ -336,7 +346,9 @@ def test_update_feature_clears_properties(geometry, initial_properties) -> None:
     assert result.id == feature_id
     assert result.properties == {}
     assert result.version == 3
-    expected_geometry = POLYGON_GEOMETRY if geometry is None else UPDATED_POLYGON_GEOMETRY
+    expected_geometry = (
+        POLYGON_GEOMETRY if geometry is None else UPDATED_POLYGON_GEOMETRY
+    )
     assert result.geometry.model_dump(mode="python") == expected_geometry
     publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
     if geometry is not None:
@@ -345,8 +357,12 @@ def test_update_feature_clears_properties(geometry, initial_properties) -> None:
 
 @pytest.mark.parametrize("initial_properties", [{"name": "Before"}, {}])
 def test_update_feature_preserves_properties_when_null(initial_properties) -> None:
-    service, repository, publisher, layer_id, feature_id = make_update_service(initial_properties)
-    request = PatchFeatureRequest(version=2, geometry=UPDATED_POLYGON_GEOMETRY, properties=None)
+    service, repository, publisher, layer_id, feature_id = make_update_service(
+        initial_properties
+    )
+    request = PatchFeatureRequest(
+        version=2, geometry=UPDATED_POLYGON_GEOMETRY, properties=None
+    )
 
     result = asyncio.run(service.update_feature(layer_id, feature_id, request))
 
@@ -358,9 +374,13 @@ def test_update_feature_preserves_properties_when_null(initial_properties) -> No
 
 
 def test_update_feature_preserves_falsy_property_values() -> None:
-    service, repository, publisher, layer_id, feature_id = make_update_service({"name": "Before"})
+    service, repository, publisher, layer_id, feature_id = make_update_service(
+        {"name": "Before"}
+    )
     request = PatchFeatureRequest(
-        version=2, geometry=None, properties={"enabled": False, "count": 0, "note": None}
+        version=2,
+        geometry=None,
+        properties={"enabled": False, "count": 0, "note": None},
     )
 
     result = asyncio.run(service.update_feature(layer_id, feature_id, request))

@@ -1,4 +1,5 @@
-﻿import { fetchLayerFeaturesByBbox } from "@/api/layers";
+import { geometryIntersectsTile } from "@/map/geometry-intersects-tile";
+import { fetchLayerFeaturesByBbox } from "@/api/layers";
 import type { ApiFeatureCollectionResponse, LayerDto } from "@/contracts/api";
 import type { ApiFeature, ApiFeatureCollection } from "@/contracts/geojson";
 import type {
@@ -10,12 +11,16 @@ import type {
 } from "@/contracts/map-cache";
 
 type TileLoadHandle = {
+  featureIds: Set<string>;
+  tile: TileDescriptor;
   initial: Promise<void>;
   completion: Promise<boolean>;
 };
 
 type LayerTileCache = {
   features: FeatureIndex;
+  deletions: Map<string, number>;
+  changedFeatureIds: Set<string>;
   tiles: TileIndex;
   inflight: Map<TileKey, TileLoadHandle>;
 };
@@ -26,6 +31,7 @@ type LoadTilesArgs = {
   limit: number;
   signal?: AbortSignal;
   force?: boolean;
+  waitForAllPages?: boolean;
   onBackgroundChange?: () => void;
 };
 
@@ -67,6 +73,8 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     );
 
     await Promise.all(loadHandles.map((handle) => handle.initial));
+    if (args.waitForAllPages)
+      await Promise.all(loadHandles.map((handle) => handle.completion));
 
     for (const handle of loadHandles) {
       void handle.completion
@@ -116,17 +124,36 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     }
   }
 
-  function upsertFeature(layerId: string, feature: ApiFeature): void {
-    const cache = getLayerCache(layerId);
-    cache.features.set(feature.id, feature);
+  function knownVersion(layerId: string, id: string) {
+    const cache = layerCaches.get(layerId);
+    return Math.max(
+      cache?.features.get(id)?.version ?? 0,
+      cache?.deletions.get(id) ?? 0,
+    );
   }
 
-  function removeFeature(layerId: string, featureId: string): void {
-    const cache = layerCaches.get(layerId);
-    if (!cache) {
-      return;
-    }
+  function historySize(layerId: string) {
+    return layerCaches.get(layerId)?.changedFeatureIds.size ?? 0;
+  }
 
+  function upsertFeature(layerId: string, feature: ApiFeature): void {
+    const cache = getLayerCache(layerId);
+    if (knownVersion(layerId, feature.id) >= feature.version) return;
+    cache.changedFeatureIds.add(feature.id);
+    mergeLiveFeature(cache, feature);
+  }
+
+  function removeFeature(
+    layerId: string,
+    featureId: string,
+    version = knownVersion(layerId, featureId),
+  ): void {
+    const cache = getLayerCache(layerId);
+    if (knownVersion(layerId, featureId) > version) return;
+    cache.deletions.set(featureId, version);
+    cache.changedFeatureIds.add(featureId);
+    for (const handle of cache.inflight.values())
+      handle.featureIds.delete(featureId);
     cache.features.delete(featureId);
     for (const [tileKey, entry] of cache.tiles.entries()) {
       if (!entry.data) {
@@ -198,6 +225,8 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     invalidateTiles,
     invalidateFeature,
     upsertFeature,
+    knownVersion,
+    historySize,
     removeFeature,
     buildVisibleFeatureCollection,
     getReadyTileCount,
@@ -209,6 +238,8 @@ export function useFeatureTileCache(options: FeatureTileCacheOptions = {}) {
     if (!cache) {
       cache = {
         features: new Map<string, ApiFeature>(),
+        deletions: new Map(),
+        changedFeatureIds: new Set(),
         tiles: new Map<TileKey, TileEntry>(),
         inflight: new Map<TileKey, TileLoadHandle>(),
       };
@@ -284,12 +315,12 @@ function loadSingleTile(
     };
   });
 
+  const featureIds = new Set<string>();
   const completion = (async () => {
     let didBackgroundWork = false;
     let currentEntry: TileEntry | null = null;
 
     try {
-      const featureIds = new Set<string>();
       const seenCursors = new Set<string>();
       let totalReturned = 0;
 
@@ -302,7 +333,7 @@ function loadSingleTile(
       });
 
       totalReturned += firstPage.features.length;
-      persistTileFeatures(cache.features, firstPage, featureIds);
+      persistTileFeatures(cache, firstPage, featureIds, args.tile);
 
       currentEntry = {
         state: "ready",
@@ -337,7 +368,7 @@ function loadSingleTile(
         });
 
         totalReturned += page.features.length;
-        persistTileFeatures(cache.features, page, featureIds);
+        persistTileFeatures(cache, page, featureIds, args.tile);
         currentMeta = page.meta;
         nextCursor = page.meta.next_cursor;
 
@@ -388,7 +419,14 @@ function loadSingleTile(
     }
   })();
 
-  const handle: TileLoadHandle = { initial, completion };
+  // A first-page failure also rejects initial; observe completion before awaiting initial.
+  void completion.catch(() => {});
+  const handle: TileLoadHandle = {
+    initial,
+    completion,
+    featureIds,
+    tile: args.tile,
+  };
   cache.inflight.set(args.tile.key, handle);
   return handle;
 }
@@ -426,13 +464,46 @@ function buildFeatureCollection(
   };
 }
 
+function mergeLiveFeature(cache: LayerTileCache, feature: ApiFeature) {
+  const previous = cache.features.get(feature.id);
+  cache.features.set(feature.id, feature);
+  cache.deletions.delete(feature.id);
+  const geometryChanged =
+    !previous ||
+    JSON.stringify(previous.geometry) !== JSON.stringify(feature.geometry);
+  for (const entry of cache.tiles.values()) {
+    if (!entry.data || !geometryChanged) continue;
+    const ids = new Set(entry.data.featureIds);
+    if (geometryIntersectsTile(feature.geometry, entry.data.bbox))
+      ids.add(feature.id);
+    else ids.delete(feature.id);
+    entry.data.featureIds = [...ids];
+  }
+  for (const handle of cache.inflight.values()) {
+    if (geometryIntersectsTile(feature.geometry, handle.tile.bbox))
+      handle.featureIds.add(feature.id);
+    else handle.featureIds.delete(feature.id);
+  }
+}
+
 function persistTileFeatures(
-  featureIndex: FeatureIndex,
+  cache: LayerTileCache,
   featureCollection: ApiFeatureCollectionResponse,
   featureIds: Set<string>,
+  tile: TileDescriptor,
 ): void {
   for (const feature of featureCollection.features) {
-    featureIndex.set(feature.id, feature);
+    if ((cache.deletions.get(feature.id) ?? 0) >= feature.version) continue;
+    const current = cache.features.get(feature.id);
+    if (current && current.version > feature.version) {
+      if (geometryIntersectsTile(current.geometry, tile.bbox))
+        featureIds.add(feature.id);
+      else featureIds.delete(feature.id);
+      continue;
+    }
+    if (!current) cache.features.set(feature.id, feature);
+    else if (current.version < feature.version)
+      mergeLiveFeature(cache, feature);
     featureIds.add(feature.id);
   }
 }

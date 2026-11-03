@@ -29,6 +29,7 @@ export type FeatureDeletedEvent = {
   occurredAt: string;
   layerId: string;
   featureId: string;
+  deletedVersion?: number;
 };
 
 export type LayerRealtimeEvent =
@@ -111,6 +112,10 @@ function isFeatureDeletedEvent(raw: unknown): raw is FeatureDeletedEvent {
     isRecord(raw) &&
     raw.type === "feature_deleted" &&
     hasBaseFeatureRealtimeFields(raw) &&
-    isString(raw.featureId)
+    isString(raw.featureId) &&
+    (raw.deletedVersion === undefined ||
+      (typeof raw.deletedVersion === "number" &&
+        Number.isSafeInteger(raw.deletedVersion) &&
+        raw.deletedVersion > 0))
   );
 }

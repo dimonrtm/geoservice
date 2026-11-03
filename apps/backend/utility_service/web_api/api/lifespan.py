@@ -7,7 +7,10 @@ Created on Wed Jan  7 16:18:42 2026
 
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from utility_service.use_cases.deps import close_runtime_resources, get_realtime_session_checker
+from utility_service.use_cases.deps import (
+    close_runtime_resources,
+    get_realtime_session_checker,
+)
 from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
 )
@@ -18,5 +21,8 @@ async def lifespan(app: FastAPI):
     app.state.websocket_connection_manager = WebSocketConnectionManager(
         get_realtime_session_checker()
     )
-    yield
-    await close_runtime_resources()
+    try:
+        yield
+    finally:
+        await app.state.websocket_connection_manager.shutdown()
+        await close_runtime_resources()

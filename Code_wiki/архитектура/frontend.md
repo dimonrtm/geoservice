@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-28
-source: repository-change:2026-10-28
+updated: 2026-11-02
+source: repository-change:2026-11-02
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -109,7 +109,8 @@ MapLibre создается в `src/composables/map/useMapInstance.ts` с цен
 - `useLayerSelection` загружает layers, выбирает активный слой и управляет видимостью MapLibre layers.
 - `useFeatureLoading` грузит features по видимому bbox, дебаунсит `moveend`, поддерживает client-side tile cache и обновляет GeoJSON source.
 - `useFeatureTileCache` хранит features по layer/tile, TTL cache и background pagination при `next_cursor`.
-- `useLayerRealtime` через `src/api/realtime.ts` получает short-lived WebSocket ticket перед initial connect и каждым reconnect, подключается к WebSocket слоя с `ticket=...`, парсит события и переподключается с задержками `500/1000/2000/5000 ms`.
+- `useLayerRealtime` получает свежий ticket перед каждой попыткой. Первые паузы составляют 0,5/1/2/5 секунд. При временном отказе попытки продолжаются с разбросом до 30 секунд. После подтверждения подписки карта перечитывает видимую область в новом поколении кеша. Поздние результаты старого поколения отбрасываются.
+- События слоя, локальные записи и страницы bbox сравниваются по версии объекта. Удаление оставляет маркер с приоритетом над живым снимком той же версии. Смена геометрии обновляет членство в тайлах. Для незнакомого ID из события карта проверяет объект через GET. История изменений ограничена сменой поколения подписки. [[api_and_realtime]]
 - `usePolygonEditing` синхронизирует overlay редактирования и связывает клики/drag vertices с edit store.
 
 ## Редактирование

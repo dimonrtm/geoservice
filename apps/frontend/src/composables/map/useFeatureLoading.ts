@@ -1,6 +1,6 @@
-﻿import { ref, type ShallowRef } from "vue";
+import { ref, type ShallowRef } from "vue";
 import { AxiosError } from "axios";
-import { HttpError } from "@/api/layers";
+import { fetchLayerFeatureById, HttpError } from "@/api/layers";
 import type { LayerDto } from "@/contracts/api";
 import type { ApiFeature } from "@/contracts/geojson";
 import { useFeatureTileCache } from "@/composables/map/useFeatureTileCache";
@@ -17,11 +17,16 @@ const DEBOUNCE_MS = 250;
 const MIN_ZOOM = 8;
 const FEATURE_LIMIT = 500;
 
-export function useFeatureLoading(map: ShallowRef<Map | null>) {
+export function useFeatureLoading(
+  map: ShallowRef<Map | null>,
+  onHistoryLimit: () => void,
+  maxHistoryEntries = 4096,
+) {
   const labelText = ref("Карта загружается...");
   const isLoadingFeature = ref(false);
   const featuresAbortController = ref<AbortController | null>(null);
   const tileCache = useFeatureTileCache();
+  let subscriptionGeneration = 0;
   let moveTimer: ReturnType<typeof setTimeout> | null = null;
 
   async function reloadFeatures(
@@ -31,12 +36,14 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     const zoom = map.value?.getZoom();
     if (zoom !== undefined && zoom < MIN_ZOOM) {
       labelText.value = `Zoom ${zoom.toFixed(1)}: приблизьтесь к ${MIN_ZOOM}`;
+      if (options.force) throw new Error("Ожидание подходящего масштаба");
       return;
     }
 
     const bbox = getCurrentBbox(map.value);
     if (!isValidBbox(bbox)) {
       labelText.value = "Bbox невалиден на клиенте";
+      if (options.force) throw new Error(labelText.value);
       return;
     }
 
@@ -50,33 +57,42 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     const visibleTileKeys = visibleTiles.map((tile) => tile.key);
 
     try {
-      const { featureCollection, fetchedTiles, requestedTiles } =
-        await tileCache.loadTiles({
-          layer,
-          tiles: visibleTiles,
-          limit: FEATURE_LIMIT,
-          signal: controller.signal,
-          force: options.force === true,
-          onBackgroundChange: () => {
-            if (
-              controller.signal.aborted ||
-              featuresAbortController.value !== controller
-            ) {
-              return;
-            }
-            syncSourceForTileKeys(layer, visibleTileKeys);
-            updateLoadedLabel(layer, bbox, visibleTileKeys, requestedTiles, {
-              fetchedTiles,
-              background: true,
-            });
-          },
-        });
+      const { fetchedTiles, requestedTiles } = await tileCache.loadTiles({
+        layer,
+        tiles: visibleTiles,
+        limit: FEATURE_LIMIT,
+        signal: controller.signal,
+        force: options.force === true,
+        waitForAllPages: options.force,
+        onBackgroundChange: () => {
+          if (
+            controller.signal.aborted ||
+            featuresAbortController.value !== controller
+          ) {
+            return;
+          }
+          syncSourceForTileKeys(layer, visibleTileKeys);
+          updateLoadedLabel(layer, bbox, visibleTileKeys, requestedTiles, {
+            fetchedTiles,
+            background: true,
+          });
+        },
+      });
 
-      setSourceData(map.value, getSourceId(layer), featureCollection);
+      if (
+        controller.signal.aborted ||
+        controller !== featuresAbortController.value
+      ) {
+        if (options.force) throw new Error("Вид карты изменился");
+        return;
+      }
+      syncSourceForTileKeys(layer, visibleTileKeys);
       updateLoadedLabel(layer, bbox, visibleTileKeys, requestedTiles, {
         fetchedTiles,
       });
     } catch (err: unknown) {
+      if (options.force) throw err;
+      if (controller.signal.aborted) return;
       if (err instanceof AxiosError && err.code === "ERR_CANCELED") {
         return;
       }
@@ -92,7 +108,8 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
         labelText.value = "Сетевая или неизвестная ошибка";
       }
     } finally {
-      isLoadingFeature.value = false;
+      if (controller === featuresAbortController.value)
+        isLoadingFeature.value = false;
     }
   }
 
@@ -115,37 +132,46 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
   }
 
   function clearLayerCache(layerId: string): void {
+    subscriptionGeneration++;
+    stopPendingFeatureWork();
     tileCache.clearLayer(layerId);
   }
 
   async function applyPatchedFeature(
     layer: LayerDto,
     feature: ApiFeature,
+    verifyUnknown = false,
   ): Promise<void> {
+    const generation = subscriptionGeneration;
+    if (verifyUnknown && !tileCache.knownVersion(layer.id, feature.id)) {
+      try {
+        feature = await fetchLayerFeatureById(layer.id, feature.id);
+      } catch (error) {
+        if (generation !== subscriptionGeneration) return;
+        if (!(error instanceof HttpError && error.status === 404)) throw error;
+        // UUID удалённого объекта не переиспользуется.
+        applyDeletedFeature(layer, feature.id, Number.POSITIVE_INFINITY);
+        return;
+      }
+    }
+    if (generation !== subscriptionGeneration) return;
     tileCache.upsertFeature(layer.id, feature);
-    tileCache.invalidateFeature(layer.id, feature.id);
-    tileCache.invalidateTiles(
-      layer.id,
-      getVisibleTiles().map((tile) => tile.key),
-    );
-    await reloadFeatures(layer);
-  }
-
-  async function applyCreatedFeature(
-    layer: LayerDto,
-    feature: ApiFeature,
-  ): Promise<void> {
-    tileCache.upsertFeature(layer.id, feature);
-    tileCache.invalidateTiles(
-      layer.id,
-      getVisibleTiles().map((tile) => tile.key),
-    );
-    await reloadFeatures(layer);
-  }
-
-  function applyDeletedFeature(layer: LayerDto, featureId: string): void {
-    tileCache.removeFeature(layer.id, featureId);
     syncVisibleSource(layer);
+    checkHistoryLimit(layer.id);
+  }
+
+  function checkHistoryLimit(layerId: string) {
+    if (tileCache.historySize(layerId) >= maxHistoryEntries) onHistoryLimit();
+  }
+
+  function applyDeletedFeature(
+    layer: LayerDto,
+    featureId: string,
+    version: number,
+  ): void {
+    tileCache.removeFeature(layer.id, featureId, version);
+    syncVisibleSource(layer);
+    checkHistoryLimit(layer.id);
   }
 
   function stopPendingFeatureWork(): void {
@@ -162,8 +188,9 @@ export function useFeatureLoading(map: ShallowRef<Map | null>) {
     reloadFeatures,
     createMoveEndHandler,
     clearLayerCache,
+    getSubscriptionGeneration: () => subscriptionGeneration,
     applyPatchedFeature,
-    applyCreatedFeature,
+    applyCreatedFeature: applyPatchedFeature,
     applyDeletedFeature,
     stopPendingFeatureWork,
   };

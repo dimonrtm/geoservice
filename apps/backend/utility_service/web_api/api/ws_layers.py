@@ -2,7 +2,14 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect, WebSocketException, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    WebSocket,
+    WebSocketDisconnect,
+    WebSocketException,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from utility_service.use_cases.deps import (
@@ -19,7 +26,9 @@ from utility_service.use_cases.services.realtime_connection_manager import (
     WebSocketConnectionManager,
     WebSocketUserContext,
 )
-from utility_service.use_cases.services.websocket_ticket_service import WebSocketTicketService
+from utility_service.use_cases.services.websocket_ticket_service import (
+    WebSocketTicketService,
+)
 
 ws_layers_router = APIRouter(tags=["realtime"])
 
@@ -62,14 +71,12 @@ async def subscribe_to_layer_updates(
     websocket: WebSocket,
     layer_id: UUID,
     user_context: WebSocketUserContext = Depends(get_layer_subscription_context),
-    connection_manager: WebSocketConnectionManager = Depends(get_websocket_connection_manager),
+    connection_manager: WebSocketConnectionManager = Depends(
+        get_websocket_connection_manager
+    ),
 ) -> None:
     await connection_manager.connect(layer_id, websocket, user_context)
     try:
-        if not await connection_manager.send_to_connection(
-            layer_id, websocket, {"type": "connected", "layerId": str(layer_id)}
-        ):
-            return
         while True:
             message = await websocket.receive()
             if message["type"] == "websocket.disconnect":

@@ -178,6 +178,7 @@ describe("useLayerRealtime", () => {
       occurredAt: "2026-04-14T10:20:32Z",
       layerId: "layer-1",
       featureId: "feature-1",
+      deletedVersion: 1,
     });
 
     await flushPromises();
@@ -185,10 +186,10 @@ describe("useLayerRealtime", () => {
     expect(realtime.isConnected.value).toBe(true);
     expect(onFeatureCreated).toHaveBeenCalledWith("layer-1", feature);
     expect(onFeatureUpdated).toHaveBeenCalledWith("layer-1", feature);
-    expect(onFeatureDeleted).toHaveBeenCalledWith("layer-1", "feature-1");
+    expect(onFeatureDeleted).toHaveBeenCalledWith("layer-1", "feature-1", 1);
   });
 
-  it("reconnects after transport close and syncs only after reconnect", async () => {
+  it("reconnects after transport close and syncs after each registration", async () => {
     const onReconnectSynced = vi.fn();
     const { useLayerRealtime } =
       await import("@/composables/map/useLayerRealtime");
@@ -214,7 +215,7 @@ describe("useLayerRealtime", () => {
     firstSocket.emitMessage({ type: "connected", layerId: "layer-1" });
     await flushPromises();
 
-    expect(onReconnectSynced).not.toHaveBeenCalled();
+    expect(onReconnectSynced).toHaveBeenCalledOnce();
 
     firstSocket.emitClose(1006);
     expect(realtime.isReconnecting.value).toBe(true);
@@ -238,6 +239,27 @@ describe("useLayerRealtime", () => {
     expect(realtime.isReconnecting.value).toBe(false);
   });
 
+  it("retries a failed readback on the open socket and stops old retries on logout", async () => {
+    const onReconnectSynced = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("late page"))
+      .mockResolvedValue(undefined);
+    const { useLayerRealtime } =
+      await import("@/composables/map/useLayerRealtime");
+    const realtime = useLayerRealtime({ onReconnectSynced });
+    await realtime.connectToLayer("layer-1");
+    getLastSocket().emitMessage({ type: "connected", layerId: "layer-1" });
+    await flushPromises();
+    expect(realtime.isSyncingAfterReconnect.value).toBe(true);
+    await vi.advanceTimersByTimeAsync(500);
+    expect(onReconnectSynced).toHaveBeenCalledTimes(2);
+    expect(FakeWebSocket.instances.length).toBe(1);
+    expect(realtime.isSyncingAfterReconnect.value).toBe(false);
+    realtime.disconnect();
+    await vi.runAllTimersAsync();
+    expect(FakeWebSocket.instances.length).toBe(1);
+  });
+
   it("does not reconnect after intentional disconnect", async () => {
     const { useLayerRealtime } =
       await import("@/composables/map/useLayerRealtime");
@@ -255,7 +277,7 @@ describe("useLayerRealtime", () => {
     expect(FakeWebSocket.instances).toHaveLength(1);
   });
 
-  it("stops reconnect after hitting the retry limit", async () => {
+  it("continues reconnect after the initial retry sequence", async () => {
     const { REALTIME_RECONNECT_DELAYS_MS, useLayerRealtime } =
       await import("@/composables/map/useLayerRealtime");
     const realtime = useLayerRealtime();
@@ -277,8 +299,8 @@ describe("useLayerRealtime", () => {
     getLastSocket().emitClose(1006);
     await vi.runAllTimersAsync();
 
-    expect(realtime.hasStoppedReconnect.value).toBe(true);
-    expect(realtime.isReconnecting.value).toBe(false);
+    expect(realtime.hasStoppedReconnect.value).toBe(false);
+    expect(FakeWebSocket.instances.length).toBeGreaterThan(5);
   });
 
   it("stops reconnect on auth-related websocket close", async () => {
@@ -299,9 +321,9 @@ describe("useLayerRealtime", () => {
   });
 
   it("does not open a websocket when ticket issue fails", async () => {
-    apiMocks.requestLayerWebSocketTicket.mockRejectedValueOnce(
-      new Error("401"),
-    );
+    apiMocks.requestLayerWebSocketTicket.mockRejectedValueOnce({
+      response: { status: 401 },
+    });
     const { useLayerRealtime } =
       await import("@/composables/map/useLayerRealtime");
     const realtime = useLayerRealtime();

@@ -51,6 +51,22 @@ describe("realtime contracts", () => {
     ).toBe(true);
   });
 
+  it("accepts legacy and versioned deletes and rejects malformed versions", () => {
+    const deleted = {
+      type: "feature_deleted",
+      layerId: "l",
+      eventId: "e",
+      occurredAt: "now",
+      featureId: "f",
+    };
+    expect(isLayerRealtimeEvent(deleted)).toBe(true);
+    expect(isLayerRealtimeEvent({ ...deleted, deletedVersion: 3 })).toBe(true);
+    for (const bad of [-1, 0, 1.2, "3", null])
+      expect(isLayerRealtimeEvent({ ...deleted, deletedVersion: bad })).toBe(
+        false,
+      );
+  });
+
   it("rejects invalid realtime payloads", () => {
     expect(
       isLayerRealtimeEvent({

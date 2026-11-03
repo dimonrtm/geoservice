@@ -26,6 +26,8 @@ injected pageshow с реальным status, настоящий history back �
 
 ## AR-02 — P2: медленный WebSocket задерживает остальных подписчиков и HTTP-ответ записи
 
+Статус 2026-11-02 — исправлена. Изоляция HTTP и двух подписчиков проверена на PostGIS, автоматическое восстановление карты — в Microsoft Edge. [Приёмка AR-02](evidence/ar-02/verification.md). Ниже сохранено исходное описание дефекта.
+
 Категории: производительность, доступность, архитектура realtime. Условие: включён `LEGACY_GIS_API_ENABLED`; по умолчанию выключен.
 
 Код: `apps/backend/utility_service/use_cases/services/realtime_connection_manager.py:36–49`, `apps/backend/utility_service/use_cases/services/feature_service.py:134,179,196`, `apps/backend/utility_service/use_cases/services/feature_realtime_publisher.py:15–59`.

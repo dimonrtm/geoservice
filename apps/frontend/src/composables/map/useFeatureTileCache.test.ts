@@ -1,4 +1,4 @@
-﻿import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useFeatureTileCache } from "@/composables/map/useFeatureTileCache";
 import type { ApiFeatureCollectionResponse, LayerDto } from "@/contracts/api";
@@ -13,6 +13,94 @@ vi.mock("@/api/layers", () => ({
 describe("feature tile cache", () => {
   beforeEach(() => {
     fetchLayerFeaturesByBbox.mockReset();
+  });
+
+  it("keeps the newest version and a deletion over stale events and bbox pages", async () => {
+    const cache = useFeatureTileCache();
+    const layer = makeLayer();
+    const tile = makeTile("tile");
+    fetchLayerFeaturesByBbox.mockResolvedValue(makeFeatureCollection(["a"]));
+    await cache.loadTiles({ layer, tiles: [tile], limit: 5 });
+    const original = makeFeatureCollection(["a"]).features[0]!;
+    cache.upsertFeature(layer.id, { ...original, version: 3 });
+    cache.upsertFeature(layer.id, { ...original, version: 2 });
+    expect(
+      cache.buildVisibleFeatureCollection(layer.id, [tile.key]).features[0]
+        ?.version,
+    ).toBe(3);
+    cache.removeFeature(layer.id, original.id, 3);
+    cache.upsertFeature(layer.id, { ...original, version: 3 });
+    const result = await cache.loadTiles({
+      layer,
+      tiles: [tile],
+      limit: 5,
+      force: true,
+    });
+    expect(result.featureCollection.features).toEqual([]);
+  });
+
+  it("moves membership when a newer bbox page precedes the same websocket update", async () => {
+    const cache = useFeatureTileCache();
+    const layer = makeLayer();
+    const a = makeTile("a"),
+      b = makeTile("b", 2);
+    const first = makeFeatureCollection(["moving"]);
+    first.features[0]!.geometry = {
+      type: "Point",
+      coordinates: [70.01, 52.01],
+    };
+    fetchLayerFeaturesByBbox.mockResolvedValueOnce(first);
+    await cache.loadTiles({ layer, tiles: [a], limit: 1 });
+    const moved = structuredClone(first);
+    moved.features[0]!.geometry = {
+      type: "Point",
+      coordinates: [70.01, 52.06],
+    };
+    moved.features[0]!.version = 2;
+    fetchLayerFeaturesByBbox.mockResolvedValueOnce(moved);
+    await cache.loadTiles({ layer, tiles: [b], limit: 1 });
+    cache.upsertFeature(layer.id, moved.features[0]!);
+    expect(
+      cache.buildVisibleFeatureCollection(layer.id, ["a"]).features,
+    ).toEqual([]);
+    expect(
+      cache.buildVisibleFeatureCollection(layer.id, ["b"]).features,
+    ).toEqual(moved.features);
+  });
+
+  it("propagates a failed second page before reporting successful recovery", async () => {
+    const cache = useFeatureTileCache();
+    const layer = makeLayer();
+    const tile = makeTile("a");
+    const page = createDeferred<ApiFeatureCollectionResponse>();
+    fetchLayerFeaturesByBbox
+      .mockResolvedValueOnce(
+        makeFeatureCollection(["a"], { nextCursor: "next" }),
+      )
+      .mockReturnValueOnce(page.promise);
+    const recovery = cache.loadTiles({
+      layer,
+      tiles: [tile],
+      limit: 1,
+      force: true,
+      waitForAllPages: true,
+    });
+    await vi.waitFor(() =>
+      expect(fetchLayerFeaturesByBbox).toHaveBeenCalledTimes(2),
+    );
+    const failure = expect(recovery).rejects.toThrow("temporary page failure");
+    page.reject(new Error("temporary page failure"));
+    await failure;
+    cache.clearLayer(layer.id);
+    fetchLayerFeaturesByBbox.mockResolvedValueOnce(makeFeatureCollection([]));
+    const retry = await cache.loadTiles({
+      layer,
+      tiles: [tile],
+      limit: 1,
+      force: true,
+      waitForAllPages: true,
+    });
+    expect(retry.featureCollection.features).toEqual([]);
   });
 
   it("deduplicates features aggregated from multiple tiles", async () => {

@@ -5,6 +5,10 @@ import type { WorkspaceResponse } from "@/contracts/work-orders";
 
 const mocks = vi.hoisted(() => ({
   abortLayerLoading: vi.fn(),
+  activeLayer: {
+    value: null as null | { id: string; name: string; title: string },
+  },
+  getSubscriptionGeneration: vi.fn(),
   applyCreatedFeature: vi.fn(),
   applyDeletedFeature: vi.fn(),
   applyPatchedFeature: vi.fn(),
@@ -51,7 +55,7 @@ vi.mock("@/composables/map/useMapInstance", () => ({
 vi.mock("@/composables/map/useLayerSelection", () => ({
   useLayerSelection: () => ({
     layers: { value: [] },
-    activeLayer: { value: null },
+    activeLayer: mocks.activeLayer,
     activeLayerId: { value: "" },
     loadLayers: mocks.loadLayers,
     changeLayer: mocks.changeLayer,
@@ -66,6 +70,7 @@ vi.mock("@/composables/map/useFeatureLoading", async () => {
     useFeatureLoading: () => ({
       labelText: ref(""),
       reloadFeatures: mocks.reloadFeatures,
+      getSubscriptionGeneration: mocks.getSubscriptionGeneration,
       createMoveEndHandler: () => vi.fn(),
       applyCreatedFeature: mocks.applyCreatedFeature,
       applyPatchedFeature: mocks.applyPatchedFeature,
@@ -194,6 +199,31 @@ describe("MapView", () => {
     expect(wrapper.get(".badge").text()).toContain(
       "Карта готова. Выберите наряд в списке.",
     );
+  });
+
+  it("ignores a local write response after the same layer starts a fresh subscription", async () => {
+    const layer = { id: "layer-1", name: "lines", title: "Lines" };
+    mocks.activeLayer.value = layer;
+    mocks.loadLayers.mockResolvedValue({ status: "ready", total: 1, layer });
+    mocks.getSubscriptionGeneration.mockReturnValue(1);
+    let saved!: (value: unknown) => void;
+    mocks.saveChange.mockReturnValueOnce(
+      new Promise((resolve) => (saved = resolve)),
+    );
+    const { default: MapView } = await import("@/components/MapView.vue");
+    const wrapper = mount(MapView, { props: { mode: "editing" } });
+    try {
+      await flushPromises();
+      await wrapper.get(".actions button").trigger("click");
+      expect(mocks.saveChange).toHaveBeenCalledOnce();
+      mocks.getSubscriptionGeneration.mockReturnValue(2);
+      saved({ id: "f", version: 2 });
+      await flushPromises();
+      expect(mocks.applyPatchedFeature).not.toHaveBeenCalled();
+    } finally {
+      wrapper.unmount();
+      mocks.activeLayer.value = null;
+    }
   });
 
   it("passes auth readiness to realtime without exposing a token", async () => {

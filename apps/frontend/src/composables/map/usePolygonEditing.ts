@@ -104,8 +104,11 @@ export function usePolygonEditing(
     return await editStore.saveEditing();
   }
 
-  async function deleteEditingFeature(): Promise<string | null> {
-    return await editStore.deleteEditing();
+  async function deleteEditingFeature() {
+    if (editStore.edit.mode !== "editing") return null;
+    const version = editStore.edit.session.version;
+    const id = await editStore.deleteEditing();
+    return id ? { id, version } : null;
   }
 
   function cancelEditing(): void {

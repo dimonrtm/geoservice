@@ -4,7 +4,9 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 from utility_service.use_cases.schemas.feature.feature_out import FeatureOut
-from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
+from utility_service.use_cases.services.feature_realtime_publisher import (
+    FeatureRealtimePublisher,
+)
 
 
 POLYGON_GEOMETRY = {
@@ -68,9 +70,10 @@ def test_publish_feature_deleted_sends_expected_payload() -> None:
     connection_manager = AsyncMock()
     publisher = FeatureRealtimePublisher(connection_manager)
 
-    asyncio.run(publisher.publish_feature_deleted(layer_id, feature_id))
+    asyncio.run(publisher.publish_feature_deleted(layer_id, feature_id, 3))
 
     payload = connection_manager.broadcast_to_layer.await_args.args[1]
     assert payload["type"] == "feature_deleted"
+    assert payload["deletedVersion"] == 3
     assert payload["featureId"] == str(feature_id)
     assert_common_event_fields(payload, layer_id)
