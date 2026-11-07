@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-22
+updated: 2026-11-07
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -92,3 +92,7 @@ tags: [domain-knowledge, ddd]
 ## Применимость заключения — 2026-10-22
 
 [[Wiki/concepts/assessment_statement_lifecycle]] и [[Wiki/concepts/assessment_delivery_and_acceptance]] описывают выпуск, область, редакции и передачу. [[Wiki/policies/assessment_issue_and_correction_policy]] закрепляет 15 ответов; [[Wiki/specifications/assessment_statement_usable]] проверяет пригодность конкретного утверждения для цели. Корпус 84 внешних документа, источники и ограничения находятся в RAW. Это модель ручной процедуры, без расширения Save и позиционного критерия.
+
+## Допуск экземпляра учебных данных — 2026-11-07
+
+Корпус 80 документов и 15 ответов уточняет [[Wiki/policies/demo_dataset_qualification_policy]]. Новые понятия: [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/coordinate_operation_provenance]]. Критерий ручного допуска — [[Wiki/specifications/demo_dataset_instance_qualified]]. Правила приняты условной организацией; два фактических вопроса metadata/fixture не закрыты.

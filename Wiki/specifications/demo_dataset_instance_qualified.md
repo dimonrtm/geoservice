@@ -1,0 +1,43 @@
+---
+title: Экземпляр набора пригоден для заявленного упражнения
+type: specification
+status: active
+created: 2026-11-07
+updated: 2026-11-07
+source: RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md
+tags: [domain-knowledge, dataset-qualification, simulated-organization]
+confidence: high
+related: [Wiki/policies/demo_dataset_qualification_policy, Wiki/concepts/dataset_instance_and_record_identity, Wiki/concepts/coordinate_operation_provenance, DDD_Wiki/use_cases/prepare_and_check_line_edit]
+---
+
+# Экземпляр набора пригоден для заявленного упражнения
+
+## Predicate
+
+Ручной допуск относится к конкретной цели, экземпляру данных, WorkOrder и EditVersion. Он установлен, когда:
+
+1. Различимы логический набор/редакция, экземпляр, запись и её обозначение; межсистемное сопоставление обосновано.
+2. Паспортные условия сравнимы с фактическими данными и persisted policy версии. Для неизвестных/неподдерживаемых/неприменимых свойств указаны источник и последствия для цели.
+3. Установлены baseline/current и их контекст. Проверены структура линии, endpoints, associations, допустимая внутренняя вершина и условия AOI по существующим инвариантам.
+4. Выбрана ветка упражнения: ненулевой Save, no-op либо подтверждение уже имеющегося состояния. Candidate не требует скрытого изменения baseline/других вершин.
+5. Имеются прослеживаемые свидетельства сверки. Несовместимые чтения не представлены атомарным снимком. Ограничения позиционной, топологической и эксплуатационной оценки явно сохранены.
+
+Это критерий ручной подготовки, не новый server status, API endpoint, domain event или общий флаг качества dataset.
+
+## Failure Meaning
+
+Нельзя заявлять допуск данного экземпляра для этой цели. Причина может быть в неизвестности происхождения, другом экземпляре/редакции, policy mismatch, отсутствии внутренней вершины, смене AOI или несогласованных наблюдениях. Недопуск упражнения не означает дефект всей БД, отмену исторического Save или автоматический Revert.
+
+При старой двухточечной L-003 нельзя добавлять вершину ради прохождения упражнения. Выбирается отдельный явно подготовленный набор/сценарий либо разбор по [[Wiki/policies/geometry_quality_escalation_policy]].
+
+## Независимые результаты
+
+Допуск к техническому упражнению не доказывает его выполнение. Завершение определяется [[Wiki/specifications/line_edit_exercise_completed]]. Позиционное качество — [[Wiki/specifications/saved_line_quality_assessment]] и прежний SIM-UGIS-POS-001. Отсутствие независимого эталона сохраняет POSITIONAL_ACCURACY_UNVERIFIED без нового hard guard Save.
+
+Receipt свидетельствует об операции; current — о прочитанном состоянии. Старый replay success не заменяет более новый current. Согласованность отдельных чтений должна быть установлена в пределах доступного контракта либо ограничена в заключении.
+
+## Происхождение и состояние
+
+Принято условной организацией в ответах 1–15 [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]], общий корпус 80 внешних документов. Ручная карточка и аналитическая матрица находятся в RAW; они не являются выполненными тестами.
+
+Фактическая БД не проверена. Два вопроса metadata/fixture остаются open в [[Wiki/_registry/questions]]; остаток сверки — FU-2026-10-11-001. Связи: [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/coordinate_operation_provenance]], [[Wiki/policies/demo_dataset_qualification_policy]], [[DDD_Wiki/use_cases/prepare_and_check_line_edit]].

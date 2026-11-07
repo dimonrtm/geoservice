@@ -3,8 +3,8 @@ title: Подготовить и проверить осознанную пра�
 type: use-case
 status: active
 created: 2026-10-18
-updated: 2026-10-19
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md"
+updated: 2026-11-07
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_line_editing_policy]
@@ -39,3 +39,17 @@ related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_
 ## Изменение задания или основания
 
 При уточнении задачи, отзыве/редакции источника или новом знании о происхождении используется [[DDD_Wiki/use_cases/reassess_line_edit_basis]]. Соответствие уже существующего состояния заданию может дать обоснованный результат без движения; оно не заменяет учебную ветку ненулевого Save. Самостоятельность частичного результата определяется также зависимостями, а не числом сохранений.
+
+## Квалификация конкретного экземпляра — 2026-11-07
+
+Шаг 1 основного потока уточнён [[Wiki/specifications/demo_dataset_instance_qualified]]:
+
+1. Установить экземпляр/редакцию и локальную запись; межсистемное соответствие объяснить по [[Wiki/concepts/dataset_instance_and_record_identity]].
+2. Сопоставить паспорт, persisted policy и реальные данные; отдельно указать происхождение координатной операции и неизвестные свойства.
+3. Проверить структуру, endpoints/associations, WorkOrder/AOI и разрешённую внутреннюю вершину. Существующий seed — ожидание, не факт содержимого старого volume.
+4. Выбрать ветку упражнения с учётом current: ненулевой Save, no-op или уже достигнутое состояние. Не менять baseline для подготовки удобного примера.
+5. Связать доступные наблюдения и ограничения в ручной карточке; после Save отдельно устанавливать исход операции и current.
+
+При невозможности подтвердить экземпляр/условия заявленная ветка не допускается. Это не новый hard guard Save, aggregate или транзакция. Новая функция UI/endpoint этим не проектируется. Фактические два metadata/fixture вопроса остаются open.
+
+Источник: [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]], общий корпус 80 документов; сценарии аналитические, не исполненные runtime-тесты.

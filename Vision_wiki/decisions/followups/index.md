@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-22
+updated: 2026-11-07
 source: null
 tags: [followups, conflicts]
 ---
@@ -21,6 +21,8 @@ tags: [followups, conflicts]
 | FU-2026-10-11-003 | resolved | Организационные основания точности и хранения | [[../../../Wiki/policies/positional_accuracy_acceptance_policy]], [[../../../Wiki/policies/change_history_retention_policy]]; [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] | Приняты обязанности, SIM-UGIS-POS-001 и SIM-UGIS-RET-001 v1.0 для условной организации; реальные назначения и документы не требуются. Решение принято агентом по поручению пользователя; реализация отдельно в FU-2026-10-13-004. |
 
 ### FU-2026-10-11-001 — Отставание Wiki От First-Save Реализации
+
+Сверка `/sync-vision` 2026-11-07: [отчёт S2-X01](../../../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок восстановления 2026-10-23. Текущие технические основания — [[../../../Code_wiki/архитектура/frontend_save_recovery]], [[../../../Code_wiki/архитектура/browser_auth_sessions]], [[../../../Code_wiki/архитектура/edit_version_api_readback]]. Ожидания реализации S2-X01 ниже исторические. Follow-up остаётся open: требуется сверка доменной очереди и двух вопросов metadata/fixture; FU-2026-10-13-004 также не закрывается.
 
 Дополнение `/sync-vision` 2026-10-16: [[../../../Code_wiki/архитектура/frontend]] также помечена `stale`. Коммит `6c4b6ba` добавил frontend Save contracts/API client и recovery state; источники для отдельного `/ingest repository-change`: `apps/frontend/src/contracts/workspace-edit.ts`, `apps/frontend/src/api/workOrders.ts`, `apps/frontend/src/stores/workOrders.ts`, `apps/frontend/src/stores/workspaceRecoveryStorage.ts` и `docs/sprint_2/2026-10-15-day-9-frontend-state-implementation-report.md`. Сверить влияние на зависимости S2-X01, не объявляя весь UI/recovery scope готовым. Организационные specification и retention уже приняты по FU-2026-10-11-003; ниже сохраняется прежняя формулировка технической сверки.
 
@@ -140,3 +142,9 @@ FU-2026-06-01-002: новые первичные источники расшир
 | FU-2026-10-28-001 | resolved | Code_wiki auth | [[Code_wiki/архитектура/browser_auth_sessions]], [[Code_wiki/архитектура/api_and_realtime]], [[Code_wiki/архитектура/backend]], [[Code_wiki/архитектура/frontend]] | После repository-change ingest синхронизировать только устаревшие технические auth-факты: logout без sid/с удалением cookie, JWT без parent check и отсутствие межвкладочной координации. Основание — production services/auth frontend и принятый AR-01; доменную модель и legacy history не менять. |
 
 Correction 2026-10-28 по FU-2026-10-28-001: после отдельной регистрации конфликта обновлены только auth-разделы трёх указанных Code_wiki нод по browser_auth_sessions и production sources. Технический конфликт разрешён; прежние записи реестра, доменная модель и другие follow-up’ы сохранены.
+
+## Уточнение FU-2026-10-11-001 — 2026-11-07, исследование допуска
+
+Корпус 80 документов и ответы [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]] дают критерий [[Wiki/specifications/demo_dataset_instance_qualified]], но не подтверждают runtime. Нужно сопоставить паспортное происхождение сетки, фактическую persisted policy и данные экземпляра; settings default не заменяет metadata. У старого volume проверить структуру L-003, current и WorkOrder/AOI; seed create-once не доказывает их состояние. Требуемое доказательство согласованности map/ChangeSet/baseline сверять с доступным контрактом чтения, не объявлять отдельные GET атомарными.
+
+Это уточнение существующего follow-up, не новый конфликт и не новая обязанность пользователя найти реальную организацию. FU-2026-10-13-004 сохраняет отдельную реализацию/приёмку остальных правил. FU-2026-06-01-002 не закрыт: наличие руководств не доказывает рыночное доминирование стеков. Открытых follow-up по-прежнему 19.

@@ -3,8 +3,8 @@ title: Пригодность учебного набора для воспро�
 type: policy
 status: active
 created: 2026-10-16
-updated: 2026-10-16
-source: RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md
+updated: 2026-11-07
+source: "RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md"
 tags: [domain-knowledge, data-quality, simulated-organization]
 confidence: high
 related: [Wiki/policies/edit_geometry_precision_policy, Wiki/policies/geometry_quality_escalation_policy, Code_wiki/архитектура/edit_geometry_fixture_metadata]
@@ -31,3 +31,13 @@ related: [Wiki/policies/edit_geometry_precision_policy, Wiki/policies/geometry_q
 ## Проверяемость
 
 Паспорт L-003 и runtime-сверка этим правилом не выполнены. Существующие вопросы metadata/fixture и FU-2026-10-11-001 остаются открытыми. Источник не требует новую таблицу, роль доступа или изменение Save. Внешние основания и ограничения — S01–S03, S07–S08, S10–S16 RAW.
+
+## Уточнение допуска экземпляра — 2026-11-07
+
+Ответы 1–15 [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]] конкретизируют существующее правило через [[Wiki/specifications/demo_dataset_instance_qualified]]. Различаются [[Wiki/concepts/dataset_instance_and_record_identity]] и [[Wiki/concepts/coordinate_operation_provenance]].
+
+Для каждого существенного параметра ручная карточка содержит ожидаемое значение, источник, наблюдаемое значение и результат сравнения. Default настроек не становится фактом persisted policy. Отсутствие свойства в контракте не заменяется нулём; «не применимо» требует объяснения для цели. Неизвестная история импорта не описывается как отсутствие преобразований.
+
+Допуск переоценивается при смене экземпляра, релевантной редакции, WorkOrder/AOI или основания. Топологически равная двухточечная линия не заменяет трёхточечную fixture. Ветка no-op отличается от ненулевого Save. Receipt/current/baseline и отдельные чтения связываются по доступному контексту; неподтверждённая согласованность явно ограничивает вывод.
+
+Это решения условной организации и детализация ручной процедуры. Они не меняют численные positional criteria, инварианты Save или baseline; фактические metadata/fixture остаются на сверке по FU-2026-10-11-001.

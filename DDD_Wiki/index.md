@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-22
+updated: 2026-11-07
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -30,7 +30,7 @@ tags: [domain-knowledge, ddd]
 
 Текущие пробелы, противоречия и готовность к discovery фиксируются в [[DDD_Wiki/model_health]].
 
-Сверка 2026-10-22: технический срез Save/Revert controls и ручного восстановления отражён в [[Code_wiki/архитектура/frontend_save_recovery]], результаты двух сценариев восстановления — в [отчёте M4](../docs/sprint_2/2026-10-21-day-12-m4-report.md). Доменная очередь и metadata/fixture остаются на сверке; `model_health` сохраняет метку `stale`, S2-X01 не закрыт.
+Сверка 2026-11-07: [Отчёт S2-X01](../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. Доменная очередь и два вопроса metadata/fixture остаются на сверке; [[DDD_Wiki/model_health]] сохраняет `stale`. Актуальное техническое чтение карты, ChangeSet и baseline — [[Code_wiki/архитектура/edit_version_api_readback]].
 
 ## Актуальный First-Save Срез
 
@@ -65,3 +65,7 @@ tags: [domain-knowledge, ddd]
 ## Выпуск и исправление оценки линии
 
 [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]] продолжает оценку сохранённой линии: исторический вывод, частичный охват, спор, пересмотр, уведомление и явная применимость. Новых aggregate, команд и API нет; реализация остаётся отдельной задачей.
+
+## Квалификация экземпляра — 2026-11-07
+
+[[DDD_Wiki/use_cases/prepare_and_check_line_edit]] уточнён через [[Wiki/specifications/demo_dataset_instance_qualified]]: экземпляр/запись, происхождение координат, persisted policy, структура/AOI, ветка упражнения и согласованность свидетельств. Новые aggregate, команды, события и транзакционные границы не вводятся. Runtime metadata/fixture остаются на сверке.

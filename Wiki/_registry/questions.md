@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-22
+updated: 2026-11-07
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -69,3 +69,9 @@ related: [Wiki/index, DDD_Wiki/model_health]
 ## Ответы о выпуске и исправлении заключений — 2026-10-22
 
 15 вопросов отвечены в [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers]] на корпусе 84 документов; приняты правила [[Wiki/policies/assessment_issue_and_correction_policy]]. Это решения условной организации, не новые вопросы к реальным сотрудникам. Два открытых metadata/fixture вопроса сохраняются; новых открытых доменных вопросов и blocking conflicts ingest не добавляет.
+
+## Ответы о квалификации экземпляра — 2026-11-07
+
+15 вопросов отвечены в [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]] на общем корпусе 80 внешних документов. Уточнены [[Wiki/policies/demo_dataset_qualification_policy]] и [[Wiki/specifications/demo_dataset_instance_qualified]].
+
+Два прежних вопроса остаются **open**. Для metadata требуется сверка конкретного экземпляра и persisted policy с происхождением, явными неизвестными/неподдерживаемыми свойствами и последствиями для цели. Для fixture нужны наблюдаемые baseline/current/candidate, структура/внутренняя вершина, endpoints/associations и WorkOrder/AOI. Исходники L-003 и default settings — основания проверки, не runtime evidence. Позиционная приёмка не является условием закрытия технического вопроса fixture; её статус сохраняется отдельно. Новых вопросов к реальным сотрудникам не возникает.

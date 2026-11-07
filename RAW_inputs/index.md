@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-22
+updated: 2026-11-07
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -76,3 +76,6 @@ tags: [raw-inputs, source-of-truth]
 
 | 2026-10-22 | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md` | Исследование 84 внешних документов; выпуск, scope, применимость и исправление заключения; внешние факты и модель разделены | Да: [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/concepts/assessment_delivery_and_acceptance]], [[Vision_wiki/chats/2026-10-22-assessment-research]] |
 | 2026-10-22 | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers.md` | 15 ответов на общем корпусе 84 документов, ручная карточка, аналитическая матрица; не интервью/runtime validation | Да: [[Wiki/policies/assessment_issue_and_correction_policy]], [[Wiki/specifications/assessment_statement_usable]], [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]], [[Vision_wiki/chats/2026-10-22-assessment-answers]] |
+
+| 2026-11-07 | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md` | Анализ UseCase и новых знаний: 80 внешних документов, 51 новый точный URL относительно прежних RAW; не 80 независимых свидетельств | Да: [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/coordinate_operation_provenance]], [[Vision_wiki/chats/2026-11-07-dataset-qualification-research]] |
+| 2026-11-07 | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md` | 15 ответов условной организации на общем корпусе 80 документов; ручная карточка и аналитическая матрица, не runtime validation | Да: [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/demo_dataset_instance_qualified]], [[DDD_Wiki/use_cases/prepare_and_check_line_edit]], [[Vision_wiki/chats/2026-11-07-dataset-qualification-answers]] |

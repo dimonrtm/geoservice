@@ -3,7 +3,7 @@ title: Concepts Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-10-22
+updated: 2026-11-07
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, concept]
 confidence: n/a
@@ -22,3 +22,6 @@ related: [Wiki/index]
 
 | [[Wiki/concepts/assessment_statement_lifecycle]] | Состояние, утверждение, выпуск и применимость различаются | [[Wiki/policies/assessment_issue_and_correction_policy]] | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md` |
 | [[Wiki/concepts/assessment_delivery_and_acceptance]] | Доставка, ограничения, обязанность и приёмка для цели различаются | [[Wiki/policies/assessment_issue_and_correction_policy]] | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md` |
+
+| [[Wiki/concepts/dataset_instance_and_record_identity]] | Логический набор, экземпляр, запись и обозначаемый актив различаются | [[Wiki/specifications/demo_dataset_instance_qualified]] | high | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md` |
+| [[Wiki/concepts/coordinate_operation_provenance]] | CRS, операция, ресурсы и история координат отдельно от сетки и точности | [[Wiki/policies/demo_dataset_qualification_policy]] | high | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md` |

@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-22
+updated: 2026-11-07
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -31,6 +31,12 @@ tags: [knowledge, index, geoservice]
 - [[docs/agent-memory/README]] - компактная инженерная память Codex.
 
 ## Свежие Изменения
+
+- 2026-11-07: ingest [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research]] и [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]]: общий корпус 80 внешних документов, 15 ответов; новые понятия идентичности экземпляра и происхождения координатной операции, критерий ручного допуска. Теперь 52 RAW обработаны. 19 follow-up’ов и два metadata/fixture вопроса остаются открытыми; реализация и фактическая БД не проверялись.
+
+
+- 2026-11-07: Сверка `/sync-vision` 2026-11-07: 50 RAW-источников, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001. За неделю 2026-10-31–2026-11-07 новых RAW и concept/decision/entity/solution нод — 0; обновлены существующие технические ноды о чтении EditVersion, WebSocket и Docker. Сводка — [[Code_wiki/index]], живое состояние — [[memory/project-state]].
+- [Отчёт S2-X01](docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. См. [[Code_wiki/архитектура/frontend_save_recovery]]. Датированные записи ниже сохраняют историю прежних срезов.
 
 - 2026-10-22: `/sync-vision` сверил весь граф знаний и реестры. Все 48 RAW обработаны; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture; активных канонических конфликтов — 0, legacy-конфликтов — 1. Stale-нода — [[DDD_Wiki/model_health]]. Lint: 37 известных `missing_frontmatter` только в RAW. За период 2026-10-15–2026-10-22 Git содержит 7 новых уже обработанных RAW; новых concept/decision/entity/solution нод — 4/0/0/0, дополнительно 4 policies, 4 specifications, 1 glossary, 3 use cases, 7 source-summary chat-нод и 3 технические ноды. Индексы и реестры покрывают эти добавления; текущая сводка — [[memory/project-state]].
 - 2026-10-21: [[Code_wiki/архитектура/frontend_save_recovery]] отражает подключённые Save/Revert controls, ручные retry/readback и границы S2-X01. [Отчёт M4](docs/sprint_2/2026-10-21-day-12-m4-report.md) фиксирует два успешных сценария commit → потеря ответа → restart API → refresh → replay → GET. Это результат указанного отчёта, а не новый прогон `/sync-vision`; доменные follow-up’ы не закрыты.
@@ -150,7 +156,7 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
-- По `FU-2026-10-11-001` остаётся сверить доменную очередь реализации и metadata/fixture с техническими источниками. Save/Revert controls и ручные retry/readback подключены, два сценария M4 описаны в отчёте 2026-10-21. Остаток S2-X01 — продолжение после потери доступа, переход на другой наряд при незавершённом recovery и сравнение/перенос попытки; см. [[Code_wiki/архитектура/frontend_save_recovery]].
+- По `FU-2026-10-11-001` остаётся сверить доменную очередь и два вопроса metadata/fixture. S2-X01 завершён по [отчёту 2026-10-23](docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md); автоматический перенос попытки не реализован и не является незавершённым обещанием этого среза. Сопоставление остальных правил условной организации с реализацией остаётся в `FU-2026-10-13-004`.
 - Для first-save остаются 2 вопроса сверки actual dataset spatial metadata и eligible line/fixture с кодом и Sprint 2: [[Wiki/_registry/questions]]. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 приняты условной организацией; учебное evidence не подтверждает точность L-003. Реализация принятых recovery/evidence/retention правил — `FU-2026-10-13-004`.
 - Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.

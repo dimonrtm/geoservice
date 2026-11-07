@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-22
+updated: 2026-11-07
 source: null
 tags: [vision-wiki, product]
 ---
@@ -138,3 +138,8 @@ tags: [vision-wiki, product]
 
 - [[Vision_wiki/chats/2026-10-22-assessment-research]] — 84 внешних документа и 12 уточнений предметной модели.
 - [[Vision_wiki/chats/2026-10-22-assessment-answers]] — 15 ответов, ручная карточка и сценарная матрица; правила условной организации.
+
+## Квалификация экземпляра — исследование 2026-11-07
+
+- [[Vision_wiki/chats/2026-11-07-dataset-qualification-research]] — 80 документов, идентичность экземпляра/записи и происхождение координатной операции.
+- [[Vision_wiki/chats/2026-11-07-dataset-qualification-answers]] — 15 ответов, ручной допуск, ограничения доказательств; два вопроса metadata/fixture сохраняются.

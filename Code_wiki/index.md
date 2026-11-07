@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-10-28
+updated: 2026-11-07
 source: repository-change:2026-10-28
 tags: [code-wiki, technical-knowledge]
 ---
@@ -37,7 +37,7 @@ tags: [code-wiki, technical-knowledge]
 - [[архитектура/frontend_save_recovery]] — независимый recovery store, IndexedDB/CAS, общий read generation, session barriers, навигация и сравнение.
 - [[архитектура/edit_geometry_fixture_metadata]] — seed L-003, before/after fixture, persisted policy и граница знания о фактической БД.
 
-- [[архитектура/edit_version_api_readback]] — публичный geometry PUT, локальные strict errors, текущий token/changeSet/baseline и согласованный workspace snapshot; содержит follow-up к историческим описаниям decoding и отсутствия PUT.
+- [[архитектура/edit_version_api_readback]] — публичный geometry PUT, раздельное чтение карты, ChangeSet и baseline, сверка токенов и границы репозиториев.
 
 - [[архитектура/edit_version_persistence]] — root lock, transaction-bound context, PostGIS validation и ограниченная запись current snapshot.
 - [[архитектура/edit_geometry_determinism]] — Decimal canonicalization, immutable policy EditVersion, fingerprint и точный EWKB readback.
@@ -58,6 +58,9 @@ tags: [code-wiki, technical-knowledge]
 - [Документы Спринта 1](../docs/release_1/sprint_1/README.md) - календарный план, контракты Дня 1, design/implementation plans Дней 2-4, backend foundation Work Orders Дня 5, EditVersion from Default Дня 8, Мои наряды Дня 11 и отделенные исторические generic-планы.
 
 ## Свежие Repository-Change Знания
+
+- Сверка 2026-11-07 по [[состояние_проекта/repository_change_ingest]]: записи 2026-11-04 отражают раздельные чтения EditVersion и владельцев frontend-состояния; записи 2026-11-02 — изоляцию WebSocket-подписок и восстановление кеша; записи 2026-11-01 — фильтрацию Docker context и её проверки. Ссылки: [[архитектура/edit_version_api_readback]], [[архитектура/frontend]], [[архитектура/api_and_realtime]], [[deployment/docker_compose]], [[сборка/ci_and_quality]].
+- [Отчёт S2-X01](../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. Контракт — [[архитектура/frontend_save_recovery]]; актуальная auth-модель — [[архитектура/browser_auth_sessions]].
 
 - 2026-10-16: `/ingest repository-change` перенёс backend Save/registry/replay/history, frontend Save/recovery state и fixture/metadata. После ingest исправлены зарегистрированные в `FU-2026-10-11-001` устаревшие технические описания; метки `stale` сняты с пяти затронутых архитектурных нод. Доменные вопросы, model health и сам follow-up сохраняют статус до отдельной синхронизации; технические основания и остаток S2-X01 доступны в новых нодах выше. Прежние датированные записи ниже исторические.
 
