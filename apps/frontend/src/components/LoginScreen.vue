@@ -1,7 +1,7 @@
 <template>
   <div class="loginScreen">
     <div class="loginCard">
-      <div class="eyebrow">Геосервис</div>
+      <div class="eyebrow">{{ appName }}</div>
       <h1 class="title">Вход</h1>
       <p class="subtitle">
         Введите электронную почту и пароль, чтобы открыть карту.
@@ -56,6 +56,7 @@ import { LogIn } from "@lucide/vue";
 import { ref } from "vue";
 
 import { parseApiError } from "@/api/parseApiError";
+import { appName } from "@/config/app";
 import ActionableError from "@/components/ActionableError.vue";
 import UiButton from "@/components/ui/UiButton.vue";
 import type { ErrorPresentation } from "@/contracts/api-error";

@@ -72,6 +72,8 @@ services:
       context: ../apps/frontend/
       dockerfile: Dockerfile
       target: prod
+      args:
+        VITE_APP_NAME: ${VITE_APP_NAME:-GeoService}
     ports:
       - "8080:80"
     depends_on:

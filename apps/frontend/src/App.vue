@@ -13,6 +13,7 @@ import UiButton from "@/components/ui/UiButton.vue";
 import UiIconButton from "@/components/ui/UiIconButton.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
 import { getRoleLabel, isEditorRole } from "@/domain/authRole";
+import { appName } from "@/config/app";
 import { useAuthStore } from "@/stores/auth";
 import "./assets/main.css";
 
@@ -107,7 +108,7 @@ async function handleSessionLogout(): Promise<void> {
             <UiIconButton
               :icon="LogOut"
               label="Выйти"
-              tooltip="Выйти из GeoService"
+              :tooltip="`Выйти из ${appName}`"
               tooltip-align="end"
               variant="secondary"
               data-test="logout-mobile"

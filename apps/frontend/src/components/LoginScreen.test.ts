@@ -4,6 +4,8 @@ import { nextTick } from "vue";
 
 const loginWithPasswordMock = vi.hoisted(() => vi.fn());
 
+vi.mock("@/config/app", () => ({ appName: 'Сети & "Уфа" <ГИС>' }));
+
 vi.mock("@/stores/auth", () => ({
   useAuthStore: () => ({
     loginWithPassword: loginWithPasswordMock,
@@ -28,6 +30,13 @@ function createDeferred<T>() {
 }
 
 describe("LoginScreen", () => {
+  it("shows the configured application name as text", async () => {
+    const { default: LoginScreen } = await import("./LoginScreen.vue");
+    const wrapper = mount(LoginScreen);
+    expect(wrapper.get(".eyebrow").text()).toBe('Сети & "Уфа" <ГИС>');
+    expect(wrapper.get(".eyebrow").element.children).toHaveLength(0);
+  });
+
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();

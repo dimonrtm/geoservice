@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Исходники Vite в build/; остальные результаты сборки остаются исключёнными.
+!build/
+build/*
+!build/appBranding.ts
+!build/appBranding.test.ts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

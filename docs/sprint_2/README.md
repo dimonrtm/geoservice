@@ -1,5 +1,7 @@
 # Sprint 2
 
+- **FE-04 — исправлена 2026-11-07:** [анализ](2026-11-07-fe-04-document-language-analysis.md), [дизайн](2026-11-07-fe-04-document-language-design.md), [план](2026-11-07-fe-04-document-language-plan.md), [отчёт](2026-11-07-fe-04-document-language-report.md), [runbook](2026-11-07-fe-04-document-language-runbook.md). Русский HTML и единое название через `VITE_APP_NAME`; 501 тест и Docker/dev browser smoke прошли. Реальная озвучка не проверена.
+
 - **INF-04 — снята 2026-11-01:** infra contract tests остаются локальными
   по решению пользователя; [основание](2026-11-01-inf-04-infra-contract-tests-analysis.md).
 - **INF-05 — исправлена 2026-11-01:** отдельный geometry location пропускает

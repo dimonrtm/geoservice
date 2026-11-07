@@ -2,6 +2,8 @@ import { mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("./config/app", () => ({ appName: "Сети Уфы" }));
+
 vi.mock("./components/LoginScreen.vue", () => ({
   default: {
     name: "LoginScreen",
@@ -156,6 +158,9 @@ describe("App", () => {
     expect(mobile.attributes("aria-label")).toBe("Выйти");
     expect(mobile.attributes("aria-describedby")).toBeDefined();
     expect(mobile.element.closest(".logoutMobile")).not.toBeNull();
+
+    await mobile.trigger("focus");
+    expect(wrapper.get('[role="tooltip"]').text()).toBe("Выйти из Сети Уфы");
 
     await desktop.trigger("click");
     await vi.waitFor(() => expect(auth.logout).toHaveBeenCalledTimes(1));

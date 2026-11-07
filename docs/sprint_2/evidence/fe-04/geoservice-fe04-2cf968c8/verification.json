@@ -1,0 +1,42 @@
+{
+  "project": "geoservice-fe04-2cf968c8",
+  "backend": "mocked-auth-only",
+  "production": [
+    {
+      "configuredName": null,
+      "expectedName": "GeoService",
+      "html": true,
+      "browser": true,
+      "compose": true
+    },
+    {
+      "configuredName": "  Сети Уфы  ",
+      "expectedName": "Сети Уфы",
+      "html": true,
+      "browser": true,
+      "compose": true
+    },
+    {
+      "configuredName": "Сети & \"Уфа\" </title><div id=\"injected\"> %MODE%",
+      "expectedName": "Сети & \"Уфа\" </title><div id=\"injected\"> %MODE%",
+      "html": true,
+      "browser": true,
+      "compose": true
+    }
+  ],
+  "dev": [
+    {
+      "configuredName": "   ",
+      "expectedName": "GeoService",
+      "html": true,
+      "browser": true
+    },
+    {
+      "configuredName": "  Дев-сети Уфы  ",
+      "expectedName": "Дев-сети Уфы",
+      "html": true,
+      "browser": true
+    }
+  ],
+  "screenReader": "not-run"
+}

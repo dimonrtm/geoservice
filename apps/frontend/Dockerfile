@@ -19,6 +19,7 @@ CMD ["sh","-lc","npm run dev -- --host 0.0.0.0 --port 5173"]
 
 # ---- build ----
 FROM base AS build
+ARG VITE_APP_NAME
 RUN npm run build
 
 # ---- prod ----
