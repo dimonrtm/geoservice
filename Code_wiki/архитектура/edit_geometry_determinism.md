@@ -3,7 +3,7 @@ title: Детерминированная геометрия EditVersion
 type: technical-note
 status: active
 created: 2026-10-08
-updated: 2026-10-16
+updated: 2026-11-04
 source: repository-change:2026-10-16
 tags: [geometry, decimal, edit-version, fingerprint, postgis]
 ---
@@ -36,7 +36,7 @@ Backfill читает параметры geometry из окружения migrat
 
 `infrastructure/postgresql/geometry_codec.py` принимает только непустые XY Point/LineString SRID 4326 в EWKB. Каждая binary64 ordinate переводится через `Decimal(repr(float_value))`; обратная запись проверяет равенство после roundtrip. Signed zero сохраняется codec и baseline copying; нормализация для hash выполняется отдельно.
 
-`workspace_aggregate.sql` возвращает features как EWKB hex; `WorkOrderRepository` передаёт raw EWKB hex, а `WorkspaceService` декодирует geometry после role/assignment/lifecycle guards и формирует JSON numbers — [[edit_version_api_readback]]. Остаётся один aggregate SQL execute, AOI-фильтрация, порядок и прежняя публичная форма ответа. Это предотвращает сдвиг off-grid baseline возле midpoint из-за девяти знаков `ST_AsGeoJSON`. AOI display и legacy API этим механизмом не перестраиваются.
+Карта и сравнение с baseline используют текущую геометрию в EWKB. Сервис читает исходные координаты из закреплённого снимка через репозиторий Utility Network. Декодирование для readback сохраняет значения вне сетки вблизи середины шага. См. [[edit_version_api_readback]].
 
 ## Источники и связи
 

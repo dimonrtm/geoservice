@@ -39,7 +39,7 @@ def test_openapi_documents_strict_put_and_errors():
     assert set(body["required"]) == {"commandId", "draftVersionToken", "geometry"}
     assert body["properties"]["geometry"]["properties"]["type"]["const"] == "LineString"
     assert body["properties"]["geometry"]["properties"]["coordinates"]["minItems"] == 2
-    for operation in (save, doc["paths"][prefix + "/workspace"]["get"]):
+    for operation in (save, doc["paths"][prefix]["get"]):
         error = operation["responses"]["422"]["content"]["application/json"]["schema"]
         error = doc["components"]["schemas"][error["$ref"].split("/")[-1]]
         assert set(error["required"]) == {"code", "message", "correlationId"}
@@ -78,8 +78,11 @@ def test_openapi_matches_save_and_workspace():
     check_refs(doc)
     prefix = "/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}"
     save = doc["paths"][prefix + "/features/{feature_id}/geometry"]["put"]
-    get = doc["paths"][prefix + "/workspace"]["get"]
-    for operation in (save, get):
+    get = doc["paths"][prefix]["get"]
+    changes = doc["paths"][prefix + "/change-set"]["get"]
+    baseline = doc["paths"][prefix + "/features/{feature_id}/baseline"]["get"]
+    assert prefix + "/workspace" not in doc["paths"]
+    for operation in (save, get, changes, baseline):
         for parameter in operation["parameters"]:
             if parameter["in"] == "path":
                 assert parameter["required"] is True
@@ -104,6 +107,13 @@ def test_openapi_matches_save_and_workspace():
     workspace = resolve(get["responses"]["200"]["content"]["application/json"]["schema"])
     work_order = resolve(workspace["properties"]["workOrder"])
     version = resolve(work_order["properties"]["editVersion"])
+    assert "draftVersionToken" in version["required"]
+    assert {"changeSet", "basicValidation", "hasPersistedChangeSet"}.isdisjoint(
+        version["properties"]
+    )
+    baseline_schema = resolve(baseline["responses"]["200"]["content"]["application/json"]["schema"])
+    assert set(baseline_schema["required"]) == {"featureId", "baselineGeometry"}
+    version = resolve(changes["responses"]["200"]["content"]["application/json"]["schema"])
     for field in ("draftVersionToken", "hasPersistedChangeSet", "basicValidation", "changeSet"):
         assert field in version["required"]
     for field in ("basicValidation", "changeSet"):
@@ -118,7 +128,6 @@ def test_openapi_matches_save_and_workspace():
     assert set(change_set["required"]) == {
         "featureId",
         "vertexIndex",
-        "baselineGeometry",
         "operation",
     }
     opened = doc["paths"]["/api/v1/work-orders/{work_order_id}/edit-versions"]["post"]

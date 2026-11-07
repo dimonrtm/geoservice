@@ -3,7 +3,7 @@ title: Атомарный Save, replay и история EditVersion
 type: technical-note
 status: active
 created: 2026-10-16
-updated: 2026-10-16
+updated: 2026-11-04
 source: repository-change:2026-10-16
 tags: [edit-version, save, replay, transaction, history]
 ---
@@ -12,7 +12,7 @@ tags: [edit-version, save, replay, transaction, history]
 
 ## Граница транзакции
 
-`EditVersionService.save_geometry` выполняет Save/Revert в одной `AsyncSession.begin()`: root lock, проверка контекста и идентичности, reservation команды, validation, запись current, revision, terminal response и change event. Repository предоставляет операции хранения; сервис определяет их порядок. Root блокируется по WorkOrder/EditVersion, command lookup глобален по `command_id`. Save не берёт WorkOrder lock после root; reopen использует WorkOrder → EditVersion.
+`EditVersionService.save_geometry` выполняет Save/Revert в одной `AsyncSession.begin()`: root lock, проверка контекста и идентичности, reservation команды, validation, запись current, revision, terminal response и change event. Текущую геометрию поставляет EditVersionRepository, исходную линию закреплённого снимка — DefaultStateRepository. Repository предоставляет операции хранения; сервис определяет их порядок. Root блокируется по WorkOrder/EditVersion, command lookup глобален по `command_id`. Save не берёт WorkOrder lock после root; reopen использует WorkOrder → EditVersion.
 
 Сервис проверяет активного Editor, текущее назначение и lifecycle `open`/`in_progress`. Guards действуют и при replay: сохранённый успешный ответ не даёт права получить результат после потери доступа. Для новой команды отсутствие версии/feature до reservation не занимает CommandId. Существующий, но чужой объект маскируется `EDIT_VERSION_NOT_FOUND`; такой отказ при доступном внутреннем context может быть сохранён в registry.
 
@@ -22,7 +22,7 @@ tags: [edit-version, save, replay, transaction, history]
 
 Обычный `geom-v1` fingerprint зависит от неизменяемого baseline/policy и исходного token, а не от current. При недоступном baseline новая команда получает `geom-contextless-v1` и отказ контекста; сохранённый формат идентичности при повторе не меняется. Если baseline сломался после сохранения `geom-v1`, fallback на другую идентичность запрещён.
 
-Matching terminal replay выполняется до проверки token против текущей revision: возвращается исходный успешный payload или прежний domain rejection. Поэтому replay может содержать исторические geometry/token. Текущие данные читаются отдельным workspace GET — [[edit_version_api_readback]]. `running` не является долговременным состоянием: deferred constraint trigger запрещает commit незавершённой команды.
+Matching terminal replay выполняется до проверки token против текущей revision: возвращается исходный успешный payload или прежний domain rejection. Поэтому replay может содержать исторические geometry/token. Текущие данные возвращают раздельные чтения карты, ChangeSet и исходной линии — [[edit_version_api_readback]]. `running` не является долговременным состоянием: deferred constraint trigger запрещает commit незавершённой команды.
 
 Единственное предусмотренное возобновление terminal rejection — `retry_on_access_change=true` для `404 EDIT_VERSION_NOT_FOUND`, выставляемое при несовпадении assignee. После восстановления доступа та же identity проходит `rejected → running` и повторную domain/token validation в одной транзакции. Обычные отказы не возобновляются после исправления данных. Текущие access/lifecycle guards могут маскировать прежний результат, не переписывая его.
 

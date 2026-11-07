@@ -3,8 +3,8 @@ title: Frontend Save и восстановление намерения реда
 type: technical-note
 status: active
 created: 2026-10-16
-updated: 2026-10-23
-source: repository-change:2026-10-23
+updated: 2026-11-04
+source: repository-change:2026-11-04
 tags: [frontend, pinia, save, recovery, readback, indexeddb]
 ---
 
@@ -30,7 +30,7 @@ IndexedDB `geoservice-workspace-recovery`, версия 1, содержит stor
 
 Первоначальный PUT допускает пять дополнительных повторов с задержками 0/2/5/10/20 секунд. Restore/manual retry — пять попыток всего. FIFO scheduler допускает не более двух recovery HTTP одновременно; retry-wait освобождает слот, один key имеет один активный run. Polling отсутствует. Перед фактическим выполнением в очереди заново проверяются actor, epoch и доступ.
 
-Known success сохраняется до GET; ошибка GET не превращает результат в unknown и не запускает новый PUT. Только workspace GET обновляет current/token/changeSet; replay-result исторический. Обычные и recovery GET используют общий generation по key и session epoch. Намерение открыть workspace живёт отдельно от transient spinner: новый recovery GET может закончиться после superseded ordinary GET, и workspace всё равно откроется. Ошибка устаревшего ordinary GET не закрывает более свежий принятый workspace.
+Known success сохраняется до GET; ошибка GET не превращает результат в unknown и не запускает новый PUT. Актуальные данные дают раздельные чтения карты, ChangeSet и исходной линии. Результат replay может относиться к более ранней ревизии. См. [[edit_version_api_readback]]. Обычные и recovery GET используют общий generation по key и session epoch. Намерение открыть workspace живёт отдельно от transient spinner: новый recovery GET может закончиться после superseded ordinary GET, и workspace всё равно откроется. Ошибка устаревшего ordinary GET не закрывает более свежий принятый workspace.
 
 Recovery удаляется после принятого необходимого readback и успешного storage cleanup. `DRAFT_VERSION_STALE` удерживает source/candidate до GET, затем материал сравнения остаётся в памяти при переключениях. После завершённого readback refresh может его потерять; автоматического reapply нет.
 
@@ -52,7 +52,7 @@ No-op требует source evidence, не выводится из `operation`. 
 
 - `apps/frontend/src/contracts/workspace-recovery.ts`
 - `apps/frontend/src/stores/workspaceRecovery.ts`, `workspaceRecoveryIndexedDb.ts`, `workspaceRecoveryMigration.ts`, `workspaceRecoveryScheduler.ts`
-- `apps/frontend/src/stores/workOrders.ts`, `auth.ts`, `apps/frontend/src/api/http.ts`
+- `apps/frontend/src/stores/editorSession.ts`, `editVersionCommands.ts`, `auth.ts`, `apps/frontend/src/api/http.ts`
 - `apps/frontend/src/components/WorkspaceRecoveryList.vue`, `WorkspaceNavigationDialog.vue`, `WorkspaceComparisonPanel.vue`, `WorkspaceEditCommands.vue`
 - `apps/frontend/src/domain/workspaceCommandPresentation.ts`, `dialogFocus.ts`
 - `apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts`

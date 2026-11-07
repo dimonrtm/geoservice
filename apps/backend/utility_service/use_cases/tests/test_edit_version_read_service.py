@@ -14,12 +14,11 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
     WorkOrderStatus,
 )
-from utility_service.infrastructure.postgresql.repository_rows.workspace import (
-    WorkspaceAggregateRow,
-    WorkspaceDraftFeaturePairRow,
+from utility_service.infrastructure.postgresql.repository_rows.edit_version_read import (
+    EditVersionMapRow,
 )
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
-from utility_service.use_cases.services.workspace_service import WorkspaceService
+from utility_service.use_cases.services.edit_version_read_service import EditVersionReadService
 
 
 def user(role: UserRole = UserRole.EDITOR, *, is_active: bool = True) -> SimpleNamespace:
@@ -85,13 +84,6 @@ def workspace_row(actor_id, *, work_order_status=WorkOrderStatus.IN_PROGRESS):
             }
         ],
     )
-    aggregate.baseline_state = SimpleNamespace(
-        id=aggregate.edit_version.default_state_id,
-        work_order_id=aggregate.work_order.id,
-        base_network_revision=12,
-        status="active",
-    )
-    pairs = []
     for feature in aggregate.features_data:
         geojson = feature.pop("geometry_data")
         positions = (
@@ -104,18 +96,6 @@ def workspace_row(actor_id, *, work_order_status=WorkOrderStatus.IN_PROGRESS):
             )
         ).hex()
         feature["geometry_ewkb"] = ewkb
-        pairs.append(
-            WorkspaceDraftFeaturePairRow(
-                feature_id=feature["id"],
-                current_feature_type=feature["feature_type"],
-                baseline_feature_type=feature["feature_type"],
-                current_geometry_ewkb=ewkb,
-                baseline_geometry_ewkb=ewkb,
-                operation="unchanged",
-                visible=True,
-            )
-        )
-    aggregate.draft_feature_pairs = tuple(pairs)
     return aggregate
 
 
@@ -126,18 +106,18 @@ def repository(**methods):
     return fake
 
 
-def build_service(actor, aggregate) -> WorkspaceService:
-    return WorkspaceService(
-        session=SimpleNamespace(),
+def build_service(actor, aggregate) -> EditVersionReadService:
+    return EditVersionReadService(
         user_repository=repository(get_by_id=actor),
-        work_order_repository=repository(get_workspace_aggregate=aggregate),
+        work_order_repository=repository(get_edit_version_map=aggregate),
+        default_state_repository=repository(),
     )
 
 
 def test_workspace_from_aggregate_uses_repository_row_contract() -> None:
-    annotation = get_type_hints(WorkspaceService.workspace_from_aggregate)["aggregate"]
+    annotation = get_type_hints(EditVersionReadService.map_response)["version_map"]
 
-    assert annotation is WorkspaceAggregateRow
+    assert annotation is EditVersionMapRow
 
 
 def test_editor_gets_workspace_for_assigned_open_edit_version() -> None:
@@ -146,7 +126,7 @@ def test_editor_gets_workspace_for_assigned_open_edit_version() -> None:
     service = build_service(actor, aggregate)
 
     result = asyncio.run(
-        service.get_workspace(
+        service.get_version_map(
             work_order_id=aggregate.work_order.id,
             edit_version_id=aggregate.edit_version.id,
             actor_id=actor.id,
@@ -158,9 +138,6 @@ def test_editor_gets_workspace_for_assigned_open_edit_version() -> None:
     assert payload["workOrder"]["scope"]["aoi"]["name"] == "Рабочая область WO-001"
     assert payload["workOrder"]["editVersion"]["baseNetworkRevision"] == 12
     assert payload["workOrder"]["editVersion"]["draftVersionToken"] == "1"
-    assert payload["workOrder"]["editVersion"]["hasPersistedChangeSet"] is False
-    assert payload["workOrder"]["editVersion"]["basicValidation"] is None
-    assert payload["workOrder"]["editVersion"]["changeSet"] is None
     assert (
         payload["workOrder"]["editVersion"]["features"]["features"][0]["properties"]["assetCode"]
         == "J-001"
@@ -174,7 +151,7 @@ def test_reviewer_is_denied() -> None:
     service = build_service(actor, None)
 
     with pytest.raises(WorkOrderApiError) as exc_info:
-        asyncio.run(service.get_workspace(uuid4(), uuid4(), actor.id))
+        asyncio.run(service.get_version_map(uuid4(), uuid4(), actor.id))
 
     assert exc_info.value.status_code == 403
     assert exc_info.value.code == "ROLE_NOT_ALLOWED"
@@ -185,7 +162,7 @@ def test_missing_workspace_returns_404() -> None:
     service = build_service(actor, None)
 
     with pytest.raises(WorkOrderApiError) as exc_info:
-        asyncio.run(service.get_workspace(uuid4(), uuid4(), actor.id))
+        asyncio.run(service.get_version_map(uuid4(), uuid4(), actor.id))
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.code == "EDIT_VERSION_NOT_FOUND"
@@ -197,7 +174,7 @@ def test_wrong_assignee_is_masked_as_404() -> None:
     service = build_service(actor, aggregate)
 
     with pytest.raises(WorkOrderApiError) as exc_info:
-        asyncio.run(service.get_workspace(uuid4(), uuid4(), actor.id))
+        asyncio.run(service.get_version_map(uuid4(), uuid4(), actor.id))
 
     assert exc_info.value.status_code == 404
     assert exc_info.value.code == "EDIT_VERSION_NOT_FOUND"
@@ -209,7 +186,7 @@ def test_workspace_state_conflict_returns_409() -> None:
     service = build_service(actor, aggregate)
 
     with pytest.raises(WorkOrderApiError) as exc_info:
-        asyncio.run(service.get_workspace(uuid4(), uuid4(), actor.id))
+        asyncio.run(service.get_version_map(uuid4(), uuid4(), actor.id))
 
     assert exc_info.value.status_code == 409
     assert exc_info.value.code == "EDIT_VERSION_STATE_CONFLICT"
@@ -222,7 +199,7 @@ def test_missing_aoi_returns_context_invalid() -> None:
     service = build_service(actor, aggregate)
 
     with pytest.raises(WorkOrderApiError) as exc_info:
-        asyncio.run(service.get_workspace(uuid4(), uuid4(), actor.id))
+        asyncio.run(service.get_version_map(uuid4(), uuid4(), actor.id))
 
     assert exc_info.value.status_code == 422
     assert exc_info.value.code == "WORKSPACE_CONTEXT_INVALID"
@@ -245,7 +222,7 @@ def test_foreign_workspace_masks_corrupt_ewkb(
     )
     with pytest.raises(WorkOrderApiError) as error:
         asyncio.run(
-            service.get_workspace(
+            service.get_version_map(
                 uuid4(),
                 uuid4(),
                 actor.id,

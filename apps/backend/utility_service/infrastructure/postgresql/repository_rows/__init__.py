@@ -1,13 +1,13 @@
-from .workspace import (
-    WorkspaceAggregateRow,
-    WorkspaceAoiRow,
-    WorkspaceEditVersionRow,
-    WorkspaceWorkOrderRow,
+from .edit_version_read import (
+    EditVersionMapRow,
+    MapAoiRow,
+    VersionReadHeader,
+    MapWorkOrderRow,
 )
 
 __all__ = [
-    "WorkspaceAggregateRow",
-    "WorkspaceAoiRow",
-    "WorkspaceEditVersionRow",
-    "WorkspaceWorkOrderRow",
+    "EditVersionMapRow",
+    "MapAoiRow",
+    "VersionReadHeader",
+    "MapWorkOrderRow",
 ]

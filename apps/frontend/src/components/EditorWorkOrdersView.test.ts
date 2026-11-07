@@ -1,3 +1,5 @@
+import { useAuthStore } from "@/stores/auth";
+import { editorTestContext } from "@/test/editorTestContext";
 import { flushPromises, mount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -86,11 +88,31 @@ function workspaceResponse(): WorkspaceResponse {
 }
 
 describe("EditorWorkOrdersView", () => {
+  it("ignores a list request that finishes after the session changes", async () => {
+    const context = editorTestContext();
+    let complete!: () => void;
+    context.workOrders.loadAssigned = vi.fn(async () => {
+      await new Promise<void>((resolve) => {
+        complete = resolve;
+      });
+      return context.workOrders.loadAssignedRequestSeq;
+    });
+    const reconcile = vi.spyOn(context.editorSession, "reconcileAssignments");
+    const restore = vi.spyOn(context.editorSession, "restoreOpenedWorkspace");
+    const { default: EditorWorkOrdersView } =
+      await import("./EditorWorkOrdersView.vue");
+    const wrapper = mount(EditorWorkOrdersView);
+    useAuthStore().sessionEpoch++;
+    complete();
+    await flushPromises();
+    expect(reconcile).not.toHaveBeenCalled();
+    expect(restore).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
   it("enables line interaction only for an opened workspace", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.loadAssigned = vi.fn();
-    store.restoreOpenedWorkspace = vi.fn();
+    const store = editorTestContext();
+    store.workOrders.loadAssigned = vi.fn().mockResolvedValue(0);
+    store.editorSession.restoreOpenedWorkspace = vi.fn();
     const { default: EditorWorkOrdersView } =
       await import("./EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
@@ -100,9 +122,10 @@ describe("EditorWorkOrdersView", () => {
     expect(
       wrapper.findComponent({ name: "MapView" }).props("workspaceInteractive"),
     ).not.toBe(true);
-    store.workspace = workspaceResponse();
-    store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
-    store.openedEditVersionId = "ev-1";
+    store.seed(workspaceResponse());
+    store.workOrders.selectedWorkOrderId =
+      store.editorSession.openedWorkOrderId = "wo-1";
+    store.editorSession.openedEditVersionId = "ev-1";
     await flushPromises();
     expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
       false,
@@ -124,17 +147,17 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("does not inherit readiness from empty or removed map", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.loadAssigned = vi.fn();
-    store.restoreOpenedWorkspace = vi.fn();
+    const store = editorTestContext();
+    store.workOrders.loadAssigned = vi.fn().mockResolvedValue(0);
+    store.editorSession.restoreOpenedWorkspace = vi.fn();
     const { default: EditorWorkOrdersView } =
       await import("./EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
     wrapper.findComponent({ name: "MapView" }).vm.$emit("readyChange", true);
-    store.workspace = workspaceResponse();
-    store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
-    store.openedEditVersionId = "ev-1";
+    store.seed(workspaceResponse());
+    store.workOrders.selectedWorkOrderId =
+      store.editorSession.openedWorkOrderId = "wo-1";
+    store.editorSession.openedEditVersionId = "ev-1";
     await flushPromises();
     expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
       false,
@@ -144,9 +167,9 @@ describe("EditorWorkOrdersView", () => {
     expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
       true,
     );
-    store.workspace = null;
+    store.seed(null);
     await flushPromises();
-    store.workspace = workspaceResponse();
+    store.seed(workspaceResponse());
     await flushPromises();
     expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
       false,
@@ -155,13 +178,13 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("keeps readiness on current workspace readback and hides commands on false", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.loadAssigned = vi.fn();
-    store.restoreOpenedWorkspace = vi.fn();
-    store.workspace = workspaceResponse();
-    store.selectedWorkOrderId = store.openedWorkOrderId = "wo-1";
-    store.openedEditVersionId = "ev-1";
+    const store = editorTestContext();
+    store.workOrders.loadAssigned = vi.fn().mockResolvedValue(0);
+    store.editorSession.restoreOpenedWorkspace = vi.fn();
+    store.seed(workspaceResponse());
+    store.workOrders.selectedWorkOrderId =
+      store.editorSession.openedWorkOrderId = "wo-1";
+    store.editorSession.openedEditVersionId = "ev-1";
     const { default: EditorWorkOrdersView } =
       await import("./EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
@@ -173,7 +196,7 @@ describe("EditorWorkOrdersView", () => {
     expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
       true,
     );
-    store.workspace = workspaceResponse();
+    store.seed(workspaceResponse());
     await flushPromises();
     expect(wrapper.find('[data-test="workspace-edit-commands"]').exists()).toBe(
       true,
@@ -190,7 +213,6 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("hiding commands preserves recovery and does not send mutations", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
     const { useAuthStore } = await import("@/stores/auth");
     const { useWorkspaceRecoveryStore } =
       await import("@/stores/workspaceRecovery");
@@ -202,14 +224,20 @@ describe("EditorWorkOrdersView", () => {
     const auth = useAuthStore();
     auth.token = "test";
     auth.user = { id: "actor", email: "editor@example.local", role: "editor" };
-    const store = useWorkOrdersStore();
-    store.loadAssigned = vi.fn();
-    store.restoreOpenedWorkspace = vi.fn();
-    store.workspace = workspaceFixture();
-    store.selectedWorkOrderId = store.openedWorkOrderId = target.workOrderId;
-    store.openedEditVersionId = target.editVersionId;
-    store.localDraft = createLocalDraft(store.workspace, target.featureId, 1);
-    store.localDraft.candidateGeometry = structuredClone(candidate);
+    const store = editorTestContext();
+    store.workOrders.loadAssigned = vi.fn().mockResolvedValue(0);
+    store.editorSession.restoreOpenedWorkspace = vi.fn();
+    store.seed(workspaceFixture());
+    store.workOrders.selectedWorkOrderId =
+      store.editorSession.openedWorkOrderId = target.workOrderId;
+    store.editorSession.openedEditVersionId = target.editVersionId;
+    store.editVersionDraft.localDraft = createLocalDraft(
+      store.editor.snapshot!,
+      target.featureId,
+      1,
+    );
+    store.editVersionDraft.localDraft.candidateGeometry =
+      structuredClone(candidate);
     const recovery = useWorkspaceRecoveryStore();
     const record = createRecoveryRecord(
       {
@@ -225,12 +253,12 @@ describe("EditorWorkOrdersView", () => {
     );
     recovery.records[record.key] = record;
     recovery.phases[record.key] = "unknown";
-    const save = vi.spyOn(store, "saveLocalDraft");
-    const revert = vi.spyOn(store, "confirmRevert");
-    const retry = vi.spyOn(store, "retryPendingSave");
-    const read = vi.spyOn(store, "refreshCurrentWorkspace");
+    const save = vi.spyOn(store.editVersionCommands, "saveLocalDraft");
+    const revert = vi.spyOn(store.editVersionCommands, "confirmRevert");
+    const retry = vi.spyOn(store.editVersionCommands, "retryPendingSave");
+    const read = vi.spyOn(store.editVersionCommands, "refreshCurrentWorkspace");
     const snapshot = JSON.stringify({
-      draft: store.localDraft,
+      draft: store.editVersionDraft.localDraft,
       records: recovery.records,
       phases: recovery.phases,
     });
@@ -255,7 +283,7 @@ describe("EditorWorkOrdersView", () => {
     expect(wrapper.find('[data-test="retry-command"]').exists()).toBe(false);
     expect(
       JSON.stringify({
-        draft: store.localDraft,
+        draft: store.editVersionDraft.localDraft,
         records: recovery.records,
         phases: recovery.phases,
       }),
@@ -266,20 +294,22 @@ describe("EditorWorkOrdersView", () => {
     recovery.stopRuntime();
   });
   beforeEach(() => {
-    vi.resetModules();
     vi.clearAllMocks();
-    loadAssignedMock.mockReset();
+    loadAssignedMock.mockReset().mockResolvedValue(0);
     openSelectedWorkOrderMock.mockReset();
     restoreOpenedWorkspaceMock.mockReset();
     reopenSelectedWorkOrderMock.mockReset();
     sessionStorage.clear();
     setActivePinia(createPinia());
+    const auth = useAuthStore();
+    auth.token = "token";
+    auth.user = { id: "actor", email: "a@local", role: "editor" };
+    editorTestContext().editorSession.reconcileAssignments = vi.fn();
   });
 
   it("loads work orders and renders empty map mode", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [
+    const store = editorTestContext();
+    store.workOrders.items = [
       {
         id: "wo-1",
         code: "WO-001",
@@ -288,7 +318,7 @@ describe("EditorWorkOrdersView", () => {
         status: "assigned",
       },
     ];
-    store.loadAssigned = loadAssignedMock;
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -306,16 +336,16 @@ describe("EditorWorkOrdersView", () => {
     const callOrder: string[] = [];
     loadAssignedMock.mockImplementation(async () => {
       callOrder.push("load");
+      return 0;
     });
     restoreOpenedWorkspaceMock.mockImplementation(async () => {
       callOrder.push("restore");
     });
 
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [inProgressWorkOrder()];
-    store.loadAssigned = loadAssignedMock;
-    store.restoreOpenedWorkspace = restoreOpenedWorkspaceMock;
+    const store = editorTestContext();
+    store.workOrders.items = [inProgressWorkOrder()];
+    store.workOrders.loadAssigned = loadAssignedMock;
+    store.editorSession.restoreOpenedWorkspace = restoreOpenedWorkspaceMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -332,19 +362,18 @@ describe("EditorWorkOrdersView", () => {
       "geoservice:selected-work-order",
       JSON.stringify({ workOrderId: "wo-1" }),
     );
-    loadAssignedMock.mockResolvedValue(undefined);
+    loadAssignedMock.mockResolvedValue(0);
 
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [assignedWorkOrder()];
-    store.loadAssigned = loadAssignedMock;
+    const store = editorTestContext();
+    store.workOrders.items = [assignedWorkOrder()];
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
     const wrapper = mount(EditorWorkOrdersView);
     await flushPromises();
 
-    expect(store.selectedWorkOrderId).toBe("wo-1");
+    expect(store.workOrders.selectedWorkOrderId).toBe("wo-1");
     expect(
       wrapper.get('[data-test="work-order-wo-1"]').attributes("aria-current"),
     ).toBe("true");
@@ -357,10 +386,9 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("announces list loading state politely", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.isLoading = true;
-    store.loadAssigned = loadAssignedMock;
+    const store = editorTestContext();
+    store.workOrders.isLoading = true;
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -373,10 +401,9 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("refreshes assigned work orders through an accessible icon control", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [];
-    store.loadAssigned = loadAssignedMock;
+    const store = editorTestContext();
+    store.workOrders.items = [];
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -393,10 +420,9 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("exposes refresh loading state and blocks a second request", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.isLoading = true;
-    store.loadAssigned = loadAssignedMock;
+    const store = editorTestContext();
+    store.workOrders.isLoading = true;
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -413,10 +439,9 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("announces the empty assigned list politely", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [];
-    store.loadAssigned = loadAssignedMock;
+    const store = editorTestContext();
+    store.workOrders.items = [];
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -429,9 +454,8 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("selects and highlights a work order locally", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [
+    const store = editorTestContext();
+    store.workOrders.items = [
       {
         id: "wo-1",
         code: "WO-001",
@@ -440,7 +464,7 @@ describe("EditorWorkOrdersView", () => {
         status: "assigned",
       },
     ];
-    store.loadAssigned = loadAssignedMock;
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -448,7 +472,7 @@ describe("EditorWorkOrdersView", () => {
 
     await wrapper.get('[data-test="work-order-wo-1"]').trigger("click");
 
-    expect(store.selectedWorkOrderId).toBe("wo-1");
+    expect(store.workOrders.selectedWorkOrderId).toBe("wo-1");
     expect(
       wrapper
         .get('[data-test="work-order-wo-1"]')
@@ -458,15 +482,14 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("routes the list retry action to loadAssigned", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.loadError = {
+    const store = editorTestContext();
+    store.workOrders.loadError = {
       summary: "Не удалось загрузить назначенные наряды.",
       guidance: "Проверьте соединение и повторите запрос.",
       action: { id: "retry", label: "Повторить" },
       diagnostics: { code: "INTERNAL_ERROR", correlationId: "list-id" },
     };
-    store.loadAssigned = loadAssignedMock;
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -487,21 +510,21 @@ describe("EditorWorkOrdersView", () => {
       JSON.stringify({ workOrderId: "wo-1" }),
     );
 
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.loadError = {
+    const store = editorTestContext();
+    store.workOrders.loadError = {
       summary: "Не удалось загрузить назначенные наряды.",
       guidance: "Проверьте соединение и повторите запрос.",
       action: { id: "retry", label: "Повторить" },
       diagnostics: { code: "INTERNAL_ERROR", correlationId: "list-id" },
     };
     let loadCount = 0;
-    store.loadAssigned = vi.fn(async () => {
+    store.workOrders.loadAssigned = vi.fn(async () => {
       loadCount += 1;
       if (loadCount === 2) {
-        store.items = [assignedWorkOrder()];
-        store.loadError = null;
+        store.workOrders.items = [assignedWorkOrder()];
+        store.workOrders.loadError = null;
       }
+      return 0;
     });
 
     const { default: EditorWorkOrdersView } =
@@ -512,7 +535,7 @@ describe("EditorWorkOrdersView", () => {
     await wrapper.get('[data-test="error-action"]').trigger("click");
     await flushPromises();
 
-    expect(store.selectedWorkOrderId).toBe("wo-1");
+    expect(store.workOrders.selectedWorkOrderId).toBe("wo-1");
     expect(wrapper.get('[data-test="workspace-details-title"]').text()).toBe(
       "Проверка участка фидера",
     );
@@ -520,17 +543,17 @@ describe("EditorWorkOrdersView", () => {
 
   it("routes sign-in errors to local logout", async () => {
     const { useAuthStore } = await import("@/stores/auth");
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
+
     const auth = useAuthStore();
-    const store = useWorkOrdersStore();
+    const store = editorTestContext();
     auth.logout = vi.fn();
-    store.loadError = {
+    store.workOrders.loadError = {
       summary: "Сессия завершена.",
       guidance: "Войдите снова.",
       action: { id: "sign-in", label: "Войти снова" },
       diagnostics: { code: "AUTH_REQUIRED", correlationId: "auth-id" },
     };
-    store.loadAssigned = loadAssignedMock;
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -541,9 +564,8 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("exposes the selected work order as current without pressed state", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [
+    const store = editorTestContext();
+    store.workOrders.items = [
       assignedWorkOrder(),
       {
         id: "wo-2",
@@ -553,8 +575,8 @@ describe("EditorWorkOrdersView", () => {
         status: "assigned",
       },
     ];
-    store.selectedWorkOrderId = "wo-1";
-    store.loadAssigned = loadAssignedMock;
+    store.workOrders.selectedWorkOrderId = "wo-1";
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -570,9 +592,8 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("renders selected preview and opens from the right panel", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [
+    const store = editorTestContext();
+    store.workOrders.items = [
       { ...assignedWorkOrder(), description: "Описание выбранного наряда" },
       {
         id: "wo-2",
@@ -582,9 +603,9 @@ describe("EditorWorkOrdersView", () => {
         status: "assigned",
       },
     ];
-    store.selectedWorkOrderId = "wo-1";
-    store.loadAssigned = loadAssignedMock;
-    store.openSelectedWorkOrder = openSelectedWorkOrderMock;
+    store.workOrders.selectedWorkOrderId = "wo-1";
+    store.workOrders.loadAssigned = loadAssignedMock;
+    store.editorSession.openSelectedWorkOrder = openSelectedWorkOrderMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -614,11 +635,10 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("renders continue for an in-progress preview", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [inProgressWorkOrder()];
-    store.selectedWorkOrderId = "wo-1";
-    store.loadAssigned = loadAssignedMock;
+    const store = editorTestContext();
+    store.workOrders.items = [inProgressWorkOrder()];
+    store.workOrders.selectedWorkOrderId = "wo-1";
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -633,14 +653,13 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("renders details and workspace map for the opened selected work order", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [inProgressWorkOrder()];
-    store.selectedWorkOrderId = "wo-1";
-    store.openedWorkOrderId = "wo-1";
-    store.openedEditVersionId = "ev-1";
-    store.workspace = workspaceResponse();
-    store.loadAssigned = loadAssignedMock;
+    const store = editorTestContext();
+    store.workOrders.items = [inProgressWorkOrder()];
+    store.workOrders.selectedWorkOrderId = "wo-1";
+    store.editorSession.openedWorkOrderId = "wo-1";
+    store.editorSession.openedEditVersionId = "ev-1";
+    store.seed(workspaceResponse());
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -661,11 +680,10 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("routes reopen from the selected workspace error", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [assignedWorkOrder()];
-    store.selectedWorkOrderId = "wo-1";
-    store.openWorkspaceErrorByWorkOrderId = {
+    const store = editorTestContext();
+    store.workOrders.items = [assignedWorkOrder()];
+    store.workOrders.selectedWorkOrderId = "wo-1";
+    store.editorSession.openWorkspaceErrorByWorkOrderId = {
       "wo-1": {
         summary: "Рабочая версия не найдена.",
         guidance: "Откройте рабочую версию заново.",
@@ -676,8 +694,8 @@ describe("EditorWorkOrdersView", () => {
         },
       },
     };
-    store.loadAssigned = loadAssignedMock;
-    store.reopenSelectedWorkOrder = reopenSelectedWorkOrderMock;
+    store.workOrders.loadAssigned = loadAssignedMock;
+    store.editorSession.reopenSelectedWorkOrder = reopenSelectedWorkOrderMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -688,9 +706,8 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("does not label a newly selected work order as opening", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [
+    const store = editorTestContext();
+    store.workOrders.items = [
       assignedWorkOrder(),
       {
         id: "wo-2",
@@ -700,9 +717,9 @@ describe("EditorWorkOrdersView", () => {
         status: "assigned",
       },
     ];
-    store.selectedWorkOrderId = "wo-2";
-    store.openingWorkOrderId = "wo-1";
-    store.loadAssigned = loadAssignedMock;
+    store.workOrders.selectedWorkOrderId = "wo-2";
+    store.editorSession.openingWorkOrderId = "wo-1";
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -714,16 +731,15 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("focuses details and announces only after explicit open", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [assignedWorkOrder()];
-    store.selectedWorkOrderId = "wo-1";
-    store.loadAssigned = loadAssignedMock;
-    store.openSelectedWorkOrder = vi.fn(async () => {
-      store.updateWorkOrderStatus("wo-1", "in_progress");
-      store.openedWorkOrderId = "wo-1";
-      store.openedEditVersionId = "ev-1";
-      store.workspace = workspaceResponse();
+    const store = editorTestContext();
+    store.workOrders.items = [assignedWorkOrder()];
+    store.workOrders.selectedWorkOrderId = "wo-1";
+    store.workOrders.loadAssigned = loadAssignedMock;
+    store.editorSession.openSelectedWorkOrder = vi.fn(async () => {
+      store.workOrders.updateWorkOrderStatus("wo-1", "in_progress");
+      store.editorSession.openedWorkOrderId = "wo-1";
+      store.editorSession.openedEditVersionId = "ev-1";
+      store.seed(workspaceResponse());
     });
 
     const host = document.createElement("div");
@@ -747,9 +763,8 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("does not announce or move focus when selection changes during explicit open", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [
+    const store = editorTestContext();
+    store.workOrders.items = [
       assignedWorkOrder(),
       {
         id: "wo-2",
@@ -759,17 +774,17 @@ describe("EditorWorkOrdersView", () => {
         status: "assigned",
       },
     ];
-    store.selectedWorkOrderId = "wo-1";
-    store.loadAssigned = loadAssignedMock;
+    store.workOrders.selectedWorkOrderId = "wo-1";
+    store.workOrders.loadAssigned = loadAssignedMock;
 
     let resolveOpen!: () => void;
-    store.openSelectedWorkOrder = vi.fn(
+    store.editorSession.openSelectedWorkOrder = vi.fn(
       () =>
         new Promise<void>((resolve) => {
           resolveOpen = () => {
-            store.openedWorkOrderId = "wo-1";
-            store.openedEditVersionId = "ev-1";
-            store.workspace = workspaceResponse();
+            store.editorSession.openedWorkOrderId = "wo-1";
+            store.editorSession.openedEditVersionId = "ev-1";
+            store.seed(workspaceResponse());
             resolve();
           };
         }),
@@ -785,7 +800,7 @@ describe("EditorWorkOrdersView", () => {
     const wrapper = mount(EditorWorkOrdersView, { attachTo: host });
 
     await wrapper.get('[data-test="workspace-open-action"]').trigger("click");
-    store.selectWorkOrder("wo-2");
+    store.workOrders.selectWorkOrder("wo-2");
     resolveOpen();
     await flushPromises();
 
@@ -801,15 +816,14 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("restores workspace without moving focus or announcing explicit success", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [inProgressWorkOrder()];
-    store.loadAssigned = loadAssignedMock;
-    store.restoreOpenedWorkspace = vi.fn(async () => {
-      store.selectedWorkOrderId = "wo-1";
-      store.openedWorkOrderId = "wo-1";
-      store.openedEditVersionId = "ev-1";
-      store.workspace = workspaceResponse();
+    const store = editorTestContext();
+    store.workOrders.items = [inProgressWorkOrder()];
+    store.workOrders.loadAssigned = loadAssignedMock;
+    store.editorSession.restoreOpenedWorkspace = vi.fn(async () => {
+      store.workOrders.selectedWorkOrderId = "wo-1";
+      store.editorSession.openedWorkOrderId = "wo-1";
+      store.editorSession.openedEditVersionId = "ev-1";
+      store.seed(workspaceResponse());
     });
 
     const sentinel = document.createElement("button");
@@ -831,9 +845,8 @@ describe("EditorWorkOrdersView", () => {
   });
 
   it("shows preview instead of a cached workspace after switching away and back", async () => {
-    const { useWorkOrdersStore } = await import("@/stores/workOrders");
-    const store = useWorkOrdersStore();
-    store.items = [
+    const store = editorTestContext();
+    store.workOrders.items = [
       inProgressWorkOrder(),
       {
         id: "wo-2",
@@ -843,16 +856,16 @@ describe("EditorWorkOrdersView", () => {
         status: "assigned",
       },
     ];
-    store.selectWorkOrder("wo-1");
-    store.openedWorkOrderId = "wo-1";
-    store.openedEditVersionId = "ev-1";
-    store.workspace = workspaceResponse();
+    store.workOrders.selectWorkOrder("wo-1");
+    store.editorSession.openedWorkOrderId = "wo-1";
+    store.editorSession.openedEditVersionId = "ev-1";
+    store.seed(workspaceResponse());
     sessionStorage.setItem(
       "geoservice:opened-workspace",
       JSON.stringify({ workOrderId: "wo-1", editVersionId: "ev-1" }),
     );
-    store.loadAssigned = loadAssignedMock;
-    loadAssignedMock.mockResolvedValue(undefined);
+    store.workOrders.loadAssigned = loadAssignedMock;
+    loadAssignedMock.mockResolvedValue(0);
 
     const { default: EditorWorkOrdersView } =
       await import("@/components/EditorWorkOrdersView.vue");
@@ -862,7 +875,7 @@ describe("EditorWorkOrdersView", () => {
     await wrapper.get('[data-test="work-order-wo-2"]').trigger("click");
     await wrapper.get('[data-test="work-order-wo-1"]').trigger("click");
 
-    expect(store.workspace).toBeNull();
+    expect(store.editor.snapshot).toBeNull();
     expect(wrapper.get('[data-test="map-view"]').attributes("data-mode")).toBe(
       "empty",
     );

@@ -1,6 +1,6 @@
+import { editorTestContext } from "@/test/editorTestContext";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
-import { useWorkOrdersStore } from "@/stores/workOrders";
 import {
   workspaceFixture,
   target,
@@ -8,12 +8,15 @@ import {
   commandId,
   candidate,
 } from "@/test/workspaceEditFixture";
-import { presentWorkspaceCommands } from "./workspaceCommandPresentation";
+import {
+  presentWorkspaceCommands,
+  workspaceCommandState,
+} from "./workspaceCommandPresentation";
 
 function setup(changed = false) {
-  const store = useWorkOrdersStore();
-  store.workspace = workspaceFixture(changed);
-  store.workspace.workOrder.scope.aoi.geometry = {
+  const store = editorTestContext();
+  store.seed(workspaceFixture(changed));
+  store.editor.snapshot!.workOrder.scope.aoi.geometry = {
     type: "Polygon",
     coordinates: [
       [
@@ -25,9 +28,10 @@ function setup(changed = false) {
       ],
     ],
   };
-  store.openedWorkOrderId = store.selectedWorkOrderId = target.workOrderId;
-  store.openedEditVersionId = target.editVersionId;
-  store.beginLocalEdit(target.featureId, 1);
+  store.editorSession.openedWorkOrderId = store.workOrders.selectedWorkOrderId =
+    target.workOrderId;
+  store.editorSession.openedEditVersionId = target.editVersionId;
+  store.editVersionDraft.beginLocalEdit(target.featureId, 1);
   return store;
 }
 beforeEach(() => {
@@ -37,18 +41,24 @@ beforeEach(() => {
 describe("workspace command presentation", () => {
   it("separates local changes from persisted changes", () => {
     const store = setup(true);
-    expect(presentWorkspaceCommands(store, true)).toMatchObject({
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true),
+    ).toMatchObject({
       canSave: false,
       canCancel: false,
       canRevert: true,
     });
-    store.moveLocalVertex([65.1, 44.3]);
-    expect(presentWorkspaceCommands(store, true)).toMatchObject({
+    store.editVersionDraft.moveLocalVertex([65.1, 44.3]);
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true),
+    ).toMatchObject({
       canSave: true,
       canCancel: true,
       canRevert: true,
     });
-    expect(presentWorkspaceCommands(store, false)).toMatchObject({
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), false),
+    ).toMatchObject({
       canSave: false,
       canCancel: false,
       canRevert: false,
@@ -63,9 +73,11 @@ describe("workspace command presentation", () => {
     "blocked",
   ] as const)("blocks every command during %s", (phase) => {
     const store = setup(true);
-    store.moveLocalVertex([65.1, 44.3]);
-    store.localPhase = phase;
-    expect(presentWorkspaceCommands(store, true)).toMatchObject({
+    store.editVersionDraft.moveLocalVertex([65.1, 44.3]);
+    store.editVersionCommands.localPhase = phase;
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true),
+    ).toMatchObject({
       canSave: false,
       canCancel: false,
       canRevert: false,
@@ -73,25 +85,37 @@ describe("workspace command presentation", () => {
   });
   it("distinguishes known success and stale when current cannot be read", () => {
     const store = setup();
-    store.localPhase = "reading-current";
-    vi.spyOn(store, "readbackError", "get").mockReturnValue("GET failed");
+    store.editVersionCommands.localPhase = "reading-current";
+    vi.spyOn(store.editVersionCommands, "readbackError", "get").mockReturnValue(
+      "GET failed",
+    );
     const command = {
       actorId: "actor",
       target,
       request: { commandId, draftVersionToken: "a", geometry: candidate },
     };
-    vi.spyOn(store, "recoveryRecord", "get").mockReturnValue({
+    vi.spyOn(
+      store.editVersionCommands,
+      "recoveryRecord",
+      "get",
+    ).mockReturnValue({
       schemaVersion: 1,
       command,
       state: "succeeded",
       result: successFixture(),
     });
-    expect(presentWorkspaceCommands(store, true)).toMatchObject({
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true),
+    ).toMatchObject({
       busy: false,
       statusText:
         "Операция выполнена, но актуальные данные карты не удалось загрузить. Редактирование временно недоступно",
     });
-    vi.spyOn(store, "recoveryRecord", "get").mockReturnValue({
+    vi.spyOn(
+      store.editVersionCommands,
+      "recoveryRecord",
+      "get",
+    ).mockReturnValue({
       schemaVersion: 1,
       command,
       state: "rejected",
@@ -103,71 +127,83 @@ describe("workspace command presentation", () => {
         correlationId: null,
       },
     });
-    expect(presentWorkspaceCommands(store, true).statusText).toContain(
-      "отклонено",
-    );
-    expect(presentWorkspaceCommands(store, true).statusText).toContain(
-      "не удалось загрузить",
-    );
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true).statusText,
+    ).toContain("отклонено");
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true).statusText,
+    ).toContain("не удалось загрузить");
   });
   it("explains storage failure before sending without claiming an unknown result", () => {
     const store = setup();
-    vi.spyOn(store, "storageError", "get").mockReturnValue("quota");
-    const view = presentWorkspaceCommands(store, true);
+    vi.spyOn(store.editVersionCommands, "storageError", "get").mockReturnValue(
+      "quota",
+    );
+    const view = presentWorkspaceCommands(workspaceCommandState(), true);
     expect(view.canSave).toBe(false);
     expect(view.busy).toBe(false);
     expect(view.statusText).toContain("не отправлена");
   });
   it("blocks invalid and unchanged rejected geometry but allows correction", () => {
     const store = setup();
-    store.moveLocalVertex([65.1, 44.2]);
-    store.rejectedCandidateGeometry = structuredClone(candidate);
-    store.localPhase = "rejected";
-    store.saveError = "GEOMETRY_INVALID";
-    expect(presentWorkspaceCommands(store, true)).toMatchObject({
+    store.editVersionDraft.moveLocalVertex([65.1, 44.2]);
+    store.editVersionCommands.rejectedCandidateGeometry =
+      structuredClone(candidate);
+    store.editVersionCommands.localPhase = "rejected";
+    store.editVersionCommands.saveError = "GEOMETRY_INVALID";
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true),
+    ).toMatchObject({
       canSave: false,
       canCancel: true,
     });
-    store.moveLocalVertex([65.1, 44.3]);
-    expect(presentWorkspaceCommands(store, true).canSave).toBe(true);
-    store.moveLocalVertex([65, 44]);
-    expect(presentWorkspaceCommands(store, true).canSave).toBe(false);
+    store.editVersionDraft.moveLocalVertex([65.1, 44.3]);
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true).canSave,
+    ).toBe(true);
+    store.editVersionDraft.moveLocalVertex([65, 44]);
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true).canSave,
+    ).toBe(false);
   });
   it("only claims no-op with source evidence and always explains quality", () => {
     const store = setup(true);
-    store.localDraft = null;
-    store.localPhase = "idle";
-    store.commandResult = successFixture();
-    expect(presentWorkspaceCommands(store, true).statusText).toBe(
-      "Прежняя операция выполнена",
-    );
-    store.submittedSourceGeometry = structuredClone(candidate);
-    store.submittedCommandId = commandId;
-    expect(presentWorkspaceCommands(store, true).statusText).toBe(
-      "Сохранение выполнено без новых изменений",
-    );
-    store.workspace = workspaceFixture();
+    store.editVersionDraft.localDraft = null;
+    store.editVersionCommands.localPhase = "idle";
+    store.editVersionCommands.commandResult = successFixture();
     expect(
-      presentWorkspaceCommands(store, true).positionalAccuracyMessage,
+      presentWorkspaceCommands(workspaceCommandState(), true).statusText,
+    ).toBe("Прежняя операция выполнена");
+    store.editVersionCommands.submittedSourceGeometry =
+      structuredClone(candidate);
+    store.editVersionCommands.submittedCommandId = commandId;
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true).statusText,
+    ).toBe("Сохранение выполнено без новых изменений");
+    store.seed(workspaceFixture());
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true)
+        .positionalAccuracyMessage,
     ).toContain("Позиционная точность не проверена");
   });
   it("does not expose an unrecognized technical code", () => {
     const store = setup();
-    store.localPhase = "blocked";
-    store.saveError = "PRIVATE_INTERNAL_CODE";
-    expect(presentWorkspaceCommands(store, true).statusText).not.toContain(
-      "PRIVATE_INTERNAL_CODE",
-    );
+    store.editVersionCommands.localPhase = "blocked";
+    store.editVersionCommands.saveError = "PRIVATE_INTERNAL_CODE";
+    expect(
+      presentWorkspaceCommands(workspaceCommandState(), true).statusText,
+    ).not.toContain("PRIVATE_INTERNAL_CODE");
   });
   it("explains the disabled Save when returning to a rejected candidate", () => {
     const store = setup();
-    store.moveLocalVertex([65.1, 44.2]);
-    store.rejectedCandidateGeometry = structuredClone(candidate);
-    store.saveError = "GEOMETRY_INVALID";
-    store.localPhase = "rejected";
-    store.moveLocalVertex([65.1, 44.3]);
-    store.moveLocalVertex([65.1, 44.2]);
-    const view = presentWorkspaceCommands(store, true);
+    store.editVersionDraft.moveLocalVertex([65.1, 44.2]);
+    store.editVersionCommands.rejectedCandidateGeometry =
+      structuredClone(candidate);
+    store.editVersionCommands.saveError = "GEOMETRY_INVALID";
+    store.editVersionCommands.localPhase = "rejected";
+    store.editVersionDraft.moveLocalVertex([65.1, 44.3]);
+    store.editVersionDraft.moveLocalVertex([65.1, 44.2]);
+    const view = presentWorkspaceCommands(workspaceCommandState(), true);
     expect(view.canSave).toBe(false);
     expect(view.statusText).toContain("форма линии недопустима");
   });

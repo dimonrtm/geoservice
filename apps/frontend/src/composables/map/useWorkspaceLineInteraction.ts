@@ -6,7 +6,11 @@ import {
   vertexMoveBlockReason,
   lineSelectionBlockReason,
 } from "@/domain/workspaceLineInteraction";
-import { useWorkOrdersStore } from "@/stores/workOrders";
+import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
+import { useEditVersionDraftStore } from "@/stores/editVersionDraft";
+import { useEditorNavigationStore } from "@/stores/editorNavigation";
+import { useEditorSessionStore } from "@/stores/editorSession";
+import { useEditVersionEditor } from "@/composables/useEditVersionEditor";
 import { useAuthStore } from "@/stores/auth";
 import {
   setWorkspaceDraftData,
@@ -17,35 +21,48 @@ export function useWorkspaceLineInteraction(
   map: Ref<Map>,
   workspace: Ref<WorkspaceResponse>,
 ) {
-  const store = useWorkOrdersStore();
+  const editVersionCommands = useEditVersionCommandsStore();
+  const editVersionDraft = useEditVersionDraftStore();
+  const editorNavigation = useEditorNavigationStore();
+  const editorSession = useEditorSessionStore();
+  const editor = useEditVersionEditor();
   const auth = useAuthStore();
   const message = ref("");
   const choices = ref<Array<{ id: string; label: string }>>([]);
   const confirmation = ref<{
     featureId: string | null;
-    draft: typeof store.localDraft;
+    draft: typeof editVersionDraft.localDraft;
   } | null>(null);
   let marker: Marker | null = null;
   let markerTarget: string | null = null;
   let disposed = false;
   let suppressClick = false;
   let clickTimer: ReturnType<typeof setTimeout> | undefined;
-  const contextKey = computed(
-    () =>
-      `${auth.user?.id ?? ""}:${store.activeWorkspaceKey ?? ""}:${workspace.value.workOrder.editVersion.draftVersionToken}`,
+  const versionKey = computed(
+    () => `${auth.user?.id ?? ""}:${editorSession.activeWorkspaceKey ?? ""}`,
   );
+  const matchesCurrentMap = computed(() => {
+    const current = editorSession.activeWorkspace?.workOrder;
+    const displayed = workspace.value.workOrder;
+    return (
+      current?.id === displayed.id &&
+      current.editVersion.id === displayed.editVersion.id &&
+      current.editVersion.draftVersionToken ===
+        displayed.editVersion.draftVersionToken
+    );
+  });
   const available = computed(
     () =>
       auth.isAuthenticated &&
       auth.user?.role === "editor" &&
-      store.activeWorkspace === workspace.value &&
-      !store.workspaceInteractionLocked &&
-      !store.recoveryRecord &&
-      !store.storageError &&
+      matchesCurrentMap.value &&
+      !editorNavigation.workspaceInteractionLocked &&
+      !editVersionCommands.recoveryRecord &&
+      !editVersionCommands.storageError &&
       !["FEATURE_NOT_EDITABLE", "WORK_ORDER_CONTEXT_INVALID"].includes(
-        store.saveError ?? "",
+        editVersionCommands.saveError ?? "",
       ) &&
-      ["idle", "editing", "rejected"].includes(store.phase),
+      ["idle", "editing", "rejected"].includes(editVersionCommands.phase),
   );
 
   function removeMarker() {
@@ -70,7 +87,7 @@ export function useWorkspaceLineInteraction(
     }, 0);
   }
   function drag() {
-    const draft = store.localDraft;
+    const draft = editVersionDraft.localDraft;
     if (
       disposed ||
       !available.value ||
@@ -91,7 +108,7 @@ export function useWorkspaceLineInteraction(
       candidate,
       workspace.value.workOrder.scope.aoi.geometry,
     );
-    if (reason || !store.moveLocalVertex(xy)) {
+    if (reason || !editVersionDraft.moveLocalVertex(xy)) {
       marker.setLngLat(draft.candidateGeometry.coordinates[1]!);
       message.value =
         reason ??
@@ -100,20 +117,21 @@ export function useWorkspaceLineInteraction(
   }
   function sync() {
     if (disposed) return;
-    const draft = store.localDraft;
-    const matching = store.activeWorkspace === workspace.value;
+    const draft = editVersionDraft.localDraft;
+    const matching = matchesCurrentMap.value;
     setWorkspaceDraftData(
       map.value,
       workspace.value,
-      matching && !store.activeComparison ? draft : null,
+      matching && !editVersionCommands.activeComparison ? draft : null,
     );
     setWorkspaceComparisonData(
       map.value,
-      matching ? store.previewGeometry : null,
+      matching ? editVersionCommands.previewGeometry : null,
     );
     if (
       !available.value ||
       !draft ||
+      !editor.readyFor(draft.featureId) ||
       lineSelectionBlockReason(workspace.value, draft.featureId)
     ) {
       removeMarker();
@@ -150,30 +168,59 @@ export function useWorkspaceLineInteraction(
         message.value = reason;
         return;
       }
-      if (store.localDraft?.featureId === featureId) {
+      if (editVersionDraft.localDraft?.featureId === featureId) {
         message.value = "";
         return;
       }
     }
-    if (store.localDraft && isLocalDraftDirty(store.localDraft)) {
-      confirmation.value = { featureId, draft: store.localDraft };
+    if (
+      editVersionDraft.localDraft &&
+      isLocalDraftDirty(editVersionDraft.localDraft)
+    ) {
+      confirmation.value = { featureId, draft: editVersionDraft.localDraft };
       return;
     }
     applySelection(featureId);
   }
+  const pendingFeatureId = ref<string | null>(null);
   function applySelection(featureId: string | null) {
-    if (featureId === null) store.cancelLocalEdit();
-    else if (!store.beginLocalEdit(featureId, 1)) {
-      message.value =
-        "Не удалось выбрать линию. Проверьте состояние рабочей области.";
-      return;
+    pendingFeatureId.value = featureId;
+    if (featureId === null) {
+      editVersionDraft.cancelLocalEdit();
+      editor.clearFeatureSelection();
+    } else if (editor.readyFor(featureId)) {
+      if (editVersionDraft.beginLocalEdit(featureId, 1))
+        pendingFeatureId.value = null;
+    } else {
+      editVersionDraft.cancelLocalEdit();
+      void editorSession.readActiveFeature(featureId);
     }
     message.value = "";
   }
+  watch(
+    () => {
+      const featureId = pendingFeatureId.value;
+      return featureId && available.value && editor.readyFor(featureId)
+        ? featureId
+        : null;
+    },
+    (featureId) => {
+      if (featureId && !editVersionDraft.localDraft) {
+        pendingFeatureId.value = null;
+        if (!lineSelectionBlockReason(workspace.value, featureId))
+          editVersionDraft.beginLocalEdit(featureId, 1);
+      }
+    },
+    { flush: "post" },
+  );
   function confirmDiscard() {
     const pending = confirmation.value;
     confirmation.value = null;
-    if (!pending || !available.value || pending.draft !== store.localDraft)
+    if (
+      !pending ||
+      !available.value ||
+      pending.draft !== editVersionDraft.localDraft
+    )
       return;
     if (pending.featureId !== null) {
       const reason = lineSelectionBlockReason(
@@ -185,7 +232,7 @@ export function useWorkspaceLineInteraction(
         return;
       }
     }
-    if (store.cancelLocalEdit()) applySelection(pending.featureId);
+    if (editVersionDraft.cancelLocalEdit()) applySelection(pending.featureId);
   }
   function click(event: MapMouseEvent) {
     if (suppressClick || confirmation.value || disposed) return;
@@ -247,8 +294,9 @@ export function useWorkspaceLineInteraction(
     else select(null);
   }
   watch(
-    contextKey,
-    () => {
+    [versionKey, () => workspace.value.workOrder.editVersion.draftVersionToken],
+    ([version], [previous]) => {
+      if (version !== previous) pendingFeatureId.value = null;
       confirmation.value = null;
       choices.value = [];
       message.value = "";
@@ -271,9 +319,9 @@ export function useWorkspaceLineInteraction(
     () =>
       [
         workspace.value,
-        store.localDraft,
+        editVersionDraft.localDraft,
         available.value,
-        store.previewGeometry,
+        editVersionCommands.previewGeometry,
       ] as const,
     sync,
     { immediate: true, flush: "post" },

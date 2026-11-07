@@ -15,7 +15,9 @@ from utility_service.web_api.api.auth import (
 from utility_service.web_api.api.secure_router import ping, ping_write
 from utility_service.web_api.api.utility_network import get_feeder
 from utility_service.web_api.api.work_orders import (
-    get_workspace,
+    get_change_set,
+    get_feature_baseline,
+    get_version_map,
     list_assigned_to_me,
     open_edit_version,
 )
@@ -33,7 +35,9 @@ from utility_service.web_api.api.ws_layers import issue_layer_websocket_ticket
         (ping_write, "user"),
         (list_assigned_to_me, "user"),
         (open_edit_version, "user"),
-        (get_workspace, "user"),
+        (get_change_set, "user"),
+        (get_feature_baseline, "user"),
+        (get_version_map, "user"),
         (get_feeder, "_"),
         (issue_layer_websocket_ticket, "user"),
     ],

@@ -1,9 +1,9 @@
+import { editorTestContext } from "@/test/editorTestContext";
 import { stopRecovery } from "@/test/recoveryIntegration";
 import { mount, flushPromises } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAuthStore } from "@/stores/auth";
-import { useWorkOrdersStore } from "@/stores/workOrders";
 import {
   target,
   workspaceFixture,
@@ -12,7 +12,7 @@ import {
 import WorkspaceEditCommands from "./WorkspaceEditCommands.vue";
 const api = vi.hoisted(() => ({
   saveFeatureGeometry: vi.fn(),
-  fetchWorkspace: vi.fn(),
+  readMap: vi.fn(),
 }));
 vi.mock("@/api/workOrders", () => api);
 const wrappers: ReturnType<typeof mount>[] = [];
@@ -22,8 +22,8 @@ function setup(changed = false) {
   const auth = useAuthStore();
   auth.token = "test";
   auth.user = { id: "actor", email: "editor@example.local", role: "editor" };
-  const store = useWorkOrdersStore();
-  store.items = [
+  const store = editorTestContext();
+  store.workOrders.items = [
     {
       id: target.workOrderId,
       code: "WO",
@@ -32,8 +32,8 @@ function setup(changed = false) {
       status: "in_progress",
     },
   ];
-  store.workspace = workspaceFixture(changed);
-  store.workspace.workOrder.scope.aoi.geometry = {
+  store.seed(workspaceFixture(changed));
+  store.editor.snapshot!.workOrder.scope.aoi.geometry = {
     type: "Polygon",
     coordinates: [
       [
@@ -45,10 +45,11 @@ function setup(changed = false) {
       ],
     ],
   };
-  store.openedWorkOrderId = store.selectedWorkOrderId = target.workOrderId;
-  store.openedEditVersionId = target.editVersionId;
-  store.beginLocalEdit(target.featureId, 1);
-  store.moveLocalVertex([65.1, 44.3]);
+  store.editorSession.openedWorkOrderId = store.workOrders.selectedWorkOrderId =
+    target.workOrderId;
+  store.editorSession.openedEditVersionId = target.editVersionId;
+  store.editVersionDraft.beginLocalEdit(target.featureId, 1);
+  store.editVersionDraft.moveLocalVertex([65.1, 44.3]);
   const wrapper = mount(WorkspaceEditCommands, {
     global: { plugins: [pinia] },
     attachTo: document.body,
@@ -81,11 +82,11 @@ describe("workspace commands", () => {
         resolve = r;
       }),
     );
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    api.readMap.mockResolvedValue(workspaceFixture(true));
     const button = wrapper.get('[data-test="save-edit"]');
     await button.trigger("click");
     await button.trigger("click");
-    await store.saveLocalDraft();
+    await store.editVersionCommands.saveLocalDraft();
     await vi.waitFor(() =>
       expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1),
     );
@@ -98,7 +99,7 @@ describe("workspace commands", () => {
     await vi.waitFor(() =>
       expect(wrapper.text()).toContain("Правка сохранена в рабочей версии"),
     );
-    expect(store.localDraft).toBeNull();
+    expect(store.editVersionDraft.localDraft).toBeNull();
   });
   it("cancels without dialog or HTTP, keeps selection and moves focus off disabled button", async () => {
     const { wrapper, store } = setup(true);
@@ -106,10 +107,10 @@ describe("workspace commands", () => {
     (button.element as HTMLButtonElement).focus();
     await button.trigger("click");
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
-    expect(store.localDraft?.candidateGeometry.coordinates[1]).toEqual([
-      65.1, 44.2,
-    ]);
-    expect(store.localDraft?.featureId).toBe(target.featureId);
+    expect(
+      store.editVersionDraft.localDraft?.candidateGeometry.coordinates[1],
+    ).toEqual([65.1, 44.2]);
+    expect(store.editVersionDraft.localDraft?.featureId).toBe(target.featureId);
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(wrapper.get("h2").element);
   });
@@ -117,7 +118,7 @@ describe("workspace commands", () => {
     const { wrapper, store } = setup(true);
     const button = wrapper.get('[data-test="revert-edit"]');
     (button.element as HTMLButtonElement).focus();
-    const original = JSON.stringify(store.localDraft);
+    const original = JSON.stringify(store.editVersionDraft.localDraft);
     await button.trigger("click");
     await flushPromises();
     expect(wrapper.get('[role="dialog"]').text()).toContain("окончательно");
@@ -125,24 +126,24 @@ describe("workspace commands", () => {
       wrapper.get('[data-test="revert-safe"]').element,
     );
     await wrapper.get('[role="dialog"]').trigger("keydown", { key: "Escape" });
-    expect(JSON.stringify(store.localDraft)).toBe(original);
+    expect(JSON.stringify(store.editVersionDraft.localDraft)).toBe(original);
     await button.trigger("click");
     await wrapper.get('[data-test="revert-proceed"]').trigger("click");
-    expect(store.localDraft).toBeNull();
+    expect(store.editVersionDraft.localDraft).toBeNull();
     expect(wrapper.get('[role="dialog"]').text()).toContain("История");
     await wrapper.get('[role="dialog"]').trigger("keydown", { key: "Escape" });
     await flushPromises();
-    expect(store.localDraft).toBeNull();
+    expect(store.editVersionDraft.localDraft).toBeNull();
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
     expect(document.activeElement).toBe(button.element);
   });
   it("traps focus and confirms clean revert without a discard step", async () => {
     const { wrapper, store } = setup(true);
-    store.cancelLocalEdit();
+    store.editVersionDraft.cancelLocalEdit();
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       Promise.resolve(successFixture(r.commandId)),
     );
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture());
+    api.readMap.mockResolvedValue(workspaceFixture());
     await wrapper.get('[data-test="revert-edit"]').trigger("click");
     await flushPromises();
     const safe = wrapper.get('[data-test="revert-safe"]');
@@ -156,14 +157,16 @@ describe("workspace commands", () => {
     await vi.waitFor(() =>
       expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1),
     );
-    await vi.waitFor(() => expect(store.localDraft).toBeNull());
+    await vi.waitFor(() =>
+      expect(store.editVersionDraft.localDraft).toBeNull(),
+    );
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
   });
   it("unknown retry launches one bounded series through the actual store", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const { wrapper, store } = setup();
     api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
-    const save = store.saveLocalDraft();
+    const save = store.editVersionCommands.saveLocalDraft();
     await save;
     await vi.runAllTimersAsync();
     await wrapper.get('[data-test="retry-command"]').trigger("click");
@@ -180,21 +183,23 @@ describe("workspace commands", () => {
         data: { code: "DRAFT_VERSION_STALE", message: "stale" },
       },
     });
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    api.readMap.mockResolvedValue(workspaceFixture(true));
     await wrapper.get('[data-test="save-edit"]').trigger("click");
     await flushPromises();
-    await vi.waitFor(() => expect(store.canDiscardRejectedAttempt).toBe(true));
+    await vi.waitFor(() =>
+      expect(store.editVersionCommands.canDiscardRejectedAttempt).toBe(true),
+    );
     await wrapper.get('[data-test="discard-rejected"]').trigger("click");
-    expect(store.localDraft).toBeNull();
+    expect(store.editVersionDraft.localDraft).toBeNull();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
-    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
+    expect(api.readMap).toHaveBeenCalledTimes(1);
   });
   it("does not steal focus on asynchronous status updates and clears context notices", async () => {
     const { wrapper, store, auth } = setup(true);
     const other = document.createElement("button");
     document.body.append(other);
     other.focus();
-    store.localPhase = "unknown";
+    store.editVersionCommands.localPhase = "unknown";
     await flushPromises();
     expect(document.activeElement).toBe(other);
     auth.user = { id: "other", email: "other@example.local", role: "editor" };
@@ -208,18 +213,37 @@ describe("workspace commands", () => {
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       Promise.resolve(successFixture(r.commandId)),
     );
-    api.fetchWorkspace.mockRejectedValue(new Error("read"));
+    api.readMap.mockRejectedValue(new Error("read"));
     await wrapper.get('[data-test="save-edit"]').trigger("click");
     await flushPromises();
-    await vi.waitFor(() => expect(store.readbackError).toBeTruthy());
+    await vi.waitFor(() =>
+      expect(store.editVersionCommands.readbackError).toBeTruthy(),
+    );
     expect(wrapper.text()).toContain(
       "Операция выполнена, но актуальные данные карты не удалось загрузить",
     );
     expect(wrapper.find('[role="progressbar"]').exists()).toBe(false);
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    api.readMap.mockResolvedValue(workspaceFixture(true));
     await wrapper.get('[data-test="retry-read"]').trigger("click");
     await flushPromises();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
-    await vi.waitFor(() => expect(api.fetchWorkspace).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(api.readMap).toHaveBeenCalledTimes(2));
   });
 });
+
+vi.mock("@/api/editVersions", () => api);
+vi.mock("@/api/editVersionMap", async () => {
+  const { fixtureMap } = await import("@/test/editorReadFixtures");
+  return {
+    fetchEditVersionMap: (workOrderId: string, versionId: string) =>
+      fixtureMap(api.readMap, workOrderId, versionId),
+  };
+});
+vi.mock("@/api/editVersionChangeSet", async () => ({
+  fetchEditVersionChangeSet: (await import("@/test/editorReadFixtures"))
+    .fixtureChangeSet,
+}));
+vi.mock("@/api/featureBaseline", async () => ({
+  fetchFeatureBaseline: (await import("@/test/editorReadFixtures"))
+    .fixtureBaseline,
+}));

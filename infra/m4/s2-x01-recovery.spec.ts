@@ -1,3 +1,4 @@
+import { editorReadback } from "./editor-readback.mjs";
 import { test, expect, chromium, type BrowserContext } from "@playwright/test";
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -150,7 +151,7 @@ for (const action of ["Save", "Revert"] as const)
       if (action === "Revert") {
         const r = page.waitForResponse(workspaceResponse);
         await page.getByTestId("save-edit").click();
-        w = await (await r).json();
+        w = await editorReadback(page, await r);
         await expect(page.getByTestId("revert-edit")).toBeEnabled();
       }
       const version = w.workOrder.editVersion.id,
@@ -194,7 +195,7 @@ for (const action of ["Save", "Revert"] as const)
         (r) => workspaceResponse(r) && replayed > 0,
       );
       await page.goto("/");
-      const current = await (await currentRead).json();
+      const current = await editorReadback(page, await currentRead);
       await expect
         .poll(async () => (await storedRecoveries(page)).length)
         .toBe(0);
@@ -297,7 +298,7 @@ test("independent A/B/C, old replay, account isolation and each recovery consent
     if (await leave.isVisible()) await leave.click();
     const response = page.waitForResponse(workspaceResponse);
     await page.getByTestId("workspace-open-action").click();
-    return (await response).json();
+    return editorReadback(page, await response);
   }
   const ids: string[] = [];
   for (const code of ["X01-A", "X01-B", "X01-C"]) {

@@ -108,8 +108,7 @@ def test_run_smoke_uses_assigned_work_order_for_workspace_path(
         },
         (
             "GET",
-            f"/api/v1/work-orders/{EXPECTED_WORK_ORDER_ID}/edit-versions/"
-            f"{edit_version_id}/workspace",
+            f"/api/v1/work-orders/{EXPECTED_WORK_ORDER_ID}/edit-versions/" f"{edit_version_id}",
         ): workspace_payload(edit_version_id=edit_version_id),
     }
 
@@ -127,8 +126,7 @@ def test_run_smoke_uses_assigned_work_order_for_workspace_path(
         ("POST", f"/api/v1/work-orders/{EXPECTED_WORK_ORDER_ID}/edit-versions", "Bearer token-1"),
         (
             "GET",
-            f"/api/v1/work-orders/{EXPECTED_WORK_ORDER_ID}/edit-versions/"
-            f"{edit_version_id}/workspace",
+            f"/api/v1/work-orders/{EXPECTED_WORK_ORDER_ID}/edit-versions/" f"{edit_version_id}",
             "Bearer token-1",
         ),
     ]

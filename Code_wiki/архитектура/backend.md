@@ -3,7 +3,7 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-10-28
+updated: 2026-11-04
 source: repository-change:2026-10-28
 tags: [backend, fastapi, postgis, architecture]
 ---
@@ -88,8 +88,8 @@ Lifetime handles и ограничения конкурентного досту
 [[edit_version_persistence]]. `EditVersionService.save_geometry` подключён к geometry PUT: mutation, revision,
 terminal result и событие фиксируются атомарно; domain rejection после reservation
 коммитится перед HTTP error, infrastructure failure откатывает транзакцию.
-Replay возвращает исходный result после текущих access guards, а workspace GET
-читает current — [[edit_version_save_orchestration]], [[edit_version_api_readback]].
+Replay возвращает исходный result после текущих access guards, а раздельные чтения карты и ChangeSet
+возвращают актуальное состояние — [[edit_version_save_orchestration]], [[edit_version_api_readback]].
 
 ## EditVersion Foundation
 

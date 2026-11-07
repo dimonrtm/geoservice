@@ -212,7 +212,7 @@ def load_workspace(
     return request_json(
         config,
         "GET",
-        f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}/workspace",
+        f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}",
         token=token,
         opener=opener,
     )

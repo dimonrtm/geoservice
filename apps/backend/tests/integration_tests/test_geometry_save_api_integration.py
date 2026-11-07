@@ -18,7 +18,9 @@ from tests.integration_tests.workspace_api_support import (
     client_for,
     current_geometry,
     geometry_path,
-    read_workspace,
+    read_version_map,
+    read_change_set,
+    read_baseline,
     version_path,
 )
 from utility_service.infrastructure.postgresql.geometry_codec import geometry_to_geojson
@@ -82,7 +84,7 @@ def test_http_open_save_readback_revert():
             opened = await client.post(f"/api/v1/work-orders/{ids['work_order_id']}/edit-versions")
             assert opened.status_code == 201, opened.text
             ids["edit_version_id"] = opened.json()["editVersion"]["id"]
-            initial = await read_workspace(
+            initial = await read_change_set(
                 client,
                 ids,
             )
@@ -106,7 +108,7 @@ def test_http_open_save_readback_revert():
             build_workspace_api(engine),
             ids,
         ) as client:
-            workspace = await read_workspace(
+            workspace = await read_version_map(
                 client,
                 ids,
             )
@@ -118,11 +120,13 @@ def test_http_open_save_readback_revert():
                 )
                 == saved.json()["updatedFeature"]["geometry"]
             )
-            assert workspace["basicValidation"] == saved.json()["basicValidation"]
-            assert workspace["changeSet"] == {
+            changes = await read_change_set(client, ids)
+            assert changes["draftVersionToken"] == workspace["draftVersionToken"]
+            assert changes["basicValidation"] == saved.json()["basicValidation"]
+            assert await read_baseline(client, ids) == geometry_to_geojson(BASELINE)
+            assert changes["changeSet"] == {
                 "featureId": str(ids["feature_id"]),
                 "vertexIndex": 1,
-                "baselineGeometry": geometry_to_geojson(BASELINE),
                 "operation": "updated",
             }
             no_op = await client.put(
@@ -135,7 +139,7 @@ def test_http_open_save_readback_revert():
             assert no_op.status_code == 200, no_op.text
             assert no_op.json()["draftVersionToken"] == "2"
             assert (
-                await read_workspace(
+                await read_version_map(
                     client,
                     ids,
                 )
@@ -149,7 +153,7 @@ def test_http_open_save_readback_revert():
                 ),
             )
             assert reverted.status_code == 200, reverted.text
-            clean = await read_workspace(
+            clean = await read_change_set(
                 client,
                 ids,
             )
@@ -160,7 +164,7 @@ def test_http_open_save_readback_revert():
                 clean["changeSet"],
             ) == ("3", False, None, None)
             assert current_geometry(
-                clean,
+                await read_version_map(client, ids),
                 ids,
             ) == geometry_to_geojson(BASELINE)
         after = await snapshot(
@@ -297,7 +301,7 @@ def test_http_stale_and_old_replay():
                 json=request_a,
             )
             assert replay.json() == saved_a.json()
-            workspace = await read_workspace(
+            workspace = await read_version_map(
                 client,
                 ids,
             )
@@ -426,11 +430,8 @@ def test_http_current_authorization(
                 status,
                 "SAVE_CONTEXT_CLOSED" if case == "closed" else code,
             )
-            assert_error(
-                await client.get(f"{version_path(path_ids)}/workspace"),
-                status,
-                code,
-            )
+            for suffix in ("", "/change-set", f"/features/{ids['feature_id']}/baseline"):
+                assert_error(await client.get(f"{version_path(path_ids)}{suffix}"), status, code)
         state = await snapshot(
             engine,
             ids,

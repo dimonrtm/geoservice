@@ -204,7 +204,7 @@ def test_put_format_errors_do_not_call_save(body):
 
 @pytest.mark.parametrize(
     "endpoint",
-    ["put", "workspace"],
+    ["put", "", "/change-set", "/features/bad-id/baseline"],
 )
 def test_edit_path_validation_is_structured(endpoint):
     client, service, path, token, _, ids, _ = api_context()
@@ -219,7 +219,7 @@ def test_edit_path_validation_is_structured(endpoint):
         )
     else:
         response = client.get(
-            f"/api/v1/work-orders/bad-id/edit-versions/{ids[1]}/workspace",
+            f"/api/v1/work-orders/bad-id/edit-versions/{ids[1]}{endpoint}",
             headers={
                 "Authorization": f"Bearer {token}",
             },

@@ -1,37 +1,46 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useAuthStore } from "@/stores/auth";
-import { useWorkOrdersStore } from "@/stores/workOrders";
-import { presentWorkspaceCommands } from "@/domain/workspaceCommandPresentation";
+import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
+import { useEditVersionDraftStore } from "@/stores/editVersionDraft";
+import { useEditVersionChangeSetStore } from "@/stores/editVersionChangeSet";
+import { useEditorSessionStore } from "@/stores/editorSession";
+import {
+  presentWorkspaceCommands,
+  workspaceCommandState,
+} from "@/domain/workspaceCommandPresentation";
 
-const store = useWorkOrdersStore();
+const editVersionCommands = useEditVersionCommandsStore();
+const editVersionDraft = useEditVersionDraftStore();
+const editorSession = useEditorSessionStore();
+const changes = useEditVersionChangeSetStore();
 const auth = useAuthStore();
 const editPanelHeading = ref<HTMLHeadingElement | null>(null);
 const dialog = ref<HTMLDialogElement | null>(null);
 let previousFocus: HTMLElement | null = null;
 const view = computed(() =>
   presentWorkspaceCommands(
-    store,
+    workspaceCommandState(),
     auth.isAuthenticated && auth.user?.role === "editor",
   ),
 );
 const selectedLabel = computed(() => {
-  const draft = store.localDraft;
+  const draft = editVersionDraft.localDraft;
   if (!draft) return "Выберите линию на карте для редактирования";
   const feature =
-    store.activeWorkspace?.workOrder.editVersion.features.features.find(
+    editorSession.activeWorkspace?.workOrder.editVersion.features.features.find(
       (f) => f.id === draft.featureId,
     );
   return `Выбрана линия: ${feature?.properties?.assetCode ?? draft.featureId}`;
 });
 watch(
-  () => store.revertConfirmation?.phase,
+  () => editVersionCommands.revertConfirmation?.phase,
   async (phase, oldPhase) => {
     if (phase) {
       if (!oldPhase)
         previousFocus = document.activeElement as HTMLElement | null;
       await nextTick();
-      if (store.revertConfirmation?.phase !== phase) return;
+      if (editVersionCommands.revertConfirmation?.phase !== phase) return;
       if (dialog.value && !dialog.value.open) dialog.value.showModal();
       dialog.value?.querySelector<HTMLButtonElement>("button")?.focus();
     } else {
@@ -51,15 +60,15 @@ watch(
   },
 );
 function closeRevert() {
-  const id = store.revertConfirmation?.confirmationId;
-  if (id) store.cancelRevert(id);
+  const id = editVersionCommands.revertConfirmation?.confirmationId;
+  if (id) editVersionCommands.cancelRevert(id);
 }
 function proceedRevert() {
-  const context = store.revertConfirmation;
+  const context = editVersionCommands.revertConfirmation;
   if (!context) return;
   if (context.phase === "resolve-dirty")
-    store.discardLocalDraftForRevert(context.confirmationId);
-  else void store.confirmRevert(context.confirmationId);
+    editVersionCommands.discardLocalDraftForRevert(context.confirmationId);
+  else void editVersionCommands.confirmRevert(context.confirmationId);
 }
 function dialogKeydown(event: KeyboardEvent) {
   if (event.key === "Escape") {
@@ -94,24 +103,24 @@ async function focusAfterAction(origin: EventTarget | null) {
 }
 function save(event: MouseEvent) {
   if (!view.value.canSave) return;
-  void store.saveLocalDraft();
+  void editVersionCommands.saveLocalDraft();
   void focusAfterAction(event.currentTarget);
 }
 function cancel(event: MouseEvent) {
   if (!view.value.canCancel) return;
-  store.discardLocalChangesKeepingSelection();
+  editVersionDraft.discardLocalChangesKeepingSelection();
   void focusAfterAction(event.currentTarget);
 }
 function revert() {
-  if (view.value.canRevert) store.beginRevert();
+  if (view.value.canRevert) editVersionCommands.beginRevert();
 }
 function recover(event: MouseEvent, action: "command" | "read" | "discard") {
   if (action === "command" && view.value.canRetryCommand)
-    void store.retryPendingSave();
+    void editVersionCommands.retryPendingSave();
   if (action === "read" && view.value.canRetryRead)
-    void store.refreshCurrentWorkspace();
+    void editVersionCommands.refreshCurrentWorkspace();
   if (action === "discard" && view.value.canDiscardRejectedAttempt)
-    store.discardRejectedAttempt();
+    editVersionCommands.discardRejectedAttempt();
   void focusAfterAction(event.currentTarget);
 }
 </script>
@@ -199,7 +208,7 @@ function recover(event: MouseEvent, action: "command" | "read" | "discard") {
       </button>
     </div>
     <dialog
-      v-if="store.revertConfirmation"
+      v-if="editVersionCommands.revertConfirmation"
       ref="dialog"
       role="dialog"
       aria-modal="true"
@@ -210,13 +219,13 @@ function recover(event: MouseEvent, action: "command" | "read" | "discard") {
     >
       <h3 id="revert-title">
         {{
-          store.revertConfirmation.phase === "resolve-dirty"
+          editVersionCommands.revertConfirmation.phase === "resolve-dirty"
             ? "Отказаться от локальной правки?"
             : "Вернуть исходную геометрию?"
         }}
       </h3>
       <p
-        v-if="store.revertConfirmation.phase === 'resolve-dirty'"
+        v-if="editVersionCommands.revertConfirmation.phase === 'resolve-dirty'"
         id="revert-description"
       >
         Локальная правка будет окончательно отменена. Отмена следующего
@@ -230,14 +239,14 @@ function recover(event: MouseEvent, action: "command" | "read" | "discard") {
       <div class="commandButtons">
         <button type="button" data-test="revert-safe" @click="closeRevert">
           {{
-            store.revertConfirmation.phase === "resolve-dirty"
+            editVersionCommands.revertConfirmation.phase === "resolve-dirty"
               ? "Продолжить редактирование"
               : "Отмена"
           }}
         </button>
         <button type="button" data-test="revert-proceed" @click="proceedRevert">
           {{
-            store.revertConfirmation.phase === "resolve-dirty"
+            editVersionCommands.revertConfirmation.phase === "resolve-dirty"
               ? "Отказаться от локальной правки"
               : "Вернуть исходную геометрию"
           }}
@@ -247,9 +256,7 @@ function recover(event: MouseEvent, action: "command" | "read" | "discard") {
     <p id="workspace-revert-hint" class="hint">
       «Сбросить» — вернуть линию к исходному состоянию.
       <span
-        v-if="
-          !store.activeWorkspace?.workOrder.editVersion.hasPersistedChangeSet
-        "
+        v-if="changes.phase === 'ready' && !changes.data?.hasPersistedChangeSet"
         >Сохранённых изменений для сброса нет.</span
       >
     </p>

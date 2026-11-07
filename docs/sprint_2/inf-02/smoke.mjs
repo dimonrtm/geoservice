@@ -1,3 +1,7 @@
+import {
+  editorReadback,
+  isEditVersionMap,
+} from "../../../infra/m4/editor-readback.mjs";
 import { createRequire } from "node:module";
 import path from "node:path";
 
@@ -8,7 +12,7 @@ const { chromium, expect: baseExpect, selectors } = require("@playwright/test");
 const expect = baseExpect.configure({ timeout: 20_000 });
 selectors.setTestIdAttribute("data-test");
 const workspaceResponse = (response) =>
-  response.url().endsWith("/workspace") && response.status() === 200;
+  isEditVersionMap(response.url()) && response.status() === 200;
 
 async function launch(origin) {
   const browser = await chromium.launch({
@@ -119,11 +123,11 @@ export async function workflow(origin, layerId, evidence) {
       .click();
     let readback = page.waitForResponse(workspaceResponse);
     await page.getByTestId("workspace-open-action").click();
-    const initial = await (await readback).json();
+    const initial = await editorReadback(page, await readback);
     const feature = await moveLine(page, initial);
     readback = page.waitForResponse(workspaceResponse);
     await page.getByTestId("save-edit").click();
-    const saved = await (await readback).json();
+    const saved = await editorReadback(page, await readback);
     const currentGeometry = (workspace) =>
       workspace.workOrder.editVersion.features.features.find(
         (f) => f.id === feature.id,
@@ -138,7 +142,7 @@ export async function workflow(origin, layerId, evidence) {
     readback = page.waitForResponse(workspaceResponse);
     await page.reload();
     await refresh;
-    const restored = await (await readback).json();
+    const restored = await editorReadback(page, await readback);
     expect(currentGeometry(restored)).toEqual(currentGeometry(saved));
     await expect(page.getByTestId("revert-edit")).toBeEnabled();
     await page.screenshot({
@@ -147,7 +151,7 @@ export async function workflow(origin, layerId, evidence) {
     await page.getByTestId("revert-edit").click();
     readback = page.waitForResponse(workspaceResponse);
     await page.getByTestId("revert-proceed").click();
-    const reverted = await (await readback).json();
+    const reverted = await editorReadback(page, await readback);
     expect(currentGeometry(reverted)).toEqual(feature.geometry);
     expect(reverted.workOrder.editVersion.hasPersistedChangeSet).toBe(false);
     await expect(page.getByTestId("revert-edit")).toBeDisabled();

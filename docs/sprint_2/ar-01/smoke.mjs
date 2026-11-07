@@ -1,3 +1,4 @@
+import { editorReadback, isEditVersionMap } from "../../../infra/m4/editor-readback.mjs";
 // Приёмочные тесты используют настоящий backend. route.fetch/fulfill только задерживают
 // неизменённый ответ сервера; abort моделирует потерю. Credentials живут в памяти.
 import assert from "node:assert/strict";
@@ -196,10 +197,10 @@ async function openWorkOrder(page) {
     .filter({ hasText: "WO-001" })
     .click();
   const readback = page.waitForResponse(
-    (r) => at(r, "/workspace") && r.status() === 200,
+    (r) => isEditVersionMap(r.url()) && r.status() === 200,
   );
   await page.getByTestId("workspace-open-action").click();
-  const workspace = await (await readback).json();
+  const workspace = await editorReadback(page, await readback);
   await expect(page.getByTestId("workspace-edit-commands")).toBeVisible();
   return workspace;
 }
@@ -951,7 +952,7 @@ export async function acceptance({
         await moveLine(a, wa, 12);
         await moveLine(b, wb, -12);
         const saved = a.waitForResponse(
-          (r) => at(r, "/workspace") && r.status() === 200,
+          (r) => isEditVersionMap(r.url()) && r.status() === 200,
         );
         await a.getByTestId("save-edit").click();
         await saved;
@@ -966,7 +967,7 @@ export async function acceptance({
         // Возвращаем fixture в baseline существующим Revert, без SQL обхода.
         await a.getByTestId("revert-edit").click();
         const reverted = a.waitForResponse(
-          (r) => at(r, "/workspace") && r.status() === 200,
+          (r) => isEditVersionMap(r.url()) && r.status() === 200,
         );
         await a.getByTestId("revert-proceed").click();
         await reverted;

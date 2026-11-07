@@ -1,5 +1,6 @@
+import { editorTestContext } from "@/test/editorTestContext";
 const api = vi.hoisted(() => ({
-  fetchWorkspace: vi.fn(),
+  readMap: vi.fn(),
   openEditVersion: vi.fn(),
   fetchAssignedWorkOrders: vi.fn(),
 }));
@@ -8,9 +9,8 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { IDBFactory } from "fake-indexeddb";
 import { workspaceFixture, target } from "@/test/workspaceEditFixture";
-import { useWorkOrdersStore } from "./workOrders";
 import { useAuthStore } from "./auth";
-import { recoveryKey } from "@/contracts/workspace-recovery";
+
 beforeEach(() => {
   setActivePinia(createPinia());
   Object.defineProperty(globalThis, "indexedDB", {
@@ -23,78 +23,83 @@ beforeEach(() => {
   auth.user = { id: "actor", email: "a@example.local", role: "editor" };
 });
 it("a newer ordinary GET prevents an older recovery GET replacing current", () => {
-  const store = useWorkOrdersStore();
+  const store = editorTestContext();
   const ctx = {
     actorId: "actor",
     workOrderId: target.workOrderId,
     editVersionId: target.editVersionId,
   };
-  const older = store.reserveWorkspaceRead(ctx),
-    newer = store.reserveWorkspaceRead(ctx);
-  expect(store.applyWorkspaceRead(newer, workspaceFixture(true))).toBe(
-    "applied",
-  );
-  expect(store.applyWorkspaceRead(older, workspaceFixture())).toBe(
-    "superseded",
-  );
+  store.workOrders.selectedWorkOrderId = store.editorSession.openedWorkOrderId =
+    ctx.workOrderId;
+  store.editorSession.openedEditVersionId = ctx.editVersionId;
+  const older = store.editorSession.reserveWorkspaceRead(ctx),
+    newer = store.editorSession.reserveWorkspaceRead(ctx);
   expect(
-    store.snapshots[recoveryKey(ctx)]?.workOrder.editVersion.draftVersionToken,
+    store.editorSession.applyWorkspaceRead(newer, workspaceFixture(true)),
+  ).toBe("applied");
+  expect(
+    store.editorSession.applyWorkspaceRead(older, workspaceFixture()),
+  ).toBe("superseded");
+  expect(
+    store.editorSession.activeWorkspace?.workOrder.editVersion
+      .draftVersionToken,
   ).toBe("revision-b");
 });
 it("readback A updates only A while selected B keeps its workspace and draft", () => {
-  const store = useWorkOrdersStore();
+  const store = editorTestContext();
   const b = workspaceFixture();
   b.workOrder.id = "B";
   b.workOrder.editVersion.id = "ev-B";
-  store.workspace = b;
-  store.openedWorkOrderId = store.selectedWorkOrderId = "B";
-  store.openedEditVersionId = "ev-B";
-  store.beginLocalEdit(target.featureId, 1);
-  store.moveLocalVertex([65.1, 44.3]);
+  store.seed(b);
+  store.editorSession.openedWorkOrderId = store.workOrders.selectedWorkOrderId =
+    "B";
+  store.editorSession.openedEditVersionId = "ev-B";
+  store.editVersionDraft.beginLocalEdit(target.featureId, 1);
+  store.editVersionDraft.moveLocalVertex([65.1, 44.3]);
   const ctx = {
     actorId: "actor",
     workOrderId: target.workOrderId,
     editVersionId: target.editVersionId,
   };
-  store.applyWorkspaceRead(
-    store.reserveWorkspaceRead(ctx),
+  store.editorSession.applyWorkspaceRead(
+    store.editorSession.reserveWorkspaceRead(ctx),
     workspaceFixture(true),
   );
-  expect(store.activeWorkspace?.workOrder.id).toBe("B");
-  expect(store.localDraft?.candidateGeometry.coordinates[1]).toEqual([
-    65.1, 44.3,
-  ]);
+  expect(store.editorSession.activeWorkspace?.workOrder.id).toBe("B");
+  expect(
+    store.editVersionDraft.localDraft?.candidateGeometry.coordinates[1],
+  ).toEqual([65.1, 44.3]);
 });
 
 it("recovery accepted during ordinary opening still opens the newest workspace", async () => {
-  const s = useWorkOrdersStore();
-  s.selectedWorkOrderId = target.workOrderId;
+  const s = editorTestContext();
+  s.workOrders.selectedWorkOrderId = target.workOrderId;
   api.openEditVersion.mockResolvedValue({
     editVersion: { id: target.editVersionId },
   });
   let resolve!: (w: ReturnType<typeof workspaceFixture>) => void;
-  api.fetchWorkspace.mockReturnValue(
+  api.readMap.mockReturnValue(
     new Promise((r) => {
       resolve = r;
     }),
   );
-  const opening = s.openSelectedWorkOrder();
-  await vi.waitFor(() => expect(api.fetchWorkspace).toHaveBeenCalled());
-  const newer = s.reserveWorkspaceRead({
+  const opening = s.editorSession.openSelectedWorkOrder();
+  await vi.waitFor(() => expect(api.readMap).toHaveBeenCalled());
+  const newer = s.editorSession.reserveWorkspaceRead({
     actorId: "actor",
     workOrderId: target.workOrderId,
     editVersionId: target.editVersionId,
   });
-  s.applyWorkspaceRead(newer, workspaceFixture(true));
+  s.editorSession.applyWorkspaceRead(newer, workspaceFixture(true));
   resolve(workspaceFixture());
   await opening;
-  expect(s.activeWorkspace?.workOrder.editVersion.draftVersionToken).toBe(
-    "revision-b",
-  );
+  expect(
+    s.editorSession.activeWorkspace?.workOrder.editVersion.draftVersionToken,
+  ).toBe("revision-b");
 });
 it("temporary assignment list failure preserves last confirmed access", async () => {
-  const s = useWorkOrdersStore();
-  s.items = [
+  const s = editorTestContext();
+  s.workOrders.items = [
     {
       id: target.workOrderId,
       code: "A",
@@ -107,43 +112,43 @@ it("temporary assignment list failure preserves last confirmed access", async ()
     isAxiosError: true,
     request: {},
   });
-  await s.loadAssigned();
-  expect(s.items.map((w) => w.id)).toEqual([target.workOrderId]);
-  expect(s.loadError).not.toBeNull();
+  await s.workOrders.loadAssigned();
+  expect(s.workOrders.items.map((w) => w.id)).toEqual([target.workOrderId]);
+  expect(s.workOrders.loadError).not.toBeNull();
 });
 
 it("new recovery GET finishing after superseded ordinary GET still opens workspace", async () => {
-  const s = useWorkOrdersStore();
-  s.selectedWorkOrderId = target.workOrderId;
+  const s = editorTestContext();
+  s.workOrders.selectedWorkOrderId = target.workOrderId;
   api.openEditVersion.mockResolvedValue({
     editVersion: { id: target.editVersionId },
   });
   let resolve!: (w: ReturnType<typeof workspaceFixture>) => void;
-  api.fetchWorkspace.mockReturnValue(
+  api.readMap.mockReturnValue(
     new Promise((r) => {
       resolve = r;
     }),
   );
-  const opening = s.openSelectedWorkOrder();
+  const opening = s.editorSession.openSelectedWorkOrder();
   await vi.waitFor(() =>
-    expect(s.openingEditVersionId).toBe(target.editVersionId),
+    expect(s.editorSession.openingEditVersionId).toBe(target.editVersionId),
   );
-  const newer = s.reserveWorkspaceRead({
+  const newer = s.editorSession.reserveWorkspaceRead({
     actorId: "actor",
     workOrderId: target.workOrderId,
     editVersionId: target.editVersionId,
   });
   resolve(workspaceFixture());
   await opening;
-  s.applyWorkspaceRead(newer, workspaceFixture(true));
-  expect(s.activeWorkspace?.workOrder.editVersion.draftVersionToken).toBe(
-    "revision-b",
-  );
+  s.editorSession.applyWorkspaceRead(newer, workspaceFixture(true));
+  expect(
+    s.editorSession.activeWorkspace?.workOrder.editVersion.draftVersionToken,
+  ).toBe("revision-b");
 });
 it("obsolete ordinary restore error cannot close newer accepted recovery workspace", async () => {
-  const s = useWorkOrdersStore();
-  s.selectedWorkOrderId = target.workOrderId;
-  s.items = [
+  const s = editorTestContext();
+  s.workOrders.selectedWorkOrderId = target.workOrderId;
+  s.workOrders.items = [
     {
       id: target.workOrderId,
       code: "A",
@@ -154,24 +159,41 @@ it("obsolete ordinary restore error cannot close newer accepted recovery workspa
   ];
   sessionStorage.setItem("geoservice:opened-workspace", JSON.stringify(target));
   let reject!: (error: unknown) => void;
-  api.fetchWorkspace.mockReturnValue(
+  api.readMap.mockReturnValue(
     new Promise((_r, j) => {
       reject = j;
     }),
   );
-  const opening = s.restoreOpenedWorkspace();
+  const opening = s.editorSession.restoreOpenedWorkspace();
   await vi.waitFor(() =>
-    expect(s.openingEditVersionId).toBe(target.editVersionId),
+    expect(s.editorSession.openingEditVersionId).toBe(target.editVersionId),
   );
-  const newer = s.reserveWorkspaceRead({
+  const newer = s.editorSession.reserveWorkspaceRead({
     actorId: "actor",
     workOrderId: target.workOrderId,
     editVersionId: target.editVersionId,
   });
-  s.applyWorkspaceRead(newer, workspaceFixture(true));
+  s.editorSession.applyWorkspaceRead(newer, workspaceFixture(true));
   reject(new Error("old failure"));
   await opening;
-  expect(s.activeWorkspace?.workOrder.editVersion.draftVersionToken).toBe(
-    "revision-b",
-  );
+  expect(
+    s.editorSession.activeWorkspace?.workOrder.editVersion.draftVersionToken,
+  ).toBe("revision-b");
 });
+
+vi.mock("@/api/editVersions", () => api);
+vi.mock("@/api/editVersionMap", async () => {
+  const { fixtureMap } = await import("@/test/editorReadFixtures");
+  return {
+    fetchEditVersionMap: (workOrderId: string, versionId: string) =>
+      fixtureMap(api.readMap, workOrderId, versionId),
+  };
+});
+vi.mock("@/api/editVersionChangeSet", async () => ({
+  fetchEditVersionChangeSet: (await import("@/test/editorReadFixtures"))
+    .fixtureChangeSet,
+}));
+vi.mock("@/api/featureBaseline", async () => ({
+  fetchFeatureBaseline: (await import("@/test/editorReadFixtures"))
+    .fixtureBaseline,
+}));

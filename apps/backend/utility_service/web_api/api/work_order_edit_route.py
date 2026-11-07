@@ -9,7 +9,7 @@ from utility_service.web_api.parsers.geometry_save_request import GeometryReques
 
 
 class WorkOrderEditRoute(APIRoute):
-    """Strict request errors scoped to the Save and workspace operations."""
+    """Strict request errors scoped to the Save and version read operations."""
 
     def get_route_handler(self) -> Callable[[Request], Awaitable[Response]]:
         handler = super().get_route_handler()

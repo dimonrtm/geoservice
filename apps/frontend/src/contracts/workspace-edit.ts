@@ -105,7 +105,7 @@ export function isSaveRequest(value: unknown): value is GeometrySaveRequest {
     isLineStringXY(value.geometry)
   );
 }
-function validSummary(value: unknown, changed: boolean): boolean {
+export function validSummary(value: unknown, changed: boolean): boolean {
   return changed
     ? record(value) &&
         value.geometryStatus === "passed" &&

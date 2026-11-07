@@ -18,8 +18,9 @@ from tests.smoke.full_path_workspace_smoke import (
     assert_workspace,
     load_assigned_work_order,
     open_edit_version,
-    load_workspace,
+    load_workspace as load_edit_version_map,
     login,
+    request_json,
     request_json_response,
 )
 from tests.smoke.save_geometry_observer import snapshot_save_state
@@ -31,6 +32,26 @@ VALIDATION = {
     "positionalAccuracyStatus": "POSITIONAL_ACCURACY_UNVERIFIED",
     "dirtyRelativeToBaseline": "passed",
 }
+
+
+def load_workspace(config, token, work_order_id, edit_version_id, *, opener=urlopen):
+    workspace = load_edit_version_map(config, token, work_order_id, edit_version_id, opener=opener)
+    path = f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}"
+    changes = request_json(config, "GET", f"{path}/change-set", token=token, opener=opener)
+    version = workspace["workOrder"]["editVersion"]
+    require(changes["draftVersionToken"] == version["draftVersionToken"], "Ревизии чтений различны")
+    if change := changes["changeSet"]:
+        baseline = request_json(
+            config,
+            "GET",
+            f"{path}/features/{change['featureId']}/baseline",
+            token=token,
+            opener=opener,
+        )
+        require(baseline["featureId"] == change["featureId"], "Baseline другой линии")
+        change["baselineGeometry"] = baseline["baselineGeometry"]
+    version.update(changes)
+    return workspace
 
 
 class SmokeCheckFailure(SmokeFailure):

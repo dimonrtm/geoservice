@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { useWorkOrdersStore } from "@/stores/workOrders";
+import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
+import { useEditorSessionStore } from "@/stores/editorSession";
 import { comparisonRows } from "@/domain/workspaceComparison";
 import { isLineStringXY } from "@/contracts/workspace-edit";
-const store = useWorkOrdersStore();
+const editVersionCommands = useEditVersionCommandsStore();
+const editorSession = useEditorSessionStore();
 const rows = computed(() => {
-  const m = store.activeComparison;
+  const m = editVersionCommands.activeComparison;
   if (!m) return [];
-  const g = store.activeWorkspace?.workOrder.editVersion.features.features.find(
-    (f) => f.id === m.featureId,
-  )?.geometry;
+  const g =
+    editorSession.activeWorkspace?.workOrder.editVersion.features.features.find(
+      (f) => f.id === m.featureId,
+    )?.geometry;
   return comparisonRows(
     m.source?.geometry ?? null,
     m.candidate,
@@ -19,7 +22,7 @@ const rows = computed(() => {
 </script>
 <template>
   <section
-    v-if="store.activeComparison"
+    v-if="editVersionCommands.activeComparison"
     class="comparison"
     aria-labelledby="comparison-heading"
     data-test="stale-comparison"
@@ -29,7 +32,7 @@ const rows = computed(() => {
       Данные изменились. Попытка не перенесена на актуальную линию. Предпросмотр
       не изменяет данные.
     </p>
-    <p v-if="!store.activeComparison.source">
+    <p v-if="!editVersionCommands.activeComparison.source">
       Исходные данные прежней попытки недоступны.
     </p>
     <div role="group" aria-label="Предпросмотр линии">
@@ -41,13 +44,18 @@ const rows = computed(() => {
         ] as const"
         :key="option.id"
         type="button"
-        :disabled="option.id === 'source' && !store.activeComparison.source"
-        :aria-pressed="store.comparisonPreview === option.id"
-        @click="store.comparisonPreview = option.id"
+        :disabled="
+          option.id === 'source' && !editVersionCommands.activeComparison.source
+        "
+        :aria-pressed="editVersionCommands.comparisonPreview === option.id"
+        @click="editVersionCommands.comparisonPreview = option.id"
       >
         {{ option.label }}
       </button>
-      <button type="button" @click="store.comparisonPreview = null">
+      <button
+        type="button"
+        @click="editVersionCommands.comparisonPreview = null"
+      >
         Скрыть предпросмотр
       </button>
     </div>
@@ -77,8 +85,8 @@ const rows = computed(() => {
     <button
       type="button"
       data-test="comparison-discard"
-      :disabled="!store.canDiscardRejectedAttempt"
-      @click="store.discardRejectedAttempt()"
+      :disabled="!editVersionCommands.canDiscardRejectedAttempt"
+      @click="editVersionCommands.discardRejectedAttempt()"
     >
       Отказаться от попытки
     </button>

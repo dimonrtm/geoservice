@@ -7,10 +7,14 @@ import pytest
 
 from utility_service.domain_services.edit_geometry.types import GeometryValue
 from utility_service.infrastructure.postgresql.geometry_codec import encode_geometry
-from utility_service.infrastructure.postgresql.repository_rows.workspace import (
-    WorkspaceDraftFeaturePairRow,
+from utility_service.infrastructure.postgresql.repository_rows.edit_version_read import (
+    CurrentDraftFeature,
 )
-from utility_service.use_cases.services.workspace_draft_projection import project_workspace_draft
+from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
+    ComparisonBaseline,
+    BaselineFeatureGeometry,
+)
+from utility_service.use_cases.services.version_change_projection import project_version_changes
 
 
 def geometry(
@@ -32,70 +36,58 @@ def draft(
     visible=True,
 ):
     baseline_id, work_order_id = uuid4(), uuid4()
-    return SimpleNamespace(
-        work_order=SimpleNamespace(id=work_order_id),
+    feature_id = uuid4()
+    version = SimpleNamespace(
+        work_order_id=work_order_id,
         edit_version=SimpleNamespace(
             default_state_id=baseline_id,
             base_network_revision=1,
             draft_revision=1,
         ),
-        baseline_state=SimpleNamespace(
-            id=baseline_id,
-            work_order_id=work_order_id,
-            base_network_revision=1,
-            status="active",
-        ),
-        draft_feature_pairs=(
-            WorkspaceDraftFeaturePairRow(
-                feature_id=uuid4(),
-                current_feature_type="line",
-                baseline_feature_type="line",
-                current_geometry_ewkb=current or geometry(),
-                baseline_geometry_ewkb=geometry(),
-                operation=operation,
-                visible=visible,
-            ),
+        features=(
+            CurrentDraftFeature(feature_id, "line", current or geometry(), operation, visible),
         ),
     )
+    state = SimpleNamespace(
+        id=baseline_id, work_order_id=work_order_id, base_network_revision=1, status="active"
+    )
+    baseline = ComparisonBaseline(state, (BaselineFeatureGeometry(feature_id, "line", geometry()),))
+    return version, baseline
 
 
 def test_workspace_projection_states():
-    row = draft()
-    initial = project_workspace_draft(row)
+    version, baseline = draft()
+    initial = project_version_changes(version, baseline)
     assert (
         initial.draft_version_token,
         initial.has_persisted_change_set,
         initial.basic_validation,
         initial.change_set,
     ) == ("1", False, None, None)
-    row.edit_version.draft_revision = 2
-    row.draft_feature_pairs = (
+    version.edit_version.draft_revision = 2
+    version.features = (
         replace(
-            row.draft_feature_pairs[0],
-            current_geometry_ewkb=geometry(((1, 1), (2, 2.1), (3, 3))),
+            version.features[0],
+            geometry_ewkb=geometry(((1, 1), (2, 2.1), (3, 3))),
             operation="updated",
         ),
     )
-    saved = project_workspace_draft(row)
+    saved = project_version_changes(version, baseline)
     assert saved.draft_version_token == "2"
     assert saved.has_persisted_change_set is True
     assert saved.basic_validation.geometry_status == "passed"
-    assert saved.change_set.feature_id == row.draft_feature_pairs[0].feature_id
+    assert saved.change_set.feature_id == version.features[0].feature_id
     assert saved.change_set.vertex_index == 1
-    assert saved.change_set.baseline_geometry.model_dump(mode="json")["coordinates"] == [
-        [1.0, 1.0],
-        [2.0, 2.0],
-        [3.0, 3.0],
-    ]
-    row.edit_version.draft_revision = 3
-    row.draft_feature_pairs = (
+    assert "baselineGeometry" not in saved.change_set.model_dump(by_alias=True)
+    version.edit_version.draft_revision = 3
+    version.features = (
         replace(
-            row.draft_feature_pairs[0],
-            current_geometry_ewkb=geometry(),
+            version.features[0],
+            geometry_ewkb=geometry(),
             operation="unchanged",
         ),
     )
-    reverted = project_workspace_draft(row)
+    reverted = project_version_changes(version, baseline)
     assert (
         reverted.draft_version_token,
         reverted.has_persisted_change_set,
@@ -127,13 +119,13 @@ def test_workspace_projection_states():
     ],
 )
 def test_workspace_projection_rejects_inconsistent_pairs(case):
-    row = draft(
+    version, baseline = draft(
         current=geometry(((1, 1), (2, 2.1), (3, 3))),
         operation="updated",
     )
-    pair = row.draft_feature_pairs[0]
+    pair = version.features[0]
     if case == "baseline":
-        row.baseline_state = None
+        baseline = None
     elif case in ("root", "owner", "revision", "status"):
         field, value = {
             "root": ("id", uuid4()),
@@ -142,35 +134,33 @@ def test_workspace_projection_rejects_inconsistent_pairs(case):
             "status": ("status", "archived"),
         }[case]
         setattr(
-            row.baseline_state,
+            baseline.state,
             field,
             value,
         )
+    elif case == "missing_current":
+        version.features = ()
+    elif case == "missing_baseline":
+        baseline = replace(baseline, features=())
     else:
         changes = {
-            "missing_current": {
-                "current_geometry_ewkb": None,
-            },
-            "missing_baseline": {
-                "baseline_geometry_ewkb": None,
-            },
             "type": {
-                "current_feature_type": "junction",
+                "feature_type": "junction",
             },
             "operation": {
                 "operation": "added",
             },
             "false_updated": {
-                "current_geometry_ewkb": geometry(),
+                "geometry_ewkb": geometry(),
             },
             "false_unchanged": {
                 "operation": "unchanged",
             },
             "endpoint": {
-                "current_geometry_ewkb": geometry(((1, 1.1), (2, 2), (3, 3))),
+                "geometry_ewkb": geometry(((1, 1.1), (2, 2), (3, 3))),
             },
             "count": {
-                "current_geometry_ewkb": geometry(((1, 1), (3, 3))),
+                "geometry_ewkb": geometry(((1, 1), (3, 3))),
             },
             "hidden": {
                 "visible": False,
@@ -180,25 +170,25 @@ def test_workspace_projection_rejects_inconsistent_pairs(case):
                 "operation": "unchanged",
             },
             "corrupt": {
-                "current_geometry_ewkb": "bad",
+                "geometry_ewkb": "bad",
             },
             "multiple": {},
         }[case]
-        row.draft_feature_pairs = (
+        version.features = (
             replace(
                 pair,
                 **changes,
             ),
         )
         if case == "multiple":
-            row.draft_feature_pairs += (
-                replace(
-                    pair,
-                    feature_id=uuid4(),
-                ),
+            second_id = uuid4()
+            version.features += (replace(pair, feature_id=second_id),)
+            baseline = replace(
+                baseline,
+                features=(*baseline.features, replace(baseline.features[0], feature_id=second_id)),
             )
     with pytest.raises(ValueError):
-        project_workspace_draft(row)
+        project_version_changes(version, baseline)
 
 
 @pytest.mark.parametrize(
@@ -210,30 +200,37 @@ def test_unchanged_points_and_short_lines_are_not_edit_candidates(
     points,
     feature_type,
 ):
-    row = draft()
+    version, baseline = draft()
     ewkb = geometry(
         points,
         kind,
     )
-    row.draft_feature_pairs = (
+    version.features = (
         replace(
-            row.draft_feature_pairs[0],
-            current_feature_type=feature_type,
-            baseline_feature_type=feature_type,
-            current_geometry_ewkb=ewkb,
-            baseline_geometry_ewkb=ewkb,
+            version.features[0],
+            feature_type=feature_type,
+            geometry_ewkb=ewkb,
         ),
     )
-    assert project_workspace_draft(row).has_persisted_change_set is False
+    baseline = replace(
+        baseline,
+        features=(replace(baseline.features[0], feature_type=feature_type, geometry_ewkb=ewkb),),
+    )
+    assert project_version_changes(version, baseline).has_persisted_change_set is False
 
 
 def test_signed_zero_does_not_create_diff():
-    row = draft()
-    row.draft_feature_pairs = (
-        replace(
-            row.draft_feature_pairs[0],
-            current_geometry_ewkb=geometry(((0, 1), (2, 2), (3, 3))),
-            baseline_geometry_ewkb=geometry((("-0.0", 1), (2, 2), (3, 3))),
+    version, baseline = draft()
+    baseline = replace(
+        baseline,
+        features=(
+            replace(baseline.features[0], geometry_ewkb=geometry((("-0.0", 1), (2, 2), (3, 3)))),
         ),
     )
-    assert project_workspace_draft(row).has_persisted_change_set is False
+    version.features = (
+        replace(
+            version.features[0],
+            geometry_ewkb=geometry(((0, 1), (2, 2), (3, 3))),
+        ),
+    )
+    assert project_version_changes(version, baseline).has_persisted_change_set is False

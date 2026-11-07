@@ -1,4 +1,5 @@
 import { parseApiError } from "@/api/parseApiError";
+import { SessionNotConfirmedError } from "@/api/sessionNotConfirmedError";
 import type { SaveRejection } from "@/contracts/workspace-edit";
 export type SaveFailureDisposition =
   | { kind: "retryableUnknown" }
@@ -22,6 +23,7 @@ export function classifySaveFailure(
 ): SaveFailureDisposition {
   const parsed = parseApiError(error);
   if (
+    error instanceof SessionNotConfirmedError ||
     parsed.kind === "network" ||
     parsed.kind === "timeout" ||
     ((parsed.kind === "api" || parsed.kind === "http") && parsed.status >= 500)

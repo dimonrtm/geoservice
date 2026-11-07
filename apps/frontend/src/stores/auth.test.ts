@@ -30,6 +30,15 @@ vi.mock("@/stores/workOrders", () => ({
     suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
   }),
 }));
+vi.mock("@/stores/editVersionCommands", () => ({
+  useEditVersionCommandsStore: () => ({
+    reset: resetWorkOrdersMock,
+    suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
+  }),
+}));
+vi.mock("@/stores/editorSession", () => ({
+  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
+}));
 
 function createLocalStorageMock() {
   const storage = new Map<string, string>();

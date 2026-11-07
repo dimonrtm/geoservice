@@ -4,6 +4,8 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 
 ## Agent Memory
 
+- Чтение карты EditVersion, ChangeSet, baseline, frontend-модули редактора и повтор после ошибки — `Code_wiki/архитектура/edit_version_api_readback.md`, `apps/backend/utility_service/use_cases/services/edit_version_read_service.py`, `apps/frontend/src/composables/useEditVersionEditor.ts`
+
 - Именование по месту использования, пакетный экспорт слоёв, DTO команды — `AGENTS.md`, `docs/agent-memory/patterns/2026-11-02-code-naming-at-call-site.md`
 
 - Условная организация, `02_expert_oldman_ufa`, автономное доменное исследование; 75 источников только для отдельного уточнения доменной модели после `/discover`, без квоты для технического разбора спринта: `docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md`

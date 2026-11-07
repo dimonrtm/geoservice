@@ -30,12 +30,10 @@ const { authStoreMock, axiosCreateMock, responseUseMock, requestUseMock } =
     };
   });
 
-vi.mock("axios", async (original) => ({
-  default: {
-    CanceledError: (await original<typeof import("axios")>()).CanceledError,
-    create: axiosCreateMock,
-  },
-}));
+vi.mock("axios", async (original) => {
+  const { default: axios } = await original<typeof import("axios")>();
+  return { default: { ...axios, create: axiosCreateMock } };
+});
 
 vi.mock("@/pinia", () => ({
   pinia: {},
@@ -147,9 +145,14 @@ describe("http api", () => {
     const handler = requestUseMock.mock.calls[0]?.[0] as (
       config: unknown,
     ) => Promise<unknown>;
-    await expect(
-      handler({ url: "/api/v1/work-orders", headers: {} }),
-    ).rejects.toMatchObject({ code: "ERR_CANCELED" });
+    const error = await handler({
+      url: "/api/v1/work-orders",
+      headers: {},
+    }).catch((cause) => cause);
+    expect(error).toMatchObject({ code: "ERR_CANCELED" });
+    const { classifySaveFailure } =
+      await import("@/stores/workspaceSaveErrors");
+    expect(classifySaveFailure(error, true).kind).toBe("retryableUnknown");
   });
   it("actor_change_while_waiting_for_gate_cancels_old_request", async () => {
     authStoreMock.token = "active";
@@ -170,7 +173,11 @@ describe("http api", () => {
     );
     authStoreMock.sessionEpoch = 2;
     release(true);
-    expect(await result).toMatchObject({ code: "ERR_CANCELED" });
+    const error = await result;
+    expect(error).toMatchObject({ code: "ERR_CANCELED" });
+    const { classifySaveFailure } =
+      await import("@/stores/workspaceSaveErrors");
+    expect(classifySaveFailure(error, true).kind).toBe("blocked");
   });
   it.each(["login", "session/refresh", "logout", "session/status"])(
     "auth_call_%s_does_not_recurse_into_gate",

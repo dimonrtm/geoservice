@@ -1,8 +1,10 @@
 import { expect, vi } from "vitest";
-import type { useWorkOrdersStore } from "@/stores/workOrders";
+import type { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
 import { useWorkspaceRecoveryStore } from "@/stores/workspaceRecovery";
 import { createRecoveryStorage } from "@/stores/workspaceRecoveryStorage";
-export async function settle(store: ReturnType<typeof useWorkOrdersStore>) {
+export async function settle(
+  store: ReturnType<typeof useEditVersionCommandsStore>,
+) {
   await vi.waitFor(() => {
     expect(store.phase).not.toBe("sending");
     if (store.phase === "reading-current")

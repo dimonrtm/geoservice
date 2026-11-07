@@ -22,6 +22,15 @@ vi.mock("@/stores/workOrders", () => ({
     suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
   }),
 }));
+vi.mock("@/stores/editVersionCommands", () => ({
+  useEditVersionCommandsStore: () => ({
+    reset: vi.fn(),
+    suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
+  }),
+}));
+vi.mock("@/stores/editorSession", () => ({
+  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
+}));
 vi.mock("@/stores/workspaceRecovery", () => ({
   useWorkspaceRecoveryStore: () => ({ hideActor: vi.fn() }),
 }));

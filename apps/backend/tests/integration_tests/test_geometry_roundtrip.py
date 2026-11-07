@@ -19,8 +19,11 @@ from utility_service.infrastructure.postgresql.geometry_codec import (
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
     WorkOrderRepository,
 )
+from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
+    DefaultStateRepository,
+)
 from utility_service.infrastructure.postgresql.models.user import UserRole
-from utility_service.use_cases.services.workspace_service import WorkspaceService
+from utility_service.use_cases.services.edit_version_read_service import EditVersionReadService
 from utility_service.web_api.tests.test_work_orders_api import build_app, auth_context
 from utility_service.web_api.parsers.geometry_save_request import parse_geometry_save_request
 
@@ -78,10 +81,10 @@ def test_workspace_http_and_postgis_roundtrip_preserve_off_grid_baseline():
             )
         )
         async with AsyncSession(engine) as session:
-            workspace = WorkspaceService(
-                session,
+            workspace = EditVersionReadService(
                 actor_repository,
                 WorkOrderRepository(session),
+                DefaultStateRepository(session),
             )
             app = build_app(
                 auth_service,
@@ -93,7 +96,7 @@ def test_workspace_http_and_postgis_roundtrip_preserve_off_grid_baseline():
                 base_url="http://test",
             ) as client:
                 response = await client.get(
-                    f"/api/v1/work-orders/{ids['work_order_id']}/edit-versions/{ids['edit_version_id']}/workspace",
+                    f"/api/v1/work-orders/{ids['work_order_id']}/edit-versions/{ids['edit_version_id']}/features/{ids['feature_id']}/baseline",
                     headers={
                         "Authorization": f"Bearer {token}",
                     },
@@ -104,12 +107,7 @@ def test_workspace_http_and_postgis_roundtrip_preserve_off_grid_baseline():
                 parse_float=Decimal,
                 parse_int=Decimal,
             )
-            feature = next(
-                f
-                for f in payload["workOrder"]["editVersion"]["features"]["features"]
-                if f["id"] == str(ids["feature_id"])
-            )
-            coordinates = tuple(tuple(p) for p in feature["geometry"]["coordinates"])
+            coordinates = tuple(tuple(p) for p in payload["baselineGeometry"]["coordinates"])
             assert coordinates == baseline.coordinates
         reverted = prepare_geometry(
             baseline,

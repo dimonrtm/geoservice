@@ -45,6 +45,12 @@ class EditGeometryDefaultState:
 
 
 @dataclass(frozen=True)
+class EditGeometryBaseline:
+    state: EditGeometryDefaultState | None
+    feature: EditGeometryFeature | None
+
+
+@dataclass(frozen=True)
 class EditGeometryContext:
     root: LockedEditVersion
     work_order_status: str

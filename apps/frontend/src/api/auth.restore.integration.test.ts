@@ -17,6 +17,12 @@ const effects = vi.hoisted(() => ({
   suspendActor: vi.fn(),
 }));
 vi.mock("@/stores/workOrders", () => ({ useWorkOrdersStore: () => effects }));
+vi.mock("@/stores/editVersionCommands", () => ({
+  useEditVersionCommandsStore: () => effects,
+}));
+vi.mock("@/stores/editorSession", () => ({
+  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
+}));
 vi.mock("@/stores/workspaceRecovery", () => ({
   useWorkspaceRecoveryStore: () => effects,
 }));

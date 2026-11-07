@@ -1,3 +1,4 @@
+import { isEditVersionMap } from "../../../infra/m4/editor-readback.mjs";
 // Реальный Chromium/MapLibre, синтетические ответы API. Не backend acceptance.
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
@@ -127,8 +128,28 @@ try {
       json = { session_id: "fe02-session", state: "active" };
     else if (pathname.endsWith("/work-orders/assigned-to-me"))
       json = { workOrders: [workOrder] };
-    else if (pathname.endsWith("/workspace")) json = workspace;
-    else {
+    else if (isEditVersionMap(route.request().url())) {
+      const {
+        hasPersistedChangeSet,
+        basicValidation,
+        changeSet,
+        ...editVersion
+      } = workspace.workOrder.editVersion;
+      json = { workOrder: { ...workspace.workOrder, editVersion } };
+    } else if (pathname.endsWith("/change-set")) {
+      const {
+        draftVersionToken,
+        hasPersistedChangeSet,
+        basicValidation,
+        changeSet,
+      } = workspace.workOrder.editVersion;
+      json = {
+        draftVersionToken,
+        hasPersistedChangeSet,
+        basicValidation,
+        changeSet,
+      };
+    } else {
       mutations.push({ pathname, method: route.request().method() });
       await route.fulfill({ status: 404, json: {} });
       return;

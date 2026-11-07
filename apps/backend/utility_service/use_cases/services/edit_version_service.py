@@ -137,9 +137,14 @@ class EditVersionService:
                 "EDIT_VERSION_NOT_FOUND",
                 "Рабочая версия не найдена.",
             )
+        baseline = await self.default_state_repository.read_geometry_baseline(
+            default_state_id=root.default_state_id,
+            feature_id=feature_id,
+        )
         context = await repository.read_context(
             root,
             feature_id=feature_id,
+            baseline=baseline,
         )
         if isinstance(
             context,

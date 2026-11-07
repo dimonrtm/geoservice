@@ -2,6 +2,7 @@ import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
 import { pinia } from "@/pinia";
 import { getApiBaseUrl } from "@/api/baseUrl";
+import { SessionNotConfirmedError } from "./sessionNotConfirmedError";
 
 declare module "axios" {
   interface AxiosRequestConfig {
@@ -27,12 +28,12 @@ http.interceptors.request.use(async (config) => {
     /\/api\/v1\/auth\/(?:login|logout|session\/(?:refresh|status))$/.test(
       config.url ?? "",
     );
-  if (
-    auth.sessionId &&
-    !authMutationOrStatus &&
-    (!(await auth.ensureSessionReady()) || epoch !== auth.sessionEpoch)
-  ) {
-    throw new axios.CanceledError("Состояние сессии не подтверждено");
+  if (auth.sessionId && !authMutationOrStatus) {
+    const ready = await auth.ensureSessionReady();
+    if (epoch !== auth.sessionEpoch)
+      throw new axios.CanceledError("Сессия пользователя изменилась");
+    if (!ready)
+      throw new SessionNotConfirmedError("Состояние сессии не подтверждено");
   }
   config.sessionEpoch = auth.sessionEpoch;
   config.sessionActorId = auth.user?.id ?? null;

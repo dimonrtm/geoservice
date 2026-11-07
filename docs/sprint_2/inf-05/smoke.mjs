@@ -1,3 +1,7 @@
+import {
+  editorReadback,
+  isEditVersionMap,
+} from "../../../infra/m4/editor-readback.mjs";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { writeFile } from "node:fs/promises";
@@ -10,7 +14,7 @@ const { chromium, expect: baseExpect, selectors } = require("@playwright/test");
 const expect = baseExpect.configure({ timeout: 20_000 });
 selectors.setTestIdAttribute("data-test");
 const workspaceResponse = (response) =>
-  response.url().endsWith("/workspace") && response.status() === 200;
+  isEditVersionMap(response.url()) && response.status() === 200;
 
 async function launch(origin) {
   const browser = await chromium.launch({
@@ -166,7 +170,7 @@ export async function checkWorkflow({ origin, fixture, evidenceDirectory }) {
       .click();
     let readback = page.waitForResponse(workspaceResponse);
     await page.getByTestId("workspace-open-action").click();
-    const initial = await (await readback).json();
+    const initial = await editorReadback(page, await readback);
     assert.equal(initial.workOrder.id, fixture.workOrderId);
     const feature = await moveLine(page, initial, evidenceDirectory);
     assert.equal(feature.id, fixture.featureId);
@@ -175,7 +179,7 @@ export async function checkWorkflow({ origin, fixture, evidenceDirectory }) {
     const savedResult = await command(() =>
       page.getByTestId("save-edit").click(),
     );
-    const saved = await (await readback).json();
+    const saved = await editorReadback(page, await readback);
     const changedIndices = current(saved).coordinates.flatMap((p, i) =>
       JSON.stringify(p) === JSON.stringify(feature.geometry.coordinates[i])
         ? []
@@ -194,7 +198,7 @@ export async function checkWorkflow({ origin, fixture, evidenceDirectory }) {
     );
     readback = page.waitForResponse(workspaceResponse);
     await page.reload();
-    const restored = await (await readback).json();
+    const restored = await editorReadback(page, await readback);
     assert.deepEqual(current(restored), current(saved));
     assert.equal(
       version(restored).draftVersionToken,
@@ -207,7 +211,7 @@ export async function checkWorkflow({ origin, fixture, evidenceDirectory }) {
     await page.getByTestId("revert-edit").click();
     readback = page.waitForResponse(workspaceResponse);
     await command(() => page.getByTestId("revert-proceed").click());
-    const reverted = await (await readback).json();
+    const reverted = await editorReadback(page, await readback);
     assert.deepEqual(current(reverted), feature.geometry);
     assert.equal(version(reverted).hasPersistedChangeSet, false);
     assert.notEqual(
@@ -216,7 +220,7 @@ export async function checkWorkflow({ origin, fixture, evidenceDirectory }) {
     );
     readback = page.waitForResponse(workspaceResponse);
     await page.reload();
-    const final = await (await readback).json();
+    const final = await editorReadback(page, await readback);
     assert.deepEqual(current(final), feature.geometry);
     assert.equal(version(final).hasPersistedChangeSet, false);
     await expect(page.getByTestId("revert-edit")).toBeDisabled();

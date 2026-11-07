@@ -17,6 +17,7 @@ from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import EditVersionCommandState
 from utility_service.infrastructure.postgresql.repository_rows.edit_geometry import (
     EditGeometryContext,
+    EditGeometryBaseline,
     EditGeometryDefaultState,
     EditGeometryFeature,
     GeometryWriteResult,
@@ -106,7 +107,7 @@ class SaveFixture:
             self,
             self,
             None,
-            None,
+            self,
             geometry_policy=GeometryPolicy(Decimal("0.001")),
             edit_version_repository=self,
         )
@@ -143,13 +144,30 @@ class SaveFixture:
         root = self.context.root
         return root if (root.id, root.work_order_id) == (edit_version_id, work_order_id) else None
 
+    async def read_geometry_baseline(
+        self,
+        *,
+        default_state_id,
+        feature_id,
+    ):
+        assert self.active and default_state_id == self.context.root.default_state_id
+        return EditGeometryBaseline(
+            state=self.context.default_state,
+            feature=self.context.baseline,
+        )
+
     async def read_context(
         self,
         root,
         *,
         feature_id,
+        baseline,
     ):
-        return self.context
+        return replace(
+            self.context,
+            baseline=baseline.feature,
+            default_state=baseline.state,
+        )
 
     def prepare_candidate(
         self,

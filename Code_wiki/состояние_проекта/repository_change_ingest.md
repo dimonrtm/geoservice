@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-11-02
-source: repository-change:2026-11-02
+updated: 2026-11-04
+source: repository-change:2026-11-04
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,15 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-11-04 | [[архитектура/data_model]] | Граница чтения рабочей версии и исходного снимка. | edit_version_map.sql, version_comparison.sql |
+| 2026-11-04 | [[архитектура/edit_version_persistence]] | Порядок чтения baseline после блокировки корня версии. | EditVersionService.save_geometry |
+| 2026-11-04 | [[архитектура/edit_geometry_determinism]] | Сохранение точности при раздельном чтении геометрии. | project_version_changes |
+| 2026-11-04 | [[архитектура/backend]] | Текущее состояние версии после повтора Save. | EditVersionReadService |
+| 2026-11-04 | [[архитектура/edit_version_save_orchestration]] | Раздельные репозитории внутри транзакции Save. | EditVersionService |
+| 2026-11-04 | [[архитектура/edit_version_api_readback]] | Раздельное чтение карты, ChangeSet и baseline, сверка токенов и границы репозиториев. | EditVersionReadService, useEditVersionEditor |
+| 2026-11-04 | [[архитектура/api_and_realtime]] | Маршруты чтения открытой версии. | work_orders.py |
+| 2026-11-04 | [[архитектура/frontend]] | Владельцы состояния наряда, карты, черновика, команд и навигации. | editorSession, editVersionCommands |
+| 2026-11-04 | [[архитектура/frontend_save_recovery]] | Актуальное состояние после повтора команды собирается из раздельных чтений. | readEditVersionSnapshot |
 | 2026-11-02 | [[архитектура/api_and_realtime]] | Изоляция подписок после commit, ограничения очереди, коды закрытия и версия удаления. | WebSocketConnectionManager, FeatureRealtimePublisher, дизайн AR-02 |
 | 2026-11-02 | [[архитектура/frontend]] | Версионное слияние кеша и автоматическое восстановление подписки после длительного разрыва. | useLayerRealtime, useFeatureLoading, useFeatureTileCache |
 | 2026-11-01 | [[deployment/docker_compose]] | Post-ingest correction: единая фильтрация frontend context, разделение локальных и контейнерных env. | .dockerignore frontend; FU-2026-11-01-001 |

@@ -1,3 +1,4 @@
+import { editorReadback, isEditVersionMap } from "./editor-readback.mjs";
 import { test, expect } from "@playwright/test";
 import { mkdir, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -25,7 +26,7 @@ for (const action of ["Save", "Revert"] as const) {
     if (action === "Revert") {
       const response = page.waitForResponse(workspaceResponse);
       await page.getByTestId("save-edit").click();
-      workspace = await (await response).json();
+      workspace = await editorReadback(page, await response);
       await expect(page.getByTestId("revert-edit")).toBeEnabled();
       expect(
         workspace.workOrder.editVersion.changeSet.baselineGeometry,
@@ -48,7 +49,7 @@ for (const action of ["Save", "Revert"] as const) {
       commitReject = reject;
     });
     page.on("request", (request) => {
-      if (request.url().endsWith("/workspace")) {
+      if (isEditVersionMap(request.url())) {
         log.push({ event: "GET", afterReload: reloaded });
         if (log.some((e) => e.event === "replay success"))
           recoveryGets.add(request);
@@ -151,7 +152,9 @@ for (const action of ["Save", "Revert"] as const) {
       { timeout: 30_000 },
     );
     await page.reload();
-    const current = (await (await finalReadback).json()).workOrder.editVersion;
+    const readbackResponse = await finalReadback;
+    const current = (await editorReadback(page, readbackResponse)).workOrder
+      .editVersion;
     expect(errors).toEqual([]);
     expect(replayed).toBe(1);
     expect(log.findLastIndex((e) => e.event === "GET")).toBeGreaterThan(

@@ -37,7 +37,7 @@ from utility_service.infrastructure.postgresql.repositories.edit_geometry_scope 
 )
 from utility_service.infrastructure.postgresql.repository_rows.edit_geometry import (
     EditGeometryContext,
-    EditGeometryDefaultState,
+    EditGeometryBaseline,
     EditGeometryFeature,
     LockedEditVersion,
     PreparedGeometryHandle,
@@ -385,6 +385,7 @@ class EditVersionRepository:
         locked_version: LockedEditVersion,
         *,
         feature_id: UUID,
+        baseline: EditGeometryBaseline,
     ) -> EditGeometryContext | RepositoryRejection:
         self.scope.require(locked_version)
         with self.session.no_autoflush:
@@ -416,23 +417,6 @@ class EditVersionRepository:
             root.id,
             root=True,
         )
-        baseline = None
-        if row["baseline_feature_id"] is not None:
-            baseline = EditGeometryFeature(
-                row["baseline_feature_id"],
-                row["baseline_feature_type"],
-                None,
-                row["baseline_network_version"],
-                bytes(row["baseline_ewkb"]),
-            )
-        default_state = None
-        if row["baseline_state_id"] is not None:
-            default_state = EditGeometryDefaultState(
-                row["baseline_state_id"],
-                row["baseline_work_order_id"],
-                row["baseline_revision"],
-                row["baseline_status"],
-            )
         context = EditGeometryContext(
             root=root,
             work_order_status=row["work_order_status"],
@@ -444,8 +428,8 @@ class EditVersionRepository:
                 row["network_version"],
                 bytes(row["current_ewkb"]),
             ),
-            baseline=baseline,
-            default_state=default_state,
+            baseline=baseline.feature,
+            default_state=baseline.state,
             aoi_ewkb=bytes(row["aoi_ewkb"]) if row["aoi_ewkb"] is not None else None,
             other_changed_feature_ids=tuple(row["other_changed_feature_ids"]),
         )

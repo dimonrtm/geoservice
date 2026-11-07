@@ -10,21 +10,19 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     WorkOrder,
     WorkOrderStatus,
 )
-from utility_service.infrastructure.postgresql.repository_rows.workspace import (
-    WorkspaceAggregateRow,
-    WorkspaceAoiRow,
-    WorkspaceBaselineStateRow,
-    WorkspaceDraftFeaturePairRow,
-    WorkspaceEditVersionRow,
-    WorkspaceWorkOrderRow,
+from utility_service.infrastructure.postgresql.repository_rows.edit_version_read import (
+    EditVersionMapRow,
+    MapAoiRow,
+    CurrentDraftFeature,
+    VersionComparisonRow,
+    VersionReadHeader,
+    MapWorkOrderRow,
 )
 
 
-WORKSPACE_AGGREGATE_SQL_PATH = (
-    Path(__file__).resolve().parents[1] / "sql" / "workspace_aggregate.sql"
-)
+EDIT_VERSION_MAP_SQL_PATH = Path(__file__).resolve().parents[1] / "sql" / "edit_version_map.sql"
 
-WORKSPACE_AGGREGATE_SQL = text(WORKSPACE_AGGREGATE_SQL_PATH.read_text(encoding="utf-8")).columns(
+EDIT_VERSION_MAP_SQL = text(EDIT_VERSION_MAP_SQL_PATH.read_text(encoding="utf-8")).columns(
     work_order_id=PGUUID(as_uuid=True),
     work_order_code=String(),
     work_order_title=String(),
@@ -36,11 +34,6 @@ WORKSPACE_AGGREGATE_SQL = text(WORKSPACE_AGGREGATE_SQL_PATH.read_text(encoding="
     edit_version_base_network_revision=Integer(),
     edit_version_draft_revision=Integer(),
     edit_version_default_state_id=PGUUID(as_uuid=True),
-    baseline_state_id=PGUUID(as_uuid=True),
-    baseline_work_order_id=PGUUID(as_uuid=True),
-    baseline_base_network_revision=Integer(),
-    baseline_status=String(),
-    draft_feature_pairs=JSONB(),
     aoi_id=PGUUID(as_uuid=True),
     aoi_name=String(),
     aoi_description=String(),
@@ -49,6 +42,11 @@ WORKSPACE_AGGREGATE_SQL = text(WORKSPACE_AGGREGATE_SQL_PATH.read_text(encoding="
     features_data=JSONB(),
     associations_data=JSONB(),
 )
+
+
+VERSION_COMPARISON_SQL = text(
+    (EDIT_VERSION_MAP_SQL_PATH.parent / "version_comparison.sql").read_text(encoding="utf-8")
+).columns(features=JSONB())
 
 
 class WorkOrderRepository:
@@ -81,14 +79,14 @@ class WorkOrderRepository:
         self.session.add(work_order)
         await self.session.flush()
 
-    async def get_workspace_aggregate(
+    async def get_edit_version_map(
         self,
         *,
         work_order_id: UUID,
         edit_version_id: UUID,
-    ) -> WorkspaceAggregateRow | None:
+    ) -> EditVersionMapRow | None:
         result = await self.session.execute(
-            WORKSPACE_AGGREGATE_SQL,
+            EDIT_VERSION_MAP_SQL,
             {
                 "work_order_id": work_order_id,
                 "edit_version_id": edit_version_id,
@@ -97,8 +95,8 @@ class WorkOrderRepository:
         row = result.mappings().one_or_none()
         if row is None:
             return None
-        return WorkspaceAggregateRow(
-            work_order=WorkspaceWorkOrderRow(
+        return EditVersionMapRow(
+            work_order=MapWorkOrderRow(
                 id=row["work_order_id"],
                 code=row["work_order_code"],
                 title=row["work_order_title"],
@@ -106,15 +104,9 @@ class WorkOrderRepository:
                 status=WorkOrderStatus(row["work_order_status"]),
                 assignee_user_id=row["work_order_assignee_user_id"],
             ),
-            edit_version=WorkspaceEditVersionRow(
-                id=row["edit_version_id"],
-                status=EditVersionStatus(row["edit_version_status"]),
-                base_network_revision=row["edit_version_base_network_revision"],
-                draft_revision=row["edit_version_draft_revision"],
-                default_state_id=row["edit_version_default_state_id"],
-            ),
+            edit_version=edit_version_from_row(row),
             aoi=(
-                WorkspaceAoiRow(
+                MapAoiRow(
                     id=row["aoi_id"],
                     name=row["aoi_name"],
                     description=row["aoi_description"],
@@ -124,25 +116,50 @@ class WorkOrderRepository:
                 if row["aoi_id"] is not None
                 else None
             ),
-            baseline_state=(
-                WorkspaceBaselineStateRow(
-                    id=row["baseline_state_id"],
-                    work_order_id=row["baseline_work_order_id"],
-                    base_network_revision=row["baseline_base_network_revision"],
-                    status=row["baseline_status"],
-                )
-                if row["baseline_state_id"] is not None
-                else None
-            ),
-            draft_feature_pairs=tuple(
-                WorkspaceDraftFeaturePairRow(
-                    **{
-                        **pair,
-                        "feature_id": UUID(pair["feature_id"]),
-                    },
-                )
-                for pair in row["draft_feature_pairs"]
-            ),
             features_data=row["features_data"],
             associations_data=row["associations_data"],
         )
+
+    async def read_version_comparison(
+        self,
+        work_order_id: UUID,
+        edit_version_id: UUID,
+        feature_id: UUID | None = None,
+    ) -> VersionComparisonRow | None:
+        result = await self.session.execute(
+            VERSION_COMPARISON_SQL,
+            {
+                "work_order_id": work_order_id,
+                "edit_version_id": edit_version_id,
+                "feature_id": feature_id,
+            },
+        )
+        row = result.mappings().one_or_none()
+        if row is None:
+            return None
+        return VersionComparisonRow(
+            work_order_id=row["work_order_id"],
+            assignee_user_id=row["assignee_user_id"],
+            work_order_status=WorkOrderStatus(row["work_order_status"]),
+            edit_version=edit_version_from_row(row),
+            features=tuple(
+                CurrentDraftFeature(
+                    feature_id=UUID(feature["feature_id"]),
+                    feature_type=feature["feature_type"],
+                    geometry_ewkb=feature["geometry_ewkb"],
+                    operation=feature["operation"],
+                    visible=feature["visible"],
+                )
+                for feature in row["features"]
+            ),
+        )
+
+
+def edit_version_from_row(row) -> VersionReadHeader:
+    return VersionReadHeader(
+        id=row["edit_version_id"],
+        status=EditVersionStatus(row["edit_version_status"]),
+        base_network_revision=row["edit_version_base_network_revision"],
+        draft_revision=row["edit_version_draft_revision"],
+        default_state_id=row["edit_version_default_state_id"],
+    )

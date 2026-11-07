@@ -18,10 +18,17 @@ from utility_service.infrastructure.postgresql.models.utility_network.network_as
 from utility_service.infrastructure.postgresql.models.utility_network.network_feature import (
     FeatureType,
 )
+from utility_service.infrastructure.postgresql.repository_rows.edit_geometry import (
+    EditGeometryBaseline,
+    EditGeometryDefaultState,
+    EditGeometryFeature,
+)
 
 
-DEFAULT_STATE_AGGREGATE_SQL_PATH = (
-    Path(__file__).resolve().parents[1] / "sql" / "default_state_aggregate.sql"
+SQL_DIRECTORY = Path(__file__).resolve().parents[1] / "sql"
+DEFAULT_STATE_AGGREGATE_SQL_PATH = SQL_DIRECTORY / "default_state_aggregate.sql"
+GEOMETRY_BASELINE_SQL = text(
+    (SQL_DIRECTORY / "default_state_geometry_baseline.sql").read_text(encoding="utf-8")
 )
 
 
@@ -80,9 +87,51 @@ DEFAULT_STATE_AGGREGATE_SQL = text(
 )
 
 
+@dataclass(frozen=True)
+class BaselineFeatureGeometry:
+    feature_id: UUID
+    feature_type: str
+    geometry_ewkb: str
+
+
+@dataclass(frozen=True)
+class ComparisonBaseline:
+    state: EditGeometryDefaultState
+    features: tuple[BaselineFeatureGeometry, ...]
+
+
+COMPARISON_BASELINE_SQL = text(
+    (SQL_DIRECTORY / "comparison_baseline.sql").read_text(encoding="utf-8")
+).columns(features=JSONB())
+
+
 class DefaultStateRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
+
+    async def read_comparison_baseline(self, default_state_id: UUID) -> ComparisonBaseline | None:
+        result = await self.session.execute(
+            COMPARISON_BASELINE_SQL, {"default_state_id": default_state_id}
+        )
+        row = result.mappings().one_or_none()
+        if row is None:
+            return None
+        return ComparisonBaseline(
+            state=EditGeometryDefaultState(
+                id=row["id"],
+                work_order_id=row["work_order_id"],
+                base_network_revision=row["base_network_revision"],
+                status=row["status"],
+            ),
+            features=tuple(
+                BaselineFeatureGeometry(
+                    feature_id=UUID(feature["feature_id"]),
+                    feature_type=feature["feature_type"],
+                    geometry_ewkb=feature["geometry_ewkb"],
+                )
+                for feature in row["features"]
+            ),
+        )
 
     async def get_active_aggregate_by_work_order_id(
         self, work_order_id: UUID
@@ -135,6 +184,46 @@ class DefaultStateRepository:
             state=state,
             features=features,
             associations=associations,
+        )
+
+    async def read_geometry_baseline(
+        self,
+        *,
+        default_state_id: UUID,
+        feature_id: UUID,
+    ) -> EditGeometryBaseline:
+        with self.session.no_autoflush:
+            result = await self.session.execute(
+                GEOMETRY_BASELINE_SQL,
+                {
+                    "default_state_id": default_state_id,
+                    "feature_id": feature_id,
+                },
+            )
+        row = result.mappings().one_or_none()
+        if row is None:
+            return EditGeometryBaseline(
+                state=None,
+                feature=None,
+            )
+        state = EditGeometryDefaultState(
+            id=row["id"],
+            work_order_id=row["work_order_id"],
+            base_network_revision=row["base_network_revision"],
+            status=row["status"],
+        )
+        feature = None
+        if row["feature_id"] is not None:
+            feature = EditGeometryFeature(
+                feature_id=row["feature_id"],
+                feature_type=row["feature_type"],
+                operation=None,
+                network_version=row["network_version"],
+                geometry_ewkb=bytes(row["geometry_ewkb"]),
+            )
+        return EditGeometryBaseline(
+            state=state,
+            feature=feature,
         )
 
 

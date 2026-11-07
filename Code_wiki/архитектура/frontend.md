@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-11-02
-source: repository-change:2026-11-02
+updated: 2026-11-04
+source: repository-change:2026-11-04
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -35,14 +35,7 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 - `src/stores/workOrders.ts` хранит назначенные текущему `Editor` work orders,
   loading/error state и локальный `selectedWorkOrderId`; выбор в списке только
   подсвечивает строку и не открывает edit version.
-- После успешного открытия workspace `src/stores/workOrders.ts` сохраняет в
-  `sessionStorage` `{workOrderId, editVersionId}` под ключом opened-workspace.
-  Selected WorkOrder хранится отдельно; после `loadAssigned()` selection
-  восстанавливается лишь при наличии наряда в доступном списке. При reload
-  `EditorWorkOrdersView` сначала вызывает `loadAssigned()`, затем
-  `restoreOpenedWorkspace()`: store проверяет, что work order всё ещё назначен
-  текущему пользователю, и восстанавливает карту через `fetchWorkspace()` без
-  повторного `POST /edit-versions`.
+- `editorSession.ts` восстанавливает открытую версию из пары идентификаторов наряда и версии в sessionStorage. `useEditVersionEditor.ts` согласует три чтения, каждое со своим состоянием. Модули `editVersionDraft.ts`, `editVersionCommands.ts` и `editorNavigation.ts` отвечают за локальное редактирование, сохранение и откат, переходы и подтверждения. Подробнее в [[edit_version_api_readback]].
 - `src/api/http.ts` централизует axios base URL, добавляет Bearer token из
   Pinia и при HTTP 401 вызывает только local `clearLocalSession()`, чтобы не
   запускать повторный backend logout из interceptor.

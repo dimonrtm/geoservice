@@ -237,7 +237,7 @@ def test_seed_chain_opens_edit_version_with_full_default_state_slice() -> None:
     run_in_rollback_transaction(scenario)
 
 
-def test_seed_chain_workspace_aggregate_returns_work_order_scope() -> None:
+def test_seed_chain_edit_version_map_returns_work_order_scope() -> None:
     async def scenario(session: AsyncSession) -> None:
         await remove_canonical_seed_chain(session)
         await run_seed_chain(session)
@@ -256,7 +256,7 @@ def test_seed_chain_workspace_aggregate_returns_work_order_scope() -> None:
             geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
 
-        aggregate = await WorkOrderRepository(session).get_workspace_aggregate(
+        aggregate = await WorkOrderRepository(session).get_edit_version_map(
             work_order_id=SEED_WORK_ORDER_SPEC.id,
             edit_version_id=result.edit_version.id,
         )
@@ -271,7 +271,7 @@ def test_seed_chain_workspace_aggregate_returns_work_order_scope() -> None:
     run_in_rollback_transaction(scenario)
 
 
-def test_workspace_aggregate_excludes_association_when_endpoint_feature_is_outside_aoi() -> None:
+def test_edit_version_map_excludes_association_when_endpoint_feature_is_outside_aoi() -> None:
     async def scenario(session: AsyncSession) -> None:
         await remove_canonical_seed_chain(session)
         await run_seed_chain(session)
@@ -324,7 +324,7 @@ def test_workspace_aggregate_excludes_association_when_endpoint_feature_is_outsi
         )
         await session.flush()
 
-        aggregate = await WorkOrderRepository(session).get_workspace_aggregate(
+        aggregate = await WorkOrderRepository(session).get_edit_version_map(
             work_order_id=SEED_WORK_ORDER_SPEC.id,
             edit_version_id=result.edit_version.id,
         )
@@ -402,7 +402,7 @@ def test_reopening_seeded_edit_version_returns_existing_version_without_duplicat
 def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopened() -> None:
     require_db_tests()
 
-    async def assert_demo_users_restored() -> None:
+    async def read_user_emails() -> set[str]:
         engine = create_async_engine(os.environ["DATABASE_URL"])
         Session = async_sessionmaker(
             bind=engine,
@@ -415,7 +415,7 @@ def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopene
         finally:
             await engine.dispose()
 
-        assert set(emails) == {spec.email for spec in SEED_DEMO_USER_SPECS}
+        return set(emails)
 
     async def scenario() -> None:
         engine = create_async_engine(os.environ["DATABASE_URL"])
@@ -486,5 +486,8 @@ def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopene
             finally:
                 await engine.dispose()
 
+    initial_emails = asyncio.run(read_user_emails())
     asyncio.run(scenario())
-    asyncio.run(assert_demo_users_restored())
+    assert asyncio.run(read_user_emails()) == initial_emails | {
+        spec.email for spec in SEED_DEMO_USER_SPECS
+    }

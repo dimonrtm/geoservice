@@ -8,15 +8,17 @@ from fastapi.responses import JSONResponse
 from utility_service.use_cases.deps import (
     get_edit_version_service,
     get_work_order_service,
-    get_workspace_service,
+    get_edit_version_read_service,
 )
 from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.schemas.edit_version import EditVersionOut, OpenEditVersionOut
 from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut
-from utility_service.use_cases.schemas.workspace import WorkspaceOut
+from utility_service.use_cases.schemas.edit_version.change_set import VersionChangeSetOut
+from utility_service.use_cases.schemas.edit_version.feature_baseline import FeatureBaselineOut
+from utility_service.use_cases.schemas.edit_version.version_map import EditVersionMapOut
 from utility_service.use_cases.services.edit_version_service import EditVersionService
 from utility_service.use_cases.services.work_order_service import WorkOrderService
-from utility_service.use_cases.services.workspace_service import WorkspaceService
+from utility_service.use_cases.services.edit_version_read_service import EditVersionReadService
 from utility_service.web_api.api.auth import require_editor
 from utility_service.web_api.api.work_order_edit_route import WorkOrderEditRoute
 from utility_service.web_api.api.geometry_save_contract import (
@@ -74,20 +76,58 @@ async def open_edit_version(
 
 
 @work_order_edit_router.get(
-    "/{work_order_id}/edit-versions/{edit_version_id}/workspace",
-    response_model=WorkspaceOut,
+    "/{work_order_id}/edit-versions/{edit_version_id}",
+    response_model=EditVersionMapOut,
     responses=EDIT_ERROR_RESPONSES,
 )
-async def get_workspace(
+async def get_version_map(
     work_order_id: UUID,
     edit_version_id: UUID,
     user: AuthUserDTO = Depends(require_editor),
-    workspace_service: WorkspaceService = Depends(get_workspace_service),
-) -> WorkspaceOut:
-    return await workspace_service.get_workspace(
+    edit_version_read_service: EditVersionReadService = Depends(get_edit_version_read_service),
+) -> EditVersionMapOut:
+    return await edit_version_read_service.get_version_map(
         work_order_id=work_order_id,
         edit_version_id=edit_version_id,
         actor_id=user.id,
+    )
+
+
+@work_order_edit_router.get(
+    "/{work_order_id}/edit-versions/{edit_version_id}/change-set",
+    response_model=VersionChangeSetOut,
+    responses=EDIT_ERROR_RESPONSES,
+)
+async def get_change_set(
+    work_order_id: UUID,
+    edit_version_id: UUID,
+    user: AuthUserDTO = Depends(require_editor),
+    edit_version_read_service: EditVersionReadService = Depends(get_edit_version_read_service),
+) -> VersionChangeSetOut:
+    return await edit_version_read_service.get_change_set(
+        work_order_id=work_order_id,
+        edit_version_id=edit_version_id,
+        actor_id=user.id,
+    )
+
+
+@work_order_edit_router.get(
+    "/{work_order_id}/edit-versions/{edit_version_id}/features/{feature_id}/baseline",
+    response_model=FeatureBaselineOut,
+    responses=EDIT_ERROR_RESPONSES,
+)
+async def get_feature_baseline(
+    work_order_id: UUID,
+    edit_version_id: UUID,
+    feature_id: UUID,
+    user: AuthUserDTO = Depends(require_editor),
+    edit_version_read_service: EditVersionReadService = Depends(get_edit_version_read_service),
+) -> FeatureBaselineOut:
+    return await edit_version_read_service.get_feature_baseline(
+        work_order_id=work_order_id,
+        edit_version_id=edit_version_id,
+        actor_id=user.id,
+        feature_id=feature_id,
     )
 
 

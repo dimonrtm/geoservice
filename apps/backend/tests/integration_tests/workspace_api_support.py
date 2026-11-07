@@ -75,13 +75,25 @@ def geometry_path(ids):
     return f"{version_path(ids)}/features/{ids['feature_id']}/geometry"
 
 
-async def read_workspace(
+async def read_version_map(
     client,
     ids,
 ):
-    response = await client.get(f"{version_path(ids)}/workspace")
+    response = await client.get(version_path(ids))
     assert response.status_code == 200, response.text
     return response.json()["workOrder"]["editVersion"]
+
+
+async def read_change_set(client, ids):
+    response = await client.get(f"{version_path(ids)}/change-set")
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+async def read_baseline(client, ids):
+    response = await client.get(f"{version_path(ids)}/features/{ids['feature_id']}/baseline")
+    assert response.status_code == 200, response.text
+    return response.json()["baselineGeometry"]
 
 
 def current_geometry(

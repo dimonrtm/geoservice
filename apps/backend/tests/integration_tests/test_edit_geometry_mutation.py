@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from tests.integration_tests.first_save_schema_support import run_committed_scenario
 from tests.integration_tests.edit_geometry_repository_support import (
     read_context,
+    read_locked_context,
     seed_repository_context,
     snapshot_repository_state,
     prepare_change,
@@ -148,7 +149,8 @@ def test_noop_has_no_update_and_consumes_old_contexts():
                     session,
                     ids,
                 )
-                other = await repository.read_context(
+                other = await read_locked_context(
+                    repository,
                     context.root,
                     feature_id=ids["feature_id"],
                 )
@@ -167,7 +169,8 @@ def test_noop_has_no_update_and_consumes_old_contexts():
                         other,
                         None,
                     )
-                fresh = await repository.read_context(
+                fresh = await read_locked_context(
+                    repository,
                     context.root,
                     feature_id=ids["feature_id"],
                 )
@@ -260,7 +263,8 @@ def test_finished_savepoint_invalidates_locked_context():
             nested = await session.begin_nested()
             await nested.rollback()
             with pytest.raises(RepositoryProtocolError):
-                await repository.read_context(
+                await read_locked_context(
+                    repository,
                     context.root,
                     feature_id=ids["feature_id"],
                 )
@@ -358,7 +362,8 @@ def test_signed_zero_noop_keeps_current_bytes_and_revert_restores_baseline():
             )
             assert change.is_noop
             assert (await repository.write_current(change)).after_ewkb == current_bytes
-            fresh = await repository.read_context(
+            fresh = await read_locked_context(
+                repository,
                 context.root,
                 feature_id=ids["feature_id"],
             )
@@ -382,7 +387,8 @@ def test_signed_zero_noop_keeps_current_bytes_and_revert_restores_baseline():
                     ),
                 )
             )
-            fresh = await repository.read_context(
+            fresh = await read_locked_context(
+                repository,
                 context.root,
                 feature_id=ids["feature_id"],
             )
@@ -410,7 +416,8 @@ def test_successful_write_invalidates_other_prepared_context():
                 session,
                 ids,
             )
-            other = await repository.read_context(
+            other = await read_locked_context(
+                repository,
                 context.root,
                 feature_id=ids["feature_id"],
             )

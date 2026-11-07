@@ -1,25 +1,42 @@
-import type { useWorkOrdersStore } from "@/stores/workOrders";
+import { useEditVersionEditor } from "@/composables/useEditVersionEditor";
+import { useEditorSessionStore } from "@/stores/editorSession";
+import { useEditVersionDraftStore } from "@/stores/editVersionDraft";
+import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
+import { useEditorNavigationStore } from "@/stores/editorNavigation";
 import { isLocalDraftDirty } from "./workspaceDraft";
 import { vertexMoveBlockReason } from "./workspaceLineInteraction";
 
-export type WorkspaceCommandState = Pick<
-  ReturnType<typeof useWorkOrdersStore>,
-  | "activeWorkspace"
-  | "localDraft"
-  | "phase"
-  | "recoveryRecord"
-  | "commandResult"
-  | "saveError"
-  | "readbackError"
-  | "storageError"
-  | "editBlockReason"
-  | "didSaveChangeGeometry"
-  | "rejectedCandidateGeometry"
-  | "canRetryPendingCommand"
-  | "canRetryCurrentRead"
-  | "canDiscardRejectedAttempt"
-  | "workspaceInteractionLocked"
->;
+export function workspaceCommandState() {
+  const editorSession = useEditorSessionStore();
+  const editVersionDraft = useEditVersionDraftStore();
+  const editVersionCommands = useEditVersionCommandsStore();
+  const editorNavigation = useEditorNavigationStore();
+  const editor = useEditVersionEditor();
+  const changedFeature =
+    editorSession.activeWorkspace?.workOrder.editVersion.changeSet?.featureId;
+  return {
+    revertBaselineReady: !!changedFeature && editor.readyFor(changedFeature),
+    draftBaselineReady:
+      !!editVersionDraft.localDraft &&
+      editor.readyFor(editVersionDraft.localDraft.featureId),
+    activeWorkspace: editorSession.activeWorkspace,
+    localDraft: editVersionDraft.localDraft,
+    phase: editVersionCommands.phase,
+    recoveryRecord: editVersionCommands.recoveryRecord,
+    commandResult: editVersionCommands.commandResult,
+    saveError: editVersionCommands.saveError,
+    readbackError: editVersionCommands.readbackError,
+    storageError: editVersionCommands.storageError,
+    editBlockReason: editVersionDraft.editBlockReason,
+    didSaveChangeGeometry: editVersionCommands.didSaveChangeGeometry,
+    rejectedCandidateGeometry: editVersionCommands.rejectedCandidateGeometry,
+    canRetryPendingCommand: editVersionCommands.canRetryPendingCommand,
+    canRetryCurrentRead: editVersionCommands.canRetryCurrentRead,
+    canDiscardRejectedAttempt: editVersionCommands.canDiscardRejectedAttempt,
+    workspaceInteractionLocked: editorNavigation.workspaceInteractionLocked,
+  };
+}
+type WorkspaceCommandState = ReturnType<typeof workspaceCommandState>;
 export type WorkspaceCommandPresentation = {
   canRetryCommand: boolean;
   canRetryRead: boolean;
@@ -145,6 +162,7 @@ export function presentWorkspaceCommands(
   view.canCancel = eligiblePhase && dirty;
   view.canRevert =
     eligiblePhase &&
+    store.revertBaselineReady &&
     store.activeWorkspace.workOrder.editVersion.hasPersistedChangeSet;
   const unchangedRejection =
     draft &&
@@ -158,7 +176,10 @@ export function presentWorkspaceCommands(
       )
     : null;
   view.canSave =
-    view.canCancel && !unchangedRejection && !geometryValidationMessage;
+    view.canCancel &&
+    store.draftBaselineReady &&
+    !unchangedRejection &&
+    !geometryValidationMessage;
   if ((store.phase === "rejected" || unchangedRejection) && store.saveError) {
     view.statusText =
       rejectionMessages[store.saveError] ??

@@ -3,8 +3,8 @@ title: Атомарная запись current geometry в EditVersion
 type: technical-note
 status: active
 created: 2026-10-10
-updated: 2026-10-16
-source: repository-change:2026-10-16
+updated: 2026-11-04
+source: repository-change:2026-11-04
 tags: [edit-version, repository, transaction, postgis, geometry]
 ---
 
@@ -16,7 +16,7 @@ tags: [edit-version, repository, transaction, postgis, geometry]
 
 `EditVersionService` получает репозиторий версии отдельной обязательной зависимостью. Все репозитории используют одну AsyncSession. При открытии сервис блокирует наряд через `WorkOrderRepository`, вызывает операции версии через `EditVersionRepository` и сохраняет состояние наряда через `WorkOrderRepository` в общей транзакции. Ошибка после создания снимка откатывает и версию, и состояние наряда. Обработка конфликта уникальности открытой версии остаётся в сервисе.
 
-Вызывающий сервис владеет `AsyncSession` и внешней transaction с READ COMMITTED. Последовательность: `lock_version` → `read_context` → `prepare_candidate` → `validate_candidate` → `write_current`. Repository не начинает и не завершает transaction. `SELECT FOR UPDATE` блокирует root по паре WorkOrder/EditVersion; отдельный последующий SELECT читает current feature, baseline именно по `default_state_id`, AOI и IDs остальных изменённых features всей версии. Column projection исключает stale ORM identity-map state после ожидания конкурента. Workspace AOI-filter к поиску target не применяется.
+Вызывающий сервис владеет `AsyncSession` и транзакцией READ COMMITTED. После `lock_version` сервис читает исходную линию через `DefaultStateRepository.read_geometry_baseline` по закреплённому `default_state_id` и идентификатору фичи. Рабочую линию, AOI и идентификаторы остальных изменённых объектов читает `EditVersionRepository.read_context`. Корень версии остаётся заблокированным до завершения команды. Выборка колонок возвращает актуальные данные после ожидания конкурента. Фильтр видимости карты к поиску целевой линии для Save не применяется.
 
 Порядок Save: root → command → feature. После root нельзя брать конфликтующий lock WorkOrder: существующий reopen использует WorkOrder → EditVersion. AOI, baseline и assignment считаются стабильными на время Save. Writers, обходящие root-lock protocol, этой boundary не защищены.
 

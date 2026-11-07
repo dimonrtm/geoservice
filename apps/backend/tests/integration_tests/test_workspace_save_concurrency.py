@@ -8,7 +8,9 @@ from tests.integration_tests.workspace_api_support import (
     client_for,
     current_geometry,
     geometry_path,
-    read_workspace,
+    read_version_map,
+    read_change_set,
+    read_baseline,
 )
 from utility_service.infrastructure.postgresql.geometry_codec import geometry_to_geojson
 from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
@@ -56,7 +58,7 @@ def test_workspace_read_during_uncommitted_save(monkeypatch):
                 ids,
             ) as reader,
         ):
-            before = await read_workspace(
+            before = await read_version_map(
                 reader,
                 ids,
             )
@@ -72,7 +74,7 @@ def test_workspace_read_during_uncommitted_save(monkeypatch):
                     timeout=5,
                 )
                 during = await asyncio.wait_for(
-                    read_workspace(
+                    read_version_map(
                         reader,
                         ids,
                     ),
@@ -80,7 +82,7 @@ def test_workspace_read_during_uncommitted_save(monkeypatch):
                 )
                 assert during == before
                 assert during["draftVersionToken"] == "1"
-                assert during["changeSet"] is None
+                assert (await read_change_set(reader, ids))["changeSet"] is None
                 assert not save_task.done()
             finally:
                 release.set()
@@ -89,13 +91,16 @@ def test_workspace_read_during_uncommitted_save(monkeypatch):
                     timeout=5,
                 )
             assert response.status_code == 200, response.text
-            after = await read_workspace(
+            after = await read_version_map(
                 reader,
                 ids,
             )
             assert after["draftVersionToken"] == "2"
-            assert after["hasPersistedChangeSet"] is True
-            assert after["changeSet"]["baselineGeometry"] == current_geometry(
+            changes = await read_change_set(reader, ids)
+            assert changes["draftVersionToken"] != before["draftVersionToken"]
+            assert changes["draftVersionToken"] == after["draftVersionToken"]
+            assert changes["hasPersistedChangeSet"] is True
+            assert await read_baseline(reader, ids) == current_geometry(
                 before,
                 ids,
             )

@@ -1,5 +1,8 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession
+from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
+    DefaultStateRepository,
+)
 
 from tests.integration_tests.first_save_schema_support import seed_context
 
@@ -26,9 +29,27 @@ async def read_context(
         work_order_id=ids["work_order_id"],
         edit_version_id=ids["edit_version_id"],
     )
-    return repository, await repository.read_context(
+    return repository, await read_locked_context(
+        repository,
         root,
         feature_id=ids["feature_id"],
+    )
+
+
+async def read_locked_context(
+    repository,
+    root,
+    *,
+    feature_id,
+):
+    baseline = await DefaultStateRepository(repository.session).read_geometry_baseline(
+        default_state_id=root.default_state_id,
+        feature_id=feature_id,
+    )
+    return await repository.read_context(
+        root,
+        feature_id=feature_id,
+        baseline=baseline,
     )
 
 

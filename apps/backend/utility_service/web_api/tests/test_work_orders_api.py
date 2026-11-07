@@ -11,18 +11,18 @@ from utility_service.use_cases.deps import (
     get_auth_session_access_service,
     get_edit_version_service,
     get_work_order_service,
-    get_workspace_service,
+    get_edit_version_read_service,
 )
 from utility_service.use_cases.dtos import AuthRole
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
 from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut, WorkOrderSummaryOut
-from utility_service.use_cases.schemas.workspace import (
-    WorkspaceAoiOut,
-    WorkspaceEditVersionOut,
-    WorkspaceFeatureCollectionOut,
-    WorkspaceOut,
-    WorkspaceScopeOut,
-    WorkspaceWorkOrderOut,
+from utility_service.use_cases.schemas.edit_version.version_map import (
+    MapAoiOut,
+    MapEditVersionOut,
+    MapFeatureCollectionOut,
+    EditVersionMapOut,
+    MapScopeOut,
+    MapWorkOrderOut,
 )
 from utility_service.use_cases.services.edit_version_service import OpenEditVersionResult
 from utility_service.web_api.tests.auth_user_factory import (
@@ -38,7 +38,7 @@ from utility_service.web_api.tests.auth_user_factory import auth_user
 def build_app(
     auth_service: object,
     edit_version_service: object,
-    workspace_service: object | None = None,
+    edit_version_read_service: object | None = None,
     work_order_service: object | None = None,
 ) -> FastAPI:
     app = FastAPI()
@@ -50,8 +50,8 @@ def build_app(
         auth_service
     )
     app.dependency_overrides[get_edit_version_service] = lambda: edit_version_service
-    if workspace_service is not None:
-        app.dependency_overrides[get_workspace_service] = lambda: workspace_service
+    if edit_version_read_service is not None:
+        app.dependency_overrides[get_edit_version_read_service] = lambda: edit_version_read_service
     if work_order_service is not None:
         app.dependency_overrides[get_work_order_service] = lambda: work_order_service
     return app
@@ -96,16 +96,16 @@ def work_order_summary(
     )
 
 
-def workspace_response(work_order_id, edit_version_id) -> WorkspaceOut:
-    return WorkspaceOut(
-        work_order=WorkspaceWorkOrderOut(
+def workspace_response(work_order_id, edit_version_id) -> EditVersionMapOut:
+    return EditVersionMapOut(
+        work_order=MapWorkOrderOut(
             id=work_order_id,
             code="WO-001",
             title="Проверка участка фидера",
             description=None,
             status="in_progress",
-            scope=WorkspaceScopeOut(
-                aoi=WorkspaceAoiOut(
+            scope=MapScopeOut(
+                aoi=MapAoiOut(
                     id=uuid4(),
                     name="Рабочая область WO-001",
                     description=None,
@@ -113,15 +113,12 @@ def workspace_response(work_order_id, edit_version_id) -> WorkspaceOut:
                     extent=[65.495, 44.795, 65.545, 44.835],
                 )
             ),
-            edit_version=WorkspaceEditVersionOut(
+            edit_version=MapEditVersionOut(
                 id=edit_version_id,
                 status="open",
                 base_network_revision=12,
                 draft_version_token="1",
-                has_persisted_change_set=False,
-                basic_validation=None,
-                change_set=None,
-                features=WorkspaceFeatureCollectionOut(features=[]),
+                features=MapFeatureCollectionOut(features=[]),
                 associations=[],
             ),
         )
@@ -350,14 +347,16 @@ def test_get_workspace_returns_nested_work_order_payload() -> None:
     edit_version_id = uuid4()
     auth_service, token, user_id = auth_context("editor")
     edit_version_service = AsyncMock()
-    workspace_service = AsyncMock()
-    workspace_service.get_workspace.return_value = workspace_response(
+    edit_version_read_service = AsyncMock()
+    edit_version_read_service.get_version_map.return_value = workspace_response(
         work_order_id,
         edit_version_id,
     )
 
-    response = TestClient(build_app(auth_service, edit_version_service, workspace_service)).get(
-        f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}/workspace",
+    response = TestClient(
+        build_app(auth_service, edit_version_service, edit_version_read_service)
+    ).get(
+        f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}",
         headers={"Authorization": f"Bearer {token}"},
     )
 
@@ -366,27 +365,29 @@ def test_get_workspace_returns_nested_work_order_payload() -> None:
     assert payload["workOrder"]["id"] == str(work_order_id)
     assert payload["workOrder"]["scope"]["aoi"]["name"] == "Рабочая область WO-001"
     assert payload["workOrder"]["editVersion"]["id"] == str(edit_version_id)
-    workspace_service.get_workspace.assert_awaited_once_with(
+    edit_version_read_service.get_version_map.assert_awaited_once_with(
         work_order_id=work_order_id,
         edit_version_id=edit_version_id,
         actor_id=user_id,
     )
 
 
-def test_workspace_service_404_is_structured() -> None:
+def test_edit_version_read_service_404_is_structured() -> None:
     work_order_id = uuid4()
     edit_version_id = uuid4()
     auth_service, token, _ = auth_context("editor")
     edit_version_service = AsyncMock()
-    workspace_service = AsyncMock()
-    workspace_service.get_workspace.side_effect = WorkOrderApiError(
+    edit_version_read_service = AsyncMock()
+    edit_version_read_service.get_version_map.side_effect = WorkOrderApiError(
         404,
         "EDIT_VERSION_NOT_FOUND",
         "Рабочая версия не найдена.",
     )
 
-    response = TestClient(build_app(auth_service, edit_version_service, workspace_service)).get(
-        f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}/workspace",
+    response = TestClient(
+        build_app(auth_service, edit_version_service, edit_version_read_service)
+    ).get(
+        f"/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}",
         headers={
             "Authorization": f"Bearer {token}",
             "X-Correlation-ID": "workspace-correlation-id",

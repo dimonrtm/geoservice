@@ -17,13 +17,19 @@ import {
 } from "@/contracts/workspace-recovery";
 const api = vi.hoisted(() => ({
   saveFeatureGeometry: vi.fn(),
-  fetchWorkspace: vi.fn(),
+  readEditVersionSnapshot: vi.fn(),
 }));
-vi.mock("@/api/workOrders", () => api);
+vi.mock("@/api/editVersions", () => api);
+vi.mock("@/composables/useEditVersionEditor", () => api);
 import { useWorkspaceRecoveryStore } from "./workspaceRecovery";
+import * as maps from "@/api/editVersionMap";
+import * as changes from "@/api/editVersionChangeSet";
+import * as baselines from "@/api/featureBaseline";
+import { readEditVersionSnapshot } from "@/composables/readEditVersionSnapshot";
 let session: RecoverySession | null;
 const completed: string[] = [];
 const host: RecoveryHost = {
+  isReadCurrent: () => true,
   session: () => session,
   canAccess: () => true,
   reserveRead: (context) => ({
@@ -56,7 +62,7 @@ beforeEach(() => {
   });
   sessionStorage.clear();
   api.saveFeatureGeometry.mockReset();
-  api.fetchWorkspace.mockReset();
+  api.readEditVersionSnapshot.mockReset();
   completed.length = 0;
   session = { actorId: "actor", epoch: 1, canEdit: true };
 });
@@ -72,7 +78,7 @@ it("unknown A does not block saving independent B and repeats only frozen A", as
     if (t.workOrderId === "wo-1") throw { isAxiosError: true, request: {} };
     return successFixture();
   });
-  api.fetchWorkspace.mockImplementation(async (wo) => {
+  api.readEditVersionSnapshot.mockImplementation(async (wo) => {
     const w = workspaceFixture(true);
     w.workOrder.id = wo;
     return w;
@@ -91,7 +97,7 @@ it("known success survives access loss and confirmation runs only GET", async ()
   store.bindHost(host);
   await store.initializeActor("actor");
   api.saveFeatureGeometry.mockResolvedValue(successFixture());
-  api.fetchWorkspace.mockRejectedValue(new Error("network"));
+  api.readEditVersionSnapshot.mockRejectedValue(new Error("network"));
   const a = command(),
     key = recoveryKey(commandContext(a));
   await store.submit(a, { geometry, vertexIndex: 1 });
@@ -99,10 +105,62 @@ it("known success survives access loss and confirmation runs only GET", async ()
   await store.suspendActor("actor");
   expect(store.getRecord(key)?.outcome.kind).toBe("succeeded");
   api.saveFeatureGeometry.mockClear();
-  api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+  api.readEditVersionSnapshot.mockResolvedValue(workspaceFixture(true));
   await store.resumeAfterAccess(key, commandId, 1);
   await vi.waitFor(() => expect(completed).toContain("wo-1"));
   expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
+});
+it("discards a failed baseline checkpoint superseded by a later version read", async () => {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  const store = useWorkspaceRecoveryStore();
+  let generation = 0;
+  const applied: string[] = [];
+  store.bindHost({
+    ...host,
+    reserveRead: (context) => ({
+      ...host.reserveRead(context),
+      generation: ++generation,
+    }),
+    isReadCurrent: (ticket) => ticket.generation === generation,
+    applyRead: (_ticket, snapshot) => {
+      applied.push(snapshot.workOrder.editVersion.draftVersionToken);
+      return "applied";
+    },
+  });
+  const saved = workspaceFixture(true);
+  const reverted = workspaceFixture();
+  reverted.workOrder.editVersion.draftVersionToken = "revision-c";
+  const map = vi
+    .spyOn(maps, "fetchEditVersionMap")
+    .mockResolvedValueOnce(saved)
+    .mockResolvedValue(reverted);
+  const change = vi
+    .spyOn(changes, "fetchEditVersionChangeSet")
+    .mockResolvedValueOnce(saved.workOrder.editVersion)
+    .mockResolvedValue(reverted.workOrder.editVersion);
+  const baseline = vi
+    .spyOn(baselines, "fetchFeatureBaseline")
+    .mockRejectedValue(new Error("offline"));
+  try {
+    api.readEditVersionSnapshot.mockImplementation(readEditVersionSnapshot);
+    api.saveFeatureGeometry.mockResolvedValue(successFixture());
+    await store.initializeActor("actor");
+    const a = command();
+    const key = recoveryKey(commandContext(a));
+    await store.submit(a, { geometry, vertexIndex: 1 });
+    await vi.waitFor(() => expect(baseline).toHaveBeenCalledTimes(1));
+    await vi.advanceTimersByTimeAsync(37000);
+    expect(store.readbackErrors[key]).toContain("исходную геометрию");
+    generation++;
+    await store.retryRead(key);
+    expect(applied).toEqual(["revision-c"]);
+    expect(map).toHaveBeenCalledTimes(2);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(baseline).toHaveBeenCalledTimes(5);
+    expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
+  } finally {
+    vi.restoreAllMocks();
+  }
 });
 it("actor change while preparing storage cannot send with the new session", async () => {
   const store = useWorkspaceRecoveryStore();
@@ -121,7 +179,7 @@ it.each(["ROLE_NOT_ALLOWED", "USER_INACTIVE"])(
     store.bindHost(host);
     await store.initializeActor("actor");
     api.saveFeatureGeometry.mockResolvedValue(successFixture());
-    api.fetchWorkspace.mockRejectedValue(new Error("offline"));
+    api.readEditVersionSnapshot.mockRejectedValue(new Error("offline"));
     const a = command(),
       b = command("b");
     await store.submit(a, { geometry, vertexIndex: 1 });
@@ -163,7 +221,7 @@ it("context access loss stops only its own work order", async () => {
       };
     return successFixture();
   });
-  api.fetchWorkspace.mockImplementation(async (wo) => {
+  api.readEditVersionSnapshot.mockImplementation(async (wo) => {
     const w = workspaceFixture(true);
     w.workOrder.id = wo;
     return w;

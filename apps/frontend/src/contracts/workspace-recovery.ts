@@ -64,6 +64,7 @@ export type RecoveryHost = {
   session(): RecoverySession | null;
   canAccess(context: RecoveryContext): boolean;
   reserveRead(context: RecoveryContext): ReadTicket;
+  isReadCurrent(ticket: ReadTicket): boolean;
   applyRead(
     ticket: ReadTicket,
     workspace: WorkspaceResponse,

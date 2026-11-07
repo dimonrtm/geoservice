@@ -30,6 +30,12 @@ vi.mock("@/api/auth", () => ({
   fetchSessionStatus: ports.status,
 }));
 vi.mock("@/stores/workOrders", () => ({ useWorkOrdersStore: () => ports }));
+vi.mock("@/stores/editVersionCommands", () => ({
+  useEditVersionCommandsStore: () => ports,
+}));
+vi.mock("@/stores/editorSession", () => ({
+  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
+}));
 vi.mock("@/stores/workspaceRecovery", () => ({
   useWorkspaceRecoveryStore: () => ports,
 }));

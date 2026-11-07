@@ -150,6 +150,26 @@ class ScriptedRuntime:
     def opener(self, request, timeout):
         method, status, payload = self.replies.pop(0)
         assert request.get_method() == method
+        payload = deepcopy(payload)
+        if method == "GET" and "workOrder" in payload:
+            assert request.full_url.endswith(f"/edit-versions/{VERSION}")
+            version = payload["workOrder"]["editVersion"]
+            changes = {
+                key: version.pop(key)
+                for key in ("hasPersistedChangeSet", "changeSet", "basicValidation")
+            }
+            changes["draftVersionToken"] = version["draftVersionToken"]
+            if change := changes["changeSet"]:
+                baseline = {
+                    "featureId": change["featureId"],
+                    "baselineGeometry": change.pop("baselineGeometry"),
+                }
+                self.replies.insert(0, ("GET", 200, baseline))
+            self.replies.insert(0, ("GET", 200, changes))
+        elif method == "GET" and "changeSet" in payload:
+            assert request.full_url.endswith("/change-set")
+        elif method == "GET" and "baselineGeometry" in payload:
+            assert request.full_url.endswith(f"/features/{FEATURE}/baseline")
         if method == "PUT":
             assert request.full_url.endswith(f"/{VERSION}/features/{FEATURE}/geometry")
             self.puts.append(json.loads(request.data))

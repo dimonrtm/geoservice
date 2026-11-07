@@ -3,7 +3,7 @@ title: Data Model And Spatial Storage
 type: note
 status: active
 created: 2026-05-30
-updated: 2026-10-16
+updated: 2026-11-04
 source: repository-change:2026-10-16
 tags: [database, postgis, sqlalchemy, geojson]
 ---
@@ -56,22 +56,7 @@ Pagination использует `id > after_id`, сортировку `id ASC`, 
 и возвращает его features/associations без AOI: рабочая область больше не часть
 `utility_network`.
 
-`WorkOrderRepository.get_workspace_aggregate` читает workspace для пары
-`work_order_id`/`edit_version_id`: `WorkOrder`, `EditVersion`, `work_order.AOI`,
-features из `edit_version_features`, пересекающие AOI через `ST_Intersects`, и
-associations, у которых оба endpoint feature попали в рабочую область. Geometry
-features передаётся как EWKB hex, decoding выполняет WorkspaceService после
-access guards. AOI display использует `ST_AsGeoJSON` и дополнительно возвращает
-extent. Current/baseline pairs и revision читаются тем же statement; pairs не
-ограничены AOI — [[edit_version_api_readback]].
-
-SQL для workspace aggregate вынесен в
-`apps/backend/utility_service/infrastructure/postgresql/sql/workspace_aggregate.sql`.
-Запрос сохраняет один round trip и текущий API repository/use-case слоя, но сначала
-строит `workspace_features AS MATERIALIZED`, а затем собирает `features_data` и
-`associations_data` через join к этому CTE. Это убирает повторное вычисление AOI
-membership и фиксирует правило: association попадает в workspace только когда оба
-ее endpoint feature входят в материализованный AOI-scoped набор.
+`WorkOrderRepository.get_edit_version_map` читает наряд, открытую версию, AOI, объекты и связи из схемы `work_order`. В карту входят объекты, пересекающие AOI, и связи между двумя видимыми объектами. Токен и текущая геометрия карты прочитаны одним запросом. Для ChangeSet текущие объекты всей версии и их видимость читает отдельный запрос. Исходные объекты закреплённого снимка поставляет `DefaultStateRepository`. Сервис сравнивает геометрию после проверки доступа. См. [[edit_version_api_readback]].
 
 ## First-Save Registry И История
 

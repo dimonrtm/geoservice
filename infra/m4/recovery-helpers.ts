@@ -1,3 +1,4 @@
+import { editorReadback, isEditVersionMap } from "./editor-readback.mjs";
 import { expect, type Page } from "@playwright/test";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -62,7 +63,7 @@ export async function snapshot(version: string, feature: string) {
   );
 }
 export const workspaceResponse = (r: { url(): string; status(): number }) =>
-  r.url().endsWith("/workspace") && r.status() === 200;
+  isEditVersionMap(r.url()) && r.status() === 200;
 export async function openWorkspace(page: Page) {
   await page.goto("/");
   await page
@@ -78,13 +79,13 @@ export async function openWorkspace(page: Page) {
     .click();
   const response = page.waitForResponse(workspaceResponse);
   await page.getByTestId("workspace-open-action").click();
-  return (await response).json();
+  return editorReadback(page, await response);
 }
 export async function ordinaryRevert(page: Page) {
   await page.getByTestId("revert-edit").click();
   const response = page.waitForResponse(workspaceResponse);
   await page.getByTestId("revert-proceed").click();
-  const workspace = await (await response).json();
+  const workspace = await editorReadback(page, await response);
   await expect(page.getByTestId("revert-edit")).toBeDisabled();
   return workspace;
 }
@@ -110,18 +111,37 @@ export async function moveLine(page: Page, workspace: any) {
     const [x, y] = mercator(
       ...(feature.geometry.coordinates[1] as [number, number]),
     );
-    const scale = Math.min(
-      (box.width - 96) / (right - left),
-      (box.height - 96) / (bottom - top),
-    );
-    await page.mouse.click(
-      box.x + box.width / 2 + (x - (left + right) / 2) * scale,
-      box.y + box.height / 2 + (y - (top + bottom) / 2) * scale,
-    );
-    const option = page.getByTestId("line-option").filter({ hasText: "L-003" });
-    if (await option.isVisible()) await option.click();
+    const commands = page.getByTestId("workspace-edit-commands");
+    const panelHeight = (await commands.boundingBox())?.height ?? 0;
+    const marker = page.getByLabel("Переместить внутреннюю вершину линии");
+    // fitBounds may run before the commands panel occupies its part of the canvas.
+    for (const fitHeight of [box.height + panelHeight, box.height]) {
+      const scale = Math.min(
+        (box.width - 96) / (right - left),
+        (fitHeight - 96) / (bottom - top),
+      );
+      const px = box.x + box.width / 2 + (x - (left + right) / 2) * scale;
+      const py = box.y + box.height / 2 + (y - (top + bottom) / 2) * scale;
+      for (const dy of [0, -4, 4, -8, 8]) {
+        await page.mouse.click(px, py + dy);
+        const option = page
+          .getByTestId("line-option")
+          .filter({ hasText: "L-003" });
+        if (await option.isVisible()) await option.click();
+        if (
+          (await marker.waitFor({ state: "visible", timeout: 250 }).then(
+            () => true,
+            () => false,
+          )) &&
+          (await commands
+            .getByText("Выбрана линия: L-003", { exact: true })
+            .isVisible())
+        )
+          return;
+      }
+    }
     await expect(
-      page.getByLabel("Переместить внутреннюю вершину линии"),
+      commands.getByText("Выбрана линия: L-003", { exact: true }),
     ).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 20_000 });
   const marker = (await page

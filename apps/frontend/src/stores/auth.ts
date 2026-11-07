@@ -1,3 +1,5 @@
+import { useEditorSessionStore } from "@/stores/editorSession";
+import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
 import { defineStore } from "pinia";
 import { toRaw } from "vue";
 
@@ -53,7 +55,7 @@ function resetWorkOrdersIfUserIdChanged(
     return;
   }
 
-  useWorkOrdersStore().reset(options);
+  resetEditorAndWorkOrders(options);
 }
 
 export type SetAuthOptions = {
@@ -124,24 +126,14 @@ export const useAuthStore = defineStore(
       setAuth(token: string, user: AuthUser, options: SetAuthOptions) {
         const previousUserId = authUserId(this.user);
         const sessionChanged = this.sessionId !== options.sessionId;
-        if (
-          previousUserId &&
-          (sessionChanged ||
-            previousUserId !== user.id ||
-            this.user?.role !== user.role)
-        )
-          useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
+        const accessChanged =
+          sessionChanged || hasUserAccessChanged(this.user, user);
+        if (previousUserId && accessChanged)
+          useEditVersionCommandsStore().suspendWorkspaceRecoveryForAccessLoss(
             previousUserId,
           );
 
-        if (
-          sessionChanged ||
-          previousUserId !== user.id ||
-          this.user?.role !== user.role
-        ) {
-          this.sessionEpoch++;
-          useWorkspaceRecoveryStore().hideActor();
-        }
+        if (accessChanged) invalidateSessionAccess(this);
         this.token = token;
         this.sessionId = options.sessionId;
         this.user = user;
@@ -154,55 +146,43 @@ export const useAuthStore = defineStore(
           preserveOpenedWorkspace: preserveWorkOrderState,
           preserveSelectedWorkOrder: preserveWorkOrderState,
         };
-        if (sessionChanged && previousUserId === user.id)
-          useWorkOrdersStore().reset(resetOptions);
-        else
+        if (sessionChanged && previousUserId === user.id) {
+          resetEditorAndWorkOrders(resetOptions);
+        } else
           resetWorkOrdersIfUserIdChanged(previousUserId, user.id, resetOptions);
         if (sessionChanged && runtime(this).started)
           this.restartSessionMonitor();
       },
       setUser(user: AuthUser | null) {
         const previousUserId = authUserId(this.user);
-        if (
-          previousUserId &&
-          (previousUserId !== authUserId(user) ||
-            this.user?.role !== user?.role)
-        )
-          useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
+        const accessChanged = hasUserAccessChanged(this.user, user);
+        if (previousUserId && accessChanged)
+          useEditVersionCommandsStore().suspendWorkspaceRecoveryForAccessLoss(
             previousUserId,
           );
 
-        if (
-          previousUserId !== authUserId(user) ||
-          this.user?.role !== user?.role
-        ) {
-          this.sessionEpoch++;
-          useWorkspaceRecoveryStore().hideActor();
-        }
+        if (accessChanged) invalidateSessionAccess(this);
         this.user = user;
         resetWorkOrdersIfUserIdChanged(previousUserId, authUserId(user));
       },
       clearLocalSession(options: ClearLocalSessionOptions = {}) {
         this.restoreGeneration++;
-        runtime(this).monitor?.();
-        runtime(this).monitor = undefined;
+        stopSessionMonitor(this);
         const previousUserId = authUserId(this.user);
         if (previousUserId || options.forceWorkOrdersReset)
-          useWorkOrdersStore().suspendWorkspaceRecoveryForAccessLoss(
+          useEditVersionCommandsStore().suspendWorkspaceRecoveryForAccessLoss(
             previousUserId ?? undefined,
           );
 
-        this.sessionEpoch++;
-        useWorkspaceRecoveryStore().hideActor();
+        invalidateSessionAccess(this);
         this.token = null;
         this.sessionId = null;
         this.user = null;
         this.sessionError = null;
         this.logoutError = null;
-        this.isReady = true;
-        this.isRestoring = false;
+        markSessionReady(this);
         if (options.forceWorkOrdersReset) {
-          useWorkOrdersStore().reset();
+          resetEditorAndWorkOrders();
         } else {
           resetWorkOrdersIfUserIdChanged(previousUserId, null);
         }
@@ -222,8 +202,7 @@ export const useAuthStore = defineStore(
       },
       restartSessionMonitor(): void {
         const local = runtime(this);
-        local.monitor?.();
-        local.monitor = undefined;
+        stopSessionMonitor(this);
         if (!this.sessionId || !this.token) return;
         local.monitor = startSessionMonitor(
           () =>
@@ -314,15 +293,9 @@ export const useAuthStore = defineStore(
           "login",
           marker?.revision ?? null,
           async () => {
-            if (generation !== this.restoreGeneration)
-              throw new AuthOperationSupersededError(
-                coordinator.readSessionMarker(),
-              );
+            assertCurrentAuthOperation(this, generation);
             const response = await login(email, password);
-            if (generation !== this.restoreGeneration)
-              throw new AuthOperationSupersededError(
-                coordinator.readSessionMarker(),
-              );
+            assertCurrentAuthOperation(this, generation);
             if (!response.session_id)
               throw new Error("Сервер не вернул идентификатор сессии");
             publish(this, response.session_id, "active");
@@ -330,7 +303,7 @@ export const useAuthStore = defineStore(
           },
         );
         await useWorkspaceRecoveryStore().suspendActor(result.user.id);
-        if (generation !== this.restoreGeneration) return result;
+        if (!isCurrentAuthOperation(this, generation)) return result;
         const current = coordinator.readSessionMarker();
         if (
           current?.state !== "active" ||
@@ -340,8 +313,7 @@ export const useAuthStore = defineStore(
         this.setAuth(result.access_token, result.user, {
           sessionId: result.session_id,
         });
-        this.isReady = true;
-        this.isRestoring = false;
+        markSessionReady(this);
         return result;
       },
       async restoreSession() {
@@ -355,7 +327,7 @@ export const useAuthStore = defineStore(
           let marker = coordinator.readSessionMarker();
           let result;
           // Только superseded намерение повторяется; каждый HTTP остаётся под lock.
-          while (generation === this.restoreGeneration) {
+          while (isCurrentAuthOperation(this, generation)) {
             if (marker?.state === "ended") {
               this.clearLocalSession({
                 forceWorkOrdersReset: restoreMode === "initial",
@@ -369,9 +341,11 @@ export const useAuthStore = defineStore(
                 "refresh",
                 marker?.revision ?? null,
                 async () => {
-                  if (generation !== this.restoreGeneration) return undefined;
+                  if (!isCurrentAuthOperation(this, generation))
+                    return undefined;
                   const response = await refreshSession(expectedSid);
-                  if (generation !== this.restoreGeneration) return undefined;
+                  if (!isCurrentAuthOperation(this, generation))
+                    return undefined;
                   if (
                     !response.session_id ||
                     (expectedSid && response.session_id !== expectedSid)
@@ -381,7 +355,7 @@ export const useAuthStore = defineStore(
                   return response;
                 },
               );
-              if (generation !== this.restoreGeneration) return;
+              if (!isCurrentAuthOperation(this, generation)) return;
               const current = coordinator.readSessionMarker();
               if (
                 current &&
@@ -398,14 +372,14 @@ export const useAuthStore = defineStore(
               if (!marker) throw error;
             }
           }
-          if (generation !== this.restoreGeneration) return;
+          if (!isCurrentAuthOperation(this, generation)) return;
           if (!result) return;
           this.setAuth(result.access_token, result.user, {
             sessionId: result.session_id,
             preserveWorkOrderStateOnInitialUser: true,
           });
         } catch (error: unknown) {
-          if (generation !== this.restoreGeneration) return;
+          if (!isCurrentAuthOperation(this, generation)) return;
           const parsed = parseApiError(error);
           const sessionError = presentSessionError(parsed, restoreMode);
           const initialSessionEnded =
@@ -417,9 +391,8 @@ export const useAuthStore = defineStore(
           });
           this.sessionError = sessionError;
         } finally {
-          if (generation === this.restoreGeneration) {
-            this.isReady = true;
-            this.isRestoring = false;
+          if (isCurrentAuthOperation(this, generation)) {
+            markSessionReady(this);
           }
         }
       },
@@ -439,19 +412,13 @@ export const useAuthStore = defineStore(
             "logout",
             marker?.revision ?? null,
             async () => {
-              if (
-                generation !== this.restoreGeneration ||
-                sid !== this.sessionId
-              )
+              if (!isCurrentSessionOperation(this, generation, sid))
                 return false;
               logoutStarted = true;
               const result = await logoutSession(sid);
               if (!result.ok || result.session_id !== sid)
                 throw new Error("Не подтверждён выход из ожидаемой сессии");
-              if (
-                sid === this.sessionId &&
-                generation === this.restoreGeneration
-              )
+              if (isCurrentSessionOperation(this, generation, sid))
                 this.clearLocalSession();
               try {
                 publish(this, sid, "ended");
@@ -462,8 +429,7 @@ export const useAuthStore = defineStore(
             },
           );
         } catch (error) {
-          if (sid !== this.sessionId || generation !== this.restoreGeneration)
-            return false;
+          if (!isCurrentSessionOperation(this, generation, sid)) return false;
           const parsed = parseApiError(error);
           const uncertain =
             logoutStarted &&
@@ -476,10 +442,7 @@ export const useAuthStore = defineStore(
             try {
               const status = await fetchSessionStatus(sid, token);
               if (status.session_id === sid && status.state === "ended") {
-                if (
-                  sid === this.sessionId &&
-                  generation === this.restoreGeneration
-                )
+                if (isCurrentSessionOperation(this, generation, sid))
                   this.clearLocalSession();
                 try {
                   const marker = coordinator.readSessionMarker();
@@ -502,7 +465,7 @@ export const useAuthStore = defineStore(
               /* Неизвестный исход сохраняет вход и доступен для повторной проверки. */
             }
           }
-          if (sid === this.sessionId && generation === this.restoreGeneration)
+          if (isCurrentSessionOperation(this, generation, sid))
             this.logoutError = presentLogoutError(uncertain);
           return false;
         } finally {
@@ -512,3 +475,57 @@ export const useAuthStore = defineStore(
     },
   },
 );
+
+function resetEditorAndWorkOrders(options: ResetWorkOrdersOptions = {}): void {
+  useWorkOrdersStore().reset(options);
+  useEditorSessionStore().resetEditor(options);
+}
+
+function hasUserAccessChanged(
+  previous: AuthUser | null,
+  next: AuthUser | null,
+): boolean {
+  return (
+    authUserId(previous) !== authUserId(next) || previous?.role !== next?.role
+  );
+}
+
+function invalidateSessionAccess(state: AuthState): void {
+  state.sessionEpoch++;
+  useWorkspaceRecoveryStore().hideActor();
+}
+
+function stopSessionMonitor(store: object): void {
+  const local = runtime(store);
+  local.monitor?.();
+  local.monitor = undefined;
+}
+
+function isCurrentAuthOperation(state: AuthState, generation: number): boolean {
+  return state.restoreGeneration === generation;
+}
+
+function isCurrentSessionOperation(
+  state: AuthState,
+  generation: number,
+  sessionId: string,
+): boolean {
+  return (
+    isCurrentAuthOperation(state, generation) && state.sessionId === sessionId
+  );
+}
+
+function assertCurrentAuthOperation(
+  state: AuthState,
+  generation: number,
+): void {
+  if (!isCurrentAuthOperation(state, generation))
+    throw new AuthOperationSupersededError(
+      getBrowserSessionCoordinator().readSessionMarker(),
+    );
+}
+
+function markSessionReady(state: AuthState): void {
+  state.isReady = true;
+  state.isRestoring = false;
+}

@@ -3,8 +3,8 @@ title: API And Realtime Contracts
 type: api-endpoint
 status: active
 created: 2026-05-30
-updated: 2026-11-02
-source: repository-change:2026-11-02
+updated: 2026-11-04
+source: repository-change:2026-11-04
 tags: [api, websocket, realtime, auth]
 ---
 
@@ -101,18 +101,7 @@ Legacy GIS API `/api/v1/layers*` является compatibility surface, а не
   `created: false`.
 - Response содержит `editVersion.id`, `workOrderId`, `ownerId`, `status`,
   `baseNetworkRevision`, `createdAt`, `lastOpenedAt`.
-- `GET /api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}/workspace`
-  возвращает workspace только для уже существующей открытой edit version и не
-  создаёт новую версию, не открывает work order и не меняет `WorkOrder.status`.
-  Route вложен в `work-orders/{workOrderId}`, потому что workspace читается из
-  агрегата `WorkOrder`.
-- Workspace response содержит `workOrder.id`, `code`, `title`, `status`,
-  `scope.aoi` с GeoJSON geometry и extent, а также `editVersion.id`, `status`,
-  `baseNetworkRevision`, `features` и `associations`. Features берутся из
-  `work_order.edit_version_features` и фильтруются по `WorkOrder.scope.aoi`;
-  associations попадают в ответ только когда оба endpoint feature входят в
-  рабочую область. DTO для workspace features и associations находятся в
-  `schemas.workspace` и не реиспользуют output-схемы `utility_network`.
+- GET `/api/v1/work-orders/{workOrderId}/edit-versions/{editVersionId}` читает карту уже открытой версии. Отдельные GET по суффиксам `/change-set` и `/features/{featureId}/baseline` возвращают сведения о правке и исходную геометрию линии. Контракты и правила сверки токенов описаны в [[edit_version_api_readback]].
 
 ## Ошибки
 

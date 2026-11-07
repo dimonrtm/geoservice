@@ -7,12 +7,12 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     WorkOrderStatus,
 )
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
-    WORKSPACE_AGGREGATE_SQL,
-    WORKSPACE_AGGREGATE_SQL_PATH,
+    EDIT_VERSION_MAP_SQL,
+    EDIT_VERSION_MAP_SQL_PATH,
     WorkOrderRepository,
 )
-from utility_service.infrastructure.postgresql.repository_rows.workspace import (
-    WorkspaceAggregateRow,
+from utility_service.infrastructure.postgresql.repository_rows.edit_version_read import (
+    EditVersionMapRow,
 )
 
 
@@ -47,22 +47,23 @@ class FakeSession:
         raise AssertionError("Workspace aggregate read must use one execute call")
 
 
-def test_workspace_aggregate_sql_lives_in_sql_file() -> None:
-    assert WORKSPACE_AGGREGATE_SQL_PATH.name == "workspace_aggregate.sql"
-    sql_text = WORKSPACE_AGGREGATE_SQL_PATH.read_text(encoding="utf-8")
-    assert "workspace_features AS MATERIALIZED" in sql_text
-    assert "JOIN workspace_features AS from_feature" in sql_text
-    assert "JOIN workspace_features AS to_feature" in sql_text
+def test_edit_version_map_sql_lives_in_sql_file() -> None:
+    assert EDIT_VERSION_MAP_SQL_PATH.name == "edit_version_map.sql"
+    sql_text = EDIT_VERSION_MAP_SQL_PATH.read_text(encoding="utf-8")
+    assert "utility_network." not in sql_text
+    assert "visible_features AS MATERIALIZED" in sql_text
+    assert "JOIN visible_features AS from_feature" in sql_text
+    assert "JOIN visible_features AS to_feature" in sql_text
     assert "ST_Intersects(context.aoi_geometry, feature.geometry)" in sql_text
 
 
-def test_workspace_aggregate_row_dataclasses_live_next_to_repositories() -> None:
-    assert WorkspaceAggregateRow.__module__.endswith(
-        ".infrastructure.postgresql.repository_rows.workspace"
+def test_edit_version_map_row_dataclasses_live_next_to_repositories() -> None:
+    assert EditVersionMapRow.__module__.endswith(
+        ".infrastructure.postgresql.repository_rows.edit_version_read"
     )
 
 
-def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
+def test_get_edit_version_map_uses_one_sql_round_trip_and_maps_row() -> None:
     work_order_id = uuid4()
     edit_version_id = uuid4()
     aoi_id = uuid4()
@@ -84,11 +85,6 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
             "edit_version_base_network_revision": 12,
             "edit_version_draft_revision": 7,
             "edit_version_default_state_id": default_state_id,
-            "baseline_state_id": default_state_id,
-            "baseline_work_order_id": work_order_id,
-            "baseline_base_network_revision": 12,
-            "baseline_status": "active",
-            "draft_feature_pairs": [],
             "aoi_id": aoi_id,
             "aoi_name": "Workspace WO-001",
             "aoi_description": None,
@@ -121,7 +117,7 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
     repository = WorkOrderRepository(session)
 
     aggregate = asyncio.run(
-        repository.get_workspace_aggregate(
+        repository.get_edit_version_map(
             work_order_id=work_order_id,
             edit_version_id=edit_version_id,
         )
@@ -130,7 +126,7 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
     assert aggregate is not None
     assert len(session.execute_calls) == 1
     assert session.execute_calls[0] == (
-        WORKSPACE_AGGREGATE_SQL,
+        EDIT_VERSION_MAP_SQL,
         {
             "work_order_id": work_order_id,
             "edit_version_id": edit_version_id,
@@ -146,7 +142,6 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
     assert aggregate.edit_version.base_network_revision == 12
     assert aggregate.edit_version.draft_revision == 7
     assert aggregate.edit_version.default_state_id == default_state_id
-    assert aggregate.baseline_state.id == default_state_id
     assert aggregate.aoi.id == aoi_id
     assert aggregate.aoi.extent == [65.495, 44.795, 65.545, 44.835]
     assert aggregate.features_data[0]["asset_code"] == "J-001"
@@ -158,11 +153,11 @@ def test_get_workspace_aggregate_uses_one_sql_round_trip_and_maps_row() -> None:
     assert aggregate.associations_data[0]["id"] == str(association_id)
 
 
-def test_get_workspace_aggregate_returns_none_when_sql_finds_no_context() -> None:
+def test_get_edit_version_map_returns_none_when_sql_finds_no_context() -> None:
     repository = WorkOrderRepository(FakeSession(None))
 
     aggregate = asyncio.run(
-        repository.get_workspace_aggregate(
+        repository.get_edit_version_map(
             work_order_id=uuid4(),
             edit_version_id=uuid4(),
         )

@@ -1,6 +1,11 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { fetchWorkspace, saveFeatureGeometry } from "@/api/workOrders";
+import { readEditVersionSnapshot } from "@/composables/useEditVersionEditor";
+import {
+  SnapshotReadFailure,
+  type SnapshotCheckpoint,
+} from "@/composables/readEditVersionSnapshot";
+import { saveFeatureGeometry } from "@/api/editVersions";
 import { parseApiError } from "@/api/parseApiError";
 import {
   freezePendingCommand,
@@ -17,6 +22,7 @@ import {
   type RecoveryRecordV2,
   type RecoverySource,
   type RecoveryStartResult,
+  type ReadTicket,
 } from "@/contracts/workspace-recovery";
 import { createRecoveryStorage } from "./workspaceRecoveryStorage";
 import { migrateLegacyRecovery } from "./workspaceRecoveryMigration";
@@ -47,6 +53,14 @@ export const useWorkspaceRecoveryStore = defineStore(
     const runs = new Map<RecoveryKey, Run>(),
       preparing = new Set<RecoveryKey>();
     const writes = new Map<RecoveryKey, Promise<unknown>>();
+    const readbacks = new Map<
+      RecoveryKey,
+      {
+        commandId: string;
+        ticket: ReadTicket;
+        checkpoint: SnapshotCheckpoint;
+      }
+    >();
     const preparationWrites = new Map<RecoveryKey, Promise<void>>();
     const storageFailures = new Set<RecoveryKey>();
     const suspensions = new Map<string, Promise<void>>();
@@ -119,6 +133,7 @@ export const useWorkspaceRecoveryStore = defineStore(
       initialization++;
       for (const run of runs.values()) run.controller.abort();
       runs.clear();
+      readbacks.clear();
     }
     function bindHost(value: RecoveryHost): () => void {
       host = value;
@@ -158,22 +173,51 @@ export const useWorkspaceRecoveryStore = defineStore(
       }
       phases.value[key] = "reading-current";
       delete readbackErrors.value[key];
-      const ticket = host!.reserveRead(commandContext(current.command));
+      const context = commandContext(current.command);
+      const commandId = current.command.request.commandId;
+      const previous = readbacks.get(key);
+      const readback =
+        previous &&
+        previous.commandId === commandId &&
+        previous.ticket.sessionEpoch === run.epoch &&
+        host!.isReadCurrent(previous.ticket)
+          ? previous
+          : { commandId, ticket: host!.reserveRead(context), checkpoint: {} };
+      readbacks.set(key, readback);
+      const { ticket } = readback;
       try {
         const { workOrderId, editVersionId } = current.command.target;
-        const workspace = await scheduler.run(
-          key,
+        const workspace = await readEditVersionSnapshot(
+          workOrderId,
+          editVersionId,
           run.controller.signal,
-          () => {
-            if (
-              !active(key, run) ||
-              !host!.canAccess(commandContext(current.command))
-            )
-              throw new Error("Session changed");
-            return fetchWorkspace(workOrderId, editVersionId);
-          },
+          readback.checkpoint,
+          (fetch) =>
+            scheduler.run(key, run.controller.signal, () => {
+              if (
+                !active(key, run) ||
+                getRecord(key)?.command.request.commandId !== commandId ||
+                !host!.canAccess(context) ||
+                !host!.isReadCurrent(ticket)
+              )
+                throw new DOMException(
+                  "Recovery read superseded",
+                  "AbortError",
+                );
+              return fetch();
+            }),
         );
-        if (!active(key, run) || getRecord(key)?.blocks.length) return;
+        if (
+          !active(key, run) ||
+          getRecord(key)?.command.request.commandId !== commandId ||
+          getRecord(key)?.blocks.length
+        )
+          return;
+        if (!host!.canAccess(context)) {
+          await suspend(key);
+          return;
+        }
+        readbacks.delete(key);
         const accepted = host!.applyRead(
           ticket,
           parseWorkspaceResponse(workspace, workOrderId, editVersionId),
@@ -191,6 +235,10 @@ export const useWorkspaceRecoveryStore = defineStore(
         await finish(key, run);
       } catch (error) {
         if (!active(key, run)) return;
+        if (!host!.canAccess(context)) {
+          await suspend(key);
+          return;
+        }
         const parsed = parseApiError(error);
         if (
           parsed.kind === "api" &&
@@ -205,13 +253,22 @@ export const useWorkspaceRecoveryStore = defineStore(
         }
         if (
           (parsed.kind === "api" || parsed.kind === "http") &&
-          [401, 403, 404].includes(parsed.status)
+          [401, 403, 404, 409].includes(parsed.status)
         ) {
           await suspend(key);
           return;
         }
+        if (!host!.isReadCurrent(ticket)) {
+          readbacks.delete(key);
+          if (retrySuperseded) {
+            await read(key, run, false);
+            return;
+          }
+        }
         readbackErrors.value[key] =
-          "Актуальные данные не загружены. Повторите загрузку.";
+          error instanceof SnapshotReadFailure
+            ? error.message
+            : "Актуальные данные не загружены. Повторите загрузку.";
         host?.interrupted(key, "readback");
       }
     }
@@ -480,6 +537,7 @@ export const useWorkspaceRecoveryStore = defineStore(
       if (getRecord(key)?.outcome.kind !== "unknown") await launch(key);
     }
     async function suspend(key: RecoveryKey) {
+      readbacks.delete(key);
       runs.get(key)?.controller.abort();
       runs.delete(key);
       phases.value[key] = "blocked";

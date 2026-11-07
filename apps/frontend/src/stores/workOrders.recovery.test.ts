@@ -1,3 +1,4 @@
+import { editorTestContext } from "@/test/editorTestContext";
 import { useWorkspaceRecoveryStore } from "./workspaceRecovery";
 import {
   settle,
@@ -17,12 +18,11 @@ import {
 } from "@/test/workspaceEditFixture";
 const api = vi.hoisted(() => ({
   fetchAssignedWorkOrders: vi.fn(),
-  fetchWorkspace: vi.fn(),
+  readMap: vi.fn(),
   openEditVersion: vi.fn(),
   saveFeatureGeometry: vi.fn(),
 }));
 vi.mock("@/api/workOrders", () => api);
-import { useWorkOrdersStore } from "./workOrders";
 import { useAuthStore } from "./auth";
 import { writeRecoveryRecord } from "./workspaceRecoveryStorage";
 const command = {
@@ -34,11 +34,12 @@ function setup(edit = false) {
   const auth = useAuthStore();
   auth.token = "test";
   auth.user = { id: "actor", email: "editor@example.local", role: "editor" };
-  const store = useWorkOrdersStore();
-  store.workspace = workspaceFixture();
-  store.openedWorkOrderId = store.selectedWorkOrderId = target.workOrderId;
-  store.openedEditVersionId = target.editVersionId;
-  store.items = [
+  const store = editorTestContext();
+  store.seed(workspaceFixture());
+  store.editorSession.openedWorkOrderId = store.workOrders.selectedWorkOrderId =
+    target.workOrderId;
+  store.editorSession.openedEditVersionId = target.editVersionId;
+  store.workOrders.items = [
     {
       id: target.workOrderId,
       code: "WO",
@@ -48,8 +49,8 @@ function setup(edit = false) {
     },
   ];
   if (edit) {
-    store.beginLocalEdit(target.featureId, 1);
-    store.moveLocalVertex([65.1, 44.2]);
+    store.editVersionDraft.beginLocalEdit(target.featureId, 1);
+    store.editVersionDraft.moveLocalVertex([65.1, 44.2]);
   }
   return store;
 }
@@ -67,12 +68,12 @@ describe("Save recovery", () => {
       result: successFixture(),
     });
     const store = setup();
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    await store.restorePendingSave();
-    await settle(store);
-    expect(store.didSaveChangeGeometry).toBeNull();
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    await store.editVersionCommands.restorePendingSave();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.didSaveChangeGeometry).toBeNull();
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
-    expect(store.workspace?.workOrder.editVersion.draftVersionToken).toBe(
+    expect(store.editor.snapshot?.workOrder.editVersion.draftVersionToken).toBe(
       "revision-b",
     );
   });
@@ -80,16 +81,18 @@ describe("Save recovery", () => {
     const store = setup(true);
     const response = deferred<ReturnType<typeof successFixture>>();
     api.saveFeatureGeometry.mockReturnValue(response.promise);
-    const saving = store.saveLocalDraft();
-    await vi.waitFor(() => expect(store.pendingCommand).not.toBeNull());
-    const id = store.pendingCommand!.request.commandId;
-    store.clearOpenedWorkspace({ force: true });
+    const saving = store.editVersionCommands.saveLocalDraft();
+    await vi.waitFor(() =>
+      expect(store.editVersionCommands.pendingCommand).not.toBeNull(),
+    );
+    const id = store.editVersionCommands.pendingCommand!.request.commandId;
+    store.editorSession.clearOpenedWorkspace({ force: true });
     response.resolve(successFixture(id));
     await saving;
-    expect(store.didSaveChangeGeometry).toBeNull();
-    expect(store.submittedSourceGeometry).toBeNull();
-    expect(store.workspace).toBeNull();
-    expect(api.fetchWorkspace).not.toHaveBeenCalled();
+    expect(store.editVersionCommands.didSaveChangeGeometry).toBeNull();
+    expect(store.editVersionCommands.submittedSourceGeometry).toBeNull();
+    expect(store.editor.snapshot).toBeNull();
+    expect(api.readMap).not.toHaveBeenCalled();
   });
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -108,7 +111,7 @@ describe("Save recovery", () => {
       isAxiosError: true,
       code: "ETIMEDOUT",
     });
-    const save = store.saveLocalDraft();
+    const save = store.editVersionCommands.saveLocalDraft();
     await vi.advanceTimersByTimeAsync(0);
     await until(() => api.saveFeatureGeometry.mock.calls.length === 2);
     for (const [ms, count] of [
@@ -123,15 +126,15 @@ describe("Save recovery", () => {
       expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(count!);
     }
     await save;
-    expect(store.phase).toBe("unknown");
+    expect(store.editVersionCommands.phase).toBe("unknown");
     for (const args of api.saveFeatureGeometry.mock.calls)
       expect(args[1]).toEqual(api.saveFeatureGeometry.mock.calls[0]?.[1]);
-    const retry = store.retryPendingSave();
-    const duplicate = store.retryPendingSave();
+    const retry = store.editVersionCommands.retryPendingSave();
+    const duplicate = store.editVersionCommands.retryPendingSave();
     await vi.runAllTimersAsync();
     await Promise.all([retry, duplicate]);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(11);
-    const again = store.retryPendingSave();
+    const again = store.editVersionCommands.retryPendingSave();
     await vi.runAllTimersAsync();
     await again;
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(16);
@@ -147,20 +150,20 @@ describe("Save recovery", () => {
       result: successFixture(),
     });
     const store = setup();
-    api.fetchWorkspace.mockRejectedValueOnce(new Error("offline"));
-    await store.restorePendingSave();
-    await settle(store);
-    expect(store.canRetryCurrentRead).toBe(true);
+    api.readMap.mockRejectedValueOnce(new Error("offline"));
+    await store.editVersionCommands.restorePendingSave();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.canRetryCurrentRead).toBe(true);
     const read = deferred<ReturnType<typeof workspaceFixture>>();
-    api.fetchWorkspace.mockReturnValue(read.promise);
-    const first = store.refreshCurrentWorkspace();
-    const second = store.refreshCurrentWorkspace();
-    await vi.waitFor(() => expect(api.fetchWorkspace).toHaveBeenCalledTimes(2));
-    expect(store.canRetryCurrentRead).toBe(false);
+    api.readMap.mockReturnValue(read.promise);
+    const first = store.editVersionCommands.refreshCurrentWorkspace();
+    const second = store.editVersionCommands.refreshCurrentWorkspace();
+    await vi.waitFor(() => expect(api.readMap).toHaveBeenCalledTimes(2));
+    expect(store.editVersionCommands.canRetryCurrentRead).toBe(false);
     read.resolve(workspaceFixture(true));
     await Promise.all([first, second]);
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
-    expect(store.phase).toBe("idle");
+    expect(store.editVersionCommands.phase).toBe("idle");
   });
   it("stale discard requires successful readback and clears the rejected attempt without HTTP", async () => {
     const store = setup(true);
@@ -171,29 +174,31 @@ describe("Save recovery", () => {
         data: { code: "DRAFT_VERSION_STALE", message: "stale" },
       },
     });
-    api.fetchWorkspace.mockRejectedValue(new Error("offline"));
-    await store.saveLocalDraft();
-    await settle(store);
-    expect(store.discardRejectedAttempt()).toBe(false);
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    await store.refreshCurrentWorkspace();
-    expect(store.canDiscardRejectedAttempt).toBe(true);
-    const calls = api.fetchWorkspace.mock.calls.length;
-    expect(store.discardRejectedAttempt()).toBe(true);
-    expect(store.localDraft).toBeNull();
-    expect(store.saveError).toBeNull();
-    expect(api.fetchWorkspace).toHaveBeenCalledTimes(calls);
+    api.readMap.mockRejectedValue(new Error("offline"));
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.discardRejectedAttempt()).toBe(false);
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    await store.editVersionCommands.refreshCurrentWorkspace();
+    expect(store.editVersionCommands.canDiscardRejectedAttempt).toBe(true);
+    const calls = api.readMap.mock.calls.length;
+    expect(store.editVersionCommands.discardRejectedAttempt()).toBe(true);
+    expect(store.editVersionDraft.localDraft).toBeNull();
+    expect(store.editVersionCommands.saveError).toBeNull();
+    expect(api.readMap).toHaveBeenCalledTimes(calls);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
-    expect(store.beginLocalEdit(target.featureId, 1)).toBe(true);
-    expect(store.localDraft?.sourceToken).toBe("revision-b");
+    expect(store.editVersionDraft.beginLocalEdit(target.featureId, 1)).toBe(
+      true,
+    );
+    expect(store.editVersionDraft.localDraft?.sourceToken).toBe("revision-b");
   });
   it("restore has five total attempts with original token", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
     const store = setup();
-    store.workspace = workspaceFixture(true);
+    store.seed(workspaceFixture(true));
     api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
-    const restoring = store.restorePendingSave();
+    const restoring = store.editVersionCommands.restorePendingSave();
     await restoring;
     await vi.runAllTimersAsync();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(5);
@@ -202,20 +207,22 @@ describe("Save recovery", () => {
   it("unknown Revert retries the same command without another confirmation and refresh uses stored command", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const store = setup();
-    store.workspace = workspaceFixture(true);
+    store.seed(workspaceFixture(true));
     api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
-    store.beginRevert();
-    const sending = store.confirmRevert(
-      store.revertConfirmation!.confirmationId,
+    store.editVersionCommands.beginRevert();
+    const sending = store.editVersionCommands.confirmRevert(
+      store.editVersionCommands.revertConfirmation!.confirmationId,
     );
     await sending;
     await vi.runAllTimersAsync();
-    const original = JSON.parse(JSON.stringify(store.pendingCommand));
+    const original = JSON.parse(
+      JSON.stringify(store.editVersionCommands.pendingCommand),
+    );
     expect(original.request.geometry).toEqual(
       workspaceFixture(true).workOrder.editVersion.changeSet!.baselineGeometry,
     );
-    expect(store.revertConfirmation).toBeNull();
-    const retry = store.retryPendingSave();
+    expect(store.editVersionCommands.revertConfirmation).toBeNull();
+    const retry = store.editVersionCommands.retryPendingSave();
     await vi.runAllTimersAsync();
     await retry;
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(11);
@@ -231,19 +238,19 @@ describe("Save recovery", () => {
         geometry: original.request.geometry,
       },
     });
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture());
-    await restored.restorePendingSave();
-    await settle(restored);
+    api.readMap.mockResolvedValue(workspaceFixture());
+    await restored.editVersionCommands.restorePendingSave();
+    await settle(restored.editVersionCommands);
     expect(api.saveFeatureGeometry).toHaveBeenLastCalledWith(
       original.target,
       original.request,
     );
-    expect(restored.phase).toBe("idle");
-    expect(restored.localDraft).toBeNull();
+    expect(restored.editVersionCommands.phase).toBe("idle");
+    expect(restored.editVersionDraft.localDraft).toBeNull();
   });
   it("stale Revert needs new consent and new ID without a new local edit", async () => {
     const store = setup();
-    store.workspace = workspaceFixture(true);
+    store.seed(workspaceFixture(true));
     api.saveFeatureGeometry.mockRejectedValue({
       isAxiosError: true,
       response: {
@@ -253,24 +260,28 @@ describe("Save recovery", () => {
     });
     const newer = workspaceFixture(true);
     newer.workOrder.editVersion.draftVersionToken = "revision-c";
-    api.fetchWorkspace.mockResolvedValue(newer);
-    store.beginRevert();
-    await store.confirmRevert(store.revertConfirmation!.confirmationId);
-    await settle(store);
+    api.readMap.mockResolvedValue(newer);
+    store.editVersionCommands.beginRevert();
+    await store.editVersionCommands.confirmRevert(
+      store.editVersionCommands.revertConfirmation!.confirmationId,
+    );
+    await settle(store.editVersionCommands);
     const original = api.saveFeatureGeometry.mock.calls[0]![1];
-    expect(store.beginRevert()).toBe("blocked");
-    expect(store.discardRejectedAttempt()).toBe(true);
-    expect(store.localDraft).toBeNull();
-    expect(store.beginRevert()).toBe("confirm");
-    await store.confirmRevert(store.revertConfirmation!.confirmationId);
-    await settle(store);
+    expect(store.editVersionCommands.beginRevert()).toBe("blocked");
+    expect(store.editVersionCommands.discardRejectedAttempt()).toBe(true);
+    expect(store.editVersionDraft.localDraft).toBeNull();
+    expect(store.editVersionCommands.beginRevert()).toBe("confirm");
+    await store.editVersionCommands.confirmRevert(
+      store.editVersionCommands.revertConfirmation!.confirmationId,
+    );
+    await settle(store.editVersionCommands);
     const next = api.saveFeatureGeometry.mock.calls[1]![1];
     expect(next.commandId).not.toBe(original.commandId);
     expect(next.draftVersionToken).toBe("revision-c");
     expect(next.geometry).toEqual(original.geometry);
-    store.discardRejectedAttempt();
-    store.workspace = workspaceFixture();
-    expect(store.beginRevert()).toBe("blocked");
+    store.editVersionCommands.discardRejectedAttempt();
+    store.seed(workspaceFixture());
+    expect(store.editVersionCommands.beginRevert()).toBe("blocked");
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(2);
   });
   it("refresh after completed stale readback does not restore the rejected draft", async () => {
@@ -282,17 +293,17 @@ describe("Save recovery", () => {
         data: { code: "DRAFT_VERSION_STALE", message: "stale" },
       },
     });
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    await store.saveLocalDraft();
-    await settle(store);
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
     expect((await readRecoveryRecord("actor")).kind).toBe("empty");
     setActivePinia(createPinia());
     const restored = setup();
-    restored.workspace = workspaceFixture(true);
-    await restored.restorePendingSave();
-    await settle(restored);
-    expect(restored.phase).toBe("idle");
-    expect(restored.localDraft).toBeNull();
+    restored.seed(workspaceFixture(true));
+    await restored.editVersionCommands.restorePendingSave();
+    await settle(restored.editVersionCommands);
+    expect(restored.editVersionCommands.phase).toBe("idle");
+    expect(restored.editVersionDraft.localDraft).toBeNull();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
   });
   it.each(["success", "rejection", "block"])(
@@ -302,7 +313,7 @@ describe("Save recovery", () => {
       writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
       const store = setup();
       api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
-      const restoring = store.restorePendingSave();
+      const restoring = store.editVersionCommands.restorePendingSave();
       await vi.runAllTimersAsync();
       await restoring;
       api.saveFeatureGeometry.mockClear();
@@ -318,12 +329,12 @@ describe("Save recovery", () => {
         });
       if (terminal === "block")
         api.saveFeatureGeometry.mockResolvedValue({ malformed: true });
-      api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-      const retry = store.retryPendingSave();
+      api.readMap.mockResolvedValue(workspaceFixture(true));
+      const retry = store.editVersionCommands.retryPendingSave();
       await vi.runAllTimersAsync();
       await retry;
       expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
-      expect(store.canRetryPendingCommand).toBe(false);
+      expect(store.editVersionCommands.canRetryPendingCommand).toBe(false);
     },
   );
   it("refresh before first PUT restores same intent and old replay never replaces current", async () => {
@@ -335,11 +346,13 @@ describe("Save recovery", () => {
     });
     const newer = workspaceFixture(true);
     newer.workOrder.editVersion.draftVersionToken = "new-current";
-    api.fetchWorkspace.mockResolvedValue(newer);
-    await store.restorePendingSave();
-    await settle(store);
-    expect(store.commandResult?.draftVersionToken).toBe("old-receipt");
-    expect(store.workspace?.workOrder.editVersion.draftVersionToken).toBe(
+    api.readMap.mockResolvedValue(newer);
+    await store.editVersionCommands.restorePendingSave();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.commandResult?.draftVersionToken).toBe(
+      "old-receipt",
+    );
+    expect(store.editor.snapshot?.workOrder.editVersion.draftVersionToken).toBe(
       "new-current",
     );
     expect(api.saveFeatureGeometry).toHaveBeenCalledExactlyOnceWith(
@@ -355,11 +368,11 @@ describe("Save recovery", () => {
       result: successFixture(),
     });
     const store = setup();
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    await store.restorePendingSave();
-    await settle(store);
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    await store.editVersionCommands.restorePendingSave();
+    await settle(store.editVersionCommands);
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
-    expect(store.phase).toBe("idle");
+    expect(store.editVersionCommands.phase).toBe("idle");
   });
   it("does not overlap client requests or continue after terminal success", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
@@ -368,12 +381,12 @@ describe("Save recovery", () => {
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       slow.promise.then((v) => ({ ...v, commandId: r.commandId })),
     );
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    const save = store.saveLocalDraft();
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    const save = store.editVersionCommands.saveLocalDraft();
     await vi.advanceTimersByTimeAsync(100000);
-    await store.saveLocalDraft();
+    await store.editVersionCommands.saveLocalDraft();
     await until(() => api.saveFeatureGeometry.mock.calls.length === 1);
-    await store.retryPendingSave();
+    await store.editVersionCommands.retryPendingSave();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
     slow.resolve(successFixture());
     await save;
@@ -382,14 +395,22 @@ describe("Save recovery", () => {
   });
   it("dirty navigation is blocked and Cancel allows it", () => {
     const store = setup(true);
-    store.selectWorkOrder("other");
-    expect(store.selectedWorkOrderId).toBe(target.workOrderId);
-    store.clearOpenedWorkspace();
-    expect(store.workspace).not.toBeNull();
-    store.cancelNavigation(store.navigation!.id);
-    store.cancelLocalEdit();
-    store.selectWorkOrder("other");
-    expect(store.selectedWorkOrderId).toBe("other");
+    store.editorNavigation.requestNavigation({
+      kind: "work-order",
+      workOrderId: "other",
+    });
+    expect(store.workOrders.selectedWorkOrderId).toBe(target.workOrderId);
+    store.editorSession.clearOpenedWorkspace();
+    expect(store.editor.snapshot).not.toBeNull();
+    store.editorNavigation.cancelNavigation(
+      store.editorNavigation.navigation!.id,
+    );
+    store.editVersionDraft.cancelLocalEdit();
+    store.editorNavigation.requestNavigation({
+      kind: "work-order",
+      workOrderId: "other",
+    });
+    expect(store.workOrders.selectedWorkOrderId).toBe("other");
   });
   it("interceptor reset before Save catch preserves blocked record and hides private state", async () => {
     const store = setup(true);
@@ -408,10 +429,10 @@ describe("Save recovery", () => {
       useAuthStore().handleUnauthorizedResponse(error);
       return Promise.reject(error);
     });
-    await store.saveLocalDraft();
-    await settle(store);
-    expect(store.workspace).toBeNull();
-    expect(store.pendingCommand).toBeNull();
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
+    expect(store.editor.snapshot).toBeNull();
+    expect(store.editVersionCommands.pendingCommand).toBeNull();
     expect(await readRecoveryRecord("actor")).toMatchObject({
       kind: "record",
       record: { state: "blocked", reason: "access" },
@@ -421,7 +442,7 @@ describe("Save recovery", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const store = setup(true);
     api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
-    const saving = store.saveLocalDraft();
+    const saving = store.editVersionCommands.saveLocalDraft();
     await vi.advanceTimersByTimeAsync(0);
     await until(() => api.saveFeatureGeometry.mock.calls.length === 2);
     useAuthStore().clearLocalSession();
@@ -437,14 +458,15 @@ describe("Save recovery", () => {
     await vi.runAllTimersAsync();
     await saving;
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(2);
-    expect(store.localDraft).toBeNull();
+    expect(store.editVersionDraft.localDraft).toBeNull();
   });
   it("assignment loss hides workspace but retains recovery", async () => {
     writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
     const store = setup();
     api.fetchAssignedWorkOrders.mockResolvedValue({ workOrders: [] });
-    await store.loadAssigned();
-    expect(store.workspace).toBeNull();
+    await store.workOrders.loadAssigned();
+    await store.editorSession.reconcileAssignments();
+    expect(store.editor.snapshot).toBeNull();
     expect(await readRecoveryRecord("actor")).toMatchObject({
       kind: "record",
       record: { state: "blocked" },
@@ -452,9 +474,9 @@ describe("Save recovery", () => {
   });
   it("restores pending through existing workspace restore entry point", async () => {
     const store = setup();
-    store.workspace = null;
-    store.openedWorkOrderId = null;
-    store.openedEditVersionId = null;
+    store.seed(null);
+    store.editorSession.openedWorkOrderId = null;
+    store.editorSession.openedEditVersionId = null;
     sessionStorage.setItem(
       "geoservice:opened-workspace",
       JSON.stringify({
@@ -463,16 +485,16 @@ describe("Save recovery", () => {
       }),
     );
     writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    api.readMap.mockResolvedValue(workspaceFixture(true));
     api.saveFeatureGeometry.mockResolvedValue(successFixture());
-    await store.restoreOpenedWorkspace();
+    await store.editorSession.restoreOpenedWorkspace();
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
   });
   it("old GET cannot overwrite post-Save readback", async () => {
     const store = setup();
-    store.workspace = null;
-    store.openedWorkOrderId = null;
-    store.openedEditVersionId = null;
+    store.seed(null);
+    store.editorSession.openedWorkOrderId = null;
+    store.editorSession.openedEditVersionId = null;
     sessionStorage.setItem(
       "geoservice:opened-workspace",
       JSON.stringify({
@@ -481,22 +503,22 @@ describe("Save recovery", () => {
       }),
     );
     const old = deferred<ReturnType<typeof workspaceFixture>>();
-    api.fetchWorkspace.mockReturnValueOnce(old.promise);
-    const restoring = store.restoreOpenedWorkspace();
-    store.workspace = workspaceFixture();
-    store.openedWorkOrderId = target.workOrderId;
-    store.openedEditVersionId = target.editVersionId;
-    store.beginLocalEdit(target.featureId, 1);
-    store.moveLocalVertex([65.1, 44.2]);
+    api.readMap.mockReturnValueOnce(old.promise);
+    const restoring = store.editorSession.restoreOpenedWorkspace();
+    store.seed(workspaceFixture());
+    store.editorSession.openedWorkOrderId = target.workOrderId;
+    store.editorSession.openedEditVersionId = target.editVersionId;
+    store.editVersionDraft.beginLocalEdit(target.featureId, 1);
+    store.editVersionDraft.moveLocalVertex([65.1, 44.2]);
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       Promise.resolve(successFixture(r.commandId)),
     );
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    await store.saveLocalDraft();
-    await settle(store);
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
     old.resolve(workspaceFixture());
     await restoring;
-    expect(store.workspace?.workOrder.editVersion.draftVersionToken).toBe(
+    expect(store.editor.snapshot?.workOrder.editVersion.draftVersionToken).toBe(
       "revision-b",
     );
   });
@@ -504,21 +526,23 @@ describe("Save recovery", () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const store = setup(true);
     api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
-    const save = store.saveLocalDraft();
+    const save = store.editVersionCommands.saveLocalDraft();
     await save;
     expect(
-      Object.isFrozen(store.pendingCommand?.request.geometry.coordinates),
+      Object.isFrozen(
+        store.editVersionCommands.pendingCommand?.request.geometry.coordinates,
+      ),
     ).toBe(true);
-    expect(store.moveLocalVertex([65.1, 44.4])).toBe(false);
+    expect(store.editVersionDraft.moveLocalVertex([65.1, 44.4])).toBe(false);
     await vi.runAllTimersAsync();
     await save;
   });
   it("workspace access failure prevents auto replay after access returns", async () => {
     writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
     const store = setup();
-    store.workspace = null;
-    store.openedWorkOrderId = null;
-    store.openedEditVersionId = null;
+    store.seed(null);
+    store.editorSession.openedWorkOrderId = null;
+    store.editorSession.openedEditVersionId = null;
     sessionStorage.setItem(
       "geoservice:opened-workspace",
       JSON.stringify({
@@ -526,7 +550,7 @@ describe("Save recovery", () => {
         editVersionId: target.editVersionId,
       }),
     );
-    api.fetchWorkspace.mockRejectedValue({
+    api.readMap.mockRejectedValue({
       isAxiosError: true,
       response: {
         status: 403,
@@ -537,7 +561,7 @@ describe("Save recovery", () => {
         },
       },
     });
-    await store.restoreOpenedWorkspace();
+    await store.editorSession.restoreOpenedWorkspace();
     expect(await readRecoveryRecord("actor")).toMatchObject({
       kind: "record",
       record: { state: "blocked", reason: "access" },
@@ -557,53 +581,57 @@ describe("Save recovery", () => {
         },
       },
     });
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    await store.saveLocalDraft();
-    await settle(store);
-    expect(store.phase).toBe("stale");
-    expect(store.localDraft?.sourceToken).toBe("revision-a");
-    expect(store.moveLocalVertex([65.1, 44.4])).toBe(false);
-    await store.saveLocalDraft();
-    await settle(store);
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.phase).toBe("stale");
+    expect(store.editVersionDraft.localDraft?.sourceToken).toBe("revision-a");
+    expect(store.editVersionDraft.moveLocalVertex([65.1, 44.4])).toBe(false);
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
-    expect(store.cancelLocalEdit()).toBe(true);
-    expect(store.activeComparison).toBeNull();
-    expect(store.comparisonPreview).toBeNull();
-    expect(store.beginLocalEdit(target.featureId, 1)).toBe(true);
-    expect(store.localDraft?.sourceToken).toBe("revision-b");
+    expect(store.editVersionDraft.cancelLocalEdit()).toBe(true);
+    expect(store.editVersionCommands.activeComparison).toBeNull();
+    expect(store.editVersionCommands.comparisonPreview).toBeNull();
+    expect(store.editVersionDraft.beginLocalEdit(target.featureId, 1)).toBe(
+      true,
+    );
+    expect(store.editVersionDraft.localDraft?.sourceToken).toBe("revision-b");
   });
   it("malformed response blocks instead of retrying or claiming success", async () => {
     const store = setup(true);
     api.saveFeatureGeometry.mockResolvedValue({ commandId: "wrong" });
-    await store.saveLocalDraft();
-    await settle(store);
-    expect(store.phase).toBe("blocked");
-    expect(store.commandResult).toBeNull();
-    expect(api.fetchWorkspace).not.toHaveBeenCalled();
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.phase).toBe("blocked");
+    expect(store.editVersionCommands.commandResult).toBeNull();
+    expect(api.readMap).not.toHaveBeenCalled();
   });
   it("cleanup failure retains success and direct read cannot bypass storage block", async () => {
     const store = setup(true);
     api.saveFeatureGeometry.mockImplementation((_t, r) =>
       Promise.resolve(successFixture(r.commandId)),
     );
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
+    api.readMap.mockResolvedValue(workspaceFixture(true));
     const remove = vi
       .spyOn(IDBObjectStore.prototype, "delete")
       .mockImplementation(() => {
         throw new Error("storage");
       });
-    await store.saveLocalDraft();
-    await settle(store);
-    expect(store.storageError).not.toBeNull();
-    expect(store.beginLocalEdit(target.featureId, 1)).toBe(false);
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.storageError).not.toBeNull();
+    expect(store.editVersionDraft.beginLocalEdit(target.featureId, 1)).toBe(
+      false,
+    );
     remove.mockRestore();
-    await store.refreshCurrentWorkspace();
-    expect(store.storageError).not.toBeNull();
-    expect(store.recoveryRecord).toMatchObject({
+    await store.editVersionCommands.refreshCurrentWorkspace();
+    expect(store.editVersionCommands.storageError).not.toBeNull();
+    expect(store.editVersionCommands.recoveryRecord).toMatchObject({
       state: "blocked",
       result: { commandState: "succeeded" },
     });
-    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
+    expect(api.readMap).toHaveBeenCalledTimes(1);
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(1);
   });
   it("direct read cannot bypass loss of editor role or blocked phase", async () => {
@@ -614,16 +642,18 @@ describe("Save recovery", () => {
       result: successFixture(),
     });
     const store = setup();
-    api.fetchWorkspace.mockRejectedValue(new Error("offline"));
-    await store.restorePendingSave();
-    await settle(store);
+    api.readMap.mockRejectedValue(new Error("offline"));
+    await store.editVersionCommands.restorePendingSave();
+    await settle(store.editVersionCommands);
     useAuthStore().user!.role = "reviewer";
-    await store.refreshCurrentWorkspace();
-    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
+    await store.editVersionCommands.refreshCurrentWorkspace();
+    expect(api.readMap).toHaveBeenCalledTimes(1);
     useAuthStore().user!.role = "editor";
-    await useWorkspaceRecoveryStore().suspend(store.recoveryKey!);
-    await store.refreshCurrentWorkspace();
-    expect(api.fetchWorkspace).toHaveBeenCalledTimes(1);
+    await useWorkspaceRecoveryStore().suspend(
+      store.editVersionCommands.recoveryKey!,
+    );
+    await store.editVersionCommands.refreshCurrentWorkspace();
+    expect(api.readMap).toHaveBeenCalledTimes(1);
   });
   it("no-op consumes a terminal result without requiring token change", async () => {
     const store = setup(true);
@@ -636,11 +666,13 @@ describe("Save recovery", () => {
         basicValidation: null,
       }),
     );
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture());
-    await store.saveLocalDraft();
-    await settle(store);
-    expect(store.phase).toBe("idle");
-    expect(store.commandResult?.draftVersionToken).toBe("revision-a");
+    api.readMap.mockResolvedValue(workspaceFixture());
+    await store.editVersionCommands.saveLocalDraft();
+    await settle(store.editVersionCommands);
+    expect(store.editVersionCommands.phase).toBe("idle");
+    expect(store.editVersionCommands.commandResult?.draftVersionToken).toBe(
+      "revision-a",
+    );
   });
   it("preserves access suspension through reset when storage writes fail", async () => {
     writeRecoveryRecord({ schemaVersion: 1, command, state: "unknown" });
@@ -661,15 +693,16 @@ describe("Save recovery", () => {
       { sessionId: "sid-test" },
     );
     writes.mockRestore();
-    store.workspace = workspaceFixture();
-    store.selectedWorkOrderId = store.openedWorkOrderId = target.workOrderId;
-    store.openedEditVersionId = target.editVersionId;
+    store.seed(workspaceFixture());
+    store.workOrders.selectedWorkOrderId =
+      store.editorSession.openedWorkOrderId = target.workOrderId;
+    store.editorSession.openedEditVersionId = target.editVersionId;
     api.saveFeatureGeometry.mockResolvedValue(successFixture());
-    api.fetchWorkspace.mockResolvedValue(workspaceFixture(true));
-    await store.restorePendingSave();
-    await settle(store);
+    api.readMap.mockResolvedValue(workspaceFixture(true));
+    await store.editVersionCommands.restorePendingSave();
+    await settle(store.editVersionCommands);
     expect(api.saveFeatureGeometry).not.toHaveBeenCalled();
-    expect(store.activeWorkspace).toBeNull();
+    expect(store.editorSession.activeWorkspace).toBeNull();
     expect(await readRecoveryRecord("actor")).toMatchObject({
       kind: "record",
       record: { state: "blocked", reason: "access" },
@@ -695,25 +728,26 @@ describe("Save recovery", () => {
         api.saveFeatureGeometry.mockImplementation((_t, r) =>
           Promise.resolve(successFixture(r.commandId)),
         );
-        api.fetchWorkspace.mockRejectedValue(error);
+        api.readMap.mockRejectedValue(error);
       }
       if (where === "list") {
         vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
         api.saveFeatureGeometry.mockRejectedValue({ isAxiosError: true });
-        const saving = store.saveLocalDraft();
+        const saving = store.editVersionCommands.saveLocalDraft();
         await saving;
         await until(() => api.saveFeatureGeometry.mock.calls.length >= 1);
         api.fetchAssignedWorkOrders.mockRejectedValue(error);
-        await store.loadAssigned();
+        await store.workOrders.loadAssigned();
+        await store.editorSession.reconcileAssignments();
         const calls = api.saveFeatureGeometry.mock.calls.length;
         await vi.runAllTimersAsync();
         await saving;
         expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(calls);
-      } else await store.saveLocalDraft();
-      await settle(store);
-      expect(store.activeWorkspace).toBeNull();
-      expect(store.localDraft).toBeNull();
-      expect(store.commandResult).toBeNull();
+      } else await store.editVersionCommands.saveLocalDraft();
+      await settle(store.editVersionCommands);
+      expect(store.editorSession.activeWorkspace).toBeNull();
+      expect(store.editVersionDraft.localDraft).toBeNull();
+      expect(store.editVersionCommands.commandResult).toBeNull();
       expect(await readRecoveryRecord("actor")).toMatchObject({
         kind: "record",
         record: { state: "blocked", reason: "access" },
@@ -727,15 +761,34 @@ describe("Save recovery", () => {
   );
   it("reselecting a vertex retains candidate and switching dirty target is blocked", () => {
     const store = setup(true);
-    expect(store.beginLocalEdit(target.featureId, 1)).toBe(true);
-    expect(store.localDraft?.candidateGeometry.coordinates[1]).toEqual([
-      65.1, 44.2,
-    ]);
-    store.workspace!.workOrder.editVersion.features.features.push({
-      ...store.workspace!.workOrder.editVersion.features.features[0]!,
+    expect(store.editVersionDraft.beginLocalEdit(target.featureId, 1)).toBe(
+      true,
+    );
+    expect(
+      store.editVersionDraft.localDraft?.candidateGeometry.coordinates[1],
+    ).toEqual([65.1, 44.2]);
+    store.editor.snapshot!.workOrder.editVersion.features.features.push({
+      ...store.editor.snapshot!.workOrder.editVersion.features.features[0]!,
       id: "other-line",
     });
-    expect(store.beginLocalEdit("other-line", 1)).toBe(false);
-    expect(store.localDraft?.featureId).toBe(target.featureId);
+    expect(store.editVersionDraft.beginLocalEdit("other-line", 1)).toBe(false);
+    expect(store.editVersionDraft.localDraft?.featureId).toBe(target.featureId);
   });
 });
+
+vi.mock("@/api/editVersions", () => api);
+vi.mock("@/api/editVersionMap", async () => {
+  const { fixtureMap } = await import("@/test/editorReadFixtures");
+  return {
+    fetchEditVersionMap: (workOrderId: string, versionId: string) =>
+      fixtureMap(api.readMap, workOrderId, versionId),
+  };
+});
+vi.mock("@/api/editVersionChangeSet", async () => ({
+  fetchEditVersionChangeSet: (await import("@/test/editorReadFixtures"))
+    .fixtureChangeSet,
+}));
+vi.mock("@/api/featureBaseline", async () => ({
+  fetchFeatureBaseline: (await import("@/test/editorReadFixtures"))
+    .fixtureBaseline,
+}));

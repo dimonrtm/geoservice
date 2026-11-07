@@ -11,28 +11,45 @@ import WorkspaceComparisonPanel from "@/components/WorkspaceComparisonPanel.vue"
 import WorkspaceEditCommands from "@/components/WorkspaceEditCommands.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
 import { useAuthStore } from "@/stores/auth";
+import { useEditorNavigationStore } from "@/stores/editorNavigation";
+import { useFeatureBaselineStore } from "@/stores/featureBaseline";
+import { useEditVersionChangeSetStore } from "@/stores/editVersionChangeSet";
+import { useEditorSessionStore } from "@/stores/editorSession";
 import { useWorkOrdersStore } from "@/stores/workOrders";
+import { useEditVersionEditor } from "@/composables/useEditVersionEditor";
 
 type WorkspaceDetailsPanelHandle = {
   focusHeading(): void;
 };
 
+const editorNavigation = useEditorNavigationStore();
+const editorSession = useEditorSessionStore();
 const workOrders = useWorkOrdersStore();
+const editor = useEditVersionEditor();
+const changes = useEditVersionChangeSetStore();
+const baseline = useFeatureBaselineStore();
 const auth = useAuthStore();
 const detailsPanelRef = ref<WorkspaceDetailsPanelHandle | null>(null);
 const workspaceAnnouncement = ref("");
 const workspaceMapReady = ref(false);
+const lastFittedWorkspaceKey = ref<string | null>(null);
+watch(
+  () => editorSession.activeWorkspaceKey,
+  () => {
+    lastFittedWorkspaceKey.value = null;
+  },
+);
 
 function onWorkspaceMapReadyChange(ready: boolean): void {
   workspaceMapReady.value = ready;
 }
 
 watch(
-  () => !!workOrders.activeWorkspace,
-  (hasWorkspace) => {
-    if (!hasWorkspace) workspaceMapReady.value = false;
+  () =>
+    editorSession.activeWorkspace ? editorSession.activeWorkspaceKey : null,
+  () => {
+    workspaceMapReady.value = false;
   },
-  { flush: "sync" },
 );
 
 watch(
@@ -43,9 +60,15 @@ watch(
 );
 
 async function loadAssignedAndRestore(): Promise<void> {
-  await workOrders.loadAssigned();
-  if (!workOrders.loadError) {
-    await workOrders.restoreOpenedWorkspace();
+  const epoch = auth.sessionEpoch;
+  const generation = await workOrders.loadAssigned();
+  const isCurrent = () =>
+    epoch === auth.sessionEpoch &&
+    generation === workOrders.loadAssignedRequestSeq;
+  if (!isCurrent()) return;
+  await editorSession.reconcileAssignments();
+  if (isCurrent() && !workOrders.loadError) {
+    await editorSession.restoreOpenedWorkspace();
   }
 }
 
@@ -63,7 +86,7 @@ function handleLoadErrorAction(actionId: ErrorActionId): void {
 
 function handleWorkspaceErrorAction(actionId: ErrorActionId): void {
   if (actionId === "retry") {
-    void workOrders.retrySelectedWorkspaceError();
+    void editorSession.retrySelectedWorkspaceError();
     return;
   }
   if (actionId === "refresh") {
@@ -71,7 +94,7 @@ function handleWorkspaceErrorAction(actionId: ErrorActionId): void {
     return;
   }
   if (actionId === "reopen") {
-    void workOrders.reopenSelectedWorkOrder();
+    void editorSession.reopenSelectedWorkOrder();
     return;
   }
   if (actionId === "sign-in") {
@@ -93,9 +116,9 @@ async function openSelectedWorkspace(): Promise<void> {
   }
 
   workspaceAnnouncement.value = "";
-  await workOrders.openSelectedWorkOrder();
+  await editorSession.openSelectedWorkOrder();
 
-  const workspace = workOrders.activeWorkspace;
+  const workspace = editorSession.activeWorkspace;
   if (
     workOrders.selectedWorkOrderId !== workOrderId ||
     workspace?.workOrder.id !== workOrderId
@@ -169,7 +192,12 @@ async function openSelectedWorkspace(): Promise<void> {
                   : undefined
               "
               :data-test="`work-order-${workOrder.id}`"
-              @click="workOrders.selectWorkOrder(workOrder.id)"
+              @click="
+                editorNavigation.requestNavigation({
+                  kind: 'work-order',
+                  workOrderId: workOrder.id,
+                })
+              "
             >
               <span class="workOrderCode">{{ workOrder.code }}</span>
               <span class="workOrderTitle">{{ workOrder.title }}</span>
@@ -191,12 +219,12 @@ async function openSelectedWorkspace(): Promise<void> {
         v-if="workOrders.selectedWorkOrder"
         ref="detailsPanelRef"
         :work-order="workOrders.selectedWorkOrder"
-        :workspace="workOrders.activeWorkspace"
+        :workspace="editorSession.activeWorkspace"
         :is-opening="
-          workOrders.openingWorkOrderId === workOrders.selectedWorkOrder.id
+          editorSession.openingWorkOrderId === workOrders.selectedWorkOrder.id
         "
-        :is-open-action-disabled="workOrders.isOpeningWorkspace"
-        :error="workOrders.selectedOpenWorkspaceError"
+        :is-open-action-disabled="editorSession.isOpeningWorkspace"
+        :error="editorSession.selectedOpenWorkspaceError"
         @open="openSelectedWorkspace"
         @error-action="handleWorkspaceErrorAction"
       />
@@ -210,21 +238,45 @@ async function openSelectedWorkspace(): Promise<void> {
         {{ workspaceAnnouncement }}
       </p>
 
+      <div v-if="editor.readError" class="panelState isError" role="status">
+        {{ editor.readError }}
+        <button
+          v-if="editor.canRetry"
+          type="button"
+          @click="editorSession.readActiveFeature()"
+        >
+          Повторить
+        </button>
+      </div>
+      <p
+        v-else-if="editorSession.activeWorkspace && changes.phase === 'loading'"
+        role="status"
+      >
+        Загружаем изменения рабочей версии. Карта доступна для просмотра.
+      </p>
+      <p
+        v-else-if="
+          editorSession.activeWorkspace && baseline.phase === 'loading'
+        "
+        role="status"
+      >
+        Загружаем исходную геометрию линии. Карта доступна для просмотра.
+      </p>
       <WorkspaceEditCommands
-        v-if="workOrders.activeWorkspace && workspaceMapReady"
+        v-if="editorSession.activeWorkspace && workspaceMapReady"
       />
-      <WorkspaceComparisonPanel v-if="workOrders.activeWorkspace" />
+      <WorkspaceComparisonPanel v-if="editorSession.activeWorkspace" />
       <MapView
-        v-if="workOrders.activeWorkspace"
+        v-if="editorSession.activeWorkspace"
         class="workspaceMap"
         mode="workspace"
         :workspace-interactive="true"
-        :workspace="workOrders.activeWorkspace"
-        :workspace-key="workOrders.activeWorkspaceKey"
+        :workspace="editorSession.activeWorkspace"
+        :workspace-key="editorSession.activeWorkspaceKey"
         :should-fit-workspace="
-          workOrders.shouldFitWorkspace(workOrders.activeWorkspaceKey)
+          lastFittedWorkspaceKey !== editorSession.activeWorkspaceKey
         "
-        @workspace-fitted="workOrders.markWorkspaceFitted"
+        @workspace-fitted="lastFittedWorkspaceKey = $event"
         @ready-change="onWorkspaceMapReadyChange"
       />
       <MapView v-else class="workspaceMap" mode="empty" />

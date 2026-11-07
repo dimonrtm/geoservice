@@ -1,11 +1,15 @@
+from uuid import uuid4
+
+import pytest
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
+from tests.integration_tests.workspace_api_support import (
+    build_workspace_api,
+    client_for,
+    version_path,
+)
 
 from tests.integration_tests.first_save_schema_support import run_committed_scenario
 from tests.integration_tests.save_geometry_support import seed_save_context
-from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
-    WorkOrderRepository,
-)
 
 
 def test_readback_pairs_include_hidden_features_and_version_baseline():
@@ -23,26 +27,64 @@ def test_readback_pairs_include_hidden_features_and_version_baseline():
                 ),
                 ids,
             )
-        async with AsyncSession(engine) as session:
-            row = await WorkOrderRepository(session).get_workspace_aggregate(
-                work_order_id=ids["work_order_id"],
-                edit_version_id=ids["edit_version_id"],
+        app = build_workspace_api(engine)
+        async with client_for(app, ids) as reader:
+            path = version_path(ids)
+            response = await reader.get(path)
+            assert response.status_code == 200, response.text
+            version = response.json()["workOrder"]["editVersion"]
+            assert version["draftVersionToken"] == "1"
+            assert "changeSet" not in version
+            assert len(version["features"]["features"]) == 1
+            assert version["associations"] == []
+            assert (await reader.get(f"{path}/change-set")).status_code == 422
+            baseline = await reader.get(f"{path}/features/{ids['feature_id']}/baseline")
+            assert baseline.status_code == 200
+            assert baseline.json()["featureId"] == str(ids["feature_id"])
+            foreign = await reader.get(f"{path}/features/{unrelated['feature_id']}/baseline")
+            assert foreign.status_code == 404
+            async with engine.begin() as connection:
+                await connection.execute(
+                    text(
+                        """
+                        UPDATE work_order.edit_version_features
+                        SET geometry = ST_Translate(geometry, -50, 0)
+                        WHERE edit_version_id = :edit_version_id AND feature_id = :feature_id
+                    """
+                    ),
+                    ids,
+                )
+            hidden = await reader.get(f"{path}/features/{ids['feature_id']}/baseline")
+            assert hidden.status_code == 404
+
+    run_committed_scenario(scenario)
+
+
+@pytest.mark.parametrize("baseline_source", ["missing", "foreign"])
+def test_map_remains_available_when_pinned_baseline_is_invalid(baseline_source):
+    async def scenario(engine):
+        async with engine.begin() as connection:
+            ids = await seed_save_context(connection)
+            unrelated = await seed_save_context(connection)
+            await connection.execute(
+                text(
+                    "UPDATE work_order.edit_versions SET default_state_id = :baseline WHERE id = :version"
+                ),
+                {
+                    "baseline": (
+                        unrelated["default_state_id"] if baseline_source == "foreign" else uuid4()
+                    ),
+                    "version": ids["edit_version_id"],
+                },
             )
-        assert row.edit_version.draft_revision == 1
-        assert row.baseline_state.id == ids["default_state_id"]
-        assert row.baseline_state.id != unrelated["default_state_id"]
-        pairs = {pair.feature_id: pair for pair in row.draft_feature_pairs}
-        assert set(pairs) == {ids["feature_id"], ids["junction_id"]}
-        assert pairs[ids["junction_id"]].visible is False
-        assert (
-            pairs[ids["junction_id"]].current_geometry_ewkb
-            != pairs[ids["junction_id"]].baseline_geometry_ewkb
-        )
-        assert (
-            pairs[ids["feature_id"]].current_geometry_ewkb
-            == pairs[ids["feature_id"]].baseline_geometry_ewkb
-        )
-        assert len(row.features_data) == 1
-        assert row.associations_data == []
+        async with client_for(build_workspace_api(engine), ids) as reader:
+            path = version_path(ids)
+            version_map = await reader.get(path)
+            assert version_map.status_code == 200
+            assert version_map.json()["workOrder"]["editVersion"]["features"]["features"]
+            for suffix in ("/change-set", f"/features/{ids['feature_id']}/baseline"):
+                response = await reader.get(path + suffix)
+                assert response.status_code == 422
+                assert response.json()["code"] == "WORKSPACE_CONTEXT_INVALID"
 
     run_committed_scenario(scenario)

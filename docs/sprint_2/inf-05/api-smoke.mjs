@@ -30,9 +30,9 @@ export async function checkLargeApi({ origin, fixture }) {
   assert.equal(typeof token, "string");
   const root = `/api/v1/work-orders/${fixture.workOrderId}/edit-versions`;
   const opened = await request(root, "POST");
-  const workspacePath = `${root}/${opened.editVersion.id}/workspace`;
+  const versionPath = `${root}/${opened.editVersion.id}`;
   const geometryPath = `${root}/${opened.editVersion.id}/features/${fixture.featureId}/geometry`;
-  const initial = await request(workspacePath);
+  const initial = await request(versionPath);
   const version = (w) => w.workOrder.editVersion;
   const current = (w) =>
     version(w).features.features.find((f) => f.id === fixture.featureId)
@@ -62,10 +62,14 @@ export async function checkLargeApi({ origin, fixture }) {
   const saved = await save(candidate, version(initial).draftVersionToken);
   assert.equal(saved.result.operation, "updated");
   assert.equal(saved.result.hasPersistedChangeSet, true);
-  const readback = await request(workspacePath);
+  const readback = await request(versionPath);
   assert.deepEqual(current(readback), saved.result.updatedFeature.geometry);
   assert.deepEqual(current(readback), candidate);
-  assert.deepEqual(version(readback).changeSet.baselineGeometry, baseline);
+  assert.deepEqual(
+    (await request(`${versionPath}/features/${fixture.featureId}/baseline`))
+      .baselineGeometry,
+    baseline,
+  );
   assert.notEqual(
     version(readback).draftVersionToken,
     version(initial).draftVersionToken,
@@ -76,9 +80,12 @@ export async function checkLargeApi({ origin, fixture }) {
   const reverted = await save(baseline, version(readback).draftVersionToken);
   assert.equal(reverted.result.operation, "unchanged");
   assert.equal(reverted.result.hasPersistedChangeSet, false);
-  const final = await request(workspacePath);
+  const final = await request(versionPath);
   assert.deepEqual(current(final), baseline);
-  assert.equal(version(final).hasPersistedChangeSet, false);
+  assert.equal(
+    (await request(`${versionPath}/change-set`)).hasPersistedChangeSet,
+    false,
+  );
   assert.notEqual(
     version(final).draftVersionToken,
     version(readback).draftVersionToken,
