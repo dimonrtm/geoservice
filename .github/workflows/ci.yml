@@ -220,7 +220,7 @@ jobs:
             assert len(payload['associations'])==9; \
             print('utility dataset api ok')"
 
-      - name: Workspace authenticated API smoke
+      - name: EditVersion authenticated API smoke
         working-directory: infra
         run: |
           docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml exec -T utility_service \
@@ -245,17 +245,17 @@ jobs:
             ); \
             edit_version=json.load(urllib.request.urlopen(open_request))['editVersion']; \
             edit_version_id=edit_version['id']; \
-            workspace_request=urllib.request.Request( \
-              f'http://127.0.0.1:8000/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}/workspace', \
+            version_map_request=urllib.request.Request( \
+              f'http://127.0.0.1:8000/api/v1/work-orders/{work_order_id}/edit-versions/{edit_version_id}', \
               headers={'Authorization':'Bearer '+token} \
             ); \
-            payload=json.load(urllib.request.urlopen(workspace_request)); \
+            payload=json.load(urllib.request.urlopen(version_map_request)); \
             assert payload['workOrder']['id']==work_order_id; \
             assert payload['workOrder']['scope']['aoi']['id']=='6c13a4d8-8d67-4fb3-a1f9-4ea5ab7f0100'; \
             assert payload['workOrder']['editVersion']['id']==edit_version_id; \
             assert len(payload['workOrder']['editVersion']['features']['features'])==19; \
             assert len(payload['workOrder']['editVersion']['associations'])==9; \
-            print('workspace api ok')"
+            print('edit version map api ok')"
 
       - name: Full path workspace API smoke
         working-directory: infra
