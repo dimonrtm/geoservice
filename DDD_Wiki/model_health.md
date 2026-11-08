@@ -3,8 +3,8 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-11-07
-source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md"
+updated: 2026-11-08
+source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md"
 tags: [domain-knowledge, ddd, health, stale]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
@@ -12,17 +12,17 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 # Model Health
 
-## Текущее уточнение после ingest — 2026-11-07
+## Текущее уточнение после ingest — 2026-11-08
 
-Обработаны два RAW-артефакта одного исследования с общим корпусом 80 внешних документов: анализ и 15 ответов. Всего RAW — 52, все индексированы обработанными. 19 follow-up’ов, два metadata/fixture вопроса, 0 активных канонических конфликтов и 1 legacy-конфликт сохраняются.
+Обработаны два RAW-артефакта одного исследования с общим корпусом 78 внешних документов: анализ и 15 ответов. Всего RAW — 54, все индексированы обработанными. 19 follow-up’ов, два metadata/fixture вопроса, 0 активных канонических конфликтов и 1 legacy-конфликт сохраняются.
 
-[[Wiki/specifications/demo_dataset_instance_qualified]] конкретизирует допуск экземпляра; [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] включает сверку идентичности, происхождения координат, persisted policy и структуры/AOI. Это принятые ручные правила, не реализованный endpoint/evaluator.
+[[Wiki/specifications/demo_dataset_instance_qualified]] конкретизирует допуск экземпляра; [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] включает сверку идентичности, происхождения координат, persisted policy и структуры/AOI. Это принятые ручные правила, не реализованный endpoint/evaluator. Уточнение 08.11 добавляет явные свойство, метод, состояние и фактический охват проверки, различает непроверенность и установленное несоответствие; источник — [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]].
 
 FU-2026-10-11-001 сохраняет расхождение между ожидаемым происхождением metadata и конфигурационным default, а также фактическую сверку L-003 старого volume. Фактическая БД не опрашивалась. Метка stale остаётся для этой сверки и доменной очереди. Датированные сводки ниже исторические.
 
 ## Актуальность Состояния
 
-Сверка `/sync-vision` 2026-11-07: 50 RAW-источников, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001.
+Сверка `/sync-vision` 2026-11-07: 52 RAW-источника, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001.
 
 [Отчёт S2-X01](../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. Технические источники — [[Code_wiki/архитектура/frontend_save_recovery]], [[Code_wiki/архитектура/browser_auth_sessions]] и [[Code_wiki/архитектура/edit_version_api_readback]]. Прежние ожидания S2-X01 ниже исторические; доменные follow-up’ы не закрываются.
 

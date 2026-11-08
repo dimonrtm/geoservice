@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-07
+updated: 2026-11-08
 source: null
 tags: [vision-wiki, product]
 ---
@@ -143,3 +143,8 @@ tags: [vision-wiki, product]
 
 - [[Vision_wiki/chats/2026-11-07-dataset-qualification-research]] — 80 документов, идентичность экземпляра/записи и происхождение координатной операции.
 - [[Vision_wiki/chats/2026-11-07-dataset-qualification-answers]] — 15 ответов, ручной допуск, ограничения доказательств; два вопроса metadata/fixture сохраняются.
+
+## Проверяемость данных — исследование 2026-11-08
+
+- [[Vision_wiki/chats/2026-11-08-verification-research]] — 78 документов; метод проверки, охват, состояния знания и перенос представления.
+- [[Vision_wiki/chats/2026-11-08-verification-answers]] — 15 ответов, карточка и аналитическая матрица; принятые правила условной организации.

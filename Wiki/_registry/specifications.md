@@ -3,7 +3,7 @@ title: Specifications Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-07
+updated: 2026-11-08
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, specification]
 confidence: n/a
@@ -30,3 +30,7 @@ related: [Wiki/index]
 | [[Wiki/specifications/assessment_statement_usable]] | Состояние/цель/scope, прослеживаемый выпуск и действующая применимость | Нельзя опираться на утверждение для этой цели; не автоматический Revert | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers.md` |
 
 | [[Wiki/specifications/demo_dataset_instance_qualified]] | Установлены экземпляр/контекст, policy, структура/AOI, ветка и прослеживаемые свидетельства | Допуск для заявленного упражнения не доказан; не новый Save guard | high | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md` |
+
+## Уточнение доказательств — 2026-11-08
+
+[[Wiki/specifications/demo_dataset_instance_qualified]] уточняет пункты 2–5 предиката: метод, фактический охват и состояние каждого наблюдения; частичный результат не означает проверку всего набора. Источник — [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]. Фактические metadata/fixture не подтверждены.

@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-07
+updated: 2026-11-08
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -32,10 +32,11 @@ tags: [knowledge, index, geoservice]
 
 ## Свежие Изменения
 
+- 2026-11-08: ingest [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]] и [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]: 78 внешних документов, 15 ответов; уточнены метод, охват проверки и состояния знания. Всего 54 RAW обработаны; два фактических вопроса metadata/fixture остаются open.
+
 - 2026-11-07: ingest [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research]] и [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]]: общий корпус 80 внешних документов, 15 ответов; новые понятия идентичности экземпляра и происхождения координатной операции, критерий ручного допуска. Теперь 52 RAW обработаны. 19 follow-up’ов и два metadata/fixture вопроса остаются открытыми; реализация и фактическая БД не проверялись.
 
-
-- 2026-11-07: Сверка `/sync-vision` 2026-11-07: 50 RAW-источников, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001. За неделю 2026-10-31–2026-11-07 новых RAW и concept/decision/entity/solution нод — 0; обновлены существующие технические ноды о чтении EditVersion, WebSocket и Docker. Сводка — [[Code_wiki/index]], живое состояние — [[memory/project-state]].
+- 2026-11-07: Сверка `/sync-vision` 2026-11-07: 54 RAW-источника, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001. За неделю 2026-10-31–2026-11-07 добавлены 2 уже обработанных RAW; новых concept/decision/entity/solution нод — 2/0/0/0, дополнительно 1 specification и 2 source-summary chat-ноды. Обновлены технические ноды о раздельном чтении EditVersion, WebSocket и Docker, включая название HTML/UI при сборке. Сводка — [[Code_wiki/index]], живое состояние — [[memory/project-state]].
 - [Отчёт S2-X01](docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. См. [[Code_wiki/архитектура/frontend_save_recovery]]. Датированные записи ниже сохраняют историю прежних срезов.
 
 - 2026-10-22: `/sync-vision` сверил весь граф знаний и реестры. Все 48 RAW обработаны; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture; активных канонических конфликтов — 0, legacy-конфликтов — 1. Stale-нода — [[DDD_Wiki/model_health]]. Lint: 37 известных `missing_frontmatter` только в RAW. За период 2026-10-15–2026-10-22 Git содержит 7 новых уже обработанных RAW; новых concept/decision/entity/solution нод — 4/0/0/0, дополнительно 4 policies, 4 specifications, 1 glossary, 3 use cases, 7 source-summary chat-нод и 3 технические ноды. Индексы и реестры покрывают эти добавления; текущая сводка — [[memory/project-state]].

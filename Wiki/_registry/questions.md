@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-07
+updated: 2026-11-08
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -75,3 +75,7 @@ related: [Wiki/index, DDD_Wiki/model_health]
 15 вопросов отвечены в [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]] на общем корпусе 80 внешних документов. Уточнены [[Wiki/policies/demo_dataset_qualification_policy]] и [[Wiki/specifications/demo_dataset_instance_qualified]].
 
 Два прежних вопроса остаются **open**. Для metadata требуется сверка конкретного экземпляра и persisted policy с происхождением, явными неизвестными/неподдерживаемыми свойствами и последствиями для цели. Для fixture нужны наблюдаемые baseline/current/candidate, структура/внутренняя вершина, endpoints/associations и WorkOrder/AOI. Исходники L-003 и default settings — основания проверки, не runtime evidence. Позиционная приёмка не является условием закрытия технического вопроса fixture; её статус сохраняется отдельно. Новых вопросов к реальным сотрудникам не возникает.
+
+## Уточнение способов закрытия — 2026-11-08
+
+Ответ 15 [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]] уточняет состав наблюдений для двух существующих open-вопросов. Требуется назвать метод, свойство, контекст состояния и охват; отделить непроверенность от установленного несоответствия. Отсутствие строки в отфильтрованной выдаче не доказывает отсутствие feature. Интернет-исследование и seed не заменяют фактическую сверку; статусы остаются open.

@@ -3,8 +3,8 @@ title: Экземпляр набора пригоден для заявленн�
 type: specification
 status: active
 created: 2026-11-07
-updated: 2026-11-07
-source: RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md"
 tags: [domain-knowledge, dataset-qualification, simulated-organization]
 confidence: high
 related: [Wiki/policies/demo_dataset_qualification_policy, Wiki/concepts/dataset_instance_and_record_identity, Wiki/concepts/coordinate_operation_provenance, DDD_Wiki/use_cases/prepare_and_check_line_edit]
@@ -41,3 +41,11 @@ Receipt свидетельствует об операции; current — о п�
 Принято условной организацией в ответах 1–15 [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]], общий корпус 80 внешних документов. Ручная карточка и аналитическая матрица находятся в RAW; они не являются выполненными тестами.
 
 Фактическая БД не проверена. Два вопроса metadata/fixture остаются open в [[Wiki/_registry/questions]]; остаток сверки — FU-2026-10-11-001. Связи: [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/coordinate_operation_provenance]], [[Wiki/policies/demo_dataset_qualification_policy]], [[DDD_Wiki/use_cases/prepare_and_check_line_edit]].
+
+## Уточнение свидетельств предиката — 2026-11-08
+
+Пункты 2–5 Predicate читаются с явным методом и охватом: какое свойство, каких записей/участков, какого состояния и каким способом проверено. Сверка одного свойства/viewport не доказывает весь набор. Непроверенность и установленное несоответствие имеют разные причины недопуска заявленной ветки; обоснованная неприменимость не подменяет отсутствие данных.
+
+Если экземпляр получен переносом, проверяются существенные для цели identity и свойства конечного представления. Отправка данных без установленного применения не доказывает наблюдаемое целевое состояние. Это уточнение свидетельств, не новый Save guard, API или требование полного обследования всех объектов для одного упражнения.
+
+Источник: ответы 1–15 и ручная карточка [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]. Фактический протокол не выполнен; вопросы metadata/fixture остаются open. POSITIONAL_ACCURACY_UNVERIFIED и прежние критерии сохраняются.

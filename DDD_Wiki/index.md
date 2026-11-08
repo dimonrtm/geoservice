@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-07
+updated: 2026-11-08
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -69,3 +69,7 @@ tags: [domain-knowledge, ddd]
 ## Квалификация экземпляра — 2026-11-07
 
 [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] уточнён через [[Wiki/specifications/demo_dataset_instance_qualified]]: экземпляр/запись, происхождение координат, persisted policy, структура/AOI, ветка упражнения и согласованность свидетельств. Новые aggregate, команды, события и транзакционные границы не вводятся. Runtime metadata/fixture остаются на сверке.
+
+## Метод и охват проверки — 2026-11-08
+
+[[DDD_Wiki/use_cases/prepare_and_check_line_edit]] уточнён по [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]: свойство, метод, состояние и область проверки фиксируются в ручной карточке. 78 документов — общий корпус анализа и ответов. Новых aggregate, событий и транзакций нет.

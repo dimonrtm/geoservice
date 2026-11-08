@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-07
+updated: 2026-11-08
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -96,3 +96,7 @@ tags: [domain-knowledge, ddd]
 ## Допуск экземпляра учебных данных — 2026-11-07
 
 Корпус 80 документов и 15 ответов уточняет [[Wiki/policies/demo_dataset_qualification_policy]]. Новые понятия: [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/coordinate_operation_provenance]]. Критерий ручного допуска — [[Wiki/specifications/demo_dataset_instance_qualified]]. Правила приняты условной организацией; два фактических вопроса metadata/fixture не закрыты.
+
+## Метод и охват квалификации — 2026-11-08
+
+[[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]] уточняет существующие [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/concepts/dataset_instance_and_record_identity]] и [[Wiki/concepts/assessment_delivery_and_acceptance]]. На общем корпусе 78 документов приняты 15 ответов [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]; обновлены [[Wiki/policies/demo_dataset_qualification_policy]] и [[Wiki/specifications/demo_dataset_instance_qualified]]. Фактическая БД не проверена.

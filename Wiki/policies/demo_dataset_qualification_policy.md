@@ -3,8 +3,8 @@ title: Пригодность учебного набора для воспро�
 type: policy
 status: active
 created: 2026-10-16
-updated: 2026-11-07
-source: "RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md"
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md"
 tags: [domain-knowledge, data-quality, simulated-organization]
 confidence: high
 related: [Wiki/policies/edit_geometry_precision_policy, Wiki/policies/geometry_quality_escalation_policy, Code_wiki/архитектура/edit_geometry_fixture_metadata]
@@ -41,3 +41,11 @@ related: [Wiki/policies/edit_geometry_precision_policy, Wiki/policies/geometry_q
 Допуск переоценивается при смене экземпляра, релевантной редакции, WorkOrder/AOI или основания. Топологически равная двухточечная линия не заменяет трёхточечную fixture. Ветка no-op отличается от ненулевого Save. Receipt/current/baseline и отдельные чтения связываются по доступному контексту; неподтверждённая согласованность явно ограничивает вывод.
 
 Это решения условной организации и детализация ручной процедуры. Они не меняют численные positional criteria, инварианты Save или baseline; фактические metadata/fixture остаются на сверке по FU-2026-10-11-001.
+
+## Метод и полнота ручной сверки — 2026-11-08
+
+По ответам 1–15 [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]] карточка дополнительно называет проверяемое свойство, конкретный метод, состояние данных и фактический охват. Для каждого существенного пункта различаются соответствие, установленное несоответствие, непроверенность и обоснованная неприменимость. Это язык ручного заключения, не новые server statuses.
+
+AOI задания, survey extent и область выполненной проверки не взаимозаменяемы. Нулевое число найденных ошибок распространяется только на выполненные проверки. Отсутствие feature в выдаче сначала проверяется на фильтры/слой/контекст; не означает отсутствия актива.
+
+После переноса формата/экземпляра проверяются существенные соответствия записей и представления. После обмена различаются отправка, применение и чтение результата. Исторический receipt не заменяет current. Состав карточки и аналитическая матрица находятся в RAW; они не являются выполненными проверками. Методы внешних владельцев и их численные допуски не становятся нормами GeoService.

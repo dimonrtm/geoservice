@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-07
+updated: 2026-11-08
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -42,3 +42,7 @@ related: [Wiki/index]
 ## Уточнение источника — 2026-11-07
 
 [[Wiki/policies/demo_dataset_qualification_policy]] дополнена по [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]]: паспорт/settings/persisted policy/данные сравниваются; допуск зависит от экземпляра и цели. Численные positional criteria и scope Save не изменены.
+
+## Уточнение квалификации — 2026-11-08
+
+[[Wiki/policies/demo_dataset_qualification_policy]] дополнена по [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]: свойство/метод/охват, состояния знания, проверка конечного представления и стадий обмена. Это ручные правила условной организации, без нового hard guard Save.

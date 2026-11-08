@@ -3,8 +3,8 @@ title: Подготовить и проверить осознанную пра�
 type: use-case
 status: active
 created: 2026-10-18
-updated: 2026-11-07
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md"
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_line_editing_policy]
@@ -53,3 +53,16 @@ related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_
 При невозможности подтвердить экземпляр/условия заявленная ветка не допускается. Это не новый hard guard Save, aggregate или транзакция. Новая функция UI/endpoint этим не проектируется. Фактические два metadata/fixture вопроса остаются open.
 
 Источник: [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]], общий корпус 80 документов; сценарии аналитические, не исполненные runtime-тесты.
+
+## Метод проверки и охват — 2026-11-08
+
+При подготовке и проверке результата редактор фиксирует в ручной карточке:
+
+- проверяемое свойство, объекты/участки, состояние и метод;
+- ожидание с источником отдельно от наблюдаемого значения;
+- фактически выполненные проверки и непроверенную часть;
+- ограничения переноса данных и контекста отдельных чтений.
+
+Отсутствие записи в выдаче сначала проверяется на фильтр и экземпляр; результат partial validation не становится проверкой всей сети. Установленное несоответствие отличается от отсутствия наблюдения. После обмена устанавливаются этап применения и прочитанное состояние, отдельно от отправки.
+
+Ответы и аналитические сценарии — [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]], общий корпус 78 документов. Это уточнение шагов 1, 4 и 5 основного потока, без новых команд, aggregate, events, orchestration и транзакционных границ. Техническая, позиционная и эксплуатационная пригодность остаются разными выводами.

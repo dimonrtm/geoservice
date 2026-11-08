@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-07
+updated: 2026-11-08
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -79,3 +79,6 @@ tags: [raw-inputs, source-of-truth]
 
 | 2026-11-07 | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md` | Анализ UseCase и новых знаний: 80 внешних документов, 51 новый точный URL относительно прежних RAW; не 80 независимых свидетельств | Да: [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/coordinate_operation_provenance]], [[Vision_wiki/chats/2026-11-07-dataset-qualification-research]] |
 | 2026-11-07 | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md` | 15 ответов условной организации на общем корпусе 80 документов; ручная карточка и аналитическая матрица, не runtime validation | Да: [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/demo_dataset_instance_qualified]], [[DDD_Wiki/use_cases/prepare_and_check_line_edit]], [[Vision_wiki/chats/2026-11-07-dataset-qualification-answers]] |
+
+| 2026-11-08 | `RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md` | Анализ UseCase: 78 внешних документов, 42 ранее не встречавшихся точных URL; метод, охват, состояния знания и перенос представления | Да: [[Vision_wiki/chats/2026-11-08-verification-research]], [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/assessment_delivery_and_acceptance]] |
+| 2026-11-08 | `RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md` | 15 ответов на общем корпусе 78 документов; ручная карточка и аналитическая матрица, не runtime validation | Да: [[Vision_wiki/chats/2026-11-08-verification-answers]], [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/demo_dataset_instance_qualified]], [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] |

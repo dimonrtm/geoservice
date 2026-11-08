@@ -3,8 +3,8 @@ title: Идентичность экземпляра набора и запис�
 type: concept
 status: active
 created: 2026-11-07
-updated: 2026-11-07
-source: RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md"
 tags: [domain-knowledge, dataset-qualification, simulated-organization]
 confidence: high
 related: [Wiki/specifications/demo_dataset_instance_qualified, Wiki/concepts/change_basis_lifecycle, Wiki/concepts/assessment_statement_lifecycle]
@@ -31,3 +31,9 @@ related: [Wiki/specifications/demo_dataset_instance_qualified, Wiki/concepts/cha
 Внешние основания: S10 (OGC MUDDI — objectID/recordID/systemID), S29 (USGS — PID metadata), S49 (DCAT — dataset/distribution), S41–S42 (структурное и топологическое равенство) в [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research]]. Выбор состава ручной карточки — решение условной организации, ответы 6–8. High означает определённость понятия, не проверку конкретной БД.
 
 Связи: [[Wiki/concepts/change_basis_lifecycle]], [[Wiki/concepts/assessment_statement_lifecycle]].
+
+## Проверка после переноса представления — 2026-11-08
+
+Успех экспорта, импорта или sync не удостоверяет сохранность идентичности и существенных свойств. Для допуска конечного экземпляра устанавливаются соответствие записей, структура геометрии, релевантные атрибуты, размерность и координатное представление. Проверка ограничивается целью, но ограничения не скрываются.
+
+Формат может изменить локальный fid или численную запись координат. Название файла и ссылка на исходный паспорт не заменяют сверку результата. Основания: R13, R35–R37, R45 и R72 в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]. Это уточнение ручной квалификации; новый ETL не вводится.

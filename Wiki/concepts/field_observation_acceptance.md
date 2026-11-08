@@ -3,8 +3,8 @@ title: Принятие полевого свидетельства
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-10-19
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md"
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/edit_change_justification_policy, Wiki/specifications/saved_line_quality_assessment]
@@ -35,3 +35,11 @@ USX допускает принятие всей съёмки, части либ
 ## Происхождение и пересмотр принятия
 
 [[Wiki/concepts/evidence_dependency]] уточняет зависимость копий и область независимости. [[Wiki/concepts/change_basis_lifecycle]] отделяет время наблюдения, редакцию основания и историю решений. Принятие части материала фиксируется по точному фрагменту, свойству и участку; непроверенное отличается от отклонённого. Новые правила не объявляют весь файл принятым.
+
+## Метод и охват утверждения — 2026-11-08
+
+Свидетельство уточняется по проверяемому свойству: наличие объекта, XY, высота, материал и связность не получают общий verified автоматически. Метод, источник/редакция, время и охват относятся к конкретному утверждению. Визуальная проверка и инструментальное обследование дают различные основания; имя метода само не доказывает достаточность для цели.
+
+Ручная матрица охвата связывает объекты/участки, свойства, наблюдаемое состояние и выполненные проверки. AOI задания, survey extent и область проверки различаются. «Не проверено», «проверено и не соответствует», «не найдено в выдаче» и обоснованная неприменимость не смешиваются; отсутствие записи не удостоверяет отсутствие физического объекта.
+
+Внешние основания: Watercare R59, Water Corporation R60, Ohio DNR R61, Philadelphia R65 и Giswater R78 в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]. Это уточнение принятой модели условной организации, не новая классификация API. Численные допуски владельцев не перенесены в GeoService.

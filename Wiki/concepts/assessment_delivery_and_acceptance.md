@@ -3,8 +3,8 @@ title: Передача и принятие заключения
 type: concept
 status: active
 created: 2026-10-22
-updated: 2026-10-22
-source: RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md"
 tags: [domain-knowledge, assessment, simulated-organization]
 confidence: high
 related: [Wiki/concepts/assessment_statement_lifecycle, Wiki/policies/assessment_issue_and_correction_policy]
@@ -28,3 +28,9 @@ related: [Wiki/concepts/assessment_statement_lifecycle, Wiki/policies/assessment
 ## Обоснование и границы
 
 Отраслевые основания: U22 Energex (изменения и получатели), R03 VDOT (передача перед оценкой/включением), U25 (подтверждение получения), A05 (договорённости передачи), A17 (идентичность версии). Не переносятся их сроки или штатные роли. Это ручная процедура условной организации; отправка уведомлений, ACL, журнал доставок и внешний документооборот в коде не реализованы этим ingest.
+
+## Стадии обмена данными как отдельные свидетельства — 2026-11-08
+
+При сопровождении заключения данными различаются отправка, применение изменений и проверка результата в целевом представлении. Подтверждение одного этапа не доказывает остальные. Если участвуют несколько сервисов, пределы общего результата устанавливаются по результатам значимых этапов/участников, а не по одному ярлыку completed.
+
+Основания: QFieldCloud R12/R14 и VertiGIS R10 в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]. Это внешние примеры, не гарантии реализации GeoService. Правило дополняет существующее разделение доставки и приёмки; orchestration и новый журнал этим не реализуются.

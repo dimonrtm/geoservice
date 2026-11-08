@@ -3,8 +3,8 @@ title: Жизненный цикл утверждения о качестве
 type: concept
 status: active
 created: 2026-10-22
-updated: 2026-10-22
-source: RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md"
 tags: [domain-knowledge, assessment, simulated-organization]
 confidence: high
 related: [Wiki/concepts/change_basis_lifecycle, Wiki/concepts/evidence_dependency, Wiki/policies/assessment_issue_and_correction_policy]
@@ -34,3 +34,9 @@ related: [Wiki/concepts/change_basis_lifecycle, Wiki/concepts/evidence_dependenc
 RAW исследование: G13 (предварительные/выпущенные данные), G22/G25 (scope качества и доверие к оценке), G10 (пересмотр по воздействию), A10/A17 (идентичность версии), G15 (версия обработки). Внешние факты и решения организации различены в реестре 84 документов.
 
 Применение — [[Wiki/policies/assessment_issue_and_correction_policy]] и [[Wiki/specifications/assessment_statement_usable]]. Основание остаётся предметом [[Wiki/specifications/line_edit_basis_applicable]], позиционное evidence — [[Wiki/specifications/saved_line_quality_assessment]].
+
+## Проверяемое содержание заключения — 2026-11-08
+
+Для каждого утверждения фиксируются свойство, метод, состояние данных и область выполнения проверки. Итог «ошибок не найдено» ограничивается реально выполненными правилами и областью; не включает непроверенные свойства и объекты. Частичный scope сохраняется и при отсутствии обнаруженных ошибок.
+
+Матрица охвата — документальный способ применить существующее правило, не новый aggregate или enum. Основания: R55 (validation extent), R60 (survey metadata), R78 (раздельные проверки graph/EPA/O&M) в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]. Связь: [[Wiki/concepts/field_observation_acceptance]].
