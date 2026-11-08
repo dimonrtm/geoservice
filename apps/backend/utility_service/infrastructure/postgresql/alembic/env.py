@@ -13,7 +13,8 @@ from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 config = context.config
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    # Alembic also runs in-process; keep application diagnostics enabled afterwards.
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # --- IMPORT MODELS HERE (важно для autogenerate) ---
 from utility_service.infrastructure.postgresql.models.base import Base  # noqa: E402
