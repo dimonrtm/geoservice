@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock
+from unittest.mock import ANY, AsyncMock
 from uuid import uuid4
 
 import pytest
@@ -56,7 +56,7 @@ def test_legacy_patch_clear_properties_commits(geometry):
         layer_id, feature_id = await seed_legacy_feature(engine)
         published_states = []
 
-        async def observe_commit(published_layer_id, feature):
+        async def observe_commit(published_layer_id, feature, *, context):
             persisted = await read_feature(engine, published_layer_id, feature.id)
             published_states.append(persisted)
 
@@ -77,7 +77,7 @@ def test_legacy_patch_clear_properties_commits(geometry):
         assert result.version == 2
         assert result.geometry.model_dump(mode="json") == expected_geometry
         assert persisted == result
-        publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+        publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result, context=ANY)
         # Assert outside the callback: the service suppresses publisher exceptions.
         assert published_states == [result]
 

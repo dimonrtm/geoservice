@@ -1,6 +1,6 @@
 import asyncio
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import ANY, AsyncMock
 from uuid import uuid4
 
 import pytest
@@ -155,7 +155,7 @@ def test_create_feature_publishes_created_event_after_success() -> None:
     result = asyncio.run(service.create_feature(layer_id, request))
 
     assert result.id == created_id
-    publisher.publish_feature_created.assert_awaited_once_with(layer_id, result)
+    publisher.publish_feature_created.assert_awaited_once_with(layer_id, result, context=ANY)
 
 
 def test_create_feature_does_not_fail_when_realtime_publish_raises() -> None:
@@ -246,7 +246,7 @@ def test_update_feature_publishes_updated_event_after_success() -> None:
     result = asyncio.run(service.update_feature(layer_id, feature_id, request))
 
     assert result.id == feature_id
-    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result, context=ANY)
 
 
 def test_delete_feature_publishes_deleted_event_after_success() -> None:
@@ -272,7 +272,7 @@ def test_delete_feature_publishes_deleted_event_after_success() -> None:
     )
 
     assert result.featureId == feature_id
-    publisher.publish_feature_deleted.assert_awaited_once_with(layer_id, feature_id, 3)
+    publisher.publish_feature_deleted.assert_awaited_once_with(layer_id, feature_id, 3, context=ANY)
 
 
 @pytest.mark.parametrize("properties", [{"name": "After"}, {}])
@@ -342,7 +342,7 @@ def test_update_feature_clears_properties(geometry, initial_properties) -> None:
     assert result.version == 3
     expected_geometry = POLYGON_GEOMETRY if geometry is None else UPDATED_POLYGON_GEOMETRY
     assert result.geometry.model_dump(mode="python") == expected_geometry
-    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result, context=ANY)
     if geometry is not None:
         repository.get_feature.assert_not_awaited()
 
@@ -358,7 +358,7 @@ def test_update_feature_preserves_properties_when_null(initial_properties) -> No
     assert result.properties == initial_properties
     assert result.version == 3
     assert result.geometry.model_dump(mode="python") == UPDATED_POLYGON_GEOMETRY
-    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result, context=ANY)
 
 
 def test_update_feature_preserves_falsy_property_values() -> None:
@@ -379,4 +379,4 @@ def test_update_feature_preserves_falsy_property_values() -> None:
     assert result.properties == {"enabled": False, "count": 0, "note": None}
     assert result.version == 3
     assert result.geometry.model_dump(mode="python") == POLYGON_GEOMETRY
-    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result)
+    publisher.publish_feature_updated.assert_awaited_once_with(layer_id, result, context=ANY)

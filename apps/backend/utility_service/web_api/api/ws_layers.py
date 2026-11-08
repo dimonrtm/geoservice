@@ -19,6 +19,7 @@ from utility_service.use_cases.deps import (
     get_websocket_ticket_service,
 )
 from utility_service.use_cases.dtos import AuthUserDTO, AuthenticatedSession
+from utility_service.use_cases.dtos.realtime_diagnostics import RealtimeFailureReason
 from utility_service.web_api.api.auth import get_auth_context, require_legacy_gis_editor
 from utility_service.utils.websocket_ticket_auth import authenticate_websocket_ticket
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
@@ -74,12 +75,35 @@ async def subscribe_to_layer_updates(
     connection_manager: WebSocketConnectionManager = Depends(get_websocket_connection_manager),
 ) -> None:
     await connection_manager.connect(layer_id, websocket, user_context)
+    close_code = None
+    failure_reason = None
+    receive_error = None
     try:
         while True:
             message = await websocket.receive()
             if message["type"] == "websocket.disconnect":
+                close_code = message.get("code")
+                failure_reason = _disconnect_failure_reason(close_code)
                 break
-    except WebSocketDisconnect:
-        pass
+    except WebSocketDisconnect as error:
+        close_code = error.code
+        failure_reason = _disconnect_failure_reason(close_code)
+    except Exception as error:
+        failure_reason = RealtimeFailureReason.DISCONNECT_UNKNOWN
+        receive_error = error
     finally:
-        await connection_manager.disconnect(layer_id, websocket)
+        await connection_manager.disconnect(
+            layer_id,
+            websocket,
+            close_code=close_code,
+            failure_reason=failure_reason,
+            error=receive_error,
+        )
+
+
+def _disconnect_failure_reason(close_code: int | None) -> RealtimeFailureReason | None:
+    if close_code in (1000, 1001, 1005):
+        return None
+    if close_code is None:
+        return RealtimeFailureReason.DISCONNECT_UNKNOWN
+    return RealtimeFailureReason.ABNORMAL_DISCONNECT

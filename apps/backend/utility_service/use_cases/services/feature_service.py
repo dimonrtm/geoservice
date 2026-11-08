@@ -1,4 +1,12 @@
-from uuid import UUID
+from uuid import UUID, uuid4
+
+from utility_service.use_cases.dtos.realtime_diagnostics import (
+    RealtimeEventContext,
+    RealtimeFailureReason,
+    RealtimeDeliveryStage,
+    RealtimeDeliveryOutcome,
+)
+from utility_service.utils.realtime_logging import log_realtime_failure
 
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -255,27 +263,55 @@ class FeatureService:
     async def publish_feature_created(self, layer_id: UUID, feature: FeatureOut) -> None:
         if self.realtime_publisher is None:
             return
+        context = None
         try:
-            await self.realtime_publisher.publish_feature_created(layer_id, feature)
-        except Exception:
-            return
+            context = RealtimeEventContext(
+                f"evt_{uuid4()}", "feature_created", layer_id, feature.id, feature.version
+            )
+            await self.realtime_publisher.publish_feature_created(
+                layer_id, feature, context=context
+            )
+        except Exception as error:
+            self._log_publication_failure(layer_id, context, error)
 
     async def publish_feature_updated(self, layer_id: UUID, feature: FeatureOut) -> None:
         if self.realtime_publisher is None:
             return
+        context = None
         try:
-            await self.realtime_publisher.publish_feature_updated(layer_id, feature)
-        except Exception:
-            return
+            context = RealtimeEventContext(
+                f"evt_{uuid4()}", "feature_updated", layer_id, feature.id, feature.version
+            )
+            await self.realtime_publisher.publish_feature_updated(
+                layer_id, feature, context=context
+            )
+        except Exception as error:
+            self._log_publication_failure(layer_id, context, error)
 
     async def publish_feature_deleted(
         self, layer_id: UUID, feature_id: UUID, deleted_version: int
     ) -> None:
         if self.realtime_publisher is None:
             return
+        context = None
         try:
-            await self.realtime_publisher.publish_feature_deleted(
-                layer_id, feature_id, deleted_version
+            context = RealtimeEventContext(
+                f"evt_{uuid4()}", "feature_deleted", layer_id, feature_id, deleted_version
             )
-        except Exception:
-            return
+            await self.realtime_publisher.publish_feature_deleted(
+                layer_id, feature_id, deleted_version, context=context
+            )
+        except Exception as error:
+            self._log_publication_failure(layer_id, context, error)
+
+    def _log_publication_failure(self, layer_id, context, error):
+        log_realtime_failure(
+            event="realtime_publication_failed",
+            context=context,
+            layer_id=layer_id,
+            connection_id=None,
+            reason=RealtimeFailureReason.PUBLICATION_FAILED,
+            stage=RealtimeDeliveryStage.PREPARE,
+            outcome=RealtimeDeliveryOutcome.NOT_SENT,
+            error=error,
+        )
