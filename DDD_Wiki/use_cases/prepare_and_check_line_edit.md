@@ -4,7 +4,7 @@ type: use-case
 status: active
 created: 2026-10-18
 updated: 2026-11-08
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md"
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-use-case-answers.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-answers.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_line_editing_policy]
@@ -66,3 +66,11 @@ related: [DDD_Wiki/use_cases/utility_editor_workflow, Wiki/policies/intentional_
 Отсутствие записи в выдаче сначала проверяется на фильтр и экземпляр; результат partial validation не становится проверкой всей сети. Установленное несоответствие отличается от отсутствия наблюдения. После обмена устанавливаются этап применения и прочитанное состояние, отдельно от отправки.
 
 Ответы и аналитические сценарии — [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]], общий корпус 78 документов. Это уточнение шагов 1, 4 и 5 основного потока, без новых команд, aggregate, events, orchestration и транзакционных границ. Техническая, позиционная и эксплуатационная пригодность остаются разными выводами.
+
+## Представление и область вывода — 2026-11-08
+
+В подготовке правки уточняется назначение геометрии: измеренное, картографическое, производное либо неизвестное. Проверка положения относится к соответствующему представлению; структурная сверка и явные associations проверяются отдельно. При обмене не смешиваются локальный PK, идентификатор обмена и обозначение актива.
+
+Отрицательный результат поиска ограничивается фактическими фильтрами/страницами и состоянием чтения. Полнота известных записей не означает полноты физической сети. Раздельные чтения карты и change-set не объявляются одним снимком без свидетельства согласованности.
+
+Источник: [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-answers]], 15 ответов, карточка и аналитическая матрица. Границы EditVersion/WorkOrder, frozen properties, POSITIONAL_ACCURACY_UNVERIFIED и no-op сохраняются. Новых событий/контекстов не требуется; реализация и конкретная БД не подтверждены.

@@ -3,26 +3,44 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-11-08
-source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md"
-tags: [domain-knowledge, ddd, health, stale]
+updated: 2026-11-09
+source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md; docs/verification/2026-11-09-model-health-code-reconciliation.md"
+tags: [domain-knowledge, ddd, health]
 confidence: high
 related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 ---
 
 # Model Health
 
-## Текущее уточнение после ingest — 2026-11-08
+## Текущее состояние реализации — 2026-11-09
 
-Обработаны два RAW-артефакта одного исследования с общим корпусом 78 внешних документов: анализ и 15 ответов. Всего RAW — 54, все индексированы обработанными. 19 follow-up’ов, два metadata/fixture вопроса, 0 активных канонических конфликтов и 1 legacy-конфликт сохраняются.
+Сверка кода завершена: [матрица и проверки](../docs/verification/2026-11-09-model-health-code-reconciliation.md). First-save, публичные Save/Revert/readback и S2-X01 recovery реализованы; 105 выбранных frontend-тестов прошли. Метка stale снята как признак устранённого отставания этого документа. Backend/PostGIS/M4 и БД повторно не проверялись; прежние протоколы сохраняют свою область.
+
+FU-2026-10-11-001 resolved; FU-2026-10-13-004 остаётся open. Открытых follow-up’ов 18, вопросов 0; канонических конфликтов 0, legacy-конфликтов 1. ReviewPackage, positional evaluator, submit/review/post и новые withdrawal/correction rules остаются моделью. Актуальность документа не означает завершение этих функций. Датированные сводки ниже исторические.
+
+## История discovery до сверки кода — 2026-11-09
+
+DISC-2026-11-09-01/02 answered по [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]], общий корпус — 88 документов. Приняты отзыв до допуска post и новый связанный цикл коррекции. Обработаны оба новых RAW; всего 58. Открытых вопросов 0, follow-up’ов 19, активных канонических конфликтов 0, legacy-конфликтов 1. Stale сохраняется из-за сверки реализации; исследование не является runtime-приёмкой.
+
+## Синхронизация до discovery — 2026-11-09
+
+Все 56 RAW индексированы как обработанные, новых необработанных нет. Реестры Wiki покрывают существующие ноды. Открыты 19 follow-up’ов, вопросов — 0; активных канонических конфликтов — 0, legacy-конфликтов — 1. Единственная stale-нода — этот документ: техническая очередь требует отдельной сверки с реализацией. Lint: 37 известных missing_frontmatter только в RAW. Активная discovery-таблица ниже согласована с реестром и следующим действием [[memory/project-state]]; закрытая проверка L-003 вынесена из таблицы с основанием. Runtime-проверки при синхронизации не повторялись.
+
+## Фактическая сверка metadata/fixture — 2026-11-08
+
+[Протокол](../docs/verification/2026-11-08-demo-dataset-runtime-check.md) подтверждает локальную L-003 и persisted policy версии revision 49. Два вопроса metadata/fixture отвечены; текущий счёт открытых вопросов — 0. 19 follow-up сохраняются: FU-2026-10-11-001 требует сверки остальной доменной очереди. Метка stale остаётся по этой причине. Нижеследующие исследования описывают состояние до runtime-проверки и не отменяют её результат.
+
+## Исторический срез после ingest, до runtime-проверки — 2026-11-08
+
+Обработаны два RAW-артефакта исследования представлений с общим корпусом 80 внешних документов: анализ и 15 ответов. Всего RAW — 56, все индексированы обработанными. 19 follow-up’ов, два metadata/fixture вопроса, 0 активных канонических конфликтов и 1 legacy-конфликт сохраняются.
 
 [[Wiki/specifications/demo_dataset_instance_qualified]] конкретизирует допуск экземпляра; [[DDD_Wiki/use_cases/prepare_and_check_line_edit]] включает сверку идентичности, происхождения координат, persisted policy и структуры/AOI. Это принятые ручные правила, не реализованный endpoint/evaluator. Уточнение 08.11 добавляет явные свойство, метод, состояние и фактический охват проверки, различает непроверенность и установленное несоответствие; источник — [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]].
 
 FU-2026-10-11-001 сохраняет расхождение между ожидаемым происхождением metadata и конфигурационным default, а также фактическую сверку L-003 старого volume. Фактическая БД не опрашивалась. Метка stale остаётся для этой сверки и доменной очереди. Датированные сводки ниже исторические.
 
-## Актуальность Состояния
+## История сверок состояния
 
-Сверка `/sync-vision` 2026-11-07: 52 RAW-источника, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001.
+Сверка `/sync-vision` 2026-11-08: 54 RAW-источника, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001.
 
 [Отчёт S2-X01](../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. Технические источники — [[Code_wiki/архитектура/frontend_save_recovery]], [[Code_wiki/архитектура/browser_auth_sessions]] и [[Code_wiki/архитектура/edit_version_api_readback]]. Прежние ожидания S2-X01 ниже исторические; доменные follow-up’ы не закрываются.
 
@@ -48,15 +66,19 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 
 Политика восстановления и разграничение operation/observer приняты; D5-Q1 стало правилом текущего XY-среза. Реальный ответственный за исходные дефекты ещё не назначен. Недостающая реализация оформлена в [S2-X01](../docs/sprint_2/2026-10-12-s2-x01-save-recovery-followup.md) вне календарных дней. Конкретная positional specification и срок history не получены. Этот ingest не подтверждает готовность публичного API/UI и не исправляет остальное отставание model health от реализации; метка `stale` сохранена.
 
+## Дополнение представлений после ingest — 2026-11-08
+
+Источник: [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-answers]]. Уточнены назначение геометрии, роли идентификаторов и знаменатель полноты. Существующие инварианты и агрегаты сохранены; 56 RAW обработаны. Новых конфликтов нет; metadata/fixture не проверены, stale сохраняется.
+
 ## Current Summary
 
-Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и audit. Discovery answers закрыли поведение first-save contract, но фактические demo metadata и fixture ещё не выбраны. Ближайшая реализация должна доказать путь workspace -> `UpdateEditVersionFeatureGeometry` -> сдвиг ровно одной внутренней вершины одной существующей line feature -> server-side canonicalization по metadata dataset -> atomic save full resulting snapshot относительно единого базового состояния работы -> command response + persisted readback -> revert к baseline. Line должна быть valid/simple и `covered by` AOI; endpoints, structure, attributes и associations заморожены. Позиционная точность для приёмки берётся из утверждённой спецификации и evidence, coordinate grid — из spatial-reference metadata dataset; это разные правила. `POSITIONAL_ACCURACY_UNVERIFIED` разрешает technical save, но блокирует review/completion/post. `DraftVersionToken` защищает весь aggregate, а `CommandId` идентифицирует одну operation на весь lifecycle `EditVersion`, включая concurrent retry и повтор terminal rejection. `EditVersionChangeSetPersisted` возникает на каждый content-changing save с непустым diff и хранит line identity + before/after + actor/time/baseline/command evidence; `EditVersionChangeSetCleared` возникает на revert; no-op/retry событий не создают. First-save readiness называется `persisted-draft-ready`: lifecycle остается `open`, topology - `not_checked`, review/post остается downstream context.
+Первичная доменная модель создана вокруг core subdomain `Utility Authoritative Editing`: `WorkOrder`, `EditVersion`, рабочее пространство, проверка, review/post и audit. Discovery answers закрыли поведение first-save contract; фактические metadata и fixture подтверждены протоколом 08.11.2026 для локальной revision 49. Контракт среза задаёт путь workspace -> `UpdateEditVersionFeatureGeometry` -> сдвиг ровно одной внутренней вершины одной существующей line feature -> server-side canonicalization по metadata dataset -> atomic save full resulting snapshot относительно единого базового состояния работы -> command response + persisted readback -> revert к baseline. Line должна быть valid/simple и `covered by` AOI; endpoints, structure, attributes и associations заморожены. Позиционная точность для приёмки берётся из утверждённой спецификации и evidence, coordinate grid — из spatial-reference metadata dataset; это разные правила. `POSITIONAL_ACCURACY_UNVERIFIED` разрешает technical save, но блокирует review/completion/post. `DraftVersionToken` защищает весь aggregate, а `CommandId` идентифицирует одну operation на весь lifecycle `EditVersion`, включая concurrent retry и повтор terminal rejection. `EditVersionChangeSetPersisted` возникает на каждый content-changing save с непустым diff и хранит line identity + before/after + actor/time/baseline/command evidence; `EditVersionChangeSetCleared` возникает на revert; no-op/retry событий не создают. First-save readiness называется `persisted-draft-ready`: lifecycle остается `open`, topology - `not_checked`, review/post остается downstream context.
 
 ## Current Blocking Conflicts
 
 | Conflict | Blocks | Status | Next Question |
 | --- | --- | --- | --- |
-| Нет активных blocking conflicts | - | clear | Сопоставить принятые решения с S2-X01 по FU-2026-10-13-004 и сверить metadata/fixture по FU-2026-10-11-001 |
+| Нет активных blocking conflicts | - | clear | Реализовать/проверить оставшиеся правила по FU-2026-10-13-004; сверка документации FU-2026-10-11-001 завершена |
 
 Разрешён 2026-10-12: [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]] по [решению пользователя](../docs/sprint_2/2026-10-12-save-recovery-rules-decision.md).
 
@@ -72,6 +94,8 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 
 ## Current Coverage
 
+Статус active в таблице означает принятую доменную модель. Реализация подтверждена отдельно матрицей выше: ReviewPackage/Review Post и positional evaluation ещё не реализованы.
+
 | Area | Status | Notes |
 | --- | --- | --- |
 | Ubiquitous Language | active | [[Wiki/glossary/utility_gis_editing]], [[Wiki/glossary/positional_accuracy_for_acceptance]], [[Wiki/glossary/coordinate_storage_precision]] и [[Wiki/glossary/base_work_state]] закрепляют язык workflow, точности и baseline. |
@@ -81,26 +105,35 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 | Aggregates | active | `WorkOrder`, `EditVersion` и `ReviewPackage` активны в доменной модели. |
 | Commands And Events | active | `OpenEditVersion` активна; first write command - `UpdateEditVersionFeatureGeometry`; события `EditVersionChangeSetPersisted` и `EditVersionChangeSetCleared` описывают save/revert, `CommandId` отделяет retry от concurrency. |
 | Policies And Specifications | active | Проверка назначения, [[Wiki/policies/edit_geometry_precision_policy]], [[Wiki/policies/positional_accuracy_acceptance_policy]], persisted change set, basic draft validation, ready-for-review, post allowed, review/post и stale policies активны. |
-| Sprint Planning Inputs | active | `Wiki/_registry/questions.md` содержит приоритетные вопросы для планирования маленьких спринтов. |
+| Sprint Planning Inputs | active | Открытых вопросов в `Wiki/_registry/questions.md` нет; технический остаток указан в Current Sprint Planning Queue. |
 
 ## Current Discovery Queue
 
-Основные доменные развилки first save закрыты. Следующий `/discover` не должен заново спрашивать snapshot-vs-diff, one-internal-vertex guard, AOI boundary, token/idempotency semantics, event cadence, baseline naming/mapping или состав event evidence. По [[Wiki/_registry/questions]] открыты 2 вопроса сверки с существующим кодом и Sprint 2:
+Открытых вопросов нет. DISC-2026-11-09-01/02 закрыты по [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]]: [[DDD_Wiki/use_cases/withdraw_review_package]] и [[DDD_Wiki/use_cases/correct_published_result]]. Приняты правила полномочий, гонки withdrawal/post, повторной подачи, актуального исправительного контекста и завершения ограниченной области. Не повторять их как неотвеченные из-за отсутствия реализации.
 
-- Какие фактические CRS, coordinate unit, `xyResolution`, `xyTolerance`, origin/domain и transformations имеет сохраняющий demo dataset?
-- Как выбранная в seed eligible line `L-003` и её before/after fixture coordinates соответствуют принятым критериям? Вопрос не закрывается без содержательной сверки по `FU-2026-10-11-001`.
+Следующий /discover сначала проверяет по context map покрытие нескольких зависимых нарядов на связанных участках: различены ли зависимость работы, актуальность основания и порядок публикации. Это направление смысловой проверки, а не уже установленный новый пробел или заранее открытый вопрос. Использовать реестр и прежние ответы; при исчерпании темы сообщить об этом, не заполнять квоту повторами. Соседние процессы не расширяют автоматически first-save scope.
 
-Учебная positional specification и records policy уже приняты: [[Wiki/specifications/simulated_line_positional_acceptance]] и [[Wiki/policies/change_history_retention_policy]]. Их реализация и привязка evidence к L-003 не подтверждены этой синхронизацией.
+First-save, policy, metadata и fixture L-003 для локальной revision 49 имеют инварианты и [runtime-протокол](../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Смена экземпляра требует технической сверки; позиционная пригодность этим не доказана. Разделение Reviewer/Publisher закрыто integrated contract.
 
-Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevant `traceResult` / `subnetworkStatus` важны после реализации persisted draft path.
+Отдельная техническая очередь: FU-2026-10-11-001 resolved по сверке 09.11.2026; FU-2026-10-13-004 — оставшееся соответствие реализации принятым правилам, включая новые исключения. Отсутствие submit/review/post в коде не подменяет доменный пробел.
 
 ## Current Sprint Planning Queue
 
-Следующий `/plan-sprint` должен использовать 14-дневную рамку, но мыслить маленькими вертикальными increments:
+Сверено с кодом 09.11.2026. Это границы зависимости, не новый утверждённый спринт. Следующий /plan-sprint использует 14-дневную рамку и текущий код.
 
-- Первый спринт после открытия workspace создает end-to-end first-save slice для одной line feature и одной внутренней вершины: сначала фиксирует реальную editable fixture и spatial metadata dataset, затем добавляет единое immutable базовое состояние работы + current snapshot, AOI `CoveredBy`, server-side canonical single-vertex normalization, hard atomic guards, явный `POSITIONAL_ACCURACY_UNVERIFIED`, aggregate `DraftVersionToken`, lifecycle registry `CommandId`, before/after event evidence, response/readback proof, no-op semantics, stale recovery и revert с двумя domain events.
-- Следующий спринт добавляет `submit_for_review` и `ReviewPackage v0.1` как materialized snapshot поверх persisted `edit_version_features`, с backrefs на исходные rows и editor summary/evidence.
-- Следующий спринт добавляет reviewer detail view одного package, reviewer decision и computed `can_post`; simulated post, durable audit, trace/subnetwork evidence, risk tiers, reviewer queue и association mutation не должны стартовать раньше persisted change set.
+| Область | Статус реализации | Следующее действие |
+| --- | --- | --- |
+| Persisted first-save, guards, baseline, token/CommandId, события, no-op/replay | Реализовано | Не планировать заново; сохранять контракт регрессиями |
+| Публичные Save/Revert, согласованный readback, UI и recovery S2-X01 | Реализовано; 105 выбранных frontend-тестов проходят | Не повторять завершённый slice; полноценный DB/M4 прогон при изменении соответствующего кода |
+| Metadata/fixture L-003 | Фактически сверено 08.11 для revision 49 | Повторная квалификация при смене экземпляра; UI ограничен линиями из трёх вершин |
+| Positional evidence/evaluator и readiness | Модель принята; автоматического VERIFIED нет, Save остаётся UNVERIFIED | До успешного submit определить и реализовать доказательный путь readiness; не подменять его геометрическими guards |
+| Submit и ReviewPackage | Не реализовано | Materialized snapshot над persisted change set, backrefs и evidence; explicit blocking при отсутствии readiness |
+| Reviewer decision и computed can_post | Не реализовано | После package: проверка решений/freshness, без durable post_authorized |
+| Simulated post и audit публикации | Не реализовано | После gate: прослеживаемые попытки/outcome; существующая история Save не заменяет этот audit |
+| Withdrawal и correction | Приняты правила, реализации нет | Учесть в соответствующем publication slice: порядок отзыва/допуска и новый разрешённый исправительный контекст |
+| Restart, архив/удержания и прочие правила FU-2026-10-13-004 | Частичное покрытие, follow-up open | Не смешивать recovery прежней команды с restart; отдельно проектировать непокрытый объём |
+
+Trace/subnetwork evidence, risk tiers, reviewer queue и association mutation не объявляются реализованными или автоматически включёнными в следующий спринт. Закрытие first-save не подтверждает позиционную приёмку, эксплуатационную готовность и полноту всех правил условной организации.
 
 ## Superseded Draft Summary
 
@@ -123,9 +156,9 @@ Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevan
 | Commands And Events | draft | Требуется связать команды, события и политики |
 | Sprint Planning Inputs | draft | Требуется список вопросов для 14-дневного спринта |
 
-## Discovery Queue
+## Историческая Discovery Queue — superseded
 
-Следующий `/discover` должен сгенерировать 150 candidate questions по пробелам модели и выбрать top 15 для пользователя.
+Прежняя фиксированная квота заменена правилами Current Discovery Queue и `.agents/skills/source-command-discover/SKILL.md`. Этот раздел не задаёт следующий запуск.
 
 ## Актуализация После Research 2026-10-13
 
@@ -135,7 +168,7 @@ Human-layer вопросы по `Reviewer`, evidence sufficiency, policy-relevan
 
 Ни один реальный сотрудник, SLA, specification/допуск, measurement evidence или срок хранения этим research не установлен. Метка stale сохраняется: прежняя очередь fixture/metadata и описания реализации выше по-прежнему требуют отдельной сверки. Не считать новые предложения выполненным S2-X01, repair/restart workflow или позиционной приёмкой.
 
-## Текущее уточнение: решения условной организации 2026-10-13
+## Историческое уточнение: решения условной организации 2026-10-13
 
 Этот раздел заменяет прежние выводы об отсутствии реальных ответственных/specification/records policy и ожидании принятия новых предложений. [[RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions]] принимает правила модели, а не подтверждает их реализацию. [[Wiki/conflicts/2026-10-13-real-organization-vs-simulated-decisions]] resolved. В questions остаются 2 вопроса сверки metadata/fixture; follow-up open: 19. Активных канонических blocking conflicts: 0.
 

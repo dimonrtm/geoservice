@@ -3,11 +3,11 @@ title: Review Package Aggregate
 type: aggregate
 status: active
 created: 2026-06-24
-updated: 2026-06-27
-source: "Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md"
+updated: 2026-11-09
+source: "Vision_wiki/decisions/release_2_conflict_explanation.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md"
 tags: [domain-knowledge, ddd, aggregate, review]
 confidence: high
-related: [Wiki/entities/review_decision, Wiki/value_objects/risk_tier, Wiki/policies/reviewer_post_policy]
+related: [Wiki/entities/review_decision, Wiki/value_objects/risk_tier, Wiki/policies/reviewer_post_policy, Wiki/policies/review_package_withdrawal_policy, Wiki/policies/published_result_correction_policy]
 ---
 
 # Review Package Aggregate
@@ -34,3 +34,11 @@ Package snapshot, evidence, risk tier, blockers, approval и stale status дол
 - Stale approval блокирует simulated/technical post.
 - Число false-safe verdict должно оставаться нулевым для absolute veto scenarios.
 - `ReviewPackage` фиксирует evidence snapshot checksum и не переписывает прежний risk tier незаметно; новое evidence создает новый или stale package state.
+
+## Отзыв намерения — 2026-11-09
+
+[[Wiki/policies/review_package_withdrawal_policy]] добавляет самостоятельное действие назначенного Editor/координатора, не пятое решение Reviewer. Принятый до допуска исполнения отзыв терминален для точного packageId; исторические snapshot/approval сохраняются, но не разрешают post. Повторная подача создаёт новый пакет и новое решение даже при совпавшем checksum; повторное evidence требует проверки применимости.
+
+Принятие отзыва упорядочивается с допуском конкретной post-попытки. При допущенной попытке запрос удерживает новые попытки до доказанного исхода: успех ведёт к коррекции, окончание без эффекта — к отзыву. Нет двух одновременно неразобранных попыток. can_post/read не резервирует право, факт допуска не становится durable post_authorized. Это инвариант будущей модели, не новая реализованная схема Save.
+
+Исправительный пакет связывается с опубликованным исходным по [[Wiki/policies/published_result_correction_policy]], но не наследует approval.

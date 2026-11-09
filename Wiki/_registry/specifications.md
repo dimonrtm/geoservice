@@ -3,7 +3,7 @@ title: Specifications Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-08
+updated: 2026-11-09
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, specification]
 confidence: n/a
@@ -34,3 +34,15 @@ related: [Wiki/index]
 ## Уточнение доказательств — 2026-11-08
 
 [[Wiki/specifications/demo_dataset_instance_qualified]] уточняет пункты 2–5 предиката: метод, фактический охват и состояние каждого наблюдения; частичный результат не означает проверку всего набора. Источник — [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]. Фактические metadata/fixture не подтверждены.
+
+## Уточнение представления — 2026-11-08
+
+[[Wiki/specifications/demo_dataset_instance_qualified]] связывает свидетельства с назначением геометрии, ролью идентификаторов и областью утверждения о полноте. Источник: [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-answers]]. Прежние инварианты и независимость технического/позиционного результата сохранены.
+
+## Завершение коррекции — 2026-11-09
+
+| Specification | Predicate | Failure Meaning | Confidence | Source |
+| --- | --- | --- | --- | --- |
+| [[Wiki/specifications/published_result_correction_closed]] | Доказанный результат/охват, связи, проверки, уведомление и явная судьба обязательных остатков | Разбор не завершён либо закрывает только ограниченную область с переданным остатком | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
+
+[[Wiki/specifications/post_allowed]] дополнен запретом post после принятого отзыва и запретом второй неразобранной попытки; чтение can_post не резервирует допуск. Источник — [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]].

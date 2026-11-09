@@ -10,7 +10,7 @@ tags: [domain-knowledge, dataset-qualification, simulated-organization]
 
 # Ответы о допуске экземпляра Utility GIS Editor
 
-15 ответов агента через 02_expert_oldman_ufa приняты за условную организацию на общем корпусе 80 документов. Это не интервью и не отчёт выполненного runtime-прогона. Ручная карточка и аналитические пограничные сценарии сохранены в RAW.
+15 ответов агента через expert_repson приняты за условную организацию на общем корпусе 80 документов. Это не интервью и не отчёт выполненного runtime-прогона. Ручная карточка и аналитические пограничные сценарии сохранены в RAW.
 
 Уточнена [[Wiki/policies/demo_dataset_qualification_policy]], добавлена [[Wiki/specifications/demo_dataset_instance_qualified]], расширен [[DDD_Wiki/use_cases/prepare_and_check_line_edit]]. Допуск привязан к экземпляру/задаче/версии; паспорт, settings, persisted policy и данные сравниваются. Старый двухточечный seed не исправляется ради упражнения; no-op и ненулевой Save различаются.
 

@@ -1,0 +1,400 @@
+{
+  "sources": [
+    {
+      "id": "W01",
+      "title": "Service Request - Related Records",
+      "url": "https://www.ibm.com/support/pages/node/136621",
+      "publisher": "IBM",
+      "accessed": "2026-11-09",
+      "section": "Follow-up Tickets and Work Orders",
+      "facts": [
+        "Связь для справки не наследует статусы; follow-up создаёт отдельную связанную запись, а распространение статусов ограничено и настраивается."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Контраст связи и управления жизненным циклом.",
+      "tool_ref": "turn18view2",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W02",
+      "title": "Business Completion of an Order",
+      "url": "https://help.sap.com/doc/b183ce53118d4308e10000000a174cb4/700_SFIN3E%20006/en-US/c3c9b65334e6b54ce10000000a174cb4.html",
+      "publisher": "SAP",
+      "accessed": "2026-11-09",
+      "section": "Prerequisites; Features",
+      "facts": [
+        "Business completion требует нулевого баланса и отсутствия открытых закупок; после него запрещены новые проводки."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Закрытие несёт последствия вне данных заказа.",
+      "tool_ref": "turn35view2",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W03",
+      "title": "How You Edit Work Order Information",
+      "url": "https://docs.oracle.com/html/F92852_02/how-you-edit-work-order-information.html",
+      "publisher": "Oracle",
+      "accessed": "2026-11-09",
+      "section": "General Information",
+      "facts": [
+        "При Closed сведения заказа не редактируются; при Released некоторые поля уже ограничены."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Разделение редактирования и повторного открытия.",
+      "tool_ref": "turn34view2",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W04",
+      "title": "Mass Close Maintenance Work Orders",
+      "url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/25c/faspc/mass-close-maintenance-work-orders.html",
+      "publisher": "Oracle",
+      "accessed": "2026-11-09",
+      "section": "When to Use; Troubleshooting",
+      "facts": [
+        "Пакетное закрытие предназначено для завершённых заказов; результат содержит успешные закрытия и ошибки; интерактивные предупреждения не выполняются."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Массовый переход не равен безусловному успеху всех заказов.",
+      "tool_ref": "turn18view6",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W05",
+      "title": "How You Manage Work Requests for an Asset",
+      "url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/25d/faumm/how-you-manage-work-requests-for-an-asset.html",
+      "publisher": "Oracle",
+      "accessed": "2026-11-09",
+      "section": "Status updates; Asset Transaction Records",
+      "facts": [
+        "Отмена заказа или прямое закрытие без завершения возвращает связанный request в New; обновления могут откладываться; события создания, отмены, завершения и закрытия фиксируются в истории актива."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Отмена работы не означает разрешение исходной потребности; статусы разных систем различаются.",
+      "tool_ref": "turn18view7",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W06",
+      "title": "Integration Overview",
+      "url": "https://docs.oracle.com/en/industries/energy-water/cloud-integrations/2510/wacs-ofs-release-notes/WACS-OFS-RELEASE-NOTES/Release_Notes.3.02.html",
+      "publisher": "Oracle Utilities",
+      "accessed": "2026-11-09",
+      "section": "Cancel Field Service Activity; Additional Work",
+      "facts": [
+        "Отмена в WACS отменяет OFS activity только при pending/enroute; отдельные потоки создают новый либо follow-up заказ."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Допуск отмены зависит от фактической стадии; исправительная работа имеет отдельный поток.",
+      "tool_ref": "turn18view8",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W07",
+      "title": "Supported Functionality",
+      "url": "https://docs.oracle.com/en/industries/energy-water/cloud-integrations/254/field-work-implementation-guide/FIELD-WORK-IMPLEMENTATION-GUIDE/ImplementationGuide_WO.06.2.html",
+      "publisher": "Oracle Utilities",
+      "accessed": "2026-11-09",
+      "section": "Cancel Order; Complete Order",
+      "facts": [
+        "Sent activity может переходить в discard с cancel-сообщением; завершение в WAM тоже посылает cancel в мобильную систему, чтобы там не продолжали работу."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Название сообщения не тождественно бизнес-факту; уведомления предотвращают повторное исполнение.",
+      "tool_ref": "turn18view9",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W08",
+      "title": "Technical Completion of an Order",
+      "url": "https://help.sap.com/doc/b183ce53118d4308e10000000a174cb4/700_SFIN3E%20006/en-US/bac9b65334e6b54ce10000000a174cb4.html",
+      "publisher": "SAP",
+      "accessed": "2026-11-09",
+      "section": "Features",
+      "facts": [
+        "TECO ещё допускает подтверждения и поступление затрат; закрывает резервы и открытые мощности."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Нельзя смешивать техническое завершение с окончательным закрытием.",
+      "tool_ref": "turn24view5",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W09",
+      "title": "How You Close a Maintenance Work Order",
+      "url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/25c/faumm/how-you-close-a-maintenance-work-order.html",
+      "publisher": "Oracle",
+      "accessed": "2026-11-09",
+      "section": "Introduction",
+      "facts": [
+        "Закрытие предотвращает дальнейшие обновления и сопровождается отражением costing/variance заказа."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Причина сохранять границу закрытого задания при новой работе.",
+      "tool_ref": "turn35view1",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W10",
+      "title": "Status changes and their importance",
+      "url": "https://www.ibm.com/support/pages/status-changes-and-their-importance",
+      "publisher": "IBM",
+      "accessed": "2026-11-09",
+      "section": "Body",
+      "facts": [
+        "Перевод в историю запускает проверки запасов, закупок и труда; некоторые исторические записи допускают ограниченное редактирование, но не возврат в обычную работу."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Изменение статуса не является простой сменой метки.",
+      "tool_ref": "turn24view1",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W11",
+      "title": "From the Maximo Support Desk - Allowable Status Changes for Work Orders",
+      "url": "https://www.ibm.com/support/pages/maximo-support-desk-allowable-status-changes-work-orders",
+      "publisher": "IBM",
+      "accessed": "2026-11-09",
+      "section": "Body status transition list",
+      "facts": [
+        "Перечень переходов допускает APPR→WAPPR; COMP→CLOSE; из CANCEL и CLOSE изменение статуса не допускается, для CLOSE указан Hist Edit."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Конкретная альтернатива отзыва approval и ограничений закрытия.",
+      "tool_ref": "turn24view6",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W12",
+      "title": "How You Update Work Order Status",
+      "url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/26b/faumm/how-you-update-work-order-status.html",
+      "publisher": "Oracle",
+      "accessed": "2026-11-09",
+      "section": "Status transition tables",
+      "facts": [
+        "Released→Unreleased запрещён при транзакциях или pending transactions; Closed может условно открываться в предыдущее состояние по сохранённым датам; отмена закупочных документов может завершиться исключением."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Контрпример универсальной необратимости Closed; необходимость проверки побочных обязательств.",
+      "tool_ref": "turn29view0",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W13",
+      "title": "How You Report an Operation Transaction",
+      "url": "https://docs.oracle.com/en/cloud/saas/supply-chain-and-manufacturing/25c/faumm/how-you-report-an-operation-transaction.html",
+      "publisher": "Oracle",
+      "accessed": "2026-11-09",
+      "section": "Operation Transaction Types",
+      "facts": [
+        "Complete и reverse фиксируются отдельными транзакциями; reverse исправляет ранее выполненное подтверждение операции."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Коррекция сохраняет факт первоначального действия.",
+      "tool_ref": "turn29view1",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W14",
+      "title": "Process a change request",
+      "url": "https://www.servicenow.com/docs/r/yokohama/it-service-management/change-management/t_ProcessAChangeRequest.html?contentId=UP4nn3m5S8gQ8qEPPjK9Zg",
+      "publisher": "ServiceNow",
+      "accessed": "2026-11-09",
+      "section": "Procedure",
+      "facts": [
+        "Одобрение переводит запрос в Scheduled, исполнение отдельное; Cancel Change требует причину в Work Notes; история approval доступна в activity log."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Одобрение, исполнение, отмена и аудит разделены.",
+      "tool_ref": "turn29view2",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W15",
+      "title": "IZ65426: Cannot attach a document to a closed workorder in edit history mode",
+      "url": "https://www.ibm.com/support/pages/apar/IZ65426",
+      "publisher": "IBM",
+      "accessed": "2026-11-09",
+      "section": "Problem conclusion",
+      "facts": [
+        "Исправление Maximo 7.1.1.7 разрешило прикладывать документ к закрытому заказу в Edit History; пример — фото состояния после работ."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService. Исторический APAR, не описание всех актуальных версий.",
+      "contribution": "Прямой пример evidence-only дополнения после закрытия без повторного исполнения.",
+      "tool_ref": "turn29view5",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W16",
+      "title": "Upgrade Guide IBM Maximo Products V7.5 to V7.6.1",
+      "url": "https://www.ibm.com/support/pages/system/files/inline-files/%24FILE/mam_7.6.1_upgrade_guide_0.pdf",
+      "publisher": "IBM",
+      "accessed": "2026-11-09",
+      "section": "Chapter 2, Related Records, pp.7–8",
+      "facts": [
+        "Supervisor и Technician могут создать follow-up work order либо связать существующий; он отображается в Related Records."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Связанный самостоятельный заказ является поддерживаемой альтернативой переписыванию старого.",
+      "tool_ref": "turn31view6",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W17",
+      "title": "Certification Study Guide Series: IBM Maximo Asset Management V7.1",
+      "url": "https://www.redbooks.ibm.com/redbooks/pdfs/sg247761.pdf",
+      "publisher": "IBM",
+      "accessed": "2026-11-09",
+      "section": "8.1.1–8.1.2 pp.140–142",
+      "facts": [
+        "Approved, In Progress, Completed и Closed разделены; Edit History разрешает ограниченные правки закрытого заказа; правила редактирования настраиваются."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Контроль истории не обязательно означает полную физическую неизменяемость записи.",
+      "tool_ref": "turn34view4",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W18",
+      "title": "Oracle Utilities Work and Asset Management Enhancements",
+      "url": "https://docs.oracle.com/en/industries/energy-water/work-asset-management/24011/wam-release-notes/WAM_RELEASE_NOTES_24011/WAM_Release_Notes.1.08.html",
+      "publisher": "Oracle Utilities",
+      "accessed": "2026-11-09",
+      "section": "Material Request Cancellation; Work Order Status Validation",
+      "facts": [
+        "Отправленный внешний material request можно отменить при отсутствии выдачи; перенос activity в Approved/Active заказ возвращает его в Planning с новым approval."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Ранее данное approval не переносится автоматически на изменённый состав работы.",
+      "tool_ref": "turn31view0",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W19",
+      "title": "Understanding Service Request and Work Order Close",
+      "url": "https://docs.oracle.com/cd/G35227_01/fscm92pbr54/eng/fscm/fwkm/UnderstandingServiceRequestandWorkOrderClose-cc9f10.html?pli=ul_d3126e218_fwkm",
+      "publisher": "Oracle PeopleSoft",
+      "accessed": "2026-11-09",
+      "section": "Closing of Work Order Tasks and Work Orders",
+      "facts": [
+        "Полное закрытие требует закрытых/отменённых задач и отсутствия pending timesheets; ранее созданные закупочные операции могут продолжить обработку после запрета новых затрат."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Проверять уже начатые действия отдельно от запрета новых.",
+      "tool_ref": "turn31view1",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W20",
+      "title": "Defining Service Request Statuses",
+      "url": "https://docs.oracle.com/cd/F92336_01/fscm92pbr50/eng/fscm/fwkm/DefiningServiceRequestStatuses-c9f264.html?pli=ul_d3105e83_fwkm",
+      "publisher": "Oracle PeopleSoft",
+      "accessed": "2026-11-09",
+      "section": "Service Request Status Transitions",
+      "facts": [
+        "Requester может повторно открыть completed request; системные переходы зависят от создания, завершения и отмены work order."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Права и состояние request нельзя переносить на work order или ReviewPackage.",
+      "tool_ref": "turn31view2",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W21",
+      "title": "Control Access to Reopen Closed Work Orders",
+      "url": "https://docs.oracle.com/en/cloud/saas/readiness/scm/26b/mfg26b/26B-mfg-wn-f43098.htm",
+      "publisher": "Oracle Manufacturing",
+      "accessed": "2026-11-09",
+      "section": "Tips and considerations",
+      "facts": [
+        "Lock Closed Work Orders ограничивает reopening; без этого privilege существующие пользователи могут повторно открыть заказ для правок и транзакций."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService. Производственное управление, не Utilities.",
+      "contribution": "Явный продуктовый контрпример абсолютному запрету reopen.",
+      "tool_ref": "turn31view3",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W22",
+      "title": "State model and transitions",
+      "url": "https://www.servicenow.com/docs/r/yokohama/it-service-management/change-management/c_ChangeStateModel.html",
+      "publisher": "ServiceNow",
+      "accessed": "2026-11-09",
+      "section": "State table; Revert to New; Disabled Cancel",
+      "facts": [
+        "Scheduled означает авторизовано и ожидает начала; отмена запрещена в Review и Closed; Revert to New перезапускает workflow и отменяет pending approvals."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Повторная подача отделяется от прежних согласований; отмена зависит от стадии.",
+      "tool_ref": "turn34view3",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W23",
+      "title": "Resource Usage",
+      "url": "https://docs.oracle.com/en/industries/energy-water/cloud-integrations/24a/wacs-ofs-user-guide/WACS-OFS-USER-GUIDE/WACS_OFS_User_Guide_User_Operations.4.12.html",
+      "publisher": "Oracle Utilities",
+      "accessed": "2026-11-09",
+      "section": "Individual Crew",
+      "facts": [
+        "Перед Complete проверяется eligibility activity; подтверждение отправляет completion в WACS; учёт времени сначала сохраняется pending."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Сохранение учёта, подтверждение завершения и передача результата имеют отдельные границы.",
+      "tool_ref": "turn33view2",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W24",
+      "title": "Cancellation of a Time Completion Confirmation",
+      "url": "https://help.sap.com/doc/b183ce53118d4308e10000000a174cb4/700_SFIN3E%20006/en-US/9929bf53d25ab64ce10000000a174cb4.html",
+      "publisher": "SAP",
+      "accessed": "2026-11-09",
+      "section": "Integration",
+      "facts": [
+        "Правка timesheet отменяет старое подтверждение и создаёт новое; отмена связанного движения материалов зависит от способа исходного подтверждения."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Коррекция конкретного результата требует анализа зависимых последствий.",
+      "tool_ref": "turn33view5",
+      "previous_exact_url_matches": []
+    },
+    {
+      "id": "W25",
+      "title": "Cancelling a Completion Confirmation with Known Number",
+      "url": "https://help.sap.com/doc/b183ce53118d4308e10000000a174cb4/700_SFIN3E%20006/en-US/d529bf53d25ab64ce10000000a174cb4.html",
+      "publisher": "SAP",
+      "accessed": "2026-11-09",
+      "section": "Steps 3–5",
+      "facts": [
+        "Пользователь выбирает конкретное подтверждение и вводит причину отмены."
+      ],
+      "limits": "Первичная документация конкретного продукта/релиза; аналогия enterprise work/change management, не норма utility GIS и не доказательство выбора GeoService.",
+      "contribution": "Коррекция адресует точный факт, а не безразлично весь заказ.",
+      "tool_ref": "turn35view0",
+      "previous_exact_url_matches": []
+    }
+  ],
+  "findings": [
+    "Нет единого отраслевого правила reopen Closed: Maximo и Oracle демонстрируют разные модели. Выбор нового связанного correction WorkOrder — собственное решение условной организации.",
+    "Связанные evidence-only дополнения после закрытия имеют прямую аналогию Maximo Edit History attachment; это не обязывает разрешить переписывание baseline.",
+    "Отзыв до исполнения, коррекция результата после исполнения и повторное открытие задания — разные действия. Источники не выбирают точку разрешения гонки post для GeoService.",
+    "Сохранённый approval не равен начатому исполнению. Отмена должна иметь причину и след, а связанные системы требуют отдельной обработки.",
+    "25 уникальных открытых страниц/документов, четыре издателя (IBM, Oracle, SAP, ServiceNow); страницы одного издателя не являются независимыми свидетельствами."
+  ],
+  "excluded": [
+    {
+      "url": "https://www.ibm.com/docs/en/masv-and-l/maximo-manage/cd?topic=overview-rules-changes-archived-work-orders",
+      "reason": "403 при открытии; сниппет не считался"
+    },
+    {
+      "url": "https://help.sap.com/docs/SAP_ERP/e8497383bec444069418aba9a1f578de/4580d95445f4b209e10000000a423f68.html",
+      "reason": "Открытие вернуло 0 читаемых строк"
+    },
+    {
+      "url": "https://docs.oracle.com/en/industries/energy-water/cloud-integrations/24b/wacs-ofs-release-notes/G12957.pdf",
+      "reason": "Прочитан, но исключён из счёта как другой релиз документа release notes W06. Полезный исторический пример: после отправки interim completion Undo недоступен, service history read-only; это не доказывает актуальность ограничения."
+    }
+  ]
+}

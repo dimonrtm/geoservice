@@ -3,7 +3,7 @@ title: Concepts Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-08
+updated: 2026-11-09
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, concept]
 confidence: n/a
@@ -29,3 +29,13 @@ related: [Wiki/index]
 ## Уточнение существующих понятий — 2026-11-08
 
 По [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]: [[Wiki/concepts/field_observation_acceptance]] — метод и охват свойства; [[Wiki/concepts/assessment_statement_lifecycle]] — пределы отрицательного результата проверки; [[Wiki/concepts/dataset_instance_and_record_identity]] — сверка конечного представления после переноса; [[Wiki/concepts/assessment_delivery_and_acceptance]] — отправка, применение и наблюдение результата. Новых дублирующих понятий нет.
+
+## Представление, идентификатор и полнота — 2026-11-08
+
+По [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]] дополнены существующие понятия: [[Wiki/concepts/network_representation_and_operational_state]] — назначение геометрии; [[Wiki/concepts/dataset_instance_and_record_identity]] — физический ключ, идентификатор обмена и актив; [[Wiki/concepts/assessment_statement_lifecycle]] — знаменатель полноты. Новых дублирующих нод нет.
+
+## Коррекция публикации — 2026-11-09
+
+| Concept | Meaning | Confidence | Source |
+| --- | --- | --- | --- |
+| [[Wiki/concepts/published_result_correction_case]] | Область ответственности за дефект опубликованных данных/evidence, связанные циклы и остатки | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |

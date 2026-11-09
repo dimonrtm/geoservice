@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-08
+updated: 2026-11-09
 source: null
 tags: [followups, conflicts]
 ---
@@ -22,13 +22,15 @@ tags: [followups, conflicts]
 
 ### FU-2026-10-11-001 — Отставание Wiki От First-Save Реализации
 
+Закрыт 09.11.2026: [сверка кода и очереди](../../../docs/verification/2026-11-09-model-health-code-reconciliation.md). Save/API/UI/recovery подтверждены кодом и выбранными frontend-тестами; metadata/fixture — протоколом 08.11. Новое техническое знание для ingest не требуется. Stale model_health снят; FU-2026-10-13-004 и FU-2026-07-25-001 остаются отдельными обязательствами. Открытых follow-up’ов 18. Датированные описания остатка ниже исторические.
+
 Сверка `/sync-vision` 2026-11-07: [отчёт S2-X01](../../../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок восстановления 2026-10-23. Текущие технические основания — [[../../../Code_wiki/архитектура/frontend_save_recovery]], [[../../../Code_wiki/архитектура/browser_auth_sessions]], [[../../../Code_wiki/архитектура/edit_version_api_readback]]. Ожидания реализации S2-X01 ниже исторические. Follow-up остаётся open: требуется сверка доменной очереди и двух вопросов metadata/fixture; FU-2026-10-13-004 также не закрывается.
 
 Дополнение `/sync-vision` 2026-10-16: [[../../../Code_wiki/архитектура/frontend]] также помечена `stale`. Коммит `6c4b6ba` добавил frontend Save contracts/API client и recovery state; источники для отдельного `/ingest repository-change`: `apps/frontend/src/contracts/workspace-edit.ts`, `apps/frontend/src/api/workOrders.ts`, `apps/frontend/src/stores/workOrders.ts`, `apps/frontend/src/stores/workspaceRecoveryStorage.ts` и `docs/sprint_2/2026-10-15-day-9-frontend-state-implementation-report.md`. Сверить влияние на зависимости S2-X01, не объявляя весь UI/recovery scope готовым. Организационные specification и retention уже приняты по FU-2026-10-11-003; ниже сохраняется прежняя формулировка технической сверки.
 
 | ID | Статус | Область |
 | --- | --- | --- |
-| FU-2026-10-11-001 | open | `Code_wiki`, состояние доменной модели |
+| FU-2026-10-11-001 | resolved | `Code_wiki`, состояние доменной модели |
 
 Источники: [[../../../Code_wiki/архитектура/backend]], [[../../../Code_wiki/архитектура/edit_version_persistence]], [[../../../Code_wiki/архитектура/edit_geometry_determinism]], [[../../../DDD_Wiki/model_health]], [[../../../Wiki/_registry/questions]], `apps/backend/utility_service/use_cases/services/edit_version_service.py`, `apps/backend/seeds/tests/test_seed_utility_dataset_specs.py`, `docs/sprint_2/README.md`.
 
@@ -154,3 +156,11 @@ Correction 2026-10-28 по FU-2026-10-28-001: после отдельной ре
 [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]], ответ 15, дополняет FU-2026-10-11-001: протокол конкретного экземпляра должен различать свойство, метод, состояние, область проверки и непроверенную часть. Проверка всей БД не выводится из одного успешного упражнения; отсутствие feature в выдаче проверяется на фильтры и контекст. Два вопроса metadata/fixture остаются open.
 
 FU-2026-10-13-004 не закрывается; автоматизация карточки и новых проверок не объявлена реализованной. Broad vendor/market утверждения остаются в FU-2026-06-01-002. Новых конфликтов или follow-up нет; открытых записей по-прежнему 19.
+
+## Фактическая сверка части FU-2026-10-11-001 — 2026-11-08
+
+[Протокол](../../../docs/verification/2026-11-08-demo-dataset-runtime-check.md) отвечает на два вопроса demo metadata/fixture для локальной версии revision 49. Эта часть остатка выполнена; FU остаётся open для сверки остальной доменной очереди с реализацией. Позиционная точность и end-to-end Save этой проверкой не подтверждаются.
+
+## Уточнение FU-2026-10-13-004 — 2026-11-09
+
+[[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]] добавляет принятые правила отзыва и коррекции публикации. Будущая реализация/приёмка должна проверить порядок отзыва и допуска post, исключение позднего эффекта при выводе «без публикации», новую подачу без наследования approval, сохранение последующих изменений и документальную ветку. 15 сценариев RAW — аналитические, не выполненные тесты. Нового follow-up нет; открытых 19. FU-2026-10-11-001 и stale сохраняют отдельную сверку реализации; оба новых discovery-вопроса answered.

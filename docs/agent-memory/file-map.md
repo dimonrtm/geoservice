@@ -8,7 +8,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 
 - Именование по месту использования, пакетный экспорт слоёв, DTO команды — `AGENTS.md`, `docs/agent-memory/patterns/2026-11-02-code-naming-at-call-site.md`
 
-- Условная организация, `02_expert_oldman_ufa`, автономное доменное исследование; 75 источников только для отдельного уточнения доменной модели после `/discover`, без квоты для технического разбора спринта: `docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md`
+- Условная организация, `expert_repson`, автономное доменное исследование; 75 источников только для отдельного уточнения доменной модели после `/discover`, без квоты для технического разбора спринта: `docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md`
 
 - agent memory protocol workflow: `AGENTS.md`, `docs/agent-memory/protocol.md`
 - agent memory quick file lookup: `docs/agent-memory/file-map.md`
@@ -58,7 +58,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - GeoService Sprint 1 Day 2 implementation: `apps/backend/app/alembic/versions/b82a5f2d91c3_editor_reviewer_roles.py`, `apps/backend/app/api/auth.py`, `apps/backend/app/api/websocket_auth.py`, `apps/backend/app/services/demo_user_seed_service.py`, `apps/frontend/src/domain/authRole.ts`, `apps/frontend/src/components/ReviewerHome.vue`
 - Code_wiki repository snapshot inventory: `Code_wiki/архитектура/backend.md`, `Code_wiki/архитектура/frontend.md`, `Code_wiki/архитектура/api_and_realtime.md`, `Code_wiki/архитектура/data_model.md`, `Code_wiki/dev_setup/local_development.md`, `Code_wiki/deployment/docker_compose.md`, `Code_wiki/сборка/ci_and_quality.md`, `Code_wiki/правила_и_стиль/testing_strategy.md`, `Code_wiki/глоссарий/technical_terms.md`
 - Obsidian wiki graph config: `.obsidian/app.json`, `.obsidian/appearance.json`, `.obsidian/core-plugins.json`, `.obsidian/graph.json`, `.obsidian/templates.json`
-- Выбор темы для `/discover`, параметры `--context` и `--phase`, вопросы экспертной персоне — `.agents/skills/source-command-discover/SKILL.md`, `DDD_Wiki/model_health.md`, `Общие_принципы/Фазы наполнения wiki.md`
+- Выбор темы и смысловая новизна `/discover`, устранение повторов, согласованность реестра/активной очереди/следующего action, параметры `--context` и `--phase` — `.agents/skills/source-command-discover/SKILL.md`, `DDD_Wiki/model_health.md`, `Общие_принципы/Фазы наполнения wiki.md`
 
 ## Project Documentation
 

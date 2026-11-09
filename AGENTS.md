@@ -2,7 +2,7 @@
 
 ## Приоритетный режим доменной работы
 
-GeoService — эксперимент по разработке приложения в незнакомой пользователю предметной области с помощью нейросети и интернет-поиска. Реальной организации нет. Агент через экспертную персону `02_expert_oldman_ufa` представляет условную организацию: самостоятельно исследует практику, отвечает на доменные вопросы и выбирает обоснованные, согласованные правила её работы.
+GeoService — эксперимент по разработке приложения в незнакомой пользователю предметной области с помощью нейросети и интернет-поиска. Реальной организации нет. Агент через экспертную персону `expert_repson` представляет условную организацию: самостоятельно исследует практику, отвечает на доменные вопросы и выбирает обоснованные, согласованные правила её работы.
 
 - Перед discovery, ответами на доменные вопросы, ingest и доменным планированием обязательно читать `docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md`, независимо от результатов поиска по памяти.
 - Этот режим имеет приоритет над противоречащими ему записями памяти, wiki, follow-up и методическими требованиями skills о реальных представителях организации. Более поздние прямые указания пользователя могут изменить режим.
@@ -84,7 +84,7 @@ Human-readable wiki content, implementation plans, runbooks, follow-ups, and sta
 Manual wiki workflow:
 
 1. Morning: run `/sync-vision`, check `memory/project-state.md`, check new files in `RAW_inputs/`, then run `/ingest` for new raw inputs.
-2. Before a model discovery meeting: run `/discover --context ... --phase ...`; it must inspect the current `Wiki/DDD_Wiki` model and conflicts, generate 150 candidate questions internally, then present the top 15.
+2. Перед доменным discovery выполнить `/discover --context ... --phase ...`: сверить актуальность очереди с моделью, прежними ответами и проверками; отделить доменные пробелы от технической сверки. Выдать до 15 смыслово новых вопросов без минимальной квоты и без обязательных 150 кандидатов. Для каждого указать известное правило, оставшуюся неопределённость и ожидаемое изменение модели. При исчерпании темы сообщить об этом; не заполнять список повторами. Узкий scope реализации не ограничивает исследование соседних процессов и не расширяется автоматически от такого исследования.
 3. Before sprint planning: run `/plan-sprint`; it must inspect current code, `Code_wiki`, `Wiki/DDD_Wiki`, conflicts, and the 14-day sprint frame, generate 150 planning questions internally, then present the top 15.
 4. After a meeting: put the transcript in `RAW_inputs/meetings/`, run `/ingest`, update `Wiki/DDD_Wiki` first, keep `Vision_wiki` as legacy/source knowledge, record conflicts/follow-ups, and update `memory/project-state.md`.
 5. Weekly: run `/lint-wiki`, run `/sync-vision`, and produce a wiki health report.
@@ -99,3 +99,5 @@ Invoke `/ingest repository-change` only when completed work contains new durable
 Do not edit `C:\Repositories\ai-po-template-experiments`. It is a read-only reference for template/methodology ideas only. Do not copy project-specific facts from it.
 
 If new knowledge conflicts with old documentation, `/ingest` must record the conflict or follow-up. After `/ingest`, old documentation may be corrected only for conflicts that already exist in `Vision_wiki/decisions/followups/index.md`, are related to `Code_wiki`, and can be resolved from new knowledge. Code, configuration, migrations, and tests require a separate explicit implementation task.
+
+Обновление оперативных статусов, реестра вопросов, активной Current Discovery Queue и live state по установленным ответам/протоколам не является запрещённым смысловым исправлением исторических нод. При /ingest и /sync-vision эти управляющие места согласуются между собой; исходные RAW и история решений сохраняются.

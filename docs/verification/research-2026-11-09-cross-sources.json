@@ -1,0 +1,172 @@
+{
+  "sources": [
+    {
+      "id": "R01",
+      "title": "Jobs",
+      "url": "https://docs.qfield.org/reference/qfieldcloud/jobs/",
+      "publisher": "OPENGIS.ch",
+      "accessed": "2026-11-09",
+      "section": "Delta apply; Understanding conflicts; Re-apply changes",
+      "facts": [
+        "Загрузка изменений запускает отдельное применение; конфликты обрабатываются выбранной политикой last-wins или manual. Повторное применение — явное действие."
+      ],
+      "limits": "Не задаёт бизнес-политику отзыва ReviewPackage.",
+      "contribution": "Подтверждает разделение передачи и применения и необходимость проверки результата; не новое правило нашей модели.",
+      "tool_ref": "turn20view1"
+    },
+    {
+      "id": "R02",
+      "title": "Advanced Setup Guide",
+      "url": "https://docs.qfield.org/get-started/tutorials/advanced-setup-qfc/",
+      "publisher": "OPENGIS.ch",
+      "accessed": "2026-11-09",
+      "section": "Synchronization Process",
+      "facts": [
+        "Загрузка проекта с desktop заменяет пакет; поле передаёт дельты. Изменение схемы до синхронизации полевых правок создаёт риск ошибок."
+      ],
+      "limits": "Не доказательство атомарности публикации GeoService.",
+      "contribution": "Офисная замена и полевая коррекция имеют разные последствия; коррекция должна учитывать находящиеся в пути изменения.",
+      "tool_ref": "turn7view1"
+    },
+    {
+      "id": "R03",
+      "title": "PROV-DM: The PROV Data Model",
+      "url": "https://www.w3.org/TR/prov-dm/",
+      "publisher": "W3C",
+      "accessed": "2026-11-09",
+      "section": "5.1.8 Invalidation; 5.2 Derivation",
+      "facts": [
+        "Invalidation обозначает прекращение доступности сущности для использования; физический носитель может сохраняться после утраты применимости."
+      ],
+      "limits": "Общая модель provenance, не регламент approval; сохранение исторического документа не означает его актуальную применимость.",
+      "contribution": "Поддерживает независимость истории и текущего допуска.",
+      "tool_ref": "turn12view2"
+    },
+    {
+      "id": "R04",
+      "title": "Data Catalog Vocabulary (DCAT) Version 3",
+      "url": "https://www.w3.org/TR/vocab-dcat-3/",
+      "publisher": "W3C",
+      "accessed": "2026-11-09",
+      "section": "11.1.2; 11.3 Resource life-cycle",
+      "facts": [
+        "Связь replaces не равна цепочке версий; lifecycle и versioning различны, approval может меняться без изменения содержимого. Правило выпуска версии выбирает поставщик данных."
+      ],
+      "limits": "Раздел 11 пояснительный и не задаёт отраслевой порядок отзыва.",
+      "contribution": "Основание отличать отзыв неизменного пакета от stale из-за изменившихся данных.",
+      "tool_ref": "turn20view0"
+    },
+    {
+      "id": "R05",
+      "title": "End Feature",
+      "url": "https://docs.giswater.org/master/en/docs/giswater/for-users/dialogs/end-feature.html",
+      "publisher": "Giswater",
+      "accessed": "2026-11-09",
+      "section": "End Feature",
+      "facts": [
+        "Перевод сетевых элементов в obsolete связывается с construction file; инструмент показывает итог операции."
+      ],
+      "limits": "Это изменение состояния сетевого элемента, не отзыв review-пакета.",
+      "contribution": "Не смешивать отмену намерения, прекращение эксплуатации и изменение записи.",
+      "tool_ref": "turn17view0"
+    },
+    {
+      "id": "R06",
+      "title": "Replace feature",
+      "url": "https://docs.giswater.org/master/en/docs/giswater/for-users/dialogs/replace-feature.html",
+      "publisher": "Giswater",
+      "accessed": "2026-11-09",
+      "section": "Replace feature",
+      "facts": [
+        "Замена создаёт новый объект и переводит прежний в obsolete; указываются Workcat id и дата замены."
+      ],
+      "limits": "Описанная операция замены не относится к нашему one-internal-vertex slice.",
+      "contribution": "Подтверждает необходимость связи предшественника и нового результата; не разрешает расширять реализацию.",
+      "tool_ref": "turn17view1"
+    },
+    {
+      "id": "R07",
+      "title": "PostGIS2QField README",
+      "url": "https://github.com/WASAC/postgis2qfield",
+      "publisher": "WASAC / Jin Igarashi",
+      "accessed": "2026-11-09",
+      "section": "README: purpose and district export",
+      "facts": [
+        "Инструмент разработан для RWSS WASAC и экспортирует PostGIS в пакеты QField с фильтрацией по районам."
+      ],
+      "limits": "README доказывает назначение инструмента, не текущую эксплуатацию или отсутствие потерь.",
+      "contribution": "Уточняет воспроизводимую первичную опору для кейса Rwanda в исходном файле.",
+      "tool_ref": "turn17view4"
+    },
+    {
+      "id": "R08",
+      "title": "Permissions and Roles",
+      "url": "https://docs.qfield.org/get-started/tutorials/permissions/",
+      "publisher": "OPENGIS.ch",
+      "accessed": "2026-11-09",
+      "section": "Project Collaborator Roles; Project Capabilities",
+      "facts": [
+        "Reporter может добавлять новые features, Editor менять существующие, управление проектом и участниками разделено по ролям."
+      ],
+      "limits": "Названия ролей QField не переносятся на роли GeoService.",
+      "contribution": "Право редактировать не тождественно полномочию управлять передачей/публикацией.",
+      "tool_ref": "turn23view0"
+    },
+    {
+      "id": "R09",
+      "title": "Workflow",
+      "url": "https://docs.qfield.org/reference/qfieldcloud/workflow/",
+      "publisher": "OPENGIS.ch",
+      "accessed": "2026-11-09",
+      "section": "Manager–Fieldworker sequence",
+      "facts": [
+        "После отправки дельт возвращается ID задания; Manager ожидает применения перед скачиванием обновлённых данных."
+      ],
+      "limits": "Это описанный workflow, не гарантия наличия бизнес-проверки качества.",
+      "contribution": "Подтверждает границы send/execute/readback при позднем отзыве.",
+      "tool_ref": "turn23view1"
+    },
+    {
+      "id": "R10",
+      "title": "Psector manager",
+      "url": "https://docs.giswater.org/master/en/docs/giswater/for-users/dialogs/psector-management.html",
+      "publisher": "Giswater",
+      "accessed": "2026-11-09",
+      "section": "Psector manager",
+      "facts": [
+        "Плановые секторы можно активировать, восстановить, объединить или дублировать."
+      ],
+      "limits": "Короткое описание не объясняет транзакционную семантику и не определяет отмену публикации.",
+      "contribution": "Контраст: плановый сценарий имеет собственный lifecycle; не основание откатывать сеть.",
+      "tool_ref": "turn23view2"
+    },
+    {
+      "id": "R11",
+      "title": "Project for Strengthening Operation and Maintenance of Rural Water Supply Systems in Rwanda — Final Report (December 2019)",
+      "url": "https://openjicareport.jica.go.jp/pdf/12352985_01.pdf",
+      "publisher": "JICA / WASAC",
+      "accessed": "2026-11-09",
+      "section": "PDF p.77, printed p.68, narrative preceding figures 2-9/2-10",
+      "facts": [
+        "Из-за незавершённого дата-центра к концу проекта был выбран временный offline-обмен QGIS/QField вместо запуска запланированного web-сервиса."
+      ],
+      "limits": "Исторический отчёт 2019, не состояние инфраструктуры в 2026. Скриншот страницы недоступен (cache miss); вывод только по извлечённому тексту, не по схемам.",
+      "contribution": "Первичная проверяемая опора кейса из UtilityGisEditorRole; ограничения среды могут менять способ доставки, но не заменяют приёмку.",
+      "tool_ref": "turn37view1"
+    }
+  ],
+  "excluded": [
+    {
+      "url": "https://docs.giswater.org/master/en/docs/giswater/for-users/dialogs/delete-feature.html",
+      "reason": "Cache miss, не засчитан"
+    },
+    {
+      "url": "https://docs.qfield.org/success-stories/rwanda-rural-water/",
+      "reason": "404, не засчитан"
+    },
+    {
+      "url": "https://av.tib.eu/media/57426",
+      "reason": "При open нет читаемого тела; поисковый abstract не засчитан"
+    }
+  ]
+}

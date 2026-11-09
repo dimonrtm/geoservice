@@ -3,12 +3,16 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-08
+updated: 2026-11-09
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
 
 # Wiki
+
+## Текущее состояние
+
+После сверки кода 2026-11-09 [[DDD_Wiki/model_health]] актуализирован, stale снят; FU-2026-10-11-001 resolved. First-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов проходят. [Матрица реализации](../docs/verification/2026-11-09-model-health-code-reconciliation.md) отделяет их от ещё не реализованных evaluator/review/post/withdrawal/correction. Открытых follow-up’ов 18, вопросов 0; канонических конфликтов 0, legacy-конфликтов 1. Все 58 RAW обработаны. Metadata/fixture подтверждены протоколом 08.11 для revision 49, позиционная точность не подтверждена. Discovery проверяет покрытие зависимых нарядов; технический остаток ведётся отдельно. Датированные записи ниже исторические.
 
 `Wiki/` хранит канонические атомарные доменные знания проекта: словарь, сущности, value objects, концепции, участников, внешние системы, команды, события, политики, спецификации, конфликты и вопросы.
 
@@ -100,3 +104,11 @@ tags: [domain-knowledge, ddd]
 ## Метод и охват квалификации — 2026-11-08
 
 [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]] уточняет существующие [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/concepts/dataset_instance_and_record_identity]] и [[Wiki/concepts/assessment_delivery_and_acceptance]]. На общем корпусе 78 документов приняты 15 ответов [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]; обновлены [[Wiki/policies/demo_dataset_qualification_policy]] и [[Wiki/specifications/demo_dataset_instance_qualified]]. Фактическая БД не проверена.
+
+## Представления и доказательства — 2026-11-08
+
+[[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]] — 80 внешних документов, 26 новых нормализованных ссылок. Уточнения: [[Wiki/concepts/network_representation_and_operational_state]], [[Wiki/concepts/dataset_instance_and_record_identity]], [[Wiki/concepts/assessment_statement_lifecycle]]. [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-answers]] — 15 ответов и ручные критерии; фактические metadata/fixture не подтверждены.
+
+## Отзыв и коррекция публикации — 2026-11-09
+
+[[Wiki/concepts/published_result_correction_case]], [[Wiki/policies/review_package_withdrawal_policy]], [[Wiki/policies/published_result_correction_policy]] и [[Wiki/specifications/published_result_correction_closed]] фиксируют новый прирост модели. [[Wiki/specifications/post_allowed]] уточнён. Два ответа условной организации отделены от фактов источников и реализации.

@@ -4,7 +4,7 @@ type: concept
 status: active
 created: 2026-11-07
 updated: 2026-11-08
-source: "RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md"
+source: "RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md"
 tags: [domain-knowledge, dataset-qualification, simulated-organization]
 confidence: high
 related: [Wiki/specifications/demo_dataset_instance_qualified, Wiki/concepts/change_basis_lifecycle, Wiki/concepts/assessment_statement_lifecycle]
@@ -37,3 +37,9 @@ related: [Wiki/specifications/demo_dataset_instance_qualified, Wiki/concepts/cha
 Успех экспорта, импорта или sync не удостоверяет сохранность идентичности и существенных свойств. Для допуска конечного экземпляра устанавливаются соответствие записей, структура геометрии, релевантные атрибуты, размерность и координатное представление. Проверка ограничивается целью, но ограничения не скрываются.
 
 Формат может изменить локальный fid или численную запись координат. Название файла и ссылка на исходный паспорт не заменяют сверку результата. Основания: R13, R35–R37, R45 и R72 в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]. Это уточнение ручной квалификации; новый ETL не вводится.
+
+## Роль идентификатора при обмене — 2026-11-08
+
+Локальный физический ключ строки, устойчивый идентификатор обмена и обозначение актива могут быть разными полями. Требование целочисленного PK в feature table GeoPackage не противоречит отдельному UUID отношений; перенумерация FID при обработке другого формата сама по себе не доказывает создание нового актива.
+
+При квалификации копии устанавливается соответствие идентификаторов и его происхождение. Это уточнение существующей ручной сверки, не новая система ключей GeoService. Внешние основания: R37, R47 и R78; [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]], раздел 5.

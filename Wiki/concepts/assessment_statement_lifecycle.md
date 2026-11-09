@@ -4,7 +4,7 @@ type: concept
 status: active
 created: 2026-10-22
 updated: 2026-11-08
-source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md"
+source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md"
 tags: [domain-knowledge, assessment, simulated-organization]
 confidence: high
 related: [Wiki/concepts/change_basis_lifecycle, Wiki/concepts/evidence_dependency, Wiki/policies/assessment_issue_and_correction_policy]
@@ -40,3 +40,9 @@ RAW исследование: G13 (предварительные/выпущен
 Для каждого утверждения фиксируются свойство, метод, состояние данных и область выполнения проверки. Итог «ошибок не найдено» ограничивается реально выполненными правилами и областью; не включает непроверенные свойства и объекты. Частичный scope сохраняется и при отсутствии обнаруженных ошибок.
 
 Матрица охвата — документальный способ применить существующее правило, не новый aggregate или enum. Основания: R55 (validation extent), R60 (survey metadata), R78 (раздельные проверки graph/EPA/O&M) в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]. Связь: [[Wiki/concepts/field_observation_acceptance]].
+
+## Знаменатель полноты — 2026-11-08
+
+Полнота переданных известных записей, полнота ответа на фильтрованный запрос и полнота сведений о физических активах различаются. Заключение называет набор/поставщика, область, фильтр, охват страниц и редакцию; отсутствие записи не доказывает отсутствие коммуникации на местности.
+
+Внешние основания: историческое описание требований поставки NUAR R53 и контракт OGC API Features R79 в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]], раздел 4. Исторический документ не объявляется действующей общей нормой. Решение условной организации конкретизирует охват; полного обследования всей сети ради одной учебной правки не требует.

@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-08
+updated: 2026-11-09
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -46,3 +46,10 @@ related: [Wiki/index]
 ## Уточнение квалификации — 2026-11-08
 
 [[Wiki/policies/demo_dataset_qualification_policy]] дополнена по [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]: свойство/метод/охват, состояния знания, проверка конечного представления и стадий обмена. Это ручные правила условной организации, без нового hard guard Save.
+
+## Отзыв и исправление публикации — 2026-11-09
+
+| Policy | Rule | Outcome | Confidence | Source |
+| --- | --- | --- | --- | --- |
+| [[Wiki/policies/review_package_withdrawal_policy]] | Отзыв точного пакета до допуска исполнения; порядок гонки, терминальность и новая подача | Запрет post либо выяснение допущенного outcome | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
+| [[Wiki/policies/published_result_correction_policy]] | Новый связанный WorkOrder для исправления данных; отдельная evidence-only ветка | Прослеживаемая коррекция с сохранением последующих изменений | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |

@@ -1,0 +1,472 @@
+{
+  "sources": [
+    {
+      "id": "U01",
+      "title": "North East Water — As constructed drawings and digital data",
+      "url": "https://www.newater.com.au/acdc",
+      "publisher": "North East Water",
+      "accessed": "2026-11-09",
+      "section": "Шаги 3–6",
+      "facts": [
+        "Валидация выявляет пространственные и атрибутивные ошибки; после неё чертёж передаётся Project Manager и GIS на review. Повторные подачи также идут через портал."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Валидация и review — разные события.",
+      "tool_ref": "turn6view0",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U02",
+      "title": "Melbourne Water — As constructed update of design plans",
+      "url": "https://www.melbournewater.com.au/building-and-works/developer-guides-and-resources/standards-and-specifications/constructed-update",
+      "publisher": "Melbourne Water",
+      "accessed": "2026-11-09",
+      "section": "7.8",
+      "facts": [
+        "Исходные проектные детали сохраняются; существенное изменение трассы требует новых планов. Лист получает следующую ревизию и отметку добавленных as-constructed сведений."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Прослеживаемая ревизия вместо стирания основания.",
+      "tool_ref": "turn6view1",
+      "previous_url_matches": [
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-10-22-utility-gis-editor-assessment-research.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-08-utility-gis-editor-representation-research.md"
+      ],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": false
+    },
+    {
+      "id": "U03",
+      "title": "Melbourne Water — Surveying preparation of drawings",
+      "url": "https://www.melbournewater.com.au/building-and-works/developer-guides-and-resources/standards-and-specifications/surveying",
+      "publisher": "Melbourne Water",
+      "accessed": "2026-11-09",
+      "section": "7.20.2–7.20.4",
+      "facts": [
+        "Цифровые результаты съёмки дополняют обязательные аннотированные проектные планы; проекции обоих представлений должны совпадать."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Согласованность нескольких представлений evidence.",
+      "tool_ref": "turn6view2",
+      "previous_url_matches": [
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-10-22-utility-gis-editor-assessment-research.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-08-utility-gis-editor-representation-answers.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-08-utility-gis-editor-representation-research.md"
+      ],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": false
+    },
+    {
+      "id": "U04",
+      "title": "Shellharbour — Work as Executed Guidelines",
+      "url": "https://www.shellharbour.nsw.gov.au/node/34906",
+      "publisher": "Shellharbour City Council",
+      "accessed": "2026-11-09",
+      "section": "WAE; ADAC XML",
+      "facts": [
+        "Перед handover требуется WAE-пакет. ADAC сверяется с чертежами; значимые ошибки возвращают на коррекцию и повторную подачу."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Возврат данных способен остановить принятие активов.",
+      "tool_ref": "turn6view3",
+      "previous_url_matches": [
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-08-utility-gis-editor-representation-research.md"
+      ],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": false
+    },
+    {
+      "id": "U05",
+      "title": "Firestone — Digital Data As-Built Requirements",
+      "url": "https://www.firestoneco.gov/723/Digital-Data-As-Built-Requirements",
+      "publisher": "Town of Firestone",
+      "accessed": "2026-11-09",
+      "section": "As-Built Requirements",
+      "facts": [
+        "Владелец задаёт систему координат, единицы и принимаемые форматы SHP/GDB; MDB не принимается."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Соответствие формату поставки не эквивалентно содержательной проверке (аналитический вывод).",
+      "tool_ref": "turn6view7",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U06",
+      "title": "Power and Water — NP001.10 Documentation Requirements",
+      "url": "https://www.powerwater.com.au/__data/assets/pdf_file/0009/14211/NP001.10-Documentation-Requirements-qdoc2008_181.pdf",
+      "publisher": "Power and Water Corporation",
+      "accessed": "2026-11-09",
+      "section": "§4, стр.3",
+      "facts": [
+        "Исполнитель регистрирует завершённые активы; as-constructed отражает изменения исходного проекта. Отсутствие чертежей может препятствовать подключению."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Документальный gate связан с вводом актива.",
+      "tool_ref": "turn10view0",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U07",
+      "title": "Water Corporation — Developers Manual",
+      "url": "https://www.watercorporation.com.au/-/media/WaterCorp/Documents/Developing-and-Building/Subdividing/Developers-manual.pdf",
+      "publisher": "Water Corporation",
+      "accessed": "2026-11-09",
+      "section": "§3.1; §7.1–7.3",
+      "facts": [
+        "Принятие проекта не освобождает проектировщика от ошибок. После takeover при выявлении отклонений по as-constructed владелец сохраняет право требовать исправления актива."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Завершённая передача не означает прекращения ответственности за дефект.",
+      "tool_ref": "turn10view1",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U08",
+      "title": "Unitywater — Asset Information Submission and Acceptance Guide v1",
+      "url": "https://www.unitywater.com/-/media/unitywater/pdf-accreditation-certification-documents/asset-information-submission-and-acceptance-guide-v1.pdf?hash=4E2489F37303E829DCF3C1188B8DCD02&sc_lang=en",
+      "publisher": "Unitywater",
+      "accessed": "2026-11-09",
+      "section": "§6.1–6.6, стр.20–22",
+      "facts": [
+        "Review может приостанавливаться до получения уточнений. Различаются Accepted, Conditionally Accepted, Returned for Clarification, Returned for Correction, Rejected. Подача, валидация, сертификация и достижение milestone сами по себе не означают принятия."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Явное основание для различения delivery, validation и acceptance.",
+      "tool_ref": "turn46view0",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U09",
+      "title": "Unitywater — ADAC XML Data Capture Guidelines v4",
+      "url": "https://www.unitywater.com/-/media/unitywater/pdf-accreditation-certification-documents/adac-xml-data-capture-guidelines-version-4.pdf?hash=DFB180F6B8A83F3038A088D1315F2CC2&sc_lang=en",
+      "publisher": "Unitywater",
+      "accessed": "2026-11-09",
+      "section": "§5.4.6, стр.40–41",
+      "facts": [
+        "Действующий актив нельзя обозначать Removed/Retired только из-за будущего демонтажа; файл отражает фактическое состояние на момент съёмки, сертификации и подачи. Будущие переключения описывают отдельно."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Отмена намерения и изменение физической сети — разные основания.",
+      "tool_ref": "turn13view1",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U10",
+      "title": "Sydney Water — WAC drawing asset information specification v4",
+      "url": "https://www.sydneywater.com.au/content/dam/sydneywater/documents/provider-information/standards-specifications/wac-asset-information-specification.pdf",
+      "publisher": "Sydney Water",
+      "accessed": "2026-11-09",
+      "section": "§2.2.14–2.2.15, стр.15–16",
+      "facts": [
+        "После первого принятого WAC последующие изменения в жизненном цикле актива получают следующую ревизию. Для изменения фиксируют описание, ответственного за профессиональное одобрение и дату."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Коррекция опубликованной записи оформляется новой прослеживаемой ревизией.",
+      "tool_ref": "turn13view2",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U11",
+      "title": "Watercare — Asset information and data standard",
+      "url": "https://assets.watercare.co.nz/media/ai_asset_information_and_data_standard_november_2020_b0f0de2baa.pdf",
+      "publisher": "Watercare",
+      "accessed": "2026-11-09",
+      "section": "Part A §1, стр.17–18",
+      "facts": [
+        "Цикл данных включает collect, verify, store, publish, maintain. Maintain различает ошибочную информацию для проверки и обновление вследствие изменения характеристик актива."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Исправление знания и изменение объекта нельзя смешивать.",
+      "tool_ref": "turn16view1",
+      "previous_url_matches": [
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-10-18-utility-gis-editor-domain-knowledge-analysis.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-10-18-utility-gis-editor-use-case-answers.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-07-utility-gis-editor-dataset-qualification-answers.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-07-utility-gis-editor-dataset-qualification-research.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-08-utility-gis-editor-verification-answers.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-08-utility-gis-editor-verification-research.md"
+      ],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": false
+    },
+    {
+      "id": "U12",
+      "title": "Watercare — Standard for producing CAD and Geospatial Drawings v9.2",
+      "url": "https://assets.watercare.co.nz/media/ESF_500_STD_502_6f05f86369.pdf",
+      "publisher": "Watercare",
+      "accessed": "2026-11-09",
+      "section": "§3, стр.10; checklist стр.49–50",
+      "facts": [
+        "Имя CAD включает номер чертежа, лист и ревизию. Document Control проверяет полноту QA evidence, правильность ревизии/даты и обновление Deliverables Register."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Регистрация и QA входят в выпуск ревизии.",
+      "tool_ref": "turn13view4",
+      "previous_url_matches": [
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-07-utility-gis-editor-dataset-qualification-research.md"
+      ],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": false
+    },
+    {
+      "id": "U13",
+      "title": "Watercare — Exchange Information Requirements",
+      "url": "https://assets.watercare.co.nz/media/eir_watercare_e057cb8a01.pdf",
+      "publisher": "Watercare",
+      "accessed": "2026-11-09",
+      "section": "§5, стр.12–13",
+      "facts": [
+        "Представитель Watercare разрешает sharing/publishing и принимает либо отклоняет обмены в CDE; Project Manager также имеет обязанности принятия обменов. BIM Lead проверяет модели и сообщает ошибки авторам."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Полномочия публикации и авторство модели разделены.",
+      "tool_ref": "turn16view2",
+      "previous_url_matches": [
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-07-utility-gis-editor-dataset-qualification-answers.md",
+        "C:\\Repositories\\geoservice\\RAW_inputs\\research_results\\2026-11-07-utility-gis-editor-dataset-qualification-research.md"
+      ],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": false
+    },
+    {
+      "id": "U14",
+      "title": "North East Water — ACDC Instructional Guide 2022",
+      "url": "https://www.newater.com.au/Portals/0/NE-Water/Sections/Developers-Plumbers/Developers/As-Constructed-Design-Certification-Instructional-Guide-2022.pdf",
+      "publisher": "North East Water",
+      "accessed": "2026-11-09",
+      "section": "§4.3–4.14",
+      "facts": [
+        "Для подачи обязателен специальный as-constructed template. Консультант должен проверять положение существующих сетей: выданная владельцем карта может не иметь нужной точности."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Актуальная коррекция требует проверки окружающей сети, а не слепого доверия старой подложке.",
+      "tool_ref": "turn16view3",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U15",
+      "title": "Gympie — ESDI008 Specifications for As-constructed Drawings and Information",
+      "url": "https://www.gympie.qld.gov.au/files/assets/public/v/9/development/documents/esdi008-specifications-for-as-constructed-drawings-and-information-v203.pdf",
+      "publisher": "Gympie Regional Council",
+      "accessed": "2026-11-09",
+      "section": "§1–2; Appendix C",
+      "facts": [
+        "Непригодная поставка возвращается за счёт поставщика. On-maintenance inspection не проводится до получения, review и approval as-constructed данных."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Проверка комплекта является самостоятельным предварительным gate.",
+      "tool_ref": "turn42view0",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U16",
+      "title": "Cairns — Guideline Works Acceptance",
+      "url": "https://www.cairns.qld.gov.au/__data/assets/pdf_file/0011/587117/GuidelinesWorksAcceptance.pdf",
+      "publisher": "Cairns Regional Council",
+      "accessed": "2026-11-09",
+      "section": "Steps 1–4, стр.1–3",
+      "facts": [
+        "Сначала административная проверка полноты, затем техническая проверка; неполный комплект возвращается. Осмотр назначается после успешной технической проверки."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Успешная доставка не разрешает последующий шаг автоматически.",
+      "tool_ref": "turn42view1",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U17",
+      "title": "Logan — As constructed submission form and fact sheet",
+      "url": "https://www.logan.qld.gov.au/files/assets/public/v/1/planning-and-building/documents/as_constructed_submission_kit.pdf",
+      "publisher": "Logan City Council",
+      "accessed": "2026-11-09",
+      "section": "Section 5, стр.4",
+      "facts": [
+        "Сопроводительное письмо указывает состав и цель подачи; подключение к действующей сети не производится без требуемых результатов испытаний."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Цель передачи и доказательства эксплуатационной готовности фиксируются отдельно.",
+      "tool_ref": "turn42view2",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U18",
+      "title": "Gladstone — As Constructed Requirements Submission Guidelines",
+      "url": "https://www.gladstone.qld.gov.au/gladstone/downloads/file/1322/asset-design-as-constructed-guidelines-for-creation-and-submission-of-adac-xml-files",
+      "publisher": "Gladstone Regional Council",
+      "accessed": "2026-11-09",
+      "section": "§3–4.1, стр.10–11",
+      "facts": [
+        "Запись охватывает построенные, исправленные, обновлённые, заменённые и выведенные активы, включая связь с существующей инфраструктурой. Ошибки возвращают на коррекцию и повторную подачу."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Корректирующее изменение оценивается в контексте действующей сети.",
+      "tool_ref": "turn42view3",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U19",
+      "title": "TxDOT / TTI — A Data Platform for Managing Utilities Along Highway Corridors: User Manual",
+      "url": "https://static.tti.tamu.edu/tti.tamu.edu/documents/2110-2.pdf",
+      "publisher": "Texas Transportation Institute / TxDOT",
+      "accessed": "2026-11-09",
+      "section": "As-built review; GIS documentation, стр.39–41",
+      "facts": [
+        "Review может оставить заявку на Hold и запросить недостающие/ошибочные данные. Complete As-built Review передаёт её ответственному GIS; завершение GIS documentation отдельно переводит заявку в Completed/Archival."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Решение проверки и фактическое внесение в GIS разделены.",
+      "tool_ref": "turn42view4",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U20",
+      "title": "FHWA — Appendix D Utility Permit Management",
+      "url": "https://www.fhwa.dot.gov/utilities/utilityrelo/d.cfm",
+      "publisher": "Federal Highway Administration",
+      "accessed": "2026-11-09",
+      "section": "Workflow status options",
+      "facts": [
+        "Completed в описанном прототипе означает получение as-built, Documented — последующее обновление GIS персоналом District Office; смена статуса уведомляет следующего исполнителя."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Одинаковое слово Completed у разных систем не означает публикацию.",
+      "tool_ref": "turn42view5",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": true,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U21",
+      "title": "Wollondilly — Developers Information: ADAC Work as Executed",
+      "url": "https://www.wollondilly.nsw.gov.au/planning-and-development/developers-information",
+      "publisher": "Wollondilly Shire Council",
+      "accessed": "2026-11-09",
+      "section": "ADAC WAE",
+      "facts": [
+        "Чертежи отражают отклонения от проекта и WAE-ревизию. Значимые ошибки ADAC возвращают поставщику, что задерживает принятие активов."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Проверка согласованности чертежа и цифрового файла обязательна перед принятием.",
+      "tool_ref": "turn42view6",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U22",
+      "title": "Bellevue — Side Sewer As-built Inspection",
+      "url": "https://bellevuewa.gov/city-government/departments/utilities/utilities-projects-plans-standards/utilities-codes-and-standards/side-sewer-permit-conditions/side-sewer-as-built-inspection",
+      "publisher": "City of Bellevue Utilities",
+      "accessed": "2026-11-09",
+      "section": "Inspection Procedure",
+      "facts": [
+        "При непригодном as-built физический осмотр может состояться, но permit не подписывается; потребуется повторный осмотр. Чертёж содержит GIS IDs соседних колодцев."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Выполнение физической проверки и документальное завершение различаются.",
+      "tool_ref": "turn46view2",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U23",
+      "title": "Western Power — Underground Distribution Schemes Manual 12th edition",
+      "url": "https://www.westernpower.com.au/499666/siteassets/documents/manuals-guides-and-standards/uds-manual/underground-distribution-scheme-uds-manual.pdf",
+      "publisher": "Western Power",
+      "accessed": "2026-11-09",
+      "section": "§6.2.2.8–6.2.4",
+      "facts": [
+        "Передача заверенных записей, инспекция и handover разделены. После handover доступ подрядчика к сети требует разрешения владельца; дефекты гарантийного периода исправляет Western Power с распределением стоимости по причине."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Коррекция после закрытия передачи требует нового разрешённого эксплуатационного действия.",
+      "tool_ref": "turn46view1",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U24",
+      "title": "Western Power — Drawing Numbers and Titles",
+      "url": "https://www.westernpower.com.au/link/793784f09d5a4e5ead503097945f2074.aspx",
+      "publisher": "Western Power",
+      "accessed": "2026-11-09",
+      "section": "§6.3–6.4, стр.9",
+      "facts": [
+        "При замене чертежа ссылки в других чертежах обновляют; superseded экземпляр передают Document Control для обновления базы. Отменённый чертёж маркируют Cancelled с датой и также передают Document Control."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Отмена/замена записи — явное событие с обновлением реестра и ссылок, не простое исчезновение файла.",
+      "tool_ref": "turn44view1",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    },
+    {
+      "id": "U25",
+      "title": "Power and Water — As-constructed documentation format for water and sewer gifted assets",
+      "url": "https://www.powerwater.com.au/development/water-development/standards-and-guidelines/as-constructed-documentation-format-for-water-and-sewer-gifted-assets",
+      "publisher": "Power and Water Corporation",
+      "accessed": "2026-11-09",
+      "section": "As-Constructed Drawings; Model Space",
+      "facts": [
+        "Каждый файл именуют официальным номером и amendment; новый актив выделяют отдельно от existing/future/abandoned. Для многоэтапной стройки model space содержит только новые активы текущего этапа."
+      ],
+      "limits": "Локальная практика издателя; не устанавливает полномочия GeoService, правила гонки withdrawal/post или автоматическое переоткрытие закрытого наряда. Прочитаны указанные релевантные разделы, не весь объём документа.",
+      "contribution": "Явная область поставки защищает от смешения старых и новых изменений.",
+      "tool_ref": "turn44view2",
+      "previous_url_matches": [],
+      "publisher_host_previously_seen": false,
+      "url_new_to_corpus": true
+    }
+  ],
+  "findings": [
+    "Наиболее прямое основание различения submission и acceptance — U08 §6.6.",
+    "U10 и U24 подтверждают прослеживаемые последующие ревизии, замену и отмену уже зарегистрированных документов.",
+    "U11 различает исправление ошибочного знания и изменение самого актива; U09 запрещает выдавать будущее намерение за фактический статус.",
+    "Универсального права Editor односторонне отозвать approved immutable package и момента разрешения гонки с post не установлено. Это требует явно маркированного решения условной организации.",
+    "U19 и U20 связаны общим TxDOT прототипом, не являются независимыми свидетельствами. Ряд council ADAC документов разделяет методологию, поэтому число URL не равно независимости практик.",
+    "Новизна относительно RAW_inputs/research_results проверяется отдельно по URL; прежние источники допустимы как повторное основание, но не как новое знание."
+  ],
+  "excluded": [
+    {
+      "url": "https://www.westernpower.com.au/link/8364b37b380b4cd59e1ae81e8b412897.aspx",
+      "reason": "Открытие перенаправило на Drawing Numbers and Titles; отдельный CAD standard не засчитан. Учитывается только фактически прочитанный U24."
+    },
+    {
+      "url": "https://www.noosa.qld.gov.au/files/assets/public/v/1/planning-and-development/documents/noosa_council__adac_xml_data_capture_guidelines_ver_2.1_draft_20mar2024.pdf",
+      "reason": "Доступен и прочитан, но исключён из счёта: draft и небольшой дополнительный вклад."
+    },
+    {
+      "url": "https://assets.watercare.co.nz/media/eir_watercare_e057cb8a01.pdf",
+      "reason": "Screenshot страницы 12 завершился Cache miss; PDF text доступен. U13 сохранён по однозначной текстовой матрице ролей; визуальная проверка не заявляется."
+    }
+  ]
+}

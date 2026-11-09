@@ -3,8 +3,8 @@ title: Представление сети и эксплуатационное �
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-10-18
-source: RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md
+updated: 2026-11-08
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_version_persisted_edit_invariants]
@@ -29,3 +29,11 @@ related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_
 Принято как правило интерпретации: называть предмет изменения и точное свойство проверки; не делать скрытых каскадных изменений, не считать Save доказательством эксплуатационной готовности. Область QA включает не только географический extent, но и классы объектов, конфигурацию и состояние источников. Отсутствие найденных ошибок без известного охвата не доказывает полноту.
 
 Новые commands замены активов, агрегаты сценариев, nonspatial storage и hydraulic engine не вводятся. Эти возможности требуют отдельных задач. Действующая политика [[Wiki/policies/network_edit_semantics_policy]] и инварианты [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]] сохраняются.
+
+## Назначение геометрического представления — 2026-11-08
+
+Геометрия одного обозначаемого объекта может быть измеренной, картографически размещённой или производной. В ручной оценке указывается, какое представление проверяется и как оно получено. Свидетельство о натурном положении нельзя переносить на схематическое представление без объяснимого соответствия.
+
+Внешние примеры: R21 — отдельное сохранение съёмочных координат при размещении GIS относительно кадастровой основы; R56 — множественность геометрических представлений MUDDI; R66 — синтез геометрии nonspatial объекта. Источник: [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]], раздел 2. Это не универсальная норма размещения и не новое multi-geometry storage.
+
+Решение условной организации уточняет прежнее разделение представления и эксплуатации. Доступность картинки не доказывает измеренность линии; карта не заменяет исходное свидетельство. Связи: [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/assessment_statement_lifecycle]].

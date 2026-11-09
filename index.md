@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-08
+updated: 2026-11-09
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -32,11 +32,19 @@ tags: [knowledge, index, geoservice]
 
 ## Свежие Изменения
 
+- 2026-11-09: [сверка model_health с кодом](docs/verification/2026-11-09-model-health-code-reconciliation.md) обновила активную техническую очередь: first-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов прошли. FU-2026-10-11-001 resolved, stale снят. Открытых follow-up’ов 18; evaluator/review/post и новые исключения остаются незавершённым объёмом.
+
+- 2026-11-09: исследование [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-research]] и ответы [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]] обработаны ingest: 88 документов, 66 новых нормализованных URL; приняты правила отзыва и коррекции, два вопроса answered. Всего 58 RAW обработаны, открытых вопросов 0, follow-up’ов 19; stale реализации сохраняется. Source-summary: [[Vision_wiki/chats/2026-11-09-publication-research]], [[Vision_wiki/chats/2026-11-09-publication-answers]].
+
+- 2026-11-09: `/sync-vision` согласовал индексы, реестр вопросов и активную discovery-очередь с [протоколом metadata/fixture](docs/verification/2026-11-08-demo-dataset-runtime-check.md): открытых вопросов — 0, follow-up’ов — 19; канонических конфликтов — 0, legacy — 1. Все 56 RAW обработаны, `/ingest` не требуется. За период 2026-11-02–2026-11-09 с учётом рабочего дерева добавлены 6 RAW, 2 concept-ноды, 1 specification и 6 source-summary chat-нод; новых decision/entity/solution нод — 0. Ссылки уже представлены в профильных индексах и реестрах. Единственная stale-нода — [[DDD_Wiki/model_health]]; lint: 37 известных missing_frontmatter в RAW. Текущий следующий шаг — [[memory/project-state]]. Датированные сводки ниже исторические.
+
+- 2026-11-08: `/sync-vision` сверил индексы и реестры: 54 RAW-источника обработаны, новых необработанных нет. За период 2026-11-01–2026-11-08 добавлены 4 уже обработанных RAW; новых concept/decision/entity/solution нод — 2/0/0/0, дополнительно 1 specification и 4 source-summary chat-ноды. Все новые ноды представлены в профильных индексах и реестрах. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture; активных канонических конфликтов — 0, legacy-конфликтов — 1. Единственная stale-нода — [[DDD_Wiki/model_health]]. Повторный lint: 37 известных `missing_frontmatter` только в RAW. Живое состояние и следующий шаг — [[memory/project-state]].
+
 - 2026-11-08: ingest [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]] и [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers]]: 78 внешних документов, 15 ответов; уточнены метод, охват проверки и состояния знания. Всего 54 RAW обработаны; два фактических вопроса metadata/fixture остаются open.
 
 - 2026-11-07: ingest [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research]] и [[RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers]]: общий корпус 80 внешних документов, 15 ответов; новые понятия идентичности экземпляра и происхождения координатной операции, критерий ручного допуска. Теперь 52 RAW обработаны. 19 follow-up’ов и два metadata/fixture вопроса остаются открытыми; реализация и фактическая БД не проверялись.
 
-- 2026-11-07: Сверка `/sync-vision` 2026-11-07: 54 RAW-источника, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001. За неделю 2026-10-31–2026-11-07 добавлены 2 уже обработанных RAW; новых concept/decision/entity/solution нод — 2/0/0/0, дополнительно 1 specification и 2 source-summary chat-ноды. Обновлены технические ноды о раздельном чтении EditVersion, WebSocket и Docker, включая название HTML/UI при сборке. Сводка — [[Code_wiki/index]], живое состояние — [[memory/project-state]].
+- 2026-11-07: Сверка `/sync-vision` 2026-11-07: 52 RAW-источника, все отмечены обработанными; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture. Активных канонических конфликтов — 0, legacy-конфликтов — 1. Все реестры `Wiki/_registry` покрывают существующие ноды. Lint: 37 известных `missing_frontmatter` только в RAW. Единственная stale-нода — `DDD_Wiki/model_health`; метка сохраняется до сверки очереди реализации и metadata/fixture по FU-2026-10-11-001. За неделю 2026-10-31–2026-11-07 добавлены 2 уже обработанных RAW; новых concept/decision/entity/solution нод — 2/0/0/0, дополнительно 1 specification и 2 source-summary chat-ноды. Обновлены технические ноды о раздельном чтении EditVersion, WebSocket и Docker, включая название HTML/UI при сборке. Сводка — [[Code_wiki/index]], живое состояние — [[memory/project-state]].
 - [Отчёт S2-X01](docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. См. [[Code_wiki/архитектура/frontend_save_recovery]]. Датированные записи ниже сохраняют историю прежних срезов.
 
 - 2026-10-22: `/sync-vision` сверил весь граф знаний и реестры. Все 48 RAW обработаны; новых необработанных нет. Открыты 19 follow-up’ов и 2 вопроса metadata/fixture; активных канонических конфликтов — 0, legacy-конфликтов — 1. Stale-нода — [[DDD_Wiki/model_health]]. Lint: 37 известных `missing_frontmatter` только в RAW. За период 2026-10-15–2026-10-22 Git содержит 7 новых уже обработанных RAW; новых concept/decision/entity/solution нод — 4/0/0/0, дополнительно 4 policies, 4 specifications, 1 glossary, 3 use cases, 7 source-summary chat-нод и 3 технические ноды. Индексы и реестры покрывают эти добавления; текущая сводка — [[memory/project-state]].
@@ -157,8 +165,8 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
-- По `FU-2026-10-11-001` остаётся сверить доменную очередь и два вопроса metadata/fixture. S2-X01 завершён по [отчёту 2026-10-23](docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md); автоматический перенос попытки не реализован и не является незавершённым обещанием этого среза. Сопоставление остальных правил условной организации с реализацией остаётся в `FU-2026-10-13-004`.
-- Для first-save остаются 2 вопроса сверки actual dataset spatial metadata и eligible line/fixture с кодом и Sprint 2: [[Wiki/_registry/questions]]. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 приняты условной организацией; учебное evidence не подтверждает точность L-003. Реализация принятых recovery/evidence/retention правил — `FU-2026-10-13-004`.
+- По `FU-2026-10-11-001` остаётся сверить описания реализации; metadata/fixture проверены для revision 49, активная discovery-очередь согласована с реестром. S2-X01 завершён по [отчёту 2026-10-23](docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md); автоматический перенос попытки не реализован и не является незавершённым обещанием этого среза. Сопоставление остальных правил условной организации с реализацией остаётся в `FU-2026-10-13-004`.
+- Для first-save открытых вопросов metadata/fixture нет; основание — [протокол 08.11.2026](docs/verification/2026-11-08-demo-dataset-runtime-check.md), локальная revision 49. Реестр: [[Wiki/_registry/questions]]. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 приняты условной организацией; учебное evidence не подтверждает точность L-003. Реализация принятых recovery/evidence/retention правил — `FU-2026-10-13-004`.
 - Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
@@ -178,7 +186,7 @@ tags: [knowledge, index, geoservice]
 ## Ручной Pipeline
 
 - Утро: запустить `/sync-vision`, прочитать `memory/project-state.md`, проверить новые файлы в `RAW_inputs/`, затем запустить `/ingest` для новых RAW inputs.
-- Перед встречей: запустить `/discover --context "планирование спринта" --phase "F2"` и подготовить чек-лист из 10-15 вопросов.
+- Перед встречей: запустить `/discover --context "планирование спринта" --phase "F2"` и отобрать до 15 смыслово новых вопросов без минимальной квоты; при исчерпании темы сообщить об этом.
 - Планирование спринта: запустить `/plan-sprint`; команда использует текущий код, `Code_wiki`, `Wiki/DDD_Wiki`, конфликты модели, генерирует 150 planning questions и показывает top 15 для 14-дневного спринта.
 - После встречи: положить транскрипт в `RAW_inputs/meetings/`, запустить `/ingest`, обновить wiki-ноды, конфликты, follow-up'ы и project state.
 - Раз в неделю: запустить `/lint-wiki`, затем `/sync-vision`, затем проверить отчет о здоровье wiki.
@@ -213,3 +221,7 @@ tags: [knowledge, index, geoservice]
 ## Заключения о качестве линии — 2026-10-22
 
 Исследование [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research]] содержит 84 прочитанных внешних документа; [[RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-answers]] — 15 ответов и сценарии. Результат ingest: [[Wiki/policies/assessment_issue_and_correction_policy]], [[Wiki/specifications/assessment_statement_usable]], [[DDD_Wiki/use_cases/issue_and_correct_line_assessment]]. Приняты правила условной организации; реализация и runtime-проверки не подменены исследованием.
+
+## Представления сети и квалификация — 2026-11-08
+
+[[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]] — 80 внешних документов; [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-answers]] — 15 ответов. Ingest уточнил существующие понятия и [[DDD_Wiki/use_cases/prepare_and_check_line_edit]]. Всего RAW — 56, все отмечены обработанными. Фактическая квалификация metadata/fixture ещё не выполнена.
