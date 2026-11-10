@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from utility_service.domain_services.bbox import InvalidBboxError
+
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.domain.exceptions.business_validation_exception import (
     BusinessValidationException,
@@ -105,6 +107,10 @@ def install_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(LayerNotFoundException)
     async def layer_not_found_exceptions(_: Request, e: LayerNotFoundException):
         return JSONResponse(status_code=404, content={"error": str(e)})
+
+    @app.exception_handler(InvalidBboxError)
+    async def invalid_bbox_error(_: Request, error: InvalidBboxError) -> JSONResponse:
+        return JSONResponse(status_code=422, content={"error": str(error)})
 
     @app.exception_handler(BusinessValidationException)
     async def business_validation_error(_: Request, e: BusinessValidationException):

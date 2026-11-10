@@ -3,8 +3,8 @@ title: Реестр Изменений Нод Code_wiki
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-11-07
-source: repository-change:2026-11-07
+updated: 2026-11-10
+source: repository-change:2026-11-10
 tags: [repository-change, code-wiki, ingest]
 ---
 
@@ -21,6 +21,7 @@ tags: [repository-change, code-wiki, ingest]
 
 | Дата | Нода | Причина | Источник |
 | --- | --- | --- | --- |
+| 2026-11-10 | [[архитектура/backend]] | Независимость domain_services, отдельная ошибка bbox и принадлежность ORM registry persistence-слою. | Принятый дизайн CQ-01; bbox, feature_registry, exception_handlers, architecture boundaries |
 | 2026-11-07 | [[deployment/docker_compose]] | Единое название HTML/UI на этапе сборки и различие production build args и dev environment. | VITE_APP_NAME, runbook FE-04 |
 | 2026-11-04 | [[архитектура/data_model]] | Граница чтения рабочей версии и исходного снимка. | edit_version_map.sql, version_comparison.sql |
 | 2026-11-04 | [[архитектура/edit_version_persistence]] | Порядок чтения baseline после блокировки корня версии. | EditVersionService.save_geometry |

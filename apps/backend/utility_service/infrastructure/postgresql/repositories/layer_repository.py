@@ -6,7 +6,7 @@ from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from utility_service.domain_services.feature_registry import get_layer_feature_model
+from utility_service.infrastructure.postgresql.feature_registry import get_layer_feature_model
 from utility_service.infrastructure.postgresql.models.layer import Layer
 from utility_service.use_cases.schemas.geojson.geojson import FeatureProperties
 

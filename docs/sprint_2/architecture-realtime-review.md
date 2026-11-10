@@ -56,6 +56,8 @@ Broadcast последовательно ожидает `send_json` каждог
 
 ### CQ-01 — P3: доменный слой зависит от инфраструктуры и use cases
 
+Статус 2026-11-10 — исправлена в согласованных границах: ORM registry перенесён в infrastructure, bbox использует независимый InvalidBboxError с прежним HTTP 422, добавлена проверка границы domain_services. [Отчёт проверки](2026-11-10-cq-01-verification.md): 798 passed, 335 skipped; Ruff/Black и независимое ревью без замечаний. SQL, модели и транзакции не изменены; DB integration повторно не запускалась. Ниже сохранено исходное описание.
+
 **Код:** `apps/backend/utility_service/domain_services/feature_registry.py:8–18`, `apps/backend/utility_service/domain_services/bbox.py:3`.
 
 Registry импортирует конкретные PostgreSQL ORM-модели, а bbox использует исключение из use_cases. Доменный модуль тем самым знает детали внешних слоёв. Это затрудняет изолированное использование доменных функций и делает границу `domain_services` непоследовательной: чистая геометрическая логика и адаптация ORM оказываются под одним названием.

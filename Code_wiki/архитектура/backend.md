@@ -3,8 +3,8 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-11-04
-source: repository-change:2026-10-28
+updated: 2026-11-10
+source: repository-change:2026-11-10
 tags: [backend, fastapi, postgis, architecture]
 ---
 
@@ -41,6 +41,35 @@ Backend GeoService находится в `apps/backend` и собран вокр
 Pydantic schemas живут в `utility_service.use_cases.schemas`. Разрешенное направление
 runtime-зависимостей: `web_api -> use_cases -> infrastructure`; обратная зависимость на
 `web_api` запрещена и проверяется архитектурным тестом.
+
+## Независимость Domain Services
+
+Production-код `utility_service.domain_services` не импортирует infrastructure,
+use_cases или web_api, а также SQLAlchemy/GeoAlchemy2/FastAPI/Starlette.
+`apps/backend/tests/test_architecture_boundaries.py` проверяет прямые абсолютные
+и относительные импорты, включая импорт через родительский пакет и TYPE_CHECKING.
+Каталоги tests исключены только из проверки domain_services; остальные правила
+сохраняют прежний охват. Динамические импорты и полный транзитивный граф этот
+статический тест не анализирует.
+
+`domain_services.bbox.InvalidBboxError(ValueError)` выражает ошибку bbox без
+HTTP-зависимостей. Handler в web_api преобразует именно этот тип в legacy
+`422 {"error": message}`. Неожиданный ValueError по-прежнему обрабатывается как 500.
+Общий BusinessValidationException остаётся в use_cases: его другие применения
+не становятся доменными только из-за названия класса.
+
+`utility_service.infrastructure.postgresql.feature_registry` сопоставляет имена
+шести legacy feature-таблиц с ORM-моделями. Его использует LayerRepository;
+старого domain_services.feature_registry и re-export нет. Неизвестная таблица
+по-прежнему вызывает UnknownStorageTableError из use_cases и получает прежний
+HTTP 422. Независимость domain_services не означает запрета всех зависимостей
+infrastructure от use_cases или введения persistence ports для Save.
+
+Источники: `apps/backend/utility_service/domain_services/bbox.py`,
+`apps/backend/utility_service/infrastructure/postgresql/feature_registry.py`,
+`apps/backend/utility_service/web_api/api/exception_handlers.py`,
+`apps/backend/tests/test_architecture_boundaries.py`;
+[принятое решение CQ-01](../../docs/sprint_2/2026-11-10-cq-01-design.md).
 
 ## Utility Read Path
 

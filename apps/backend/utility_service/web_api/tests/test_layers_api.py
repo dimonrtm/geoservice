@@ -168,6 +168,55 @@ def auth_headers(role: str) -> dict[str, str]:
     return {"Authorization": f"Bearer {token}"}
 
 
+@pytest.mark.parametrize(
+    ("bbox", "message"),
+    [
+        ("10,20,30", "Bbox должен содержать 4 вещественных числа"),
+        ("x,20,30,40", "Bbox должен содержать 4 вещественных числа"),
+        ("181,95,30,40", "Долгота должна принадлежать диапазону от -180 до 180"),
+        ("10,95,30,40", "Широта должна принадлежать диапазону от -90 до 90"),
+        ("10,40,30,20", "Минимальная широта должна быть меньше максимальной"),
+        ("30,20,10,40", "Минимальная долгота должна быть меньше максимальной"),
+    ],
+)
+def test_invalid_bbox_does_not_call_feature_service(monkeypatch, bbox, message) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
+    feature_service = FakeFeatureService()
+    client = TestClient(build_app("editor", FakeLayerService(), feature_service))
+    response = client.get(
+        f"/api/v1/layers/{LAYER_ID}/features",
+        headers=auth_headers("editor"),
+        params={"bbox": bbox},
+    )
+    assert response.status_code == 422
+    assert response.json() == {"error": message}
+    UUID(response.headers["X-Correlation-ID"])
+    assert feature_service.calls == []
+
+
+def test_valid_bbox_preserves_coordinates(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
+    feature_service = FakeFeatureService()
+    client = TestClient(build_app("editor", FakeLayerService(), feature_service))
+    response = client.get(
+        f"/api/v1/layers/{LAYER_ID}/features",
+        headers=auth_headers("editor"),
+        params={"bbox": "-180,-90,180,90"},
+    )
+    assert response.status_code == 200
+    assert response.json()["meta"]["bbox"] == [-180.0, -90.0, 180.0, 90.0]
+
+
+def test_missing_bbox_keeps_request_validation(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
+    feature_service = FakeFeatureService()
+    client = TestClient(build_app("editor", FakeLayerService(), feature_service))
+    response = client.get(f"/api/v1/layers/{LAYER_ID}/features", headers=auth_headers("editor"))
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["query", "bbox"]
+    assert feature_service.calls == []
+
+
 @pytest.mark.parametrize("role", ["editor", "reviewer"])
 @pytest.mark.parametrize("request_spec", LEGACY_LAYER_REQUESTS)
 def test_legacy_layers_disabled_blocks_authenticated_roles(

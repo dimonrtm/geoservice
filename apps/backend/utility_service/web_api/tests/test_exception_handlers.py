@@ -5,6 +5,12 @@ from uuid import UUID
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
+import pytest
+
+from utility_service.domain_services.bbox import InvalidBboxError
+from utility_service.use_cases.domain.exceptions.unknown_storage_table_error import (
+    UnknownStorageTableError,
+)
 
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.use_cases.domain.exceptions.business_validation_exception import (
@@ -34,6 +40,14 @@ def create_test_app():
     @api.get("/unexpected-value-error")
     def unexpected_value_error() -> None:
         raise ValueError("Это программистская ошибка")
+
+    @api.get("/invalid-bbox")
+    def invalid_bbox() -> None:
+        raise InvalidBboxError("Минимальная широта должна быть меньше максимальной")
+
+    @api.get("/unknown-storage-table")
+    def unknown_storage_table() -> None:
+        raise UnknownStorageTableError("Для данного слоя не найдена подходящая модель")
 
     @api.get("/utility-not-found")
     def utility_not_found() -> None:
@@ -88,6 +102,21 @@ def test_unexpected_value_error_returns_500() -> None:
     response = client.get("/unexpected-value-error")
 
     assert response.status_code == 500
+
+
+@pytest.mark.parametrize(
+    ("path", "message"),
+    [
+        ("/invalid-bbox", "Минимальная широта должна быть меньше максимальной"),
+        ("/unknown-storage-table", "Для данного слоя не найдена подходящая модель"),
+    ],
+)
+def test_specific_validation_errors_preserve_legacy_422(path: str, message: str) -> None:
+    client = TestClient(create_test_app(), raise_server_exceptions=False)
+    response = client.get(path)
+    assert response.status_code == 422
+    assert response.json() == {"error": message}
+    UUID(response.headers[CORRELATION_ID_HEADER])
 
 
 def test_utility_network_api_error_returns_structured_response() -> None:
