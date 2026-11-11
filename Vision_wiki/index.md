@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-09
+updated: 2026-11-10
 source: null
 tags: [vision-wiki, product]
 ---
@@ -12,7 +12,7 @@ tags: [vision-wiki, product]
 
 ## Текущее состояние
 
-После сверки кода 2026-11-09 [[DDD_Wiki/model_health]] актуализирован, stale снят; FU-2026-10-11-001 resolved. First-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов проходят. [Матрица реализации](../docs/verification/2026-11-09-model-health-code-reconciliation.md) отделяет их от ещё не реализованных evaluator/review/post/withdrawal/correction. Открытых follow-up’ов 18, вопросов 0; канонических конфликтов 0, legacy-конфликтов 1. Все 58 RAW обработаны. Metadata/fixture подтверждены протоколом 08.11 для revision 49, позиционная точность не подтверждена. Discovery проверяет покрытие зависимых нарядов; технический остаток ведётся отдельно. Датированные записи ниже исторические.
+После сверки кода 2026-11-09 [[DDD_Wiki/model_health]] актуализирован, stale снят; FU-2026-10-11-001 resolved. First-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов проходят. [Матрица реализации](../docs/verification/2026-11-09-model-health-code-reconciliation.md) отделяет их от ещё не реализованных evaluator/review/post/withdrawal/correction. Открытых follow-up’ов 18; после ingest 10.11.2026 открытых вопросов нет; три вопроса о зависимостях нарядов answered в [[Wiki/_registry/questions]]; канонических конфликтов 0, legacy-конфликтов 1. Все 60 RAW обработаны. Metadata/fixture подтверждены протоколом 08.11 для revision 49, позиционная точность не подтверждена. Приняты условия зависимости, её пересмотра и разбора взаимного ожидания; технический остаток ведётся отдельно. Датированные записи ниже исторические.
 
 Продуктовые знания и решения GeoService.
 
@@ -162,3 +162,7 @@ tags: [vision-wiki, product]
 
 - [[Vision_wiki/chats/2026-11-09-publication-research]] — анализ UseCase и прироста знания, 88 документов, 66 новых нормализованных URL.
 - [[Vision_wiki/chats/2026-11-09-publication-answers]] — ответы на два новых discovery-вопроса, принятые за условную организацию; 15 аналитических сценариев, не runtime-приёмка.
+
+## Зависимые наряды — 2026-11-10
+
+75 документов, 25 новых нормализованных URL; три ответа условной организации, без runtime-приёмки. [[Wiki/concepts/work_result_dependency]], [[Wiki/policies/dependent_work_coordination_policy]], [[Wiki/specifications/dependent_work_step_allowed]], [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]]. Источники: [[Vision_wiki/chats/2026-11-10-dependencies-research]], [[Vision_wiki/chats/2026-11-10-dependencies-answers]].

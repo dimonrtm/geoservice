@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-09
+updated: 2026-11-10
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -31,6 +31,12 @@ tags: [knowledge, index, geoservice]
 - [[docs/agent-memory/README]] - компактная инженерная память Codex.
 
 ## Свежие Изменения
+
+- 2026-11-10: исследование зависимых нарядов и ответы обработаны `/ingest`: 75 документов, 25 новых нормализованных URL; 60 RAW обработаны, открытых вопросов 0, follow-up 18. [[Vision_wiki/chats/2026-11-10-dependencies-research]], [[Vision_wiki/chats/2026-11-10-dependencies-answers]]. Реестр, Current Discovery Queue и live state согласованы; runtime не проверялся.
+
+- 2026-11-10: `/discover` выделил 3 открытых вопроса о зависимых нарядах: условие выполнения зависимости, её изменение и взаимное ожидание. [[Wiki/_registry/questions]], Current Discovery Queue в [[DDD_Wiki/model_health]] и следующий шаг [[memory/project-state]] согласованы. Постановка до исследования; теперь все три answered по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]]; правила отзыва/коррекции и first-save не переоткрываются.
+
+- 2026-11-10: `/sync-vision` сверил индексы и реестры: все 58 RAW обработаны, новых необработанных нет. Открыты 18 follow-up’ов, вопросов — 0; активных канонических конфликтов — 0, legacy — 1; stale-меток нет. За период 2026-11-03–2026-11-10 добавлены 8 уже обработанных RAW, 3 concept-ноды, 2 policies, 2 specifications, 2 use cases и 8 source-summary chat-нод; новых decision/entity/solution нод — 0. Все добавления представлены в индексах. В [[Wiki/_registry/questions]] устранено устаревшее указание на остаток уже закрытого FU-2026-10-11-001. [[Code_wiki/index]] отражает обновление границ domain_services. Lint: 37 известных missing_frontmatter только в RAW. Следующий шаг — [[memory/project-state]]; датированные сводки ниже исторические.
 
 - 2026-11-09: [сверка model_health с кодом](docs/verification/2026-11-09-model-health-code-reconciliation.md) обновила активную техническую очередь: first-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов прошли. FU-2026-10-11-001 resolved, stale снят. Открытых follow-up’ов 18; evaluator/review/post и новые исключения остаются незавершённым объёмом.
 

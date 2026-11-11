@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-07
+updated: 2026-11-10
 source: repository-change:2026-10-28
 tags: [code-wiki, technical-knowledge]
 ---
@@ -28,6 +28,8 @@ tags: [code-wiki, technical-knowledge]
   `/ingest repository-change`.
 
 ## Текущий Repository Snapshot
+
+- [[архитектура/backend#Независимость Domain Services]] — границы зависимостей domain_services, доменная ошибка bbox и размещение ORM registry в persistence-слое; основание — repository-change ingest 10.11.2026.
 
 - [[архитектура/browser_auth_sessions]] — стабильный sid, одноразовые refresh generations, немедленный серверный отзыв, status/resume gates и координация вкладок.
 

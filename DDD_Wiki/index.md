@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-09
+updated: 2026-11-10
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -12,7 +12,7 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-После сверки кода 2026-11-09 [[DDD_Wiki/model_health]] актуализирован, stale снят; FU-2026-10-11-001 resolved. First-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов проходят. [Матрица реализации](../docs/verification/2026-11-09-model-health-code-reconciliation.md) отделяет их от ещё не реализованных evaluator/review/post/withdrawal/correction. Открытых follow-up’ов 18, вопросов 0; канонических конфликтов 0, legacy-конфликтов 1. Все 58 RAW обработаны. Metadata/fixture подтверждены протоколом 08.11 для revision 49, позиционная точность не подтверждена. Discovery проверяет покрытие зависимых нарядов; технический остаток ведётся отдельно. Датированные записи ниже исторические.
+После сверки кода 2026-11-09 [[DDD_Wiki/model_health]] актуализирован, stale снят; FU-2026-10-11-001 resolved. First-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов проходят. [Матрица реализации](../docs/verification/2026-11-09-model-health-code-reconciliation.md) отделяет их от ещё не реализованных evaluator/review/post/withdrawal/correction. Открытых follow-up’ов 18; после ingest 10.11.2026 открытых вопросов нет; три вопроса о зависимостях нарядов answered в [[Wiki/_registry/questions]]; канонических конфликтов 0, legacy-конфликтов 1. Все 60 RAW обработаны. Metadata/fixture подтверждены протоколом 08.11 для revision 49, позиционная точность не подтверждена. Приняты условия зависимости, её пересмотра и разбора взаимного ожидания; технический остаток ведётся отдельно. Датированные записи ниже исторические.
 
 `DDD_Wiki/` хранит доменную модель в терминах Domain-Driven Design: домен, поддомены, bounded contexts, context map, aggregates, state machines, invariants, use cases и integration patterns.
 
@@ -85,3 +85,7 @@ tags: [domain-knowledge, ddd]
 ## Исключения публикационного цикла — 2026-11-09
 
 [[DDD_Wiki/use_cases/withdraw_review_package]] и [[DDD_Wiki/use_cases/correct_published_result]] дополняют ReviewPackage и WorkOrder lifecycle: терминальный отзыв до допуска post, выяснение допущенного outcome, новый связанный исправительный цикл и документальная ветка. Новых aggregate, API и Save enum нет; история и последующие законные изменения сохраняются.
+
+## Зависимые наряды — 2026-11-10
+
+75 документов, 25 новых нормализованных URL; три ответа условной организации, без runtime-приёмки. [[Wiki/concepts/work_result_dependency]], [[Wiki/policies/dependent_work_coordination_policy]], [[Wiki/specifications/dependent_work_step_allowed]], [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]]. Источники: [[Vision_wiki/chats/2026-11-10-dependencies-research]], [[Vision_wiki/chats/2026-11-10-dependencies-answers]].

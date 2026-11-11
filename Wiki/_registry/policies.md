@@ -53,3 +53,5 @@ related: [Wiki/index]
 | --- | --- | --- | --- | --- |
 | [[Wiki/policies/review_package_withdrawal_policy]] | Отзыв точного пакета до допуска исполнения; порядок гонки, терминальность и новая подача | Запрет post либо выяснение допущенного outcome | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
 | [[Wiki/policies/published_result_correction_policy]] | Новый связанный WorkOrder для исправления данных; отдельная evidence-only ветка | Прослеживаемая коррекция с сохранением последующих изменений | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
+
+| [[Wiki/policies/dependent_work_coordination_policy]] | Приёмка результата, пересмотр обязательства и разбор взаимного ожидания | Допуск обычных проверок, удержание или принятое перепланирование | high | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers.md |

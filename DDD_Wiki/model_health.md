@@ -3,7 +3,7 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-11-09
+updated: 2026-11-10
 source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md; docs/verification/2026-11-09-model-health-code-reconciliation.md"
 tags: [domain-knowledge, ddd, health]
 confidence: high
@@ -16,7 +16,7 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 Сверка кода завершена: [матрица и проверки](../docs/verification/2026-11-09-model-health-code-reconciliation.md). First-save, публичные Save/Revert/readback и S2-X01 recovery реализованы; 105 выбранных frontend-тестов прошли. Метка stale снята как признак устранённого отставания этого документа. Backend/PostGIS/M4 и БД повторно не проверялись; прежние протоколы сохраняют свою область.
 
-FU-2026-10-11-001 resolved; FU-2026-10-13-004 остаётся open. Открытых follow-up’ов 18, вопросов 0; канонических конфликтов 0, legacy-конфликтов 1. ReviewPackage, positional evaluator, submit/review/post и новые withdrawal/correction rules остаются моделью. Актуальность документа не означает завершение этих функций. Датированные сводки ниже исторические.
+FU-2026-10-11-001 resolved; FU-2026-10-13-004 остаётся open. Открытых follow-up’ов 18; после ingest 10.11.2026 открытых вопросов нет; DISC-2026-11-10-01/02/03 answered; канонических конфликтов 0, legacy-конфликтов 1. ReviewPackage, positional evaluator, submit/review/post и новые withdrawal/correction rules остаются моделью. Актуальность документа не означает завершение этих функций. Активная discovery-очередь ниже обновлена 10.11.2026; остальные датированные сводки исторические.
 
 ## История discovery до сверки кода — 2026-11-09
 
@@ -109,13 +109,11 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 
 ## Current Discovery Queue
 
-Открытых вопросов нет. DISC-2026-11-09-01/02 закрыты по [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]]: [[DDD_Wiki/use_cases/withdraw_review_package]] и [[DDD_Wiki/use_cases/correct_published_result]]. Приняты правила полномочий, гонки withdrawal/post, повторной подачи, актуального исправительного контекста и завершения ограниченной области. Не повторять их как неотвеченные из-за отсутствия реализации.
+Открытых вопросов нет. DISC-2026-11-10-01/02/03 answered по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]]; общий корпус 75 документов, 25 новых нормализованных URL. Приняты [[Wiki/concepts/work_result_dependency]], [[Wiki/policies/dependent_work_coordination_policy]], [[Wiki/specifications/dependent_work_step_allowed]] и [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]].
 
-Следующий /discover сначала проверяет по context map покрытие нескольких зависимых нарядов на связанных участках: различены ли зависимость работы, актуальность основания и порядок публикации. Это направление смысловой проверки, а не уже установленный новый пробел или заранее открытый вопрос. Использовать реестр и прежние ответы; при исчерпании темы сообщить об этом, не заполнять квоту повторами. Соседние процессы не расширяют автоматически first-save scope.
+Следующий `/discover` заново сверяет соседние процессы и смысловую новизну. Возможное направление проверки — идентичность и передача обязанностей при физической замене/разделении/слиянии активов; это кандидат контекста, не сформированный вопрос или разрешённая реализация. Сначала сопоставить с уже принятыми representation/record identity правилами. Если новых развилок нет, сообщить об исчерпании темы.
 
-First-save, policy, metadata и fixture L-003 для локальной revision 49 имеют инварианты и [runtime-протокол](../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Смена экземпляра требует технической сверки; позиционная пригодность этим не доказана. Разделение Reviewer/Publisher закрыто integrated contract.
-
-Отдельная техническая очередь: FU-2026-10-11-001 resolved по сверке 09.11.2026; FU-2026-10-13-004 — оставшееся соответствие реализации принятым правилам, включая новые исключения. Отсутствие submit/review/post в коде не подменяет доменный пробел.
+Не переоткрывать условия зависимостей, замену обязательства, взаимное ожидание, withdrawal/correction, evidence и закрытую сверку first-save/metadata/fixture. FU-2026-10-11-001 resolved; FU-2026-10-13-004 остаётся отдельной технической очередью. Источники не доказывают runtime; baseline, AOI/Feeder и first-save scope неизменны.
 
 ## Current Sprint Planning Queue
 

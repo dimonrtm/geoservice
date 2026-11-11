@@ -39,3 +39,5 @@ related: [Wiki/index]
 | Concept | Meaning | Confidence | Source |
 | --- | --- | --- | --- |
 | [[Wiki/concepts/published_result_correction_case]] | Область ответственности за дефект опубликованных данных/evidence, связанные циклы и остатки | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
+
+| [[Wiki/concepts/work_result_dependency]] | Обязательство результата А перед конкретным этапом Б, отдельно от evidence и parent links | high | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-research.md |

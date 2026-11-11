@@ -46,3 +46,7 @@ related: [Wiki/index]
 | [[Wiki/specifications/published_result_correction_closed]] | Доказанный результат/охват, связи, проверки, уведомление и явная судьба обязательных остатков | Разбор не завершён либо закрывает только ограниченную область с переданным остатком | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
 
 [[Wiki/specifications/post_allowed]] дополнен запретом post после принятого отзыва и запретом второй неразобранной попытки; чтение can_post не резервирует допуск. Источник — [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]].
+
+| Specification | Predicate | Failure Meaning | Confidence | Source |
+| --- | --- | --- | --- | --- |
+| [[Wiki/specifications/dependent_work_step_allowed]] | Все действующие обязательства этапа выполнены применимыми принятыми результатами, остатки приняты, обычные guards соблюдены | Удержание зависимого этапа с причиной | high | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers.md |
