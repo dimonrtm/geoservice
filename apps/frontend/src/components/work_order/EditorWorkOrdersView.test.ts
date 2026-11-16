@@ -628,9 +628,9 @@ describe("EditorWorkOrdersView", () => {
         .get('[data-ui-control-state="idle"]')
         .text(),
     ).toBe("Начать");
-    expect(
-      wrapper.find(".workOrderCard .openWorkspaceButton").exists(),
-    ).toBe(false);
+    expect(wrapper.find(".workOrderCard .openWorkspaceButton").exists()).toBe(
+      false,
+    );
     expect(wrapper.get('[data-test="map-view"]').attributes("data-mode")).toBe(
       "empty",
     );
