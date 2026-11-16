@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import WorkspaceNavigationDialog from "@/components/WorkspaceNavigationDialog.vue";
-import { useEditorNavigationStore } from "@/stores/editorNavigation";
+import WorkspaceNavigationDialog from "@/components/workspace/WorkspaceNavigationDialog.vue";
+import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
 const editorNavigation = useEditorNavigationStore();
 import { LogOut } from "@lucide/vue";
 import { computed, onMounted, onUnmounted } from "vue";
 
 import ActionableError from "./components/ActionableError.vue";
-import EditorWorkOrdersView from "./components/EditorWorkOrdersView.vue";
+import EditorWorkOrdersView from "./components/work_order/EditorWorkOrdersView.vue";
 import LoginScreen from "./components/LoginScreen.vue";
 import ReviewerHome from "./components/ReviewerHome.vue";
 import UiButton from "@/components/ui/UiButton.vue";

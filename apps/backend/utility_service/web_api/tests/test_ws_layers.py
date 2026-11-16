@@ -26,7 +26,7 @@ from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiEr
 from utility_service.use_cases.domain.exceptions.websocket_ticket_error import WebSocketTicketError
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
 from utility_service.web_api.api.ws_layers import ws_layers_router
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 from utility_service.use_cases.services.realtime_connection_manager import (

@@ -1,0 +1,1457 @@
+{
+  "method": "TypeScript AST static import/export graph; explicit type-only edges excluded from SCC. Vue script blocks only. Dynamic imports and runtime call graph are not analyzed. Source value imports can still be erased by compiler configuration.",
+  "productionFiles": 88,
+  "edges": 282,
+  "valueEdges": 218,
+  "stronglyConnectedComponents": [
+    [
+      "apps/frontend/src/api/auth.ts",
+      "apps/frontend/src/api/editVersionChangeSet.ts",
+      "apps/frontend/src/api/editVersionMap.ts",
+      "apps/frontend/src/api/editVersions.ts",
+      "apps/frontend/src/api/featureBaseline.ts",
+      "apps/frontend/src/api/http.ts",
+      "apps/frontend/src/api/workOrders.ts",
+      "apps/frontend/src/auth/browserSessionMonitor.ts",
+      "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "apps/frontend/src/stores/auth.ts",
+      "apps/frontend/src/stores/editVersionCommands.ts",
+      "apps/frontend/src/stores/editVersionDraft.ts",
+      "apps/frontend/src/stores/editorNavigation.ts",
+      "apps/frontend/src/stores/editorSession.ts",
+      "apps/frontend/src/stores/workOrders.ts",
+      "apps/frontend/src/stores/workspaceRecovery.ts"
+    ]
+  ],
+  "unresolved": [
+    {
+      "from": "apps/frontend/src/App.vue",
+      "spec": "./assets/main.css"
+    },
+    {
+      "from": "apps/frontend/src/components/ui/UiButton.vue",
+      "spec": "@/components/ui/ui-controls.css"
+    },
+    {
+      "from": "apps/frontend/src/components/ui/UiIconButton.vue",
+      "spec": "@/components/ui/ui-controls.css"
+    },
+    {
+      "from": "apps/frontend/src/main.ts",
+      "spec": "./style.css"
+    }
+  ],
+  "imports": [
+    {
+      "from": "apps/frontend/src/api/auth.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/auth.ts",
+      "to": "apps/frontend/src/auth/browserSessionTypes.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/api/editVersionChangeSet.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/editVersionChangeSet.ts",
+      "to": "apps/frontend/src/contracts/editVersionChangeSet.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/editVersionMap.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/editVersionMap.ts",
+      "to": "apps/frontend/src/contracts/editVersionMap.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/editVersions.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/editVersions.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/api/editVersions.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/featureBaseline.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/featureBaseline.ts",
+      "to": "apps/frontend/src/contracts/featureBaseline.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/http.ts",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/http.ts",
+      "to": "apps/frontend/src/pinia.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/http.ts",
+      "to": "apps/frontend/src/api/baseUrl.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/http.ts",
+      "to": "apps/frontend/src/api/sessionNotConfirmedError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/layers.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/layers.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/layers.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/api/parseApiError.ts",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/realtime.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/workOrders.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/api/workOrders.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/components/WorkspaceNavigationDialog.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/components/ActionableError.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/components/LoginScreen.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/components/ReviewerHome.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/components/ui/UiButton.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/components/ui/UiIconButton.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/domain/authRole.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/config/app.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/App.vue",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/auth/browserSessionCoordinator.ts",
+      "to": "apps/frontend/src/auth/browserSessionTypes.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/auth/browserSessionMonitor.ts",
+      "to": "apps/frontend/src/api/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/auth/browserSessionMonitor.ts",
+      "to": "apps/frontend/src/auth/browserSessionTypes.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/auth/browserSessionMonitor.ts",
+      "to": "apps/frontend/src/auth/browserSessionCoordinator.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/ActionableError.vue",
+      "to": "apps/frontend/src/components/ui/UiButton.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/ActionableError.vue",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/components/ActionableError.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/components/MapView.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/components/ui/UiIconButton.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/components/WorkspaceDetailsPanel.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/components/WorkspaceRecoveryList.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/components/WorkspaceComparisonPanel.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/components/WorkspaceEditCommands.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/stores/featureBaseline.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/stores/editVersionChangeSet.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/stores/workOrders.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/EditorWorkOrdersView.vue",
+      "to": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/LoginScreen.vue",
+      "to": "apps/frontend/src/api/parseApiError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/LoginScreen.vue",
+      "to": "apps/frontend/src/config/app.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/LoginScreen.vue",
+      "to": "apps/frontend/src/components/ActionableError.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/LoginScreen.vue",
+      "to": "apps/frontend/src/components/ui/UiButton.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/LoginScreen.vue",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/LoginScreen.vue",
+      "to": "apps/frontend/src/errors/apiErrorPresentations.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/LoginScreen.vue",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapPageView.vue",
+      "to": "apps/frontend/src/components/MapView.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/composables/map/useFeatureLoading.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/composables/map/useLayerRealtime.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/composables/map/useLayerSelection.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/composables/map/useMapInstance.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/composables/map/usePolygonEditing.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/components/WorkspaceLineInteraction.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/MapView.vue",
+      "to": "apps/frontend/src/map/workspace-layers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/ui/UiButton.vue",
+      "to": "apps/frontend/src/components/ui/ui-control-loading.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/ui/UiIconButton.vue",
+      "to": "apps/frontend/src/components/ui/ui-control-loading.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceComparisonPanel.vue",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceComparisonPanel.vue",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceComparisonPanel.vue",
+      "to": "apps/frontend/src/domain/workspaceComparison.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceComparisonPanel.vue",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceDetailsPanel.vue",
+      "to": "apps/frontend/src/components/ActionableError.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceDetailsPanel.vue",
+      "to": "apps/frontend/src/components/ui/UiButton.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceDetailsPanel.vue",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceDetailsPanel.vue",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceEditCommands.vue",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceEditCommands.vue",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceEditCommands.vue",
+      "to": "apps/frontend/src/stores/editVersionDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceEditCommands.vue",
+      "to": "apps/frontend/src/stores/editVersionChangeSet.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceEditCommands.vue",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceEditCommands.vue",
+      "to": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceLineInteraction.vue",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceLineInteraction.vue",
+      "to": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceNavigationDialog.vue",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceNavigationDialog.vue",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceNavigationDialog.vue",
+      "to": "apps/frontend/src/domain/workspaceNavigation.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceNavigationDialog.vue",
+      "to": "apps/frontend/src/domain/dialogFocus.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceRecoveryList.vue",
+      "to": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceRecoveryList.vue",
+      "to": "apps/frontend/src/stores/workOrders.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceRecoveryList.vue",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/components/WorkspaceRecoveryList.vue",
+      "to": "apps/frontend/src/domain/dialogFocus.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureLoading.ts",
+      "to": "apps/frontend/src/api/layers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureLoading.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureLoading.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureLoading.ts",
+      "to": "apps/frontend/src/composables/map/useFeatureTileCache.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureLoading.ts",
+      "to": "apps/frontend/src/map/feature-grid.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureLoading.ts",
+      "to": "apps/frontend/src/map/maplibrelayers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureTileCache.ts",
+      "to": "apps/frontend/src/map/geometry-intersects-tile.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureTileCache.ts",
+      "to": "apps/frontend/src/api/layers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureTileCache.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureTileCache.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useFeatureTileCache.ts",
+      "to": "apps/frontend/src/contracts/map-cache.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerRealtime.ts",
+      "to": "apps/frontend/src/api/http.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerRealtime.ts",
+      "to": "apps/frontend/src/api/baseUrl.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerRealtime.ts",
+      "to": "apps/frontend/src/api/realtime.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerRealtime.ts",
+      "to": "apps/frontend/src/contracts/realtime.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerRealtime.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerRealtime.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerSelection.ts",
+      "to": "apps/frontend/src/api/layers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerSelection.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useLayerSelection.ts",
+      "to": "apps/frontend/src/map/maplibrelayers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useMapInstance.ts",
+      "to": "apps/frontend/src/composables/map/mapStyle.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/usePolygonEditing.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/usePolygonEditing.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/usePolygonEditing.ts",
+      "to": "apps/frontend/src/map/maplibrelayers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/usePolygonEditing.ts",
+      "to": "apps/frontend/src/map/polygon-editing.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/usePolygonEditing.ts",
+      "to": "apps/frontend/src/stores/edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/domain/workspaceDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/domain/workspaceLineInteraction.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/stores/editVersionDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts",
+      "to": "apps/frontend/src/map/workspace-layers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/api/editVersionMap.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/api/editVersionChangeSet.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/api/featureBaseline.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/contracts/editVersionMap.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/contracts/editVersionChangeSet.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/contracts/featureBaseline.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/api/parseApiError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/api/sessionNotConfirmedError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "to": "apps/frontend/src/stores/workspaceRetry.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/api/editVersionMap.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/api/editVersionChangeSet.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/api/featureBaseline.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/stores/editVersionMap.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/stores/editVersionChangeSet.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/stores/featureBaseline.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "to": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/contracts/api.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/contracts/editVersionChangeSet.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/contracts/editVersionMap.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/editVersionMap.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/contracts/featureBaseline.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/contracts/map-cache.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/map-cache.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/realtime.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/contracts/realtime.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/contracts/realtime.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/work-orders.ts",
+      "to": "apps/frontend/src/contracts/editVersionMap.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/work-orders.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/work-orders.ts",
+      "to": "apps/frontend/src/contracts/editVersionMap.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/workspace-edit.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/workspace-recovery.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/contracts/workspace-recovery.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/authRole.ts",
+      "to": "apps/frontend/src/api/auth.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "to": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "to": "apps/frontend/src/stores/editVersionDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "to": "apps/frontend/src/domain/workspaceDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceCommandPresentation.ts",
+      "to": "apps/frontend/src/domain/workspaceLineInteraction.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceComparison.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceDraft.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceDraft.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceLineInteraction.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/domain/workspaceLineInteraction.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/errors/apiErrorPresentations.ts",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/main.ts",
+      "to": "apps/frontend/src/App.vue",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/main.ts",
+      "to": "apps/frontend/src/pinia.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/map/feature-grid.ts",
+      "to": "apps/frontend/src/contracts/map-cache.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/map/geometry-intersects-tile.ts",
+      "to": "apps/frontend/src/contracts/map-cache.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/map/maplibrelayers.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/map/maplibrelayers.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/map/maplibrelayers.ts",
+      "to": "apps/frontend/src/stores/edit.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/map/polygon-editing.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/map/workspace-layers.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/map/workspace-layers.ts",
+      "to": "apps/frontend/src/domain/workspaceDraft.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/api/parseApiError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/api/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/errors/apiErrorPresentations.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/auth/browserSessionCoordinator.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/auth/browserSessionMonitor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/auth/browserSessionTypes.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/stores/workOrders.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/auth.ts",
+      "to": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/edit.ts",
+      "to": "apps/frontend/src/api/layers.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/edit.ts",
+      "to": "apps/frontend/src/contracts/api.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/edit.ts",
+      "to": "apps/frontend/src/contracts/geojson.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/domain/workspaceDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/domain/workspaceNavigation.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/stores/editVersionDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/stores/workOrders.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorNavigation.ts",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorReadState.ts",
+      "to": "apps/frontend/src/stores/workspaceRetry.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/contracts/workspace-recovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/api/parseApiError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/errors/apiErrorPresentations.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/api/editVersions.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/stores/editVersionDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/stores/workOrders.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editorSession.ts",
+      "to": "apps/frontend/src/stores/editorSessionStorage.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionChangeSet.ts",
+      "to": "apps/frontend/src/contracts/editVersionChangeSet.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionChangeSet.ts",
+      "to": "apps/frontend/src/stores/editorReadState.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/domain/workspaceDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/contracts/workspace-recovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/stores/editVersionDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/stores/workOrders.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionCommands.ts",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionDraft.ts",
+      "to": "apps/frontend/src/domain/workspaceDraft.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionDraft.ts",
+      "to": "apps/frontend/src/stores/auth.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionDraft.ts",
+      "to": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionDraft.ts",
+      "to": "apps/frontend/src/stores/editVersionCommands.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionDraft.ts",
+      "to": "apps/frontend/src/stores/editorNavigation.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionDraft.ts",
+      "to": "apps/frontend/src/stores/editorSession.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionMap.ts",
+      "to": "apps/frontend/src/contracts/editVersionMap.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/editVersionMap.ts",
+      "to": "apps/frontend/src/stores/editorReadState.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/featureBaseline.ts",
+      "to": "apps/frontend/src/contracts/featureBaseline.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/featureBaseline.ts",
+      "to": "apps/frontend/src/stores/editorReadState.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workOrders.ts",
+      "to": "apps/frontend/src/api/workOrders.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workOrders.ts",
+      "to": "apps/frontend/src/api/parseApiError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workOrders.ts",
+      "to": "apps/frontend/src/contracts/api-error.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/workOrders.ts",
+      "to": "apps/frontend/src/contracts/work-orders.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/workOrders.ts",
+      "to": "apps/frontend/src/errors/apiErrorPresentations.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workOrders.ts",
+      "to": "apps/frontend/src/stores/editorSessionStorage.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workOrders.ts",
+      "to": "apps/frontend/src/stores/editorSessionStorage.ts",
+      "typeOnly": true
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/composables/useEditVersionEditor.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/composables/readEditVersionSnapshot.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/api/editVersions.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/api/parseApiError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/contracts/workspace-recovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/stores/workspaceRecoveryStorage.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/stores/workspaceRecoveryMigration.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/stores/workspaceRecoveryScheduler.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/stores/workspaceRetry.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecovery.ts",
+      "to": "apps/frontend/src/stores/workspaceSaveErrors.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecoveryIndexedDb.ts",
+      "to": "apps/frontend/src/contracts/workspace-recovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecoveryMigration.ts",
+      "to": "apps/frontend/src/contracts/workspace-recovery.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecoveryMigration.ts",
+      "to": "apps/frontend/src/stores/workspaceRecoveryStorage.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecoveryStorage.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceRecoveryStorage.ts",
+      "to": "apps/frontend/src/stores/workspaceRecoveryIndexedDb.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceSaveErrors.ts",
+      "to": "apps/frontend/src/api/parseApiError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceSaveErrors.ts",
+      "to": "apps/frontend/src/api/sessionNotConfirmedError.ts",
+      "typeOnly": false
+    },
+    {
+      "from": "apps/frontend/src/stores/workspaceSaveErrors.ts",
+      "to": "apps/frontend/src/contracts/workspace-edit.ts",
+      "typeOnly": true
+    }
+  ]
+}

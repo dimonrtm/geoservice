@@ -24,19 +24,19 @@ vi.mock("@/api/auth", () => ({
   logoutSession: logoutSessionMock,
 }));
 
-vi.mock("@/stores/workOrders", () => ({
+vi.mock("@/stores/work_order/workOrders", () => ({
   useWorkOrdersStore: () => ({
     reset: resetWorkOrdersMock,
     suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
   }),
 }));
-vi.mock("@/stores/editVersionCommands", () => ({
+vi.mock("@/stores/edit_version/editVersionCommands", () => ({
   useEditVersionCommandsStore: () => ({
     reset: resetWorkOrdersMock,
     suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
   }),
 }));
-vi.mock("@/stores/editorSession", () => ({
+vi.mock("@/stores/editor_session/editorSession", () => ({
   useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
 }));
 

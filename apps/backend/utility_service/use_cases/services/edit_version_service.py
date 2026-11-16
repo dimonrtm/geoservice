@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+from utility_service.use_cases.domain.exceptions.work_order_operation_error import (
+    WorkOrderOperationCode,
+    WorkOrderOperationError,
+)
+
 from dataclasses import dataclass
 from copy import deepcopy
 from uuid import UUID
@@ -459,9 +464,8 @@ class EditVersionService:
             return await self.reopen_edit_version(existing)
 
         if work_order.status is not WorkOrderStatus.ASSIGNED:
-            raise WorkOrderApiError(
-                409,
-                "WORK_ORDER_STATE_CONFLICT",
+            raise WorkOrderOperationError(
+                WorkOrderOperationCode.WORK_ORDER_STATE_CONFLICT,
                 "Состояние рабочей задачи не допускает операцию.",
             )
 
@@ -523,9 +527,8 @@ class EditVersionService:
     ) -> User:
         actor = await self.user_repository.get_by_id(actor_id)
         if actor is None:
-            raise WorkOrderApiError(
-                404,
-                "WORK_ORDER_ACTOR_NOT_FOUND",
+            raise WorkOrderOperationError(
+                WorkOrderOperationCode.WORK_ORDER_ACTOR_NOT_FOUND,
                 "Пользователь не найден.",
             )
         self.require_active_editor(actor)
@@ -538,9 +541,8 @@ class EditVersionService:
     ) -> WorkOrder:
         work_order = await self.work_order_repository.get_by_id_for_update(work_order_id)
         if work_order is None or work_order.assignee_user_id != actor.id:
-            raise WorkOrderApiError(
-                404,
-                "WORK_ORDER_NOT_FOUND",
+            raise WorkOrderOperationError(
+                WorkOrderOperationCode.WORK_ORDER_NOT_FOUND,
                 "Рабочая задача не найдена.",
             )
         return work_order
@@ -550,9 +552,8 @@ class EditVersionService:
         actor: User,
     ) -> None:
         if actor.role is not UserRole.EDITOR or not actor.is_active:
-            raise WorkOrderApiError(
-                403,
-                "ROLE_NOT_ALLOWED",
+            raise WorkOrderOperationError(
+                WorkOrderOperationCode.ROLE_NOT_ALLOWED,
                 "Роль пользователя не допускает операцию.",
             )
 
@@ -592,8 +593,7 @@ class EditVersionService:
         )
 
     def raise_context_invalid(self) -> None:
-        raise WorkOrderApiError(
-            422,
-            "WORK_ORDER_CONTEXT_INVALID",
+        raise WorkOrderOperationError(
+            WorkOrderOperationCode.WORK_ORDER_CONTEXT_INVALID,
             "Контекст рабочей задачи поврежден или неполон.",
         )

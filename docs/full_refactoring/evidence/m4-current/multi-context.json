@@ -1,0 +1,300 @@
+{
+  "project": "geoservice-m4-cd999026",
+  "verifiedAt": "2026-11-15T07:16:01.974Z",
+  "ids": [
+    "6619ba81-577e-4a2b-8ce3-77f19df5a9c0",
+    "e6e12c90-5311-457a-9c02-5f4fc415b5fe",
+    "69e5bbb4-2db2-484a-87d3-be63217a45eb"
+  ],
+  "replays": [
+    "e6e12c90-5311-457a-9c02-5f4fc415b5fe",
+    "6619ba81-577e-4a2b-8ce3-77f19df5a9c0"
+  ],
+  "newerSnapshot": {
+    "revision": 3,
+    "owner": "10000000-0000-4000-8000-000000000001",
+    "events": 2,
+    "commands": 2,
+    "operation": "updated",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.5260608,
+          44.820011
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baseline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+  },
+  "after": {
+    "revision": 3,
+    "owner": "10000000-0000-4000-8000-000000000001",
+    "events": 2,
+    "commands": 2,
+    "operation": "updated",
+    "geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.5260608,
+          44.820011
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baseline": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          65.52,
+          44.82
+        ],
+        [
+          65.525,
+          44.8205
+        ],
+        [
+          65.53,
+          44.82
+        ]
+      ]
+    },
+    "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+  },
+  "commands": [
+    {
+      "body": {
+        "commandId": "152ed026-f404-4642-a9ac-fb35e791caa5",
+        "draftVersionToken": "1",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.52605083590757,
+              44.82001102680485
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        }
+      },
+      "committed": {
+        "revision": 2,
+        "owner": "10000000-0000-4000-8000-000000000001",
+        "events": 1,
+        "commands": 1,
+        "operation": "updated",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.5260508,
+              44.820011
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "baseline": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+      },
+      "version": "1aa07bf5-3a4f-45a9-bd3b-1bfccdf2ec80",
+      "feature": "9988acfc-3391-5a22-a9d0-38720a33b1a9"
+    },
+    {
+      "body": {
+        "commandId": "00803d33-ad7c-4746-b93b-86e92027ca4f",
+        "draftVersionToken": "1",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.52605083590757,
+              44.82001102680485
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        }
+      },
+      "committed": {
+        "revision": 2,
+        "owner": "10000000-0000-4000-8000-000000000001",
+        "events": 1,
+        "commands": 1,
+        "operation": "updated",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.5260508,
+              44.820011
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "baseline": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+      },
+      "version": "70c38691-f551-4642-b808-4c91d5fb3d98",
+      "feature": "3c2f2e5b-d979-c8a3-a47a-221d2bd70f9e"
+    },
+    {
+      "body": {
+        "commandId": "c5b13d56-b810-4e55-8a45-6cbb58dd399b",
+        "draftVersionToken": "1",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.52605083590757,
+              44.82001102680485
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        }
+      },
+      "committed": {
+        "revision": 2,
+        "owner": "10000000-0000-4000-8000-000000000001",
+        "events": 1,
+        "commands": 1,
+        "operation": "updated",
+        "geometry": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.5260508,
+              44.820011
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "baseline": {
+          "type": "LineString",
+          "coordinates": [
+            [
+              65.52,
+              44.82
+            ],
+            [
+              65.525,
+              44.8205
+            ],
+            [
+              65.53,
+              44.82
+            ]
+          ]
+        },
+        "baselineBytes": "0102000020e610000003000000e17a14ae47615040295c8fc2f56846409a999999996150401b2fdd240669464052b81e85eb615040295c8fc2f5684640"
+      },
+      "version": "b81767c5-da1a-4da8-965d-8b911c80d546",
+      "feature": "cb913549-7c81-c387-e620-c9dfd933e687"
+    }
+  ]
+}

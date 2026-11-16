@@ -4,7 +4,7 @@ import {
   fitWorkspaceToAoi,
   setWorkspaceData,
 } from "@/map/workspace-layers";
-import type { WorkspaceResponse } from "@/contracts/work-orders";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
 
 const setDataMock = vi.fn();
 

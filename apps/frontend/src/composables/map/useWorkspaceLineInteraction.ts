@@ -1,16 +1,16 @@
 import { computed, onBeforeUnmount, ref, watch, type Ref } from "vue";
 import { Marker, type Map, type MapMouseEvent } from "maplibre-gl";
-import type { WorkspaceResponse } from "@/contracts/work-orders";
-import { isLocalDraftDirty } from "@/domain/workspaceDraft";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
+import { isLocalDraftDirty } from "@/domain/workspace/workspaceDraft";
 import {
   vertexMoveBlockReason,
   lineSelectionBlockReason,
-} from "@/domain/workspaceLineInteraction";
-import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
-import { useEditVersionDraftStore } from "@/stores/editVersionDraft";
-import { useEditorNavigationStore } from "@/stores/editorNavigation";
-import { useEditorSessionStore } from "@/stores/editorSession";
-import { useEditVersionEditor } from "@/composables/useEditVersionEditor";
+} from "@/domain/workspace/workspaceLineInteraction";
+import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
+import { useEditVersionDraftStore } from "@/stores/edit_version/editVersionDraft";
+import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
+import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
+import { useEditVersionEditor } from "@/composables/edit_version/useEditVersionEditor";
 import { useAuthStore } from "@/stores/auth";
 import {
   setWorkspaceDraftData,

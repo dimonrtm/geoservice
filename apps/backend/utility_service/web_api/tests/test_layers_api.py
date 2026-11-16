@@ -28,7 +28,7 @@ from utility_service.web_api.tests.auth_user_factory import (
     create_test_access_token as create_access_token,
     access_service_for,
 )
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.api.layers import layers_router
 from utility_service.web_api.tests.auth_user_factory import auth_user

@@ -20,7 +20,7 @@ from utility_service.use_cases.schemas.auth.refreshed_auth_session_out import (
 )
 from utility_service.web_api.api import auth as auth_api
 from utility_service.web_api.api.auth import auth_router
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 from utility_service.use_cases.tests.test_auth_session_access_service import access_fixture, signed

@@ -151,7 +151,7 @@ describe("http api", () => {
     }).catch((cause) => cause);
     expect(error).toMatchObject({ code: "ERR_CANCELED" });
     const { classifySaveFailure } =
-      await import("@/stores/workspaceSaveErrors");
+      await import("@/stores/workspace/workspaceSaveErrors");
     expect(classifySaveFailure(error, true).kind).toBe("retryableUnknown");
   });
   it("actor_change_while_waiting_for_gate_cancels_old_request", async () => {
@@ -176,7 +176,7 @@ describe("http api", () => {
     const error = await result;
     expect(error).toMatchObject({ code: "ERR_CANCELED" });
     const { classifySaveFailure } =
-      await import("@/stores/workspaceSaveErrors");
+      await import("@/stores/workspace/workspaceSaveErrors");
     expect(classifySaveFailure(error, true).kind).toBe("blocked");
   });
   it.each(["login", "session/refresh", "logout", "session/status"])(

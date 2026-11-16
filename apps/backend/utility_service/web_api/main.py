@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from utility_service.web_api.api.lifespan import lifespan
 from utility_service.web_api.api.auth import auth_router
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.secure_router import secure_router
 from utility_service.web_api.api.utility_network import utility_network_router
 from utility_service.web_api.api.layers import layers_router

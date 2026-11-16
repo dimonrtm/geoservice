@@ -14,7 +14,7 @@ from utility_service.web_api.tests.auth_user_factory import (
     access_service_for,
 )
 from utility_service.use_cases.deps import get_auth_service, get_auth_session_access_service
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.secure_router import secure_router
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware

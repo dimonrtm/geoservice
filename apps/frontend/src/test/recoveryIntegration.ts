@@ -1,7 +1,7 @@
 import { expect, vi } from "vitest";
-import type { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
-import { useWorkspaceRecoveryStore } from "@/stores/workspaceRecovery";
-import { createRecoveryStorage } from "@/stores/workspaceRecoveryStorage";
+import type { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
+import { useWorkspaceRecoveryStore } from "@/stores/workspace/workspace_recovery/workspaceRecovery";
+import { createRecoveryStorage } from "@/stores/workspace/workspace_recovery/workspaceRecoveryStorage";
 export async function settle(
   store: ReturnType<typeof useEditVersionCommandsStore>,
 ) {

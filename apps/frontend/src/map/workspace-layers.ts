@@ -1,8 +1,8 @@
 import type { FeatureCollection, Geometry } from "geojson";
 import type { GeoJSONSource, Map } from "maplibre-gl";
 
-import type { WorkspaceResponse } from "@/contracts/work-orders";
-import type { WorkspaceLocalDraft } from "@/domain/workspaceDraft";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
+import type { WorkspaceLocalDraft } from "@/domain/workspace/workspaceDraft";
 
 const emptyFeatureCollection: FeatureCollection<
   Geometry,
@@ -207,7 +207,7 @@ function addLayerIfMissing(
 
 export function setWorkspaceComparisonData(
   map: Map,
-  geometry: import("@/contracts/workspace-edit").LineStringXY | null,
+  geometry: import("@/contracts/workspace/workspace-edit").LineStringXY | null,
 ): void {
   const id = "workspace:comparison";
   if (!map.getSource(id))

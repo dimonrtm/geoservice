@@ -15,7 +15,9 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionStatus,
     WorkOrderStatus,
 )
-from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
+from utility_service.use_cases.domain.exceptions.work_order_operation_error import (
+    WorkOrderOperationError,
+)
 from utility_service.use_cases.services.edit_version_service import EditVersionService
 
 
@@ -383,10 +385,10 @@ def test_open_rejects_non_active_editor(actor: SimpleNamespace) -> None:
         work_order_repository=work_order_repository,
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.open_for_work_order(uuid4(), actor.id))
 
-    assert exc_info.value.status_code == 403
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "ROLE_NOT_ALLOWED"
     work_order_repository.get_by_id_for_update.assert_not_awaited()
 
@@ -399,10 +401,10 @@ def test_open_masks_wrong_assignee_as_not_found() -> None:
         work_order_repository=repository(get_by_id_for_update=assigned_to_other, save=None),
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.open_for_work_order(assigned_to_other.id, actor.id))
 
-    assert exc_info.value.status_code == 404
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_NOT_FOUND"
 
 
@@ -421,10 +423,10 @@ def test_open_rejects_missing_default_state() -> None:
         default_state_repository=repository(get_active_aggregate_by_work_order_id=None),
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.open_for_work_order(assigned.id, actor.id))
 
-    assert exc_info.value.status_code == 422
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_CONTEXT_INVALID"
 
 
@@ -445,10 +447,10 @@ def test_open_rejects_assigned_work_order_with_existing_open_version() -> None:
         ),
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.open_for_work_order(assigned.id, actor.id))
 
-    assert exc_info.value.status_code == 422
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_CONTEXT_INVALID"
 
 
@@ -466,8 +468,51 @@ def test_open_rejects_in_progress_work_order_without_existing_open_version() -> 
         ),
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.open_for_work_order(started.id, actor.id))
 
-    assert exc_info.value.status_code == 422
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_CONTEXT_INVALID"
+
+
+def test_open_rechecks_assignment_after_unique_violation() -> None:
+    actor = user()
+    assigned = work_order(actor.id)
+    started = work_order(uuid4(), status=WorkOrderStatus.IN_PROGRESS)
+    started.id = assigned.id
+    existing = edit_version(assigned.id, actor.id)
+    baseline = default_state(assigned.id, base_network_revision=12)
+    baseline_aggregate = SimpleNamespace(
+        state=baseline,
+        features=[default_feature(baseline.id)],
+        associations=[default_association(baseline.id)],
+    )
+    session = FakeSession()
+    work_order_repository = repository(
+        get_by_id_for_update=None,
+        save=None,
+    )
+    edit_version_repository = repository(
+        get_open_edit_version=None,
+        create_open_edit_version=None,
+        touch_edit_version=None,
+    )
+    work_order_repository.get_by_id_for_update.side_effect = [assigned, started]
+    edit_version_repository.get_open_edit_version.side_effect = [None, existing]
+    edit_version_repository.create_open_edit_version.side_effect = integrity_error()
+    service = build_service(
+        session=session,
+        user_repository=repository(get_by_id=actor),
+        work_order_repository=work_order_repository,
+        edit_version_repository=edit_version_repository,
+        default_state_repository=repository(
+            get_active_aggregate_by_work_order_id=baseline_aggregate,
+        ),
+    )
+
+    with pytest.raises(WorkOrderOperationError) as caught:
+        asyncio.run(service.open_for_work_order(assigned.id, actor.id))
+    assert caught.value.code == "WORK_ORDER_NOT_FOUND"
+    assert not hasattr(caught.value, "status_code")
+    assert session.begin_calls == 2
+    edit_version_repository.touch_edit_version.assert_not_awaited()

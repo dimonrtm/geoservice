@@ -16,31 +16,31 @@ vi.mock("@/api/auth", () => ({
   logoutSession: logout,
   fetchSessionStatus: statusCheck,
 }));
-vi.mock("@/stores/workOrders", () => ({
+vi.mock("@/stores/work_order/workOrders", () => ({
   useWorkOrdersStore: () => ({
     reset: vi.fn(),
     suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
   }),
 }));
-vi.mock("@/stores/editVersionCommands", () => ({
+vi.mock("@/stores/edit_version/editVersionCommands", () => ({
   useEditVersionCommandsStore: () => ({
     reset: vi.fn(),
     suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
   }),
 }));
-vi.mock("@/stores/editorSession", () => ({
+vi.mock("@/stores/editor_session/editorSession", () => ({
   useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
 }));
-vi.mock("@/stores/workspaceRecovery", () => ({
+vi.mock("@/stores/workspace/workspace_recovery/workspaceRecovery", () => ({
   useWorkspaceRecoveryStore: () => ({ hideActor: vi.fn() }),
 }));
-vi.mock("./components/WorkspaceNavigationDialog.vue", () => ({
+vi.mock("./components/workspace/WorkspaceNavigationDialog.vue", () => ({
   default: { template: "<div />" },
 }));
 vi.mock("./components/LoginScreen.vue", () => ({
   default: { template: '<div data-test="login-screen" />' },
 }));
-vi.mock("./components/EditorWorkOrdersView.vue", () => ({
+vi.mock("./components/work_order/EditorWorkOrdersView.vue", () => ({
   default: { template: '<div data-test="editor" />' },
 }));
 vi.mock("./components/ReviewerHome.vue", () => ({

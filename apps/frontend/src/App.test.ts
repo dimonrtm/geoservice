@@ -18,7 +18,7 @@ vi.mock("./components/MapPageView.vue", () => ({
   },
 }));
 
-vi.mock("./components/EditorWorkOrdersView.vue", () => ({
+vi.mock("./components/work_order/EditorWorkOrdersView.vue", () => ({
   default: {
     name: "EditorWorkOrdersView",
     template: '<div data-test="editor-work-orders-view"></div>',

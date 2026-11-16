@@ -14,7 +14,7 @@ from utility_service.use_cases.deps import (
     get_utility_network_service,
 )
 from utility_service.use_cases.dtos import AuthRole
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.utility_network import utility_network_router
 from utility_service.use_cases.domain.exceptions.utility_network_api_error import (
     UtilityNetworkApiError,

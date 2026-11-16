@@ -8,7 +8,9 @@ import pytest
 
 from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import WorkOrderStatus
-from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
+from utility_service.use_cases.domain.exceptions.work_order_operation_error import (
+    WorkOrderOperationError,
+)
 from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut
 from utility_service.use_cases.services.work_order_service import WorkOrderService
 
@@ -112,10 +114,10 @@ def test_list_assigned_to_editor_rejects_reviewer() -> None:
         user_repository=user_repository,
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.list_assigned_to_editor(actor.id))
 
-    assert exc_info.value.status_code == 403
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "ROLE_NOT_ALLOWED"
     work_order_repository.list_assigned_to_user.assert_not_awaited()
 
@@ -137,10 +139,10 @@ def test_get_assigned_work_order_rejects_non_active_editor(actor: SimpleNamespac
         user_repository=user_repository,
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.get_assigned_work_order(uuid4(), actor.id))
 
-    assert exc_info.value.status_code == 403
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "ROLE_NOT_ALLOWED"
     work_order_repository.get_by_id.assert_not_awaited()
 
@@ -156,10 +158,10 @@ def test_get_assigned_work_order_rejects_missing_actor() -> None:
         user_repository=user_repository,
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.get_assigned_work_order(uuid4(), actor_id))
 
-    assert exc_info.value.status_code == 404
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_ACTOR_NOT_FOUND"
     user_repository.get_by_id.assert_awaited_once_with(actor_id)
     work_order_repository.get_by_id.assert_not_awaited()
@@ -177,10 +179,10 @@ def test_get_assigned_work_order_raises_not_found_when_missing() -> None:
         user_repository=user_repository,
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.get_assigned_work_order(uuid4(), actor.id))
 
-    assert exc_info.value.status_code == 404
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_NOT_FOUND"
 
 
@@ -197,10 +199,10 @@ def test_get_assigned_work_order_rejects_wrong_editor() -> None:
         user_repository=user_repository,
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.get_assigned_work_order(assigned.id, actor.id))
 
-    assert exc_info.value.status_code == 403
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_NOT_ASSIGNED"
 
 
@@ -245,10 +247,10 @@ def test_start_work_order_rejects_repeated_start() -> None:
         user_repository=user_repository,
     )
 
-    with pytest.raises(WorkOrderApiError) as exc_info:
+    with pytest.raises(WorkOrderOperationError) as exc_info:
         asyncio.run(service.start_work_order(assigned.id, actor.id))
 
-    assert exc_info.value.status_code == 409
+    assert not hasattr(exc_info.value, "status_code")
     assert exc_info.value.code == "WORK_ORDER_STATE_CONFLICT"
     assert session.begin_calls == 1
     work_order_repository.save.assert_not_awaited()

@@ -1,6 +1,14 @@
+import type { WorkOrderDataIssue } from "./work_order/work-order-response-error";
 export type ErrorActionId = "retry" | "refresh" | "reopen" | "sign-in";
 
 export type ParsedApiError =
+  | {
+      kind: "protocol";
+      operation: "list" | "open";
+      issues: readonly WorkOrderDataIssue[];
+      status: null;
+      correlationId: null;
+    }
   | {
       kind: "api";
       status: number;

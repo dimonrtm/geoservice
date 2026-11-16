@@ -1,7 +1,7 @@
 import { mount } from "@vue/test-utils";
 import { flushPromises } from "@vue/test-utils";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { WorkspaceResponse } from "@/contracts/work-orders";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
 
 const mocks = vi.hoisted(() => ({
   abortLayerLoading: vi.fn(),

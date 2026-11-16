@@ -1,5 +1,5 @@
-import type { WorkspaceResponse } from "@/contracts/work-orders";
-import { isLineStringXY } from "@/contracts/workspace-edit";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
+import { isLineStringXY } from "@/contracts/workspace/workspace-edit";
 
 const versions = new Map<
   string,

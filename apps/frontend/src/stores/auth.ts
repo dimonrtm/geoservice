@@ -1,5 +1,5 @@
-import { useEditorSessionStore } from "@/stores/editorSession";
-import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
+import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
+import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
 import { defineStore } from "pinia";
 import { toRaw } from "vue";
 
@@ -25,9 +25,9 @@ import type { BrowserSessionMarker } from "@/auth/browserSessionTypes";
 import {
   useWorkOrdersStore,
   type ResetWorkOrdersOptions,
-} from "@/stores/workOrders";
+} from "@/stores/work_order/workOrders";
 
-import { useWorkspaceRecoveryStore } from "./workspaceRecovery";
+import { useWorkspaceRecoveryStore } from "./workspace/workspace_recovery/workspaceRecovery";
 
 type AuthState = {
   restoreGeneration: number;

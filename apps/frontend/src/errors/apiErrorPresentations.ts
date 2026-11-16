@@ -179,6 +179,11 @@ function workflowFallback(
 export function presentWorkOrdersLoadError(
   error: ParsedApiError,
 ): ErrorPresentation | null {
+  if (error.kind === "protocol")
+    return protocolPresentation(
+      error,
+      "Сервер вернул некорректный список нарядов.",
+    );
   return workflowFallback(
     error,
     "Не удалось загрузить назначенные наряды.",
@@ -189,6 +194,11 @@ export function presentWorkOrdersLoadError(
 export function presentWorkspaceOpenError(
   error: ParsedApiError,
 ): ErrorPresentation | null {
+  if (error.kind === "protocol")
+    return protocolPresentation(
+      error,
+      "Сервер вернул некорректные данные рабочей версии.",
+    );
   if (error.kind === "api") {
     if (
       ["WORK_ORDER_NOT_FOUND", "WORK_ORDER_NOT_ASSIGNED"].includes(error.code)
@@ -254,4 +264,16 @@ export function presentWorkspaceRestoreError(
     "Не удалось восстановить рабочую версию.",
     "retry",
   );
+}
+
+function protocolPresentation(
+  error: Extract<ParsedApiError, { kind: "protocol" }>,
+  summary: string,
+): ErrorPresentation {
+  return {
+    summary,
+    guidance: error.issues.map((issue) => issue.message).join(". "),
+    action: null,
+    diagnostics: { code: "INVALID_SERVER_RESPONSE", correlationId: null },
+  };
 }

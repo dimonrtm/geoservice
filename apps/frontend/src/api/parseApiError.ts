@@ -1,3 +1,4 @@
+import { WorkOrderResponseError } from "@/contracts/work_order/work-order-response-error";
 import axios from "axios";
 
 import {
@@ -41,6 +42,14 @@ function responseCorrelationId(headers: unknown, body: unknown): string | null {
 }
 
 export function parseApiError(error: unknown): ParsedApiError {
+  if (error instanceof WorkOrderResponseError)
+    return {
+      kind: "protocol",
+      operation: error.operation,
+      issues: error.issues,
+      status: null,
+      correlationId: null,
+    };
   if (axios.isCancel(error)) {
     return { kind: "cancelled" };
   }

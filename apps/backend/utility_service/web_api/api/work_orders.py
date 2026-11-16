@@ -20,7 +20,7 @@ from utility_service.use_cases.services.edit_version_service import EditVersionS
 from utility_service.use_cases.services.work_order_service import WorkOrderService
 from utility_service.use_cases.services.edit_version_read_service import EditVersionReadService
 from utility_service.web_api.api.auth import require_editor
-from utility_service.web_api.api.work_order_edit_route import WorkOrderEditRoute
+from utility_service.web_api.api.error_handling.work_order_edit_route import WorkOrderEditRoute
 from utility_service.web_api.api.geometry_save_contract import (
     EDIT_ERROR_RESPONSES,
     GEOMETRY_SAVE_REQUEST_SCHEMA,

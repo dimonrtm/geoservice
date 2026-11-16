@@ -1,0 +1,449 @@
+<script setup lang="ts">
+import WorkOrderDataIssues from "./WorkOrderDataIssues.vue";
+import { RefreshCw } from "@lucide/vue";
+import { nextTick, onMounted, ref, watch } from "vue";
+
+import ActionableError from "@/components/ActionableError.vue";
+import MapView from "@/components/MapView.vue";
+import UiIconButton from "@/components/ui/UiIconButton.vue";
+import WorkspaceDetailsPanel from "@/components/workspace/WorkspaceDetailsPanel.vue";
+import WorkspaceRecoveryList from "@/components/workspace/WorkspaceRecoveryList.vue";
+import WorkspaceComparisonPanel from "@/components/workspace/WorkspaceComparisonPanel.vue";
+import WorkspaceEditCommands from "@/components/workspace/WorkspaceEditCommands.vue";
+import type { ErrorActionId } from "@/contracts/api-error";
+import { useAuthStore } from "@/stores/auth";
+import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
+import { useFeatureBaselineStore } from "@/stores/edit_version/featureBaseline";
+import { useEditVersionChangeSetStore } from "@/stores/edit_version/editVersionChangeSet";
+import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
+import { useWorkOrdersStore } from "@/stores/work_order/workOrders";
+import { useEditVersionEditor } from "@/composables/edit_version/useEditVersionEditor";
+
+type WorkspaceDetailsPanelHandle = {
+  focusHeading(): void;
+};
+
+const editorNavigation = useEditorNavigationStore();
+const editorSession = useEditorSessionStore();
+const workOrders = useWorkOrdersStore();
+const editor = useEditVersionEditor();
+const changes = useEditVersionChangeSetStore();
+const baseline = useFeatureBaselineStore();
+const auth = useAuthStore();
+const detailsPanelRef = ref<WorkspaceDetailsPanelHandle | null>(null);
+const workspaceAnnouncement = ref("");
+const workspaceMapReady = ref(false);
+const lastFittedWorkspaceKey = ref<string | null>(null);
+watch(
+  () => editorSession.activeWorkspaceKey,
+  () => {
+    lastFittedWorkspaceKey.value = null;
+  },
+);
+
+function onWorkspaceMapReadyChange(ready: boolean): void {
+  workspaceMapReady.value = ready;
+}
+
+watch(
+  () =>
+    editorSession.activeWorkspace ? editorSession.activeWorkspaceKey : null,
+  () => {
+    workspaceMapReady.value = false;
+  },
+);
+
+watch(
+  () => workOrders.selectedWorkOrderId,
+  () => {
+    workspaceAnnouncement.value = "";
+  },
+);
+
+async function loadAssignedAndRestore(): Promise<void> {
+  const epoch = auth.sessionEpoch;
+  const generation = await workOrders.loadAssigned();
+  const isCurrent = () =>
+    epoch === auth.sessionEpoch &&
+    generation === workOrders.loadAssignedRequestSeq;
+  if (!isCurrent()) return;
+  await editorSession.reconcileAssignments();
+  if (isCurrent() && !workOrders.loadError) {
+    await editorSession.restoreOpenedWorkspace();
+  }
+}
+
+onMounted(loadAssignedAndRestore);
+
+function handleLoadErrorAction(actionId: ErrorActionId): void {
+  if (actionId === "retry" || actionId === "refresh") {
+    void loadAssignedAndRestore();
+    return;
+  }
+  if (actionId === "sign-in") {
+    void auth.logout();
+  }
+}
+
+function handleWorkspaceErrorAction(actionId: ErrorActionId): void {
+  if (actionId === "retry") {
+    void editorSession.retrySelectedWorkspaceError();
+    return;
+  }
+  if (actionId === "refresh") {
+    void loadAssignedAndRestore();
+    return;
+  }
+  if (actionId === "reopen") {
+    void editorSession.reopenSelectedWorkOrder();
+    return;
+  }
+  if (actionId === "sign-in") {
+    void auth.logout();
+  }
+}
+
+function statusLabel(status: string | null): string {
+  if (status === null) return "Статус недоступен";
+  if (status === "in_progress") {
+    return "В работе";
+  }
+  return "Назначен";
+}
+
+async function openSelectedWorkspace(): Promise<void> {
+  const workOrderId = workOrders.selectedWorkOrderId;
+  if (!workOrderId) {
+    return;
+  }
+
+  workspaceAnnouncement.value = "";
+  await editorSession.openSelectedWorkOrder();
+
+  const workspace = editorSession.activeWorkspace;
+  if (
+    workOrders.selectedWorkOrderId !== workOrderId ||
+    workspace?.workOrder.id !== workOrderId
+  ) {
+    return;
+  }
+
+  workspaceAnnouncement.value = `Рабочее пространство ${workspace.workOrder.code} загружено`;
+  await nextTick();
+  detailsPanelRef.value?.focusHeading();
+}
+</script>
+
+<template>
+  <div class="editorShell">
+    <aside class="workOrdersPanel" aria-label="Мои наряды">
+      <div class="panelHeader">
+        <h1>Мои наряды</h1>
+        <UiIconButton
+          :icon="RefreshCw"
+          label="Обновить"
+          tooltip="Обновить список назначенных нарядов"
+          tooltip-align="end"
+          variant="secondary"
+          :loading="workOrders.isLoading"
+          loading-label="Обновление списка нарядов"
+          data-test="refresh-work-orders"
+          @click="loadAssignedAndRestore"
+        />
+      </div>
+
+      <div
+        v-if="workOrders.isLoading"
+        class="panelState"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        Загружаем назначенные наряды...
+      </div>
+
+      <div v-else-if="workOrders.loadError" class="panelState isError">
+        <ActionableError
+          :presentation="workOrders.loadError"
+          @action="handleLoadErrorAction"
+        />
+      </div>
+
+      <div
+        v-else-if="workOrders.items.length === 0"
+        class="panelState"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        Назначенных нарядов нет.
+      </div>
+
+      <ul v-else class="workOrderList">
+        <li v-for="workOrder in workOrders.items" :key="workOrder.rowKey">
+          <div
+            class="workOrderCard"
+            :class="{
+              isSelected:
+                workOrder.id !== null &&
+                workOrders.selectedWorkOrderId === workOrder.id,
+            }"
+          >
+            <component
+              :is="workOrder.id ? 'button' : 'div'"
+              class="workOrderButton"
+              type="button"
+              :aria-current="
+                workOrder.id !== null &&
+                workOrders.selectedWorkOrderId === workOrder.id
+                  ? 'true'
+                  : undefined
+              "
+              :data-test="
+                workOrder.id
+                  ? `work-order-${workOrder.id}`
+                  : `work-order-invalid-${workOrder.rowKey}`
+              "
+              @click="
+                workOrder.id &&
+                editorNavigation.requestNavigation({
+                  kind: 'work-order',
+                  workOrderId: workOrder.id,
+                })
+              "
+            >
+              <span class="workOrderCode">{{
+                workOrder.code ?? "Код недоступен"
+              }}</span>
+              <span class="workOrderTitle">{{
+                workOrder.title ?? "Название недоступно"
+              }}</span>
+              <span class="workOrderStatus">{{
+                statusLabel(workOrder.status)
+              }}</span>
+              <span v-if="workOrder.description" class="workOrderDescription">
+                {{ workOrder.description }}
+              </span>
+            </component>
+            <WorkOrderDataIssues :issues="workOrder.issues" />
+          </div>
+        </li>
+      </ul>
+      <WorkspaceRecoveryList />
+    </aside>
+
+    <section class="workspacePane" aria-label="Рабочая область">
+      <WorkspaceDetailsPanel
+        v-if="workOrders.selectedWorkOrder"
+        ref="detailsPanelRef"
+        :work-order="workOrders.selectedWorkOrder"
+        :workspace="editorSession.activeWorkspace"
+        :is-opening="
+          editorSession.openingWorkOrderId === workOrders.selectedWorkOrder.id
+        "
+        :is-open-action-disabled="editorSession.isOpeningWorkspace"
+        :error="editorSession.selectedOpenWorkspaceError"
+        @open="openSelectedWorkspace"
+        @error-action="handleWorkspaceErrorAction"
+      />
+
+      <p
+        class="srOnly"
+        data-test="workspace-announcement"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {{ workspaceAnnouncement }}
+      </p>
+
+      <div v-if="editor.readError" class="panelState isError" role="status">
+        {{ editor.readError }}
+        <button
+          v-if="editor.canRetry"
+          type="button"
+          @click="editorSession.readActiveFeature()"
+        >
+          Повторить
+        </button>
+      </div>
+      <p
+        v-else-if="editorSession.activeWorkspace && changes.phase === 'loading'"
+        role="status"
+      >
+        Загружаем изменения рабочей версии. Карта доступна для просмотра.
+      </p>
+      <p
+        v-else-if="
+          editorSession.activeWorkspace && baseline.phase === 'loading'
+        "
+        role="status"
+      >
+        Загружаем исходную геометрию линии. Карта доступна для просмотра.
+      </p>
+      <WorkspaceEditCommands
+        v-if="editorSession.activeWorkspace && workspaceMapReady"
+      />
+      <WorkspaceComparisonPanel v-if="editorSession.activeWorkspace" />
+      <MapView
+        v-if="editorSession.activeWorkspace"
+        class="workspaceMap"
+        mode="workspace"
+        :workspace-interactive="true"
+        :workspace="editorSession.activeWorkspace"
+        :workspace-key="editorSession.activeWorkspaceKey"
+        :should-fit-workspace="
+          lastFittedWorkspaceKey !== editorSession.activeWorkspaceKey
+        "
+        @workspace-fitted="lastFittedWorkspaceKey = $event"
+        @ready-change="onWorkspaceMapReadyChange"
+      />
+      <MapView v-else class="workspaceMap" mode="empty" />
+    </section>
+  </div>
+</template>
+
+<style scoped>
+.editorShell {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+}
+
+.workOrdersPanel {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(15, 23, 42, 0.1);
+  background: #f8fafc;
+}
+
+.panelHeader {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.panelHeader h1 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  color: #0f172a;
+}
+
+.panelState {
+  padding: 16px;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.panelState.isError {
+  display: grid;
+  gap: 10px;
+  color: #991b1b;
+}
+
+.workOrderList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+}
+
+.workOrderCard {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.workOrderCard.isSelected {
+  border-color: #166534;
+  box-shadow: inset 3px 0 0 #166534;
+}
+
+.workOrderButton {
+  width: 100%;
+  display: grid;
+  gap: 5px;
+  padding: 0;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.workOrderCode {
+  font-size: 12px;
+  font-weight: 800;
+  color: #166534;
+}
+
+.workOrderTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.workOrderStatus,
+.workOrderDescription {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #475569;
+}
+
+.workspacePane {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow-y: auto;
+}
+
+.workspaceMap {
+  flex: 1 1 auto;
+  min-height: 220px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 760px) {
+  .editorShell {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(220px, 42%) minmax(420px, 1fr);
+    overflow-y: auto;
+  }
+
+  .workOrdersPanel {
+    border-right: 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  }
+
+  .workspaceMap {
+    min-height: 220px;
+  }
+}
+</style>

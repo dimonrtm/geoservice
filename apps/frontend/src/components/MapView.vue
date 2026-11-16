@@ -57,13 +57,13 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useAuthStore } from "@/stores/auth";
 import type { LayerDto } from "@/contracts/api";
-import type { WorkspaceResponse } from "@/contracts/work-orders";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
 import { useFeatureLoading } from "@/composables/map/useFeatureLoading";
 import { useLayerRealtime } from "@/composables/map/useLayerRealtime";
 import { useLayerSelection } from "@/composables/map/useLayerSelection";
 import { useMapInstance } from "@/composables/map/useMapInstance";
 import { usePolygonEditing } from "@/composables/map/usePolygonEditing";
-import WorkspaceLineInteraction from "@/components/WorkspaceLineInteraction.vue";
+import WorkspaceLineInteraction from "@/components/workspace/WorkspaceLineInteraction.vue";
 import {
   ensureWorkspaceLayers,
   fitWorkspaceToAoi,

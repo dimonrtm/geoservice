@@ -1,0 +1,13 @@
+{
+  "scope": "Store-level reproduction only; legacy screen reachability must be evaluated separately.",
+  "save": {
+    "expectedFeature": "B",
+    "observedFeature": "A",
+    "observedVersion": 2
+  },
+  "deletion": {
+    "expectedFeature": "B",
+    "observedMode": "idle",
+    "observedFeature": null
+  }
+}

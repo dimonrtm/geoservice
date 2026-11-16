@@ -1,3 +1,7 @@
+from utility_service.use_cases.domain.exceptions.work_order_operation_error import (
+    WorkOrderOperationCode,
+    WorkOrderOperationError,
+)
 from datetime import datetime, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -29,7 +33,7 @@ from utility_service.web_api.tests.auth_user_factory import (
     create_test_access_token as create_access_token,
     access_service_for,
 )
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.work_orders import work_orders_router
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
@@ -320,9 +324,8 @@ def test_service_error_becomes_structured_response() -> None:
     work_order_id = uuid4()
     auth_service, token, _ = auth_context("editor")
     edit_version_service = AsyncMock()
-    edit_version_service.open_for_work_order.side_effect = WorkOrderApiError(
-        422,
-        "WORK_ORDER_CONTEXT_INVALID",
+    edit_version_service.open_for_work_order.side_effect = WorkOrderOperationError(
+        WorkOrderOperationCode.WORK_ORDER_CONTEXT_INVALID,
         "Контекст рабочей задачи поврежден или неполон.",
     )
 

@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-23",
+  "frontend": {
+    "tests": 323,
+    "passed": 323,
+    "failedSuites": 0,
+    "exitCode": 0,
+    "lint": 0,
+    "typecheck": 0,
+    "formatCheck": 0,
+    "build": 0
+  },
+  "backendDb": {
+    "passed": 270,
+    "exitCode": 0,
+    "warnings": 2
+  },
+  "m4": {
+    "project": "geoservice-m4-efccbc54",
+    "passed": 7,
+    "retries": 0,
+    "exitCode": 0
+  },
+  "wikiLint": {
+    "existingRawMissingFrontmatter": 37,
+    "newIssues": 0
+  },
+  "limitations": [
+    "Vite chunk >500 kB",
+    "Viewport reflow is not browser zoom 200%",
+    "UI exercised through Playwright; screenshots visually inspected by agent",
+    "No storage destruction recovery or cross-tab coordination"
+  ],
+  "git": {
+    "staged": false,
+    "committed": false,
+    "pushed": false
+  }
+}

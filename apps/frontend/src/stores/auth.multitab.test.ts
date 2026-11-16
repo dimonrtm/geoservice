@@ -29,14 +29,16 @@ vi.mock("@/api/auth", () => ({
   logoutSession: ports.logout,
   fetchSessionStatus: ports.status,
 }));
-vi.mock("@/stores/workOrders", () => ({ useWorkOrdersStore: () => ports }));
-vi.mock("@/stores/editVersionCommands", () => ({
+vi.mock("@/stores/work_order/workOrders", () => ({
+  useWorkOrdersStore: () => ports,
+}));
+vi.mock("@/stores/edit_version/editVersionCommands", () => ({
   useEditVersionCommandsStore: () => ports,
 }));
-vi.mock("@/stores/editorSession", () => ({
+vi.mock("@/stores/editor_session/editorSession", () => ({
   useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
 }));
-vi.mock("@/stores/workspaceRecovery", () => ({
+vi.mock("@/stores/workspace/workspace_recovery/workspaceRecovery", () => ({
   useWorkspaceRecoveryStore: () => ports,
 }));
 

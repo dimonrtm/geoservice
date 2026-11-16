@@ -1,4 +1,4 @@
-import type { WorkspaceResponse } from "@/contracts/work-orders";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
 
 export const target = {
   workOrderId: "wo-1",

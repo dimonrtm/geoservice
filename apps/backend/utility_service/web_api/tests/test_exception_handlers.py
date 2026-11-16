@@ -20,7 +20,7 @@ from utility_service.use_cases.domain.exceptions.utility_network_api_error impor
     UtilityNetworkApiError,
 )
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.middleware.correlation_id import (
     CORRELATION_ID_HEADER,
     CorrelationIdMiddleware,

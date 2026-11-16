@@ -12,7 +12,7 @@ from utility_service.use_cases.services.realtime_connection_manager import (
 )
 from utility_service.use_cases.mappers import to_auth_user_dto
 from utility_service.web_api.api.auth import auth_router, create_access_token
-from utility_service.web_api.api.exception_handlers import install_exception_handlers
+from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.api.work_orders import work_orders_router
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 

@@ -1,12 +1,12 @@
-import { useWorkOrdersStore } from "@/stores/workOrders";
-import { useEditorNavigationStore } from "@/stores/editorNavigation";
-import { useEditVersionDraftStore } from "@/stores/editVersionDraft";
-import { useEditorSessionStore } from "@/stores/editorSession";
-import { useEditVersionCommandsStore } from "@/stores/editVersionCommands";
-import { useEditVersionEditor } from "@/composables/useEditVersionEditor";
-import { useFeatureBaselineStore } from "@/stores/featureBaseline";
-import { isLineStringXY } from "@/contracts/workspace-edit";
-import type { WorkspaceResponse } from "@/contracts/work-orders";
+import { useWorkOrdersStore } from "@/stores/work_order/workOrders";
+import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
+import { useEditVersionDraftStore } from "@/stores/edit_version/editVersionDraft";
+import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
+import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
+import { useEditVersionEditor } from "@/composables/edit_version/useEditVersionEditor";
+import { useFeatureBaselineStore } from "@/stores/edit_version/featureBaseline";
+import { isLineStringXY } from "@/contracts/workspace/workspace-edit";
+import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
 
 export function editorTestContext() {
   const editor = useEditVersionEditor();

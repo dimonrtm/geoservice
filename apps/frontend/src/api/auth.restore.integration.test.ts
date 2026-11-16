@@ -16,14 +16,16 @@ const effects = vi.hoisted(() => ({
   hideActor: vi.fn(),
   suspendActor: vi.fn(),
 }));
-vi.mock("@/stores/workOrders", () => ({ useWorkOrdersStore: () => effects }));
-vi.mock("@/stores/editVersionCommands", () => ({
+vi.mock("@/stores/work_order/workOrders", () => ({
+  useWorkOrdersStore: () => effects,
+}));
+vi.mock("@/stores/edit_version/editVersionCommands", () => ({
   useEditVersionCommandsStore: () => effects,
 }));
-vi.mock("@/stores/editorSession", () => ({
+vi.mock("@/stores/editor_session/editorSession", () => ({
   useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
 }));
-vi.mock("@/stores/workspaceRecovery", () => ({
+vi.mock("@/stores/workspace/workspace_recovery/workspaceRecovery", () => ({
   useWorkspaceRecoveryStore: () => effects,
 }));
 
