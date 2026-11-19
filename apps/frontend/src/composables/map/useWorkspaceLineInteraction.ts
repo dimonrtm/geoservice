@@ -1,3 +1,4 @@
+import { getEditorRuntime } from "@/editor/editorRuntime";
 import { computed, onBeforeUnmount, ref, watch, type Ref } from "vue";
 import { Marker, type Map, type MapMouseEvent } from "maplibre-gl";
 import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
@@ -21,6 +22,7 @@ export function useWorkspaceLineInteraction(
   map: Ref<Map>,
   workspace: Ref<WorkspaceResponse>,
 ) {
+  const workflow = getEditorRuntime().workflow;
   const editVersionCommands = useEditVersionCommandsStore();
   const editVersionDraft = useEditVersionDraftStore();
   const editorNavigation = useEditorNavigationStore();
@@ -108,7 +110,7 @@ export function useWorkspaceLineInteraction(
       candidate,
       workspace.value.workOrder.scope.aoi.geometry,
     );
-    if (reason || !editVersionDraft.moveLocalVertex(xy)) {
+    if (reason || !workflow.moveLocalVertex(xy)) {
       marker.setLngLat(draft.candidateGeometry.coordinates[1]!);
       message.value =
         reason ??
@@ -186,13 +188,12 @@ export function useWorkspaceLineInteraction(
   function applySelection(featureId: string | null) {
     pendingFeatureId.value = featureId;
     if (featureId === null) {
-      editVersionDraft.cancelLocalEdit();
+      workflow.cancelLocalEdit();
       editor.clearFeatureSelection();
     } else if (editor.readyFor(featureId)) {
-      if (editVersionDraft.beginLocalEdit(featureId, 1))
-        pendingFeatureId.value = null;
+      if (workflow.beginLocalEdit(featureId, 1)) pendingFeatureId.value = null;
     } else {
-      editVersionDraft.cancelLocalEdit();
+      workflow.cancelLocalEdit();
       void editorSession.readActiveFeature(featureId);
     }
     message.value = "";
@@ -208,7 +209,7 @@ export function useWorkspaceLineInteraction(
       if (featureId && !editVersionDraft.localDraft) {
         pendingFeatureId.value = null;
         if (!lineSelectionBlockReason(workspace.value, featureId))
-          editVersionDraft.beginLocalEdit(featureId, 1);
+          workflow.beginLocalEdit(featureId, 1);
       }
     },
     { flush: "post" },
@@ -232,7 +233,7 @@ export function useWorkspaceLineInteraction(
         return;
       }
     }
-    if (editVersionDraft.cancelLocalEdit()) applySelection(pending.featureId);
+    if (workflow.cancelLocalEdit()) applySelection(pending.featureId);
   }
   function click(event: MapMouseEvent) {
     if (suppressClick || confirmation.value || disposed) return;

@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
@@ -21,7 +22,7 @@ function createDeferred<T>() {
 }
 describe("assigned work orders", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
     sessionStorage.clear();
     vi.clearAllMocks();
   });

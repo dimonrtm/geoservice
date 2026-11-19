@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { editorTestContext } from "@/test/editorTestContext";
 import { useWorkspaceRecoveryStore } from "@/stores/workspace/workspace_recovery/workspaceRecovery";
 import { useEditVersionChangeSetStore } from "@/stores/edit_version/editVersionChangeSet";
@@ -68,7 +69,7 @@ vi.mock("maplibre-gl", () => ({
 
 function setup() {
   const pinia = createPinia();
-  setActivePinia(pinia);
+  installEditorRuntime(setActivePinia(pinia)!);
   const auth = useAuthStore();
   auth.token = "test";
   auth.user = { id: "actor", email: "editor@example.local", role: "editor" };

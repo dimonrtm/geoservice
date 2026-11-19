@@ -3,8 +3,8 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-11-04
-source: repository-change:2026-11-04
+updated: 2026-11-17
+source: repository-change:2026-11-17
 tags: [frontend, vue, maplibre, architecture]
 ---
 
@@ -77,7 +77,12 @@ epoch, refresh прежнего sid сохраняет workspace. Поздний
 
 ## Save И Recovery
 
-`useWorkOrdersStore` владеет current, draft, навигацией и stale-сравнением;
+`useWorkOrdersStore` владеет списком и выбором наряда. `editVersionDraft` владеет
+локальной попыткой; `editVersionCommands` — фазой, результатом и stale-сравнением;
+`editorNavigation` — намерением перехода; `editorSession` — открытым контекстом
+и поколениями чтений. Current вычисляется из отдельных read stores.
+`editor/createEditorWorkflow.ts` координирует операции этих владельцев через
+переданные контракты; внешние потребители не присваивают их поля.
 `useWorkspaceRecoveryStore` — независимыми отправленными командами по actor/наряду/версии.
 IndexedDB записывается до PUT. Retry сохраняет identity; только GET обновляет current.
 `prepareActorLogout` проверяет durable sent identity без suspension; managed
@@ -88,6 +93,13 @@ barrier. Новый login не отправляет прежнюю mutation ав
 Save/Revert, отдельное согласие на recovery после потери доступа, управляемые
 переходы и read-only сравнение подключены. Устройство и границы:
 [[frontend_save_recovery]]. Backend-контракт не расширен.
+
+Runtime F1 собирается один раз на Pinia в `main.ts` до mount и запуска auth.
+Он связывает RecoveryHost и освобождает watchers/bindings; unmount панели не
+останавливает общий recovery. Для изолированных интеграционных тестов runtime
+устанавливается до `setAuth`. Совместимые входы reset/suspension из auth
+делегируют bound workflow. Связи auth/HTTP остаются отдельной задачей F2.
+`npm run lint` включает AST-проверку `check:editor-boundaries` для TS/Vue.
 
 ## Карта И Загрузка Данных
 

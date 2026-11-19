@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getEditorRuntime } from "@/editor/editorRuntime";
+const workflow = getEditorRuntime().workflow;
 import { computed } from "vue";
 import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
 import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
@@ -48,13 +50,13 @@ const rows = computed(() => {
           option.id === 'source' && !editVersionCommands.activeComparison.source
         "
         :aria-pressed="editVersionCommands.comparisonPreview === option.id"
-        @click="editVersionCommands.comparisonPreview = option.id"
+        @click="editVersionCommands.showComparisonPreview(option.id)"
       >
         {{ option.label }}
       </button>
       <button
         type="button"
-        @click="editVersionCommands.comparisonPreview = null"
+        @click="editVersionCommands.hideComparisonPreview()"
       >
         Скрыть предпросмотр
       </button>
@@ -86,7 +88,7 @@ const rows = computed(() => {
       type="button"
       data-test="comparison-discard"
       :disabled="!editVersionCommands.canDiscardRejectedAttempt"
-      @click="editVersionCommands.discardRejectedAttempt()"
+      @click="workflow.discardRejectedAttempt()"
     >
       Отказаться от попытки
     </button>

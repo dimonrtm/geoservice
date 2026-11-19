@@ -3,8 +3,8 @@ title: Frontend Save и восстановление намерения реда
 type: technical-note
 status: active
 created: 2026-10-16
-updated: 2026-11-04
-source: repository-change:2026-11-04
+updated: 2026-11-17
+source: repository-change:2026-11-17
 tags: [frontend, pinia, save, recovery, readback, indexeddb]
 ---
 
@@ -14,7 +14,33 @@ tags: [frontend, pinia, save, recovery, readback, indexeddb]
 
 `useWorkspaceRecoveryStore` владеет отправленными намерениями, outcome, retry и долговременным хранением. Ключ — JSON `(actorId, workOrderId, editVersionId)`, одна незавершённая команда на версию. Неизвестный исход A не запрещает Save независимой версии B. Recovery не импортирует workOrders: явный `RecoveryHost` предоставляет session/access/readback/completion callbacks.
 
-`useWorkOrdersStore` владеет current snapshots, локальным draft, selection, навигацией и временным stale-сравнением. Обычный draft не хранится как отправленная команда. `recoveryRecord` — вычисляемое совместимое представление выбранного контекста, а не второй владелец состояния.
+`useWorkOrdersStore` владеет списком и selection. Подтверждённые map/ChangeSet/baseline
+остаются в read stores; `useEditVersionEditor` строит current snapshot.
+`editVersionDraft` владеет локальной попыткой и её идентичностью; `editVersionCommands`
+— фазой, submitted metadata, результатом, Revert confirmation и stale-сравнением;
+`editorNavigation` — переходом и logout attempt; `editorSession` — открытой версией
+и поколениями чтений. Обычный draft не хранится как отправленная команда.
+`recoveryRecord` — вычисляемое совместимое представление выбранного контекста,
+а не второй владелец состояния.
+
+`editor/createEditorWorkflow.ts` — единая точка сборки сценариев локального
+редактирования, commands и navigation; специализированные workflow-функции не
+импортируют Pinia/Vue/HTTP/storage. Owners изменяют только своё состояние через
+смысловые операции. Session сохраняет I/O открытия и чтения, но делегирует общую
+очистку workflow, не перечисляя чужие поля. UI и map interaction вызывают workflow;
+панель сравнения вызывает операции preview владельца commands.
+
+`editor/editorRuntime.ts` связывает порты и RecoveryHost на конкретном Pinia до
+запуска auth. Повторный install идемпотентен; reset не удаляет привязку; application
+unmount освобождает host/watchers. Технические `$patch`/чужие `$reset`, прямые
+вложенные мутации и межвладельческие runtime imports проверяются AST-guard в lint.
+Совместимые auth entry points сохранены; развязка auth/HTTP относится к F2.
+
+SaveAttempt (для Save и подтверждённого Revert) хранит исходный workspace generation, draft identity, commandId и
+navigationId. Возвращение к тому же наряду не делает старый callback актуальным.
+Счётчик draft generation не переиспользуется после Cancel. Принудительное закрытие
+контекста отменяет его навигационное намерение; late completion не очищает новую
+попытку и не переключает её фазу.
 
 Backend остаётся транзакционным: [[edit_version_save_orchestration]]. Клиентский unknown описывает осведомлённость, persisted `OutcomePending` отсутствует.
 
@@ -50,13 +76,13 @@ No-op требует source evidence, не выводится из `operation`. 
 
 ## Проверяемые источники
 
-- `apps/frontend/src/contracts/workspace-recovery.ts`
-- `apps/frontend/src/stores/workspaceRecovery.ts`, `workspaceRecoveryIndexedDb.ts`, `workspaceRecoveryMigration.ts`, `workspaceRecoveryScheduler.ts`
-- `apps/frontend/src/stores/editorSession.ts`, `editVersionCommands.ts`, `auth.ts`, `apps/frontend/src/api/http.ts`
-- `apps/frontend/src/components/WorkspaceRecoveryList.vue`, `WorkspaceNavigationDialog.vue`, `WorkspaceComparisonPanel.vue`, `WorkspaceEditCommands.vue`
-- `apps/frontend/src/domain/workspaceCommandPresentation.ts`, `dialogFocus.ts`
+- `apps/frontend/src/contracts/workspace/workspace-recovery.ts`
+- `apps/frontend/src/stores/workspace/workspace_recovery/`: `workspaceRecovery.ts`, `workspaceRecoveryIndexedDb.ts`, `workspaceRecoveryMigration.ts`, `workspaceRecoveryScheduler.ts`
+- `apps/frontend/src/editor/`, `apps/frontend/src/stores/editor_session/editorSession.ts`, `apps/frontend/src/stores/edit_version/editVersionCommands.ts`, `apps/frontend/src/stores/edit_version/editVersionDraft.ts`, `apps/frontend/src/stores/editor_navigation/editorNavigation.ts`, `apps/frontend/src/stores/auth.ts`, `apps/frontend/src/api/http.ts`
+- `apps/frontend/src/components/workspace/`: `WorkspaceRecoveryList.vue`, `WorkspaceNavigationDialog.vue`, `WorkspaceComparisonPanel.vue`, `WorkspaceEditCommands.vue`
+- `apps/frontend/src/domain/workspace/workspaceCommandPresentation.ts`, `apps/frontend/src/domain/dialogFocus.ts`
 - `apps/frontend/src/composables/map/useWorkspaceLineInteraction.ts`
 - `infra/m4/README.md`, `s2-x01-recovery.spec.ts`, `s2-x01-storage.spec.ts`
 - `docs/sprint_2/2026-10-23-s2-x01-recovery-design.md`
 
-Техническая актуализация относится к FU-2026-10-11-001; его доменный остаток metadata/fixture не закрыт. Приёмочные результаты хранятся в отчёте S2-X01, а не в этой архитектурной ноде.
+Техническая актуализация относится к FU-2026-10-11-001; его доменный остаток metadata/fixture не закрыт. Исходные приёмочные результаты хранятся в отчёте S2-X01; повторная проверка после F1 — в `docs/full_refactoring/2026-11-17-stage-2-f1-verification.md`.

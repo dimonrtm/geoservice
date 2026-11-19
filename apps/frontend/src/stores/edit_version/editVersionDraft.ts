@@ -1,149 +1,101 @@
-import { defineStore } from "pinia";
 import {
-  createLocalDraft,
   updateLocalVertex,
-  isLocalDraftDirty,
   type WorkspaceLocalDraft,
 } from "@/domain/workspace/workspaceDraft";
-import { useAuthStore } from "../auth";
+import { requireEditorWorkflow } from "@/editor/editorRuntimeBinding";
+import {
+  sameDraft,
+  sameEditorContext,
+  type DraftIdentity,
+  type EditorContext,
+} from "@/editor/editorWorkflowContracts";
+import { defineStore } from "pinia";
 
-import { useEditVersionEditor } from "@/composables/edit_version/useEditVersionEditor";
-import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
-import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
-import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
 type EditVersionDraftState = {
+  draftGeneration: number;
+  draftIdentity: DraftIdentity | null;
   localDraft: WorkspaceLocalDraft | null;
   editBlockReason: string | null;
 };
-
 export const useEditVersionDraftStore = defineStore("editVersionDraft", {
   state: (): EditVersionDraftState => ({
+    draftGeneration: 0,
+    draftIdentity: null,
     localDraft: null,
     editBlockReason: null,
   }),
+  getters: {},
   actions: {
-    beginLocalEdit(featureId: string, vertexIndex: number): boolean {
-      const editorNavigation = useEditorNavigationStore();
-      const editorSession = useEditorSessionStore();
-      const editVersionCommands = useEditVersionCommandsStore();
+    resetDraftState(): void {
+      this.localDraft = null;
+      this.draftIdentity = null;
+      this.editBlockReason = null;
+    },
+    replaceDraft(
+      draft: WorkspaceLocalDraft,
+      context: EditorContext | null,
+    ): void {
+      const generation = ++this.draftGeneration;
+      this.localDraft = draft;
+      this.draftIdentity = context
+        ? { ...context, draftGeneration: generation }
+        : null;
+      this.editBlockReason = null;
+    },
+    moveDraftVertex(xy: [number, number]): void {
+      if (this.localDraft)
+        this.localDraft = updateLocalVertex(this.localDraft, xy);
+    },
+    startDraft(identity: DraftIdentity, draft: WorkspaceLocalDraft): void {
+      this.draftGeneration = Math.max(
+        this.draftGeneration,
+        identity.draftGeneration,
+      );
+      this.draftIdentity = { ...identity };
+      this.localDraft = draft;
+      this.editBlockReason = null;
+    },
+    updateDraft(identity: DraftIdentity, xy: [number, number]): boolean {
+      if (!sameDraft(this.draftIdentity, identity) || !this.localDraft)
+        return false;
+      this.localDraft = updateLocalVertex(this.localDraft, xy);
+      return true;
+    },
+    finishDraft(identity: DraftIdentity): boolean {
+      if (!sameDraft(this.draftIdentity, identity)) return false;
+      this.localDraft = null;
+      this.draftIdentity = null;
+      return true;
+    },
+    clearDraftForContext(context: EditorContext): boolean {
       if (
-        !useEditVersionEditor().readyFor(featureId) ||
-        editorNavigation.workspaceInteractionLocked ||
-        !editorSession.activeWorkspace ||
-        editVersionCommands.storageError ||
-        ["FEATURE_NOT_EDITABLE", "WORK_ORDER_CONTEXT_INVALID"].includes(
-          editVersionCommands.saveError ?? "",
-        ) ||
-        editVersionCommands.recoveryRecord ||
-        !["idle", "editing", "rejected"].includes(editVersionCommands.phase)
+        !this.draftIdentity ||
+        !sameEditorContext(this.draftIdentity, context)
       )
         return false;
-      if (this.localDraft) {
-        if (
-          this.localDraft.featureId === featureId &&
-          this.localDraft.vertexIndex === vertexIndex
-        )
-          return true;
-        if (isLocalDraftDirty(this.localDraft)) {
-          this.editBlockReason = "FINISH_OR_CANCEL_LOCAL_WORK";
-          return false;
-        }
-      }
-      try {
-        this.localDraft = createLocalDraft(
-          editorSession.activeWorkspace,
-          featureId,
-          vertexIndex,
-        );
-        editVersionCommands.localPhase = "editing";
-        this.editBlockReason = null;
-        return true;
-      } catch {
-        this.editBlockReason = "INVALID_LOCAL_EDIT";
-        return false;
-      }
+      this.localDraft = null;
+      this.draftIdentity = null;
+      return true;
+    },
+    reportEditBlocked(reason: string | null): void {
+      this.editBlockReason = reason;
+    },
+    beginLocalEdit(featureId: string, vertexIndex: number): boolean {
+      return requireEditorWorkflow(this).draft.beginLocalEdit(
+        featureId,
+        vertexIndex,
+      );
     },
     moveLocalVertex(xy: [number, number]): boolean {
-      const editorNavigation = useEditorNavigationStore();
-      const editVersionCommands = useEditVersionCommandsStore();
-      if (
-        editorNavigation.workspaceInteractionLocked ||
-        !this.localDraft ||
-        !useEditVersionEditor().readyFor(this.localDraft.featureId) ||
-        editVersionCommands.storageError ||
-        ["FEATURE_NOT_EDITABLE", "WORK_ORDER_CONTEXT_INVALID"].includes(
-          editVersionCommands.saveError ?? "",
-        ) ||
-        editVersionCommands.recoveryRecord ||
-        !["editing", "rejected"].includes(editVersionCommands.phase)
-      )
-        return false;
-      try {
-        this.localDraft = updateLocalVertex(this.localDraft, xy);
-        editVersionCommands.localPhase = "editing";
-        return true;
-      } catch {
-        this.editBlockReason = "INVALID_LOCAL_EDIT";
-        return false;
-      }
+      return requireEditorWorkflow(this).draft.moveLocalVertex(xy);
     },
     cancelLocalEdit(): boolean {
-      const editorNavigation = useEditorNavigationStore();
-      const editVersionCommands = useEditVersionCommandsStore();
-      if (
-        editorNavigation.workspaceInteractionLocked ||
-        editVersionCommands.storageError ||
-        editVersionCommands.readbackError ||
-        editVersionCommands.recoveryRecord ||
-        !["idle", "editing", "rejected", "stale"].includes(
-          editVersionCommands.phase,
-        )
-      )
-        return false;
-      if (editVersionCommands.recoveryKey)
-        delete editVersionCommands.staleComparisons[
-          editVersionCommands.recoveryKey
-        ];
-      editVersionCommands.comparisonPreview = null;
-      this.localDraft = null;
-      editVersionCommands.rejectedCandidateGeometry = null;
-      editVersionCommands.saveError = null;
-      editVersionCommands.localPhase = "idle";
-      this.editBlockReason = null;
-      return true;
+      return requireEditorWorkflow(this).draft.cancelLocalEdit();
     },
     discardLocalChangesKeepingSelection(): boolean {
-      const editorNavigation = useEditorNavigationStore();
-      const editVersionCommands = useEditVersionCommandsStore();
-      const editorSession = useEditorSessionStore();
-      const auth = useAuthStore();
-      if (
-        editorNavigation.workspaceInteractionLocked ||
-        !auth.isAuthenticated ||
-        auth.user?.role !== "editor" ||
-        editVersionCommands.hasAccessSuspension(auth.user.id) ||
-        !editorSession.activeWorkspace ||
-        !this.localDraft ||
-        !isLocalDraftDirty(this.localDraft) ||
-        editVersionCommands.recoveryRecord ||
-        editVersionCommands.storageError ||
-        !["editing", "rejected"].includes(editVersionCommands.phase)
-      )
-        return false;
-      const draft = createLocalDraft(
-        editorSession.activeWorkspace,
-        this.localDraft.featureId,
-        this.localDraft.vertexIndex,
-      );
-      this.localDraft = draft;
-      editVersionCommands.localPhase = "editing";
-      editVersionCommands.saveError = null;
-      this.editBlockReason = null;
-      editVersionCommands.commandResult = null;
-      editVersionCommands.submittedSourceGeometry = null;
-      editVersionCommands.submittedCommandId = null;
-      editVersionCommands.rejectedCandidateGeometry = null;
-      return true;
+      return requireEditorWorkflow(
+        this,
+      ).draft.discardLocalChangesKeepingSelection();
     },
   },
 });

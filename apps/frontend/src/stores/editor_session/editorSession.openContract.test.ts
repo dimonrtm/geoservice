@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { beforeEach, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { editorTestContext } from "@/test/editorTestContext";
@@ -8,7 +9,7 @@ vi.mock("@/api/http", () => ({ http }));
 const id = "aaaaaaaa-1111-4111-8111-111111111111";
 const version = "bbbbbbbb-1111-4111-8111-111111111111";
 beforeEach(() => {
-  setActivePinia(createPinia());
+  installEditorRuntime(setActivePinia(createPinia())!);
   vi.clearAllMocks();
   sessionStorage.clear();
   const auth = useAuthStore();

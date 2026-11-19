@@ -4,13 +4,13 @@ test("storage: real IndexedDB CAS, corruption isolation and legacy receipt", asy
 }) => {
   await page.goto("/");
   const result = await page.evaluate(async () => {
-    const path = "/src/stores/workspaceRecoveryIndexedDb.ts";
+    const path = "/src/stores/workspace/workspace_recovery/workspaceRecoveryIndexedDb.ts";
     const { createRecoveryStorage } = await import(/* @vite-ignore */ path);
     const fixturePath = "/src/test/workspaceEditFixture.ts";
     const { target, commandId, geometry, candidate } = await import(
       /* @vite-ignore */ fixturePath
     );
-    const contractPath = "/src/contracts/workspace-recovery.ts";
+    const contractPath = "/src/contracts/workspace/workspace-recovery.ts";
     const { createRecoveryRecord } = await import(
       /* @vite-ignore */ contractPath
     );

@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { editorTestContext } from "@/test/editorTestContext";
 import { useWorkspaceRecoveryStore } from "../workspace/workspace_recovery/workspaceRecovery";
@@ -98,7 +99,7 @@ describe("Save recovery", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     vi.resetAllMocks();
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
     sessionStorage.clear();
   });
   afterEach(() => {
@@ -227,7 +228,7 @@ describe("Save recovery", () => {
     await vi.runAllTimersAsync();
     await retry;
     expect(api.saveFeatureGeometry).toHaveBeenCalledTimes(11);
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
     const restored = setup();
     api.saveFeatureGeometry.mockResolvedValue({
       ...successFixture(original.request.commandId),
@@ -298,7 +299,7 @@ describe("Save recovery", () => {
     await store.editVersionCommands.saveLocalDraft();
     await settle(store.editVersionCommands);
     expect((await readRecoveryRecord("actor")).kind).toBe("empty");
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
     const restored = setup();
     restored.seed(workspaceFixture(true));
     await restored.editVersionCommands.restorePendingSave();

@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { editorTestContext } from "@/test/editorTestContext";
 const api = vi.hoisted(() => ({
@@ -13,7 +14,7 @@ import { workspaceFixture, target } from "@/test/workspaceEditFixture";
 import { useAuthStore } from "../auth";
 
 beforeEach(() => {
-  setActivePinia(createPinia());
+  installEditorRuntime(setActivePinia(createPinia())!);
   Object.defineProperty(globalThis, "indexedDB", {
     value: new IDBFactory(),
     configurable: true,

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getEditorRuntime } from "@/editor/editorRuntime";
+const workflow = getEditorRuntime().workflow;
 import WorkOrderDataIssues from "./WorkOrderDataIssues.vue";
 import { RefreshCw } from "@lucide/vue";
 import { nextTick, onMounted, ref, watch } from "vue";
@@ -12,7 +14,6 @@ import WorkspaceComparisonPanel from "@/components/workspace/WorkspaceComparison
 import WorkspaceEditCommands from "@/components/workspace/WorkspaceEditCommands.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
 import { useAuthStore } from "@/stores/auth";
-import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
 import { useFeatureBaselineStore } from "@/stores/edit_version/featureBaseline";
 import { useEditVersionChangeSetStore } from "@/stores/edit_version/editVersionChangeSet";
 import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
@@ -23,7 +24,6 @@ type WorkspaceDetailsPanelHandle = {
   focusHeading(): void;
 };
 
-const editorNavigation = useEditorNavigationStore();
 const editorSession = useEditorSessionStore();
 const workOrders = useWorkOrdersStore();
 const editor = useEditVersionEditor();
@@ -204,7 +204,7 @@ async function openSelectedWorkspace(): Promise<void> {
               "
               @click="
                 workOrder.id &&
-                editorNavigation.requestNavigation({
+                workflow.requestNavigation({
                   kind: 'work-order',
                   workOrderId: workOrder.id,
                 })

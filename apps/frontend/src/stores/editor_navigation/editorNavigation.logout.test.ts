@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { editorTestContext } from "@/test/editorTestContext";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
@@ -37,7 +38,7 @@ const contexts: ReturnType<typeof createPinia>[] = [];
 function setup() {
   const pinia = createPinia();
   contexts.push(pinia);
-  setActivePinia(pinia);
+  installEditorRuntime(setActivePinia(pinia)!);
   useAuthStore().setAuth("token", user, { sessionId: "sid-a" });
   const store = editorTestContext();
   store.seed(workspaceFixture());
@@ -94,7 +95,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   for (const pinia of contexts.splice(0)) {
-    setActivePinia(pinia);
+    installEditorRuntime(setActivePinia(pinia)!);
     useAuthStore().stopBrowserSessionSync();
     useWorkspaceRecoveryStore().stopRuntime();
   }

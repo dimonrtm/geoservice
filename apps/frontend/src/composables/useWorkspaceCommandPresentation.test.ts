@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { useFeatureBaselineStore } from "@/stores/edit_version/featureBaseline";
 import { geometry } from "@/test/workspaceEditFixture";
 import { editorTestContext } from "@/test/editorTestContext";
@@ -35,7 +36,7 @@ function setup(changed = false) {
   return store;
 }
 beforeEach(() => {
-  setActivePinia(createPinia());
+  installEditorRuntime(setActivePinia(createPinia())!);
   sessionStorage.clear();
 });
 describe("workspace command presentation", () => {

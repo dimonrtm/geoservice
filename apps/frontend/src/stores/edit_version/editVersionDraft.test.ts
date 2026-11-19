@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { editorTestContext } from "@/test/editorTestContext";
 import {
@@ -24,7 +25,7 @@ const api = vi.hoisted(() => ({
 vi.mock("@/api/work_order/workOrders", () => api);
 describe("workOrders local editing", () => {
   beforeEach(() => {
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
     sessionStorage.clear();
     vi.clearAllMocks();
   });
@@ -84,8 +85,40 @@ describe("Save orchestration", () => {
     vi.restoreAllMocks();
     vi.resetAllMocks();
     sessionStorage.clear();
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
   });
+  it.each(["after-save", "clean-selection"])(
+    "completes Revert %s",
+    async (scenario) => {
+      const store = editableStore();
+      api.saveFeatureGeometry.mockImplementation(async (_target, request) =>
+        successFixture(request.commandId),
+      );
+      api.readMap.mockResolvedValue(workspaceFixture(true));
+      if (scenario === "after-save") {
+        await store.editVersionCommands.saveLocalDraft();
+        await settle(store.editVersionCommands);
+      } else {
+        store.editVersionDraft.cancelLocalEdit();
+        store.seed(workspaceFixture(true));
+        expect(store.editVersionDraft.beginLocalEdit(target.featureId, 1)).toBe(
+          true,
+        );
+      }
+      api.readMap.mockResolvedValue(workspaceFixture());
+      expect(store.editVersionCommands.beginRevert()).toBe("confirm");
+      await store.editVersionCommands.confirmRevert(
+        store.editVersionCommands.revertConfirmation!.confirmationId,
+      );
+      await settle(store.editVersionCommands);
+      expect(store.editVersionCommands.recoveryRecord).toBeNull();
+      expect(store.editVersionCommands.localPhase).toBe("idle");
+      expect(store.editVersionCommands.commandResult?.commandId).toBe(
+        store.editVersionCommands.submittedCommandId,
+      );
+      expect(store.editVersionDraft.localDraft).toBeNull();
+    },
+  );
   it("revert uses change set baseline without selection and persists before PUT", async () => {
     const store = editableStore();
     store.editVersionDraft.cancelLocalEdit();

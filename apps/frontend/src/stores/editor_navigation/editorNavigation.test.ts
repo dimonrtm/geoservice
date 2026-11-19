@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { editorTestContext } from "@/test/editorTestContext";
 import { beforeEach, expect, it, vi } from "vitest";
@@ -44,7 +45,7 @@ function setup() {
   return s;
 }
 beforeEach(() => {
-  setActivePinia(createPinia());
+  installEditorRuntime(setActivePinia(createPinia())!);
   sessionStorage.clear();
   vi.resetAllMocks();
 });
@@ -133,6 +134,38 @@ it("storage failure cancels save-and-leave and releases the dialog", async () =>
   expect(s.editorNavigation.navigation).toBeNull();
   expect(s.workOrders.selectedWorkOrderId).toBe(target.workOrderId);
   expect(s.editVersionDraft.localDraft).not.toBeNull();
+});
+
+it("a late blocked submit cannot cancel a newer navigation confirmation", async () => {
+  const s = setup();
+  let finish!: (result: "started" | "blocked") => void;
+  const submit = vi
+    .spyOn(useWorkspaceRecoveryStore(), "submit")
+    .mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+  const id = s.editorNavigation.requestNavigation({
+    kind: "work-order",
+    workOrderId: "B",
+  })!;
+  const pending = s.editorNavigation.resolveNavigation(id, "save");
+  await vi.waitFor(() => expect(submit).toHaveBeenCalledOnce());
+  const previous = s.editorNavigation.navigation!;
+  s.editorNavigation.abortNavigation(id);
+  s.editorNavigation.beginNavigation({
+    ...previous,
+    id: "new",
+    phase: "dirty",
+    commandId: null,
+  });
+  finish("blocked");
+  await pending;
+  expect(s.editorNavigation.navigation?.id).toBe("new");
+  expect(s.workOrders.selectedWorkOrderId).toBe(target.workOrderId);
+  submit.mockRestore();
+  useWorkspaceRecoveryStore().stopRuntime();
 });
 it("protocol failure cancels save-and-leave and releases the dialog", async () => {
   const s = setup();

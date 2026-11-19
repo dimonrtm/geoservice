@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getEditorRuntime } from "@/editor/editorRuntime";
+const workflow = getEditorRuntime().workflow;
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
@@ -55,14 +57,14 @@ watch(
 );
 function closeRevert() {
   const id = editVersionCommands.revertConfirmation?.confirmationId;
-  if (id) editVersionCommands.cancelRevert(id);
+  if (id) workflow.cancelRevert(id);
 }
 function proceedRevert() {
   const context = editVersionCommands.revertConfirmation;
   if (!context) return;
   if (context.phase === "resolve-dirty")
-    editVersionCommands.discardLocalDraftForRevert(context.confirmationId);
-  else void editVersionCommands.confirmRevert(context.confirmationId);
+    workflow.discardLocalDraftForRevert(context.confirmationId);
+  else void workflow.confirmRevert(context.confirmationId);
 }
 function dialogKeydown(event: KeyboardEvent) {
   if (event.key === "Escape") {
@@ -97,24 +99,24 @@ async function focusAfterAction(origin: EventTarget | null) {
 }
 function save(event: MouseEvent) {
   if (!view.value.canSave) return;
-  void editVersionCommands.saveLocalDraft();
+  void workflow.saveLocalDraft();
   void focusAfterAction(event.currentTarget);
 }
 function cancel(event: MouseEvent) {
   if (!view.value.canCancel) return;
-  editVersionDraft.discardLocalChangesKeepingSelection();
+  workflow.discardLocalChangesKeepingSelection();
   void focusAfterAction(event.currentTarget);
 }
 function revert() {
-  if (view.value.canRevert) editVersionCommands.beginRevert();
+  if (view.value.canRevert) workflow.beginRevert();
 }
 function recover(event: MouseEvent, action: "command" | "read" | "discard") {
   if (action === "command" && view.value.canRetryCommand)
-    void editVersionCommands.retryPendingSave();
+    void workflow.retryPendingSave();
   if (action === "read" && view.value.canRetryRead)
-    void editVersionCommands.refreshCurrentWorkspace();
+    void workflow.refreshCurrentWorkspace();
   if (action === "discard" && view.value.canDiscardRejectedAttempt)
-    editVersionCommands.discardRejectedAttempt();
+    workflow.discardRejectedAttempt();
   void focusAfterAction(event.currentTarget);
 }
 </script>

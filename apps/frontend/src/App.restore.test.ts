@@ -1,3 +1,6 @@
+vi.mock("@/editor/editorRuntime", () => ({
+  getEditorRuntime: () => ({ workflow: { requestNavigation: vi.fn() } }),
+}));
 import { mount, flushPromises } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, expect, it, vi } from "vitest";

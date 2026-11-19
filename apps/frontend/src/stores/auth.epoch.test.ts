@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { beforeEach, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 vi.mock("@/api/auth", () => ({
@@ -7,7 +8,7 @@ vi.mock("@/api/auth", () => ({
 }));
 import { useAuthStore } from "./auth";
 beforeEach(() => {
-  setActivePinia(createPinia());
+  installEditorRuntime(setActivePinia(createPinia())!);
   sessionStorage.clear();
 });
 it("late unauthorized from an older epoch cannot clear a new session", () => {

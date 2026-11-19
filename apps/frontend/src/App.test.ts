@@ -1,6 +1,8 @@
-import { mount } from "@vue/test-utils";
+import { mount, enableAutoUnmount } from "@vue/test-utils";
 import { createPinia, setActivePinia } from "pinia";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+enableAutoUnmount(afterEach);
 
 vi.mock("./config/app", () => ({ appName: "Сети Уфы" }));
 
@@ -33,9 +35,10 @@ vi.mock("./components/ReviewerHome.vue", () => ({
 }));
 
 describe("App", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.resetModules();
-    setActivePinia(createPinia());
+    const { installEditorRuntime } = await import("@/editor/editorRuntime");
+    installEditorRuntime(setActivePinia(createPinia())!);
   });
 
   it("shows editor work orders shell for authenticated editor", async () => {

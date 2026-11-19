@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { editorTestContext } from "@/test/editorTestContext";
 import { useAuthStore } from "../auth";
@@ -134,7 +135,7 @@ describe("editor version session", () => {
     vi.resetModules();
     vi.clearAllMocks();
     sessionStorage.clear();
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
     const auth = useAuthStore();
     auth.token = "t";
     auth.user = { id: "actor", email: "a@local", role: "editor" };

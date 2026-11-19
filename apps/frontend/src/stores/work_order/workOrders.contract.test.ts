@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { beforeEach, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { IDBFactory } from "fake-indexeddb";
@@ -15,7 +16,7 @@ const order = {
   status: "assigned",
 };
 beforeEach(() => {
-  setActivePinia(createPinia());
+  installEditorRuntime(setActivePinia(createPinia())!);
   vi.clearAllMocks();
   sessionStorage.clear();
   Object.defineProperty(globalThis, "indexedDB", {

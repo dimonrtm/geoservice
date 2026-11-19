@@ -1,23 +1,20 @@
-import { defineStore } from "pinia";
-import { isLocalDraftDirty } from "@/domain/workspace/workspaceDraft";
-import { useAuthStore } from "../auth";
-import { useWorkspaceRecoveryStore } from "../workspace/workspace_recovery/workspaceRecovery";
 import type {
-  NavigationTarget,
   NavigationChoice,
   NavigationContext,
+  NavigationTarget,
 } from "@/domain/workspace/workspaceNavigation";
+import { requireEditorWorkflow } from "@/editor/editorRuntimeBinding";
+import {
+  matchesNavigation,
+  type SaveAttempt,
+} from "@/editor/editorWorkflowContracts";
+import { defineStore } from "pinia";
 
-import { useEditVersionDraftStore } from "@/stores/edit_version/editVersionDraft";
-import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
-import { useWorkOrdersStore } from "@/stores/work_order/workOrders";
-import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
 type EditorNavigationState = {
   navigation: NavigationContext | null;
   navigationError: string | null;
   logoutAttempt: { id: string; sessionId: string; sessionEpoch: number } | null;
 };
-
 export const useEditorNavigationStore = defineStore("editorNavigation", {
   state: (): EditorNavigationState => ({
     navigation: null,
@@ -25,172 +22,93 @@ export const useEditorNavigationStore = defineStore("editorNavigation", {
     logoutAttempt: null,
   }),
   getters: {
-    workspaceInteractionLocked: (state): boolean => {
-      const editVersionCommands = useEditVersionCommandsStore();
-      return (
-        (state.logoutAttempt !== null &&
-          state.logoutAttempt.sessionId === useAuthStore().sessionId &&
-          state.logoutAttempt.sessionEpoch === useAuthStore().sessionEpoch) ||
-        editVersionCommands.revertConfirmation !== null ||
-        (state.navigation !== null && state.navigation.phase !== "saving")
-      );
+    workspaceInteractionLocked(): boolean {
+      return requireEditorWorkflow(
+        this,
+      ).getters.navigation.workspaceInteractionLocked();
     },
     canLeaveWorkspace(): boolean {
-      const editVersionCommands = useEditVersionCommandsStore();
-      const editVersionDraft = useEditVersionDraftStore();
-      return (
-        !this.workspaceInteractionLocked &&
-        !editVersionCommands.revertConfirmation &&
-        (!editVersionDraft.localDraft ||
-          !isLocalDraftDirty(editVersionDraft.localDraft) ||
-          !!editVersionCommands.recoveryRecord ||
-          editVersionCommands.phase === "stale")
-      );
+      return requireEditorWorkflow(this).getters.navigation.canLeaveWorkspace();
     },
   },
   actions: {
-    requestNavigation(target: NavigationTarget): string | null {
-      const editVersionCommands = useEditVersionCommandsStore();
-      const workOrders = useWorkOrdersStore();
-      const editVersionDraft = useEditVersionDraftStore();
-      const auth = useAuthStore();
-      if (
-        !auth.user ||
-        this.workspaceInteractionLocked ||
-        editVersionCommands.revertConfirmation ||
-        this.navigation ||
-        (target.kind === "work-order" &&
-          target.workOrderId === workOrders.selectedWorkOrderId)
-      )
-        return null;
-      const recovery = useWorkspaceRecoveryStore();
-      const sent =
-        target.kind === "logout"
-          ? Object.values(recovery.records).some(
-              (r) => r.command.actorId === auth.user!.id,
-            )
-          : !!editVersionCommands.recoveryRecord;
-      const stale =
-        target.kind === "logout"
-          ? Object.keys(editVersionCommands.staleComparisons).length > 0
-          : !!(
-              editVersionCommands.recoveryKey &&
-              editVersionCommands.staleComparisons[
-                editVersionCommands.recoveryKey
-              ]
-            );
-      const dirty =
-        !!editVersionDraft.localDraft &&
-        isLocalDraftDirty(editVersionDraft.localDraft) &&
-        !editVersionCommands.recoveryRecord &&
-        !editVersionCommands.activeComparison;
-      if (!dirty && !sent && !stale) {
-        void this.performNavigation(target);
-        return null;
-      }
-      const id = crypto.randomUUID();
-      this.navigation = {
-        id,
-        actorId: auth.user.id,
-        sessionEpoch: auth.sessionEpoch,
-        sourceKey: editVersionCommands.recoveryKey,
-        target,
-        phase: dirty ? "dirty" : sent ? "sent" : "stale",
-        commandId: null,
-      };
-      this.navigationError = null;
-      return id;
-    },
-    cancelNavigation(id: string): void {
-      if (this.navigation?.id === id) this.navigation = null;
-    },
-    async prepareLogout(): Promise<boolean> {
-      const auth = useAuthStore();
-      const actor = auth.user?.id;
-      if (!actor) return true;
-      const sid = auth.sessionId;
-      const epoch = auth.sessionEpoch;
-      const recovery = useWorkspaceRecoveryStore();
-      const ready = await recovery.prepareActorLogout(actor);
-      if (auth.sessionId !== sid || auth.sessionEpoch !== epoch) return false;
-      if (!ready) {
-        this.navigationError =
-          "Выход приостановлен: не удалось сохранить данные восстановления. Повторите попытку.";
+    startNavigationSave(id: string): boolean {
+      if (this.navigation?.id !== id || this.navigation.phase !== "dirty")
         return false;
-      }
+      this.navigation.phase = "saving";
+      return true;
+    },
+    reportLogoutPreparation(ready: boolean): void {
+      this.navigationError = ready
+        ? null
+        : "Выход приостановлен: не удалось сохранить данные восстановления. Повторите попытку.";
+    },
+    startLogoutAttempt(
+      attempt: NonNullable<EditorNavigationState["logoutAttempt"]>,
+    ): void {
+      this.logoutAttempt = attempt;
+    },
+    finishLogoutAttempt(id: string): void {
+      if (this.logoutAttempt?.id === id) this.logoutAttempt = null;
+    },
+    beginNavigation(context: NavigationContext): boolean {
+      if (this.navigation) return false;
+      this.navigation = { ...context };
       this.navigationError = null;
       return true;
     },
-    async performNavigation(target: NavigationTarget): Promise<void> {
-      const editorSession = useEditorSessionStore();
-      const workOrders = useWorkOrdersStore();
-      if (target.kind === "logout") {
-        const auth = useAuthStore();
-        if (this.logoutAttempt || !auth.sessionId) return;
-        const attempt = {
-          id: crypto.randomUUID(),
-          sessionId: auth.sessionId,
-          sessionEpoch: auth.sessionEpoch,
-        };
-        this.logoutAttempt = attempt;
-        const isCurrent = () =>
-          auth.sessionId === attempt.sessionId &&
-          auth.sessionEpoch === attempt.sessionEpoch;
-        try {
-          if (!(await this.prepareLogout()) || !isCurrent()) return;
-          const ended = await auth.logout();
-          if (ended && isCurrent()) auth.clearLocalSession();
-        } finally {
-          if (this.logoutAttempt?.id === attempt.id) this.logoutAttempt = null;
-        }
-        return;
-      }
-      if (this.workspaceInteractionLocked) return;
-      editorSession.clearOpenedWorkspace({ force: true });
-      workOrders.selectWorkOrder(target.workOrderId);
+    bindNavigationSave(id: string, attempt: SaveAttempt): boolean {
+      const context = this.navigation;
+      if (
+        !context ||
+        context.id !== id ||
+        !matchesNavigation(context, attempt) ||
+        !["dirty", "saving"].includes(context.phase) ||
+        context.commandId
+      )
+        return false;
+      context.phase = "saving";
+      context.commandId = attempt.commandId;
+      return true;
     },
-    async resolveNavigation(
-      id: string,
-      choice: NavigationChoice,
-    ): Promise<void> {
-      const editVersionCommands = useEditVersionCommandsStore();
-      const editVersionDraft = useEditVersionDraftStore();
-      const context = this.navigation,
-        auth = useAuthStore();
-      if (!context || context.id !== id || context.phase === "saving") return;
+    abortNavigation(id: string): void {
+      if (this.navigation?.id === id) this.navigation = null;
+    },
+    takeCompletedNavigation(attempt: SaveAttempt): NavigationTarget | null {
+      const context = this.navigation;
       if (
-        context.actorId !== auth.user?.id ||
-        context.sessionEpoch !== auth.sessionEpoch ||
-        context.sourceKey !== editVersionCommands.recoveryKey
-      ) {
-        this.navigation = null;
-        return;
-      }
-      if (choice === "stay") {
-        this.navigation = null;
-        return;
-      }
-      if (choice === "save" && context.phase === "dirty") {
-        context.phase = "saving";
-        await editVersionCommands.saveLocalDraft();
-        if (this.navigation?.id === id && !this.navigation.commandId)
-          this.navigation = null;
-        return;
-      }
-      if (
-        (choice === "discard" && context.phase === "dirty") ||
-        (choice === "leave" && context.phase !== "dirty")
-      ) {
-        this.navigation = null;
-        if (choice === "discard") editVersionDraft.cancelLocalEdit();
-        await this.performNavigation(context.target);
-      }
+        !context ||
+        context.phase !== "saving" ||
+        !matchesNavigation(context, attempt) ||
+        context.commandId !== attempt.commandId
+      )
+        return null;
+      this.navigation = null;
+      return context.target;
+    },
+    resetNavigationState(): void {
+      this.$reset();
+    },
+    requestNavigation(target: NavigationTarget): string | null {
+      return requireEditorWorkflow(this).navigation.requestNavigation(target);
+    },
+    cancelNavigation(id: string): void {
+      return requireEditorWorkflow(this).navigation.cancelNavigation(id);
+    },
+    prepareLogout(): Promise<boolean> {
+      return requireEditorWorkflow(this).navigation.prepareLogout();
+    },
+    performNavigation(target: NavigationTarget): Promise<void> {
+      return requireEditorWorkflow(this).navigation.performNavigation(target);
+    },
+    resolveNavigation(id: string, choice: NavigationChoice): Promise<void> {
+      return requireEditorWorkflow(this).navigation.resolveNavigation(
+        id,
+        choice,
+      );
     },
     allowWorkspaceNavigation(): boolean {
-      const editVersionDraft = useEditVersionDraftStore();
-      if (this.canLeaveWorkspace) return true;
-      editVersionDraft.editBlockReason = "FINISH_OR_CANCEL_LOCAL_WORK";
-      return false;
+      return requireEditorWorkflow(this).navigation.allowWorkspaceNavigation();
     },
   },
 });

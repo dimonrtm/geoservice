@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workspaceFixture as editableWorkspaceFixture } from "@/test/workspaceEditFixture";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { useAuthStore } from "@/stores/auth";
@@ -305,7 +306,7 @@ describe("EditorWorkOrdersView", () => {
     restoreOpenedWorkspaceMock.mockReset();
     reopenSelectedWorkOrderMock.mockReset();
     sessionStorage.clear();
-    setActivePinia(createPinia());
+    installEditorRuntime(setActivePinia(createPinia())!);
     const auth = useAuthStore();
     auth.token = "token";
     auth.user = { id: "actor", email: "a@local", role: "editor" };

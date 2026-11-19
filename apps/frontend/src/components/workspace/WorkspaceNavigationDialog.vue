@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getEditorRuntime } from "@/editor/editorRuntime";
+const workflow = getEditorRuntime().workflow;
 import { nextTick, ref, watch } from "vue";
 import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
 import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
@@ -25,7 +27,7 @@ watch(
 );
 function choose(choice: NavigationChoice) {
   const id = editorNavigation.navigation?.id;
-  if (id) void editorNavigation.resolveNavigation(id, choice);
+  if (id) void workflow.resolveNavigation(id, choice);
 }
 </script>
 <template>

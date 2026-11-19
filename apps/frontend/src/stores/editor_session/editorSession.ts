@@ -1,3 +1,7 @@
+import {
+  editorDependencies,
+  requireEditorWorkflow,
+} from "@/editor/editorRuntimeBinding";
 import { defineStore } from "pinia";
 import { useAuthStore } from "../auth";
 import { useWorkspaceRecoveryStore } from "../workspace/workspace_recovery/workspaceRecovery";
@@ -17,10 +21,7 @@ import {
 } from "@/errors/apiErrorPresentations";
 import { openEditVersion } from "@/api/edit_version/editVersions";
 import { useEditVersionEditor } from "@/composables/edit_version/useEditVersionEditor";
-import { useEditVersionDraftStore } from "@/stores/edit_version/editVersionDraft";
-import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
 import { useWorkOrdersStore } from "@/stores/work_order/workOrders";
-import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
 import {
   readStoredSelectedWorkOrder,
   readStoredOpenedWorkspace,
@@ -50,6 +51,7 @@ function isWorkspaceAccessFailure(error: ParsedApiError): boolean {
 }
 
 type EditorSessionState = {
+  workspaceGeneration: number;
   readGenerations: Record<string, number>;
   openedWorkOrderId: string | null;
   openedEditVersionId: string | null;
@@ -70,6 +72,7 @@ type EditorSessionState = {
 
 export const useEditorSessionStore = defineStore("editorSession", {
   state: (): EditorSessionState => ({
+    workspaceGeneration: 0,
     readGenerations: {},
     openedWorkOrderId: null,
     openedEditVersionId: null,
@@ -165,7 +168,7 @@ export const useEditorSessionStore = defineStore("editorSession", {
     },
     async restoreOpenedWorkspace(): Promise<void> {
       const workOrders = useWorkOrdersStore();
-      const editVersionCommands = useEditVersionCommandsStore();
+      const editVersionCommands = editorDependencies(this).editVersionCommands;
       if (!canLoadVersion(this)) return;
       const storedSelection = readStoredSelectedWorkOrder();
       const storedWorkspace = readStoredOpenedWorkspace();
@@ -211,7 +214,7 @@ export const useEditorSessionStore = defineStore("editorSession", {
     ): Promise<void> {
       if (!canLoadVersion(this)) return;
       const orders = useWorkOrdersStore();
-      const commands = useEditVersionCommandsStore();
+      const commands = editorDependencies(this).editVersionCommands;
       const auth = useAuthStore();
       const epoch = auth.sessionEpoch;
       const requestSeq = ++this.openWorkspaceRequestSeq;
@@ -299,46 +302,30 @@ export const useEditorSessionStore = defineStore("editorSession", {
       await this.openSelectedWorkOrder();
     },
     async reopenSelectedWorkOrder(): Promise<void> {
-      const editorNavigation = useEditorNavigationStore();
+      const editorNavigation = editorDependencies(this).editorNavigation;
       if (!editorNavigation.allowWorkspaceNavigation()) return;
       clearStoredOpenedWorkspace();
       await this.openSelectedWorkOrder();
     },
     clearOpenedWorkspace(options: ClearOpenedWorkspaceOptions = {}): void {
-      const editorNavigation = useEditorNavigationStore();
-      const editVersionCommands = useEditVersionCommandsStore();
-      const editVersionDraft = useEditVersionDraftStore();
-      if (!options.force && !editorNavigation.allowWorkspaceNavigation())
-        return;
+      requireEditorWorkflow(this).clearOpenedWorkspace(options);
+    },
+    closeWorkspaceState(options: ClearOpenedWorkspaceOptions): void {
+      this.workspaceGeneration++;
       this.openWorkspaceRequestSeq++;
       this.workspaceReadIntent = null;
-      editVersionCommands.comparisonPreview = null;
-      editVersionCommands.submittedSourceGeometry = null;
-      editVersionCommands.submittedCommandId = null;
-      editVersionCommands.rejectedCandidateGeometry = null;
-      editVersionDraft.localDraft = null;
-      editVersionCommands.localPhase = "idle";
-      editVersionCommands.saveError = null;
-      if (options.force) {
-        editVersionCommands.commandResult = null;
-      }
       setOpenedVersion(this, null, null);
-      useEditVersionEditor().reset();
-      if (!options.preserveStoredWorkspace) {
-        clearStoredOpenedWorkspace();
-      }
+      if (!options.preserveStoredWorkspace) clearStoredOpenedWorkspace();
     },
     resetEditor(options: ResetWorkOrdersOptions = {}): void {
-      const commands = useEditVersionCommandsStore();
-      if (commands.revertConfirmation)
-        commands.cancelRevert(commands.revertConfirmation.confirmationId);
+      requireEditorWorkflow(this).resetEditor(options);
+    },
+    resetSessionState(options: ResetWorkOrdersOptions): void {
       const generation = this.openWorkspaceRequestSeq + 1;
+      const workspaceGeneration = this.workspaceGeneration + 1;
       this.$reset();
       this.openWorkspaceRequestSeq = generation;
-      commands.$reset();
-      useEditVersionDraftStore().$reset();
-      useEditorNavigationStore().$reset();
-      useEditVersionEditor().reset();
+      this.workspaceGeneration = workspaceGeneration;
       if (!options.preserveOpenedWorkspace) clearStoredOpenedWorkspace();
     },
     async readActiveFeature(featureId?: string): Promise<void> {
@@ -363,14 +350,14 @@ export const useEditorSessionStore = defineStore("editorSession", {
             presentWorkspaceRestoreError(parsed),
             "restore",
           );
-          await useEditVersionCommandsStore().suspendWorkOrderRecovery(
-            workOrderId,
-          );
+          await editorDependencies(
+            this,
+          ).editVersionCommands.suspendWorkOrderRecovery(workOrderId);
         }
       }
     },
     async reconcileAssignments(): Promise<void> {
-      const editVersionCommands = useEditVersionCommandsStore();
+      const editVersionCommands = editorDependencies(this).editVersionCommands;
       const auth = useAuthStore();
       const epoch = auth.sessionEpoch;
       const actor = auth.user;
@@ -417,7 +404,7 @@ function getSelectedWorkOrderValue<T>(
 
 function canLoadVersion(state: EditorSessionState): boolean {
   return (
-    useEditorNavigationStore().allowWorkspaceNavigation() &&
+    editorDependencies(state).editorNavigation.allowWorkspaceNavigation() &&
     state.openingWorkOrderId === null
   );
 }
@@ -438,6 +425,11 @@ function setOpenedVersion(
   workOrderId: string | null,
   editVersionId: string | null,
 ): void {
+  if (
+    state.openedWorkOrderId !== workOrderId ||
+    state.openedEditVersionId !== editVersionId
+  )
+    state.workspaceGeneration++;
   state.openedWorkOrderId = workOrderId;
   state.openedEditVersionId = editVersionId;
 }

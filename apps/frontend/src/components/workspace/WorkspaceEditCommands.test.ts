@@ -1,3 +1,4 @@
+import { installEditorRuntime } from "@/editor/editorRuntime";
 import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
 import { editorTestContext } from "@/test/editorTestContext";
 import { stopRecovery } from "@/test/recoveryIntegration";
@@ -19,7 +20,7 @@ vi.mock("@/api/work_order/workOrders", () => api);
 const wrappers: ReturnType<typeof mount>[] = [];
 function setup(changed = false) {
   const pinia = createPinia();
-  setActivePinia(pinia);
+  installEditorRuntime(setActivePinia(pinia)!);
   const auth = useAuthStore();
   auth.token = "test";
   auth.user = { id: "actor", email: "editor@example.local", role: "editor" };

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { getEditorRuntime } from "@/editor/editorRuntime";
+const workflow = getEditorRuntime().workflow;
 import WorkspaceNavigationDialog from "@/components/workspace/WorkspaceNavigationDialog.vue";
-import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
-const editorNavigation = useEditorNavigationStore();
 import { LogOut } from "@lucide/vue";
 import { computed, onMounted, onUnmounted } from "vue";
 
@@ -99,7 +99,7 @@ async function handleSessionLogout(): Promise<void> {
               :icon="LogOut"
               variant="secondary"
               data-test="logout-desktop"
-              @click="editorNavigation.requestNavigation({ kind: 'logout' })"
+              @click="workflow.requestNavigation({ kind: 'logout' })"
             >
               Выйти
             </UiButton>
@@ -112,7 +112,7 @@ async function handleSessionLogout(): Promise<void> {
               tooltip-align="end"
               variant="secondary"
               data-test="logout-mobile"
-              @click="editorNavigation.requestNavigation({ kind: 'logout' })"
+              @click="workflow.requestNavigation({ kind: 'logout' })"
             />
           </div>
         </div>

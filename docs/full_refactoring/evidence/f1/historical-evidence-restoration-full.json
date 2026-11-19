@@ -1,0 +1,80 @@
+{
+  "exitCode": 1,
+  "files": [
+    {
+      "file": "access-restoration.json",
+      "restored": true,
+      "sha256": "e8b36b66ca73ad08e905b1d3e20b06d8800678c7480ac80771bde550a3a9596c"
+    },
+    {
+      "file": "comparison-1024x768.png",
+      "restored": true,
+      "sha256": "ae986d87c81e3ee4e27c0928b80bc433c7e45ce79cd6719fb0641da25d139ca0"
+    },
+    {
+      "file": "comparison-1440x900.png",
+      "restored": true,
+      "sha256": "b242ed7682a0e428cac2371518d3d211fdd817082432d7f13ff537444576e105"
+    },
+    {
+      "file": "comparison-384x512.png",
+      "restored": true,
+      "sha256": "919dec34f0051d8131707722e40c72851d03a0b3b86dc7e3e77e9e80a2e30364"
+    },
+    {
+      "file": "comparison-512x384.png",
+      "restored": true,
+      "sha256": "b101812d8abe269e8d4b1086193a28e0e9b438887211cd26021924ae4baa2aa9"
+    },
+    {
+      "file": "comparison-720x450.png",
+      "restored": true,
+      "sha256": "4891c77718fc8f5f968b4cbee17efc6b0d1912841ac9319e1fd18fd4805446ab"
+    },
+    {
+      "file": "comparison-768x1024.png",
+      "restored": true,
+      "sha256": "6d26f345c895ef4e35e63953d9a194ece2ffe0c946b159a0ba71d8faccc2e52b"
+    },
+    {
+      "file": "legacy-m4\\revert.json",
+      "restored": true,
+      "sha256": "a133e0ab31a880c8c22a045fef3bcbc7b157eeb0ffdb85ef7150c44c9ebc8873"
+    },
+    {
+      "file": "legacy-m4\\revert.png",
+      "restored": true,
+      "sha256": "f7c4c96c3d97170ab186e902046e8f0cbb64aaee449145d51637b0b484239700"
+    },
+    {
+      "file": "legacy-m4\\save.json",
+      "restored": true,
+      "sha256": "2caf298d24580aea716d84d423160985d74d5a140d8e50f73277607fa14df4c0"
+    },
+    {
+      "file": "legacy-m4\\save.png",
+      "restored": true,
+      "sha256": "1ef6fdcdf78c209a90b31caca93d4dea667a59f2d826be8b79e04ed4b1ec4b76"
+    },
+    {
+      "file": "multi-context.json",
+      "restored": true,
+      "sha256": "d0668282e16d41db7238d8ca4a44cfe9917b953d3a33376d712827f5371c807c"
+    },
+    {
+      "file": "revert-browser-restart.json",
+      "restored": true,
+      "sha256": "dd2d3ac5ef57ff8e93b119a453a3abd5f6ef96c03b0343389628c6541b818326"
+    },
+    {
+      "file": "save-browser-restart.json",
+      "restored": true,
+      "sha256": "67b79f0f157b14d08aa2238e6243105bbfdbd2f6f5a46fcc0f603f43210ca3bd"
+    },
+    {
+      "file": "verification.json",
+      "restored": true,
+      "sha256": "a95dc61950a797c2c52d43bae45790eeb818e7c35b623d2d868bc9479c1ea976"
+    }
+  ]
+}
