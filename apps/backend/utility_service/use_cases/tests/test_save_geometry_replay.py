@@ -2,11 +2,12 @@ import asyncio
 from copy import deepcopy
 from dataclasses import replace
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 
 from utility_service.infrastructure.postgresql.models.work_order import EditVersionCommandState
+from utility_service.infrastructure.postgresql.geometry_codec import encode_geometry
 from utility_service.infrastructure.postgresql.repository_rows.edit_geometry import (
     RepositoryProtocolError,
     RepositoryRejection,
@@ -17,6 +18,30 @@ from utility_service.use_cases.tests.save_geometry_service_support import (
     BASELINE,
     MOVED,
 )
+
+
+def test_short_line_preserves_saved_fingerprint_and_rejection(monkeypatch):
+    ids = iter(UUID(int=i) for i in range(1, 10))
+    monkeypatch.setattr(
+        "utility_service.use_cases.tests.save_geometry_service_support.uuid4",
+        lambda: next(ids),
+    )
+    fixture = SaveFixture()
+    short = replace(BASELINE, coordinates=BASELINE.coordinates[:2])
+    geometry = encode_geometry(short)
+    fixture.context = replace(
+        fixture.context,
+        current=replace(fixture.context.current, geometry_ewkb=geometry),
+        baseline=replace(fixture.context.baseline, geometry_ewkb=geometry),
+    )
+    request = fixture.request(short)
+    for _ in range(2):
+        with pytest.raises(WorkOrderApiError) as error:
+            asyncio.run(fixture.save(request))
+        assert error.value.code == "FEATURE_NOT_EDITABLE"
+        assert fixture.commands[request.command_id].request_fingerprint == (
+            "geom-v1:sha256:09774ee778e790816a5c32318ed0f250b491021ccef9ab4e6ff41498a80f517d"
+        )
 
 
 def test_replay_a_after_b_preserves_current_and_saved_payload():

@@ -83,6 +83,10 @@ def test_repaired_baseline_keeps_contextless_rejection(damage):
         assert first.value.code == "WORK_ORDER_CONTEXT_INVALID"
         row = deepcopy(fixture.commands[request.command_id])
         assert row.request_fingerprint.startswith("geom-contextless-v1:sha256:")
+        with pytest.raises(WorkOrderApiError) as before_repair:
+            await fixture.save(request)
+        assert before_repair.value.code == first.value.code
+        assert fixture.commands[request.command_id] == row
         fixture.context = valid_context
         equivalent = replace(
             request,

@@ -9,17 +9,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 from utility_service.domain_services.edit_geometry.canonicalization import prepare_geometry
-from utility_service.domain_services.edit_geometry.types import GeometryValue, GeometryRuleError
-from utility_service.domain_services.edit_geometry.structure import validate_transition
-from utility_service.infrastructure.postgresql.geometry_codec import (
-    decode_geometry,
-    encode_geometry,
+from utility_service.domain_services.edit_geometry.types import GeometryValue
+from utility_service.domain_services.edit_geometry.save_policy import (
+    EditRejection,
+    NeedStoredSpatial,
+    SpatialFacts,
+    begin_save_validation,
 )
+from utility_service.infrastructure.postgresql.geometry_codec import encode_geometry
 from utility_service.infrastructure.postgresql.repositories.edit_geometry_validation import (
-    check_baseline,
-    check_context,
+    checked_baseline,
     inspect_spatial,
-    reject_context,
+    read_baseline,
+    read_current,
 )
 from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersion,
@@ -444,12 +446,12 @@ class EditVersionRepository:
         request_geometry: GeometryValue,
     ) -> PreparedGeometryHandle | RepositoryRejection:
         self.scope.require(context)
-        rejection = check_baseline(context)
-        if rejection is not None:
-            return rejection
+        baseline = checked_baseline(context)
+        if isinstance(baseline, RepositoryRejection):
+            return baseline
         prepared = prepare_geometry(
             request_geometry,
-            decode_geometry(context.baseline.geometry_ewkb),
+            baseline,
             context.root.policy,
         )
         return self.scope.issue(
@@ -471,62 +473,40 @@ class EditVersionRepository:
             raise RepositoryProtocolError(
                 "Предлагаемая геометрия подготовлена для другого контекста."
             )
-        rejection = check_context(context)
-        if rejection is not None:
-            return rejection
-        for feature in (
-            context.baseline,
-            context.current,
-        ):
+
+        async def spatial_facts(geometry_ewkb: bytes) -> SpatialFacts:
             verdict = await inspect_spatial(
-                self.session,
-                geometry_ewkb=feature.geometry_ewkb,
-                aoi_ewkb=context.aoi_ewkb,
+                self.session, geometry_ewkb=geometry_ewkb, aoi_ewkb=context.aoi_ewkb
             )
-            if not verdict.geometry_valid or not verdict.aoi_valid or not verdict.aoi_covered:
-                return reject_context(
-                    "Исходная геометрия или область работ нарушает пространственные ограничения."
-                )
-        if context.other_changed_feature_ids:
-            return RepositoryRejection(
-                "MULTIPLE_FEATURE_CHANGE_NOT_ALLOWED",
-                "В версии уже изменён другой объект.",
-            )
-        baseline = decode_geometry(context.baseline.geometry_ewkb)
-        current = decode_geometry(context.current.geometry_ewkb)
-        try:
-            transition = validate_transition(
-                baseline,
-                current,
-                prepared_geometry.prepared,
-            )
-        except GeometryRuleError as error:
-            return RepositoryRejection(
-                error.code,
-                "Предлагаемая геометрия нарушает правила изменения.",
-            )
+            return SpatialFacts(verdict.geometry_valid, verdict.aoi_valid, verdict.aoi_covered)
+
+        target = begin_save_validation(
+            context.current.feature_type,
+            context.current.operation,
+            bool(context.other_changed_feature_ids),
+            prepared_geometry.prepared,
+        )
+        if isinstance(target, EditRejection):
+            return RepositoryRejection(target.code, target.reason)
+        current_phase = target.evaluate(read_baseline(context))
+        if isinstance(current_phase, EditRejection):
+            return RepositoryRejection(current_phase.code, current_phase.reason)
+        decision = current_phase.evaluate(read_current(context))
+        while isinstance(decision, NeedStoredSpatial):
+            feature = context.baseline if decision.source == "baseline" else context.current
+            decision = decision.evaluate(await spatial_facts(feature.geometry_ewkb))
+        if isinstance(decision, EditRejection):
+            return RepositoryRejection(decision.code, decision.reason)
         candidate = prepared_geometry.prepared.geometry
-        if transition.is_noop:
+        if decision.transition.is_noop:
             after = context.current.geometry_ewkb
-        elif candidate == baseline:
+        elif candidate == current_phase.baseline:
             after = context.baseline.geometry_ewkb
         else:
             after = encode_geometry(candidate)
-        verdict = await inspect_spatial(
-            self.session,
-            geometry_ewkb=after,
-            aoi_ewkb=context.aoi_ewkb,
-        )
-        if not verdict.geometry_valid:
-            return RepositoryRejection(
-                "GEOMETRY_INVALID",
-                "Предлагаемая геометрия недопустима.",
-            )
-        if not verdict.aoi_covered:
-            return RepositoryRejection(
-                "GEOMETRY_OUTSIDE_AOI",
-                "Предлагаемая геометрия выходит за пределы области работ.",
-            )
+        transition = decision.evaluate(await spatial_facts(after))
+        if isinstance(transition, EditRejection):
+            return RepositoryRejection(transition.code, transition.reason)
         change = ValidatedGeometryChange(
             context,
             context.current.geometry_ewkb,

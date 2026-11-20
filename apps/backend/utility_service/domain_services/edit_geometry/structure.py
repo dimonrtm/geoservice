@@ -62,6 +62,15 @@ def is_internal_diff(
     return len(indices) <= 1 and all(0 < index < vertex_count - 1 for index in indices)
 
 
+def internal_vertex_indices(
+    baseline: GeometryValue, current: GeometryValue
+) -> tuple[int, ...] | None:
+    if not has_matching_structure(baseline, current):
+        return None
+    indices = changed_vertices(baseline, current)
+    return indices if is_internal_diff(indices, len(baseline.coordinates)) else None
+
+
 def validate_transition(
     baseline: GeometryValue,
     current: GeometryValue,
@@ -76,14 +85,8 @@ def validate_transition(
         current,
     ):
         raise InvalidGeometryContext("Структура текущей геометрии отличается от исходной.")
-    before = changed_vertices(
-        baseline,
-        current,
-    )
-    if not is_internal_diff(
-        before,
-        len(baseline.coordinates),
-    ):
+    before = internal_vertex_indices(baseline, current)
+    if before is None:
         raise InvalidGeometryContext(
             "Текущая геометрия нарушает ограничение изменения одной внутренней вершины."
         )

@@ -1,3 +1,4 @@
+from utility_service.domain_services.edit_geometry.structure import internal_vertex_indices
 from utility_service.infrastructure.postgresql.geometry_codec import decode_geometry
 from utility_service.infrastructure.postgresql.repository_rows.edit_geometry import (
     EditGeometryDefaultState,
@@ -68,17 +69,8 @@ def project_version_changes(
             or len(current.coordinates) != len(original.coordinates)
         ):
             raise ValueError("Черновик выходит за границы первого редактирования.")
-        changed_indices = [
-            index
-            for index, (before, after) in enumerate(
-                zip(
-                    original.coordinates,
-                    current.coordinates,
-                )
-            )
-            if before != after
-        ]
-        if len(changed_indices) != 1 or not 0 < changed_indices[0] < len(original.coordinates) - 1:
+        changed_indices = internal_vertex_indices(original, current)
+        if not changed_indices:
             raise ValueError("Ожидалось изменение одной внутренней вершины.")
         change_set = ChangedVertexOut(
             feature_id=feature.feature_id,

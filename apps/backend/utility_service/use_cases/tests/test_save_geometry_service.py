@@ -1,4 +1,5 @@
 import asyncio
+from dataclasses import replace
 
 import pytest
 
@@ -74,6 +75,18 @@ def test_commit_failure_does_not_return_success():
         assert fixture.commands == {}
         assert fixture.context.root.draft_revision == 1
         assert fixture.mutations == 0
+
+    asyncio.run(scenario())
+
+
+def test_stale_precedes_deferred_structure_rejection():
+    async def scenario():
+        fixture = SaveFixture()
+        short = replace(BASELINE, coordinates=BASELINE.coordinates[:2])
+        with pytest.raises(WorkOrderApiError) as error:
+            await fixture.save(fixture.request(short, token="old"))
+        assert error.value.code == "DRAFT_VERSION_STALE"
+        assert fixture.validations == 0
 
     asyncio.run(scenario())
 

@@ -10,15 +10,17 @@ from utility_service.domain_services.edit_geometry.contextless_fingerprint impor
 from utility_service.domain_services.edit_geometry.fingerprint import command_fingerprint
 from utility_service.domain_services.edit_geometry.types import (
     FingerprintContext,
+    GeometryValue,
     InvalidGeometryContext,
 )
-from utility_service.infrastructure.postgresql.geometry_codec import decode_geometry
 from utility_service.infrastructure.postgresql.repositories.edit_geometry_validation import (
-    check_baseline,
+    checked_baseline,
+    read_baseline,
 )
 from utility_service.infrastructure.postgresql.repository_rows.edit_geometry import (
     EditGeometryContext,
     RepositoryProtocolError,
+    RepositoryRejection,
 )
 from utility_service.use_cases.schemas.edit_version.geometry_save_in import GeometrySaveRequest
 from utility_service.use_cases.schemas.edit_version.geometry_save_out import SaveGeometryRejection
@@ -60,31 +62,16 @@ def build_save_geometry_identity(
             ),
             None,
         )
-    rejection = check_baseline(context)
-    early = (
-        SaveGeometryRejection.from_code(
-            rejection.code,
-            rejection.reason,
-        )
-        if rejection
-        else None
-    )
-    baseline, state = context.baseline, context.default_state
-    geometry = None
-    if (
-        (early is None or early.code != "WORK_ORDER_CONTEXT_INVALID")
-        and baseline is not None
-        and state is not None
-        and state.id == root.default_state_id
-        and state.work_order_id == root.work_order_id
-        and state.base_network_revision == root.base_network_revision
-        and state.status == "active"
-        and baseline.feature_id == context.current.feature_id
-        and baseline.feature_type == context.current.feature_type
-    ):
+    result = checked_baseline(context)
+    early = None
+    if isinstance(result, RepositoryRejection):
+        early = SaveGeometryRejection.from_code(result.code, result.reason)
+        if result.code == "FEATURE_NOT_EDITABLE":
+            # A point or short line can still identify a previously rejected command.
+            result = read_baseline(context)
+    geometry = result if isinstance(result, GeometryValue) else None
+    if geometry is not None:
         try:
-            geometry = decode_geometry(baseline.geometry_ewkb)
-            # Fingerprint supports Point/short lines for ineligible targets, as in Day 4.
             prepared = prepare_geometry(
                 request.geometry,
                 geometry,
