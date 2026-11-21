@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-10
+updated: 2026-11-21
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -28,10 +28,16 @@ tags: [knowledge, index, geoservice]
 - [[Code_wiki/index]] - техническая wiki для архитектуры, разработки, deployment и состояния проекта.
 - [[memory/project-state]] - живое состояние проекта.
 - [[memory/llm-wiki-method]] - методика ведения атомарных LLM-wiki нод.
+- [[Общие_принципы/index]] — методика discovery и планирования.
+- [[docs/knowledge-pipeline/README]] — порядок работы с источниками и wiki.
 - [[docs/agent-memory/README]] - компактная инженерная память Codex.
 
 ## Свежие Изменения
 
+- 21.11.2026 — обработаны исследование по 102 документам и три ответа об учёте физических активов. Все 62 RAW учтены. Открытых доменных вопросов нет. [[Vision_wiki/chats/2026-11-21-asset-lifecycle-research]], [[Vision_wiki/chats/2026-11-21-asset-lifecycle-answers]], [[DDD_Wiki/use_cases/record_physical_asset_change]].
+
+- 2026-11-21 — после синхронизации 10 ноября обработаны два RAW о зависимых нарядах. Они добавили понятие, политику, спецификацию, сценарий и два конспекта в Vision. Новых нод типов decision, entity и solution за этот период нет. За 15–21 ноября новых RAW и доменных нод нет. Все 60 источников учтены. [[RAW_inputs/index]], [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]].
+- Разделение состояния редактора отражено в [[Code_wiki/index]]. Четыре технические страницы отстают от кода открытия версии, проверки геометрии, доступа к сессии и восстановления команд. В карте контекстов сохранился прежний статус границы Reviewer/Publisher. Обе задачи внесены в [[Vision_wiki/decisions/followups/index]].
 - 2026-11-10: исследование зависимых нарядов и ответы обработаны `/ingest`: 75 документов, 25 новых нормализованных URL; 60 RAW обработаны, открытых вопросов 0, follow-up 18. [[Vision_wiki/chats/2026-11-10-dependencies-research]], [[Vision_wiki/chats/2026-11-10-dependencies-answers]]. Реестр, Current Discovery Queue и live state согласованы; runtime не проверялся.
 
 - 2026-11-10: `/discover` выделил 3 открытых вопроса о зависимых нарядах: условие выполнения зависимости, её изменение и взаимное ожидание. [[Wiki/_registry/questions]], Current Discovery Queue в [[DDD_Wiki/model_health]] и следующий шаг [[memory/project-state]] согласованы. Постановка до исследования; теперь все три answered по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]]; правила отзыва/коррекции и first-save не переоткрываются.
@@ -171,9 +177,9 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
-- По `FU-2026-10-11-001` остаётся сверить описания реализации; metadata/fixture проверены для revision 49, активная discovery-очередь согласована с реестром. S2-X01 завершён по [отчёту 2026-10-23](docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md); автоматический перенос попытки не реализован и не является незавершённым обещанием этого среза. Сопоставление остальных правил условной организации с реализацией остаётся в `FU-2026-10-13-004`.
-- Для first-save открытых вопросов metadata/fixture нет; основание — [протокол 08.11.2026](docs/verification/2026-11-08-demo-dataset-runtime-check.md), локальная revision 49. Реестр: [[Wiki/_registry/questions]]. SIM-UGIS-POS-001 и SIM-UGIS-RET-001 приняты условной организацией; учебное evidence не подтверждает точность L-003. Реализация принятых recovery/evidence/retention правил — `FU-2026-10-13-004`.
-- Новый Release 1 разбит на 7 двухнедельных спринтов; в Спринте 1 уже готовы роли/доступ, utility schema, `synthetic_utility_feeder_01`, read-only feeder API, `WorkOrder`, создание `EditVersion` из per-WorkOrder `DefaultState`, экран `Мои наряды`, Edit Workspace и full path API smoke; следующий scope - persisted edit slice: geometry-only internal-vertex edit существующей line feature, `UpdateEditVersionFeatureGeometry`, resulting feature snapshot + computed baseline diff, normalized `operation`, aggregate-level `DraftVersionToken` и basic draft validation flags.
+- Открытых доменных вопросов нет. Правила физической замены, разделения и слияния линии и адресации уже выданного наряда приняты. [[Wiki/_registry/questions#Идентичность активов после физических работ]], [[DDD_Wiki/model_health#Current Discovery Queue]].
+- FU-2026-10-11-001 закрыт. Для локальной revision 49 проверены metadata и fixture. Точность L-003 по-прежнему требует позиционного доказательства. [Протокол проверки](docs/verification/2026-11-08-demo-dataset-runtime-check.md).
+- Сохранение одной линии, чтение результата и восстановление команды реализованы. Ближайшая техническая зависимость для review — проверка позиционных доказательств и готовности к передаче пакета. Открытые работы ведутся в FU-2026-10-13-004. [Матрица реализации](docs/verification/2026-11-09-model-health-code-reconciliation.md).
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
@@ -208,7 +214,7 @@ tags: [knowledge, index, geoservice]
 
 ## Решения условной организации
 
-[[Vision_wiki/chats/2026-10-13-simulated-organization-decisions]] — новая редакция 15 ответов: принятое поведение модели и [[Wiki/specifications/simulated_line_positional_acceptance]]. Старый RAW сохранён; отсутствие реального предприятия не является blocker. Текущие реестры: 2 открытых вопроса сверки, 19 open follow-up, 0 активных канонических blocking conflicts. Реализация отделена от решений.
+[[Vision_wiki/chats/2026-10-13-simulated-organization-decisions]] — новая редакция 15 ответов: принятое поведение модели и [[Wiki/specifications/simulated_line_positional_acceptance]]. Старый RAW сохранён; отсутствие реального предприятия не является blocker. На момент решения 13.10.2026 в реестрах было 2 открытых вопроса сверки, 19 open follow-up, 0 активных канонических blocking conflicts. Реализация отделена от решений.
 
 ## Исследование пригодности данных — 2026-10-16
 

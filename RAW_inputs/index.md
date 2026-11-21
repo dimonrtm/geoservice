@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-09
+updated: 2026-11-21
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -91,3 +91,5 @@ tags: [raw-inputs, source-of-truth]
 
 | 2026-11-10 | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-research.md | Анализ UseCase и новых знаний: 75 документов, 25 новых нормализованных URL | Да: [[Vision_wiki/chats/2026-11-10-dependencies-research]], [[Wiki/concepts/work_result_dependency]] |
 | 2026-11-10 | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers.md | Три ответа discovery на общем корпусе 75 документов, ручной протокол и 15 аналитических сценариев | Да: [[Vision_wiki/chats/2026-11-10-dependencies-answers]], [[Wiki/policies/dependent_work_coordination_policy]], [[Wiki/specifications/dependent_work_step_allowed]], [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]] |
+| 2026-11-21 | `RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-research.md` | Анализ UseCase по 102 внешним документам, сравнение подходов и прирост знаний | Да — [[Vision_wiki/chats/2026-11-21-asset-lifecycle-research]], [[Wiki/concepts/asset_installation_history]], [[Wiki/concepts/linear_asset_lineage]] |
+| 2026-11-21 | `RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers.md` | Три решения условной организации и аналитические сценарии | Да — [[Vision_wiki/chats/2026-11-21-asset-lifecycle-answers]], [[Wiki/policies/work_order_target_after_asset_change]], [[DDD_Wiki/use_cases/record_physical_asset_change]] |

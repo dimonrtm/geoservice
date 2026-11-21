@@ -3,9 +3,9 @@ title: GeoService Context Map
 type: context-map
 status: active
 created: 2026-06-24
-updated: 2026-06-24
+updated: 2026-11-21
 source: "Code_wiki/архитектура/data_model.md; Code_wiki/архитектура/api_and_realtime.md; Vision_wiki/decisions/release_2_conflict_explanation.md"
-tags: [domain-knowledge, ddd, context-map]
+tags: [domain-knowledge, ddd, context-map, stale]
 confidence: high
 related: [DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/review_post]
 ---

@@ -3,9 +3,9 @@ title: Атомарная запись current geometry в EditVersion
 type: technical-note
 status: active
 created: 2026-10-10
-updated: 2026-11-04
+updated: 2026-11-21
 source: repository-change:2026-11-04
-tags: [edit-version, repository, transaction, postgis, geometry]
+tags: [edit-version, repository, transaction, postgis, geometry, stale]
 ---
 
 # Атомарная запись current geometry в EditVersion

@@ -3,7 +3,7 @@ title: Сессия браузера и немедленный отзыв sid
 type: service
 status: active
 created: 2026-10-28
-updated: 2026-10-28
+updated: 2026-11-21
 source: repository-change:2026-10-28
 tags: [auth, browser-session, sid, concurrency]
 ---
@@ -89,7 +89,7 @@ rolling auth. Бизнес-данные и история команд сохр�
 Проверяемые источники: `AuthSessionService`, `AuthSessionAccessService`,
 `BrowserAuthSessionRepository`, `web_api/api/auth.py`, `web_api/api/ws_layers.py`,
 `RealtimeConnectionManager`, frontend `src/auth/`, `src/stores/auth.ts`,
-`src/api/auth.ts`, `src/stores/workOrders.ts`, `src/stores/workspaceRecovery.ts`.
+`src/api/auth.ts`, `src/stores/work_order/workOrders.ts`, `src/stores/workspace/workspace_recovery/workspaceRecovery.ts`.
 Операционные команды и границы — [runbook AR-01](../../docs/sprint_2/2026-10-27-ar-01-browser-session-runbook.md).
 
 ## Конфликт с прежним описанием

@@ -3,7 +3,7 @@ title: Questions Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-10
+updated: 2026-11-21
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, question]
 confidence: n/a
@@ -12,7 +12,9 @@ related: [Wiki/index, DDD_Wiki/model_health]
 
 # Questions Registry
 
-После исследования и ingest 10.11.2026: **0 открытых вопросов**. DISC-2026-11-10-01/02/03 answered по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]]; решения приняты условной организацией, runtime не подтверждён. Предыдущие вопросы остаются закрытыми. DISC-2026-11-09-01/02 отвечены по [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]]; правила приняты условной организацией, реализация не подтверждена. Открытых технических вопросов metadata/fixture нет. Два технических вопроса metadata/fixture отвечены для локального экземпляра revision 49; [протокол](../../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Ниже сохранена история прежних сверок.
+После ingest от 21.11.2026 открытых доменных вопросов нет. DISC-2026-11-21-01, DISC-2026-11-21-02 и DISC-2026-11-21-03 получили ответы условной организации. В разделе «Идентичность активов после физических работ» сохранена исходная постановка. [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]].
+
+По итогам исследования от 10.11.2026 вопросы о зависимых нарядах закрыты. DISC-2026-11-10-01/02/03 answered по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]]; решения приняты условной организацией, runtime не подтверждён. Предыдущие вопросы остаются закрытыми. DISC-2026-11-09-01/02 отвечены по [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]]; правила приняты условной организацией, реализация не подтверждена. Открытых технических вопросов metadata/fixture нет. Два технических вопроса metadata/fixture отвечены для локального экземпляра revision 49; [протокол](../../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Ниже сохранена история прежних сверок.
 
 Сверка `/sync-vision` 2026-10-19: в таблице открыты 2 вопроса фактической сверки metadata/fixture. Организационные и модельные вопросы уже имеют статус `answered` по решениям условной организации от 2026-10-13; исследования 2026-10-16 и 2026-10-18 новых открытых вопросов не добавили. Статусы строк при синхронизации не изменены; решения модели не подтверждают реализацию или фактические данные.
 
@@ -22,6 +24,9 @@ related: [Wiki/index, DDD_Wiki/model_health]
 
 | Question                                                                                                                                    | Domain Gap                                                                                                 | Priority | Status   | Answer Source                                                                                                                                                                             |
 | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DISC-2026-11-21-01 — Что сохраняет идентичность при временной замене оборудования? | [[Wiki/concepts/dataset_instance_and_record_identity]], [[DDD_Wiki/bounded_contexts/utility_network]] | high | answered | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]], ответ 1. [[Wiki/concepts/asset_installation_history]] |
+| DISC-2026-11-21-02 — Как установить преемственность участков при физическом разделении или объединении линии? | [[Wiki/entities/network_feature]], [[Wiki/policies/network_edit_semantics_policy]] | high | answered | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]], ответ 2. [[Wiki/concepts/linear_asset_lineage]] |
+| DISC-2026-11-21-03 — На какой объект распространяется открытый наряд после замены? | [[DDD_Wiki/bounded_contexts/work_order]], [[Wiki/policies/change_basis_revision_policy]] | medium | answered | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]], ответ 3. [[Wiki/policies/work_order_target_after_asset_change]] |
 | DISC-2026-11-10-01 — Условие зависимости задания | [[DDD_Wiki/bounded_contexts/work_order]], [[DDD_Wiki/bounded_contexts/review_post]] | high | answered | Принятое решение условной организации: [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]] |
 | DISC-2026-11-10-02 — Изменение обязательной зависимости | [[DDD_Wiki/bounded_contexts/work_order]], [[DDD_Wiki/bounded_contexts/review_post]] | high | answered | Принятое решение условной организации: [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]] |
 | DISC-2026-11-10-03 — Взаимное ожидание и неделимый результат | [[DDD_Wiki/bounded_contexts/work_order]], [[DDD_Wiki/bounded_contexts/review_post]] | high | answered | Принятое решение условной организации: [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]] |
@@ -66,6 +71,40 @@ related: [Wiki/index, DDD_Wiki/model_health]
 
 | Как продолжать или завершать разбор при возврате доступа, двух окнах, позднем результате и устаревшем подтверждении возврата? | [[Wiki/specifications/editing_resumption_allowed]], [[Wiki/policies/editor_recovery_policy]] | high | answered | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md`, ответы 1–15: решения условной организации; не доказательство реализации |
 | Как квалифицировать учебные данные и доказать качество сохранённой линии при разных CRS, источниках и численной неопределённости? | [[Wiki/policies/demo_dataset_qualification_policy]], [[Wiki/specifications/saved_line_quality_assessment]] | high | answered | `RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md`: ответы 1–15; решения модели, не runtime validation |
+
+## Идентичность активов после физических работ
+
+Историческая постановка от 21.11.2026. Ситуации ниже — аналитические примеры. Все три развилки закрыты последующим ответом [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]].
+
+### DISC-2026-11-21-01 — Временная замена и возврат оборудования
+
+На одной позиции сети вместо трансформатора А временно установлен Б. После ремонта А возвращают. По принятому правилу запись набора, изображение и физический актив различаются. Обозначение на карте может оставаться прежним при смене оборудования. [[Wiki/concepts/dataset_instance_and_record_identity]], [[RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis]] (N03).
+
+Должна ли позиция иметь собственную непрерывную историю, и по какому основанию возвращённый А продолжает историю прежнего экземпляра? Можно учитывать два физических экземпляра и периоды их установки. Другой вариант — дополнительно вести саму позицию как постоянный объект, к которому относятся периоды занятости и простоя. Выбор меняет смысл запроса «что находилось на этой позиции на дату» и принадлежность записей о ремонте.
+
+**Форма ответа.** Хронология «А снят → Б установлен → А возвращён» с обозначением того, чья история продолжается на каждом шаге. Указать, что допустимо утверждать, если принадлежность вернувшегося устройства к прежнему экземпляру не установлена.
+
+### DISC-2026-11-21-02 — Происхождение участков при разделении и объединении
+
+Одну физическую линию разделили на два самостоятельно обслуживаемых участка. Обратный пример — два прежних участка объединили в один. Отдельный контрольный случай — в GIS изменили разбиение записей, физические работы отсутствуют. Уже принято различать предмет изменения и пространственное представление. [[Wiki/policies/network_edit_semantics_policy]], [[Wiki/concepts/network_representation_and_operational_state]].
+
+При каких условиях один из участков сохраняет прежнюю идентичность, а когда исходные единицы учёта завершают свою историю и все результаты получают собственную? В первом варианте нужен критерий выбора продолжающегося участка. Во втором нужно установить происхождение каждого нового участка от одного или нескольких прежних. Ответ определит, как в истории сети проследить судьбу конкретного участка в обоих направлениях.
+
+**Форма ответа.** Две схемы «один → два» и «два → один» с границами участков до и после работ и судьбой каждого прежнего обозначения. Применить то же правило к контрольному случаю картографического разбиения.
+
+### DISC-2026-11-21-03 — Адресат незавершённого наряда
+
+До замены А выданы два задания. Первое требует установить причину дефекта именно А. Второе требует проверить состояние оборудования, установленного на данной позиции к дате осмотра. К этой дате на позиции находится Б. Уже приняты правила явного изменения объёма и согласования зависимого результата. Они описывают пересмотр задания, но оставляют открытым вопрос, произошла ли вообще смена его предмета. [[Wiki/policies/change_basis_revision_policy]], [[Wiki/policies/dependent_work_coordination_policy]], [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]].
+
+По какому признаку владелец наряда устанавливает, остаётся ли первоначальное поручение действительным для осмотра Б? Если цель закреплена за физическим экземпляром, подстановка Б требует решения о судьбе работы по А. Если допустимо поручение на позицию, смена установленного экземпляра может входить в его исходный объём. Выбор уточнит, как Work Order задаёт предмет задания, а Utility Network устанавливает, какой экземпляр занимал позицию в нужный момент.
+
+**Форма ответа.** Для обоих заданий указать объект работы, сохраняющуюся обязанность, допустимый следующий шаг и случай, когда нужно новое назначение или принятие остатка. Включить случай, где адресат исходного поручения неоднозначен.
+
+### Основания и граница проверки
+
+Внешний пример из документации Giswater показывает, что при замене с сохранением топологии прежняя запись получает статус obsolete. Деление создаёт две дуги, а при слиянии судьбу общего узла указывают отдельно. Эти примеры относятся к поведению продукта. Правила GeoService приняты отдельно по [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]]. [Замена](https://docs.giswater.org/master/en/docs/giswater/for-users/dialogs/replace-feature.html), [деление](https://docs.giswater.org/master/en/docs/giswater/for-users/dialogs/arc-divide.html), [слияние](https://docs.giswater.org/master/en/docs/giswater/for-users/dialogs/arc-fusion.html).
+
+В хранилище у сетевой записи есть UUID и ограничение уникальности пары `feeder_id`/`asset_code`. Протокол от 08.11 относится к учебному экземпляру revision 49. Ни ключ записи, ни этот протокол не определяют преемника физического оборудования. Действующий first-save допускает изменение одной внутренней вершины существующей линии. [Модель хранения](../../apps/backend/utility_service/infrastructure/postgresql/models/utility_network/network_feature.py), [протокол](../../docs/verification/2026-11-08-demo-dataset-runtime-check.md), [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]].
 
 ## Ответы о смысле изменения — 2026-10-16
 

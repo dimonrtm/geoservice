@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-10
+updated: 2026-11-21
 source: null
 tags: [vision-wiki, product]
 ---
@@ -12,7 +12,9 @@ tags: [vision-wiki, product]
 
 ## Текущее состояние
 
-После сверки кода 2026-11-09 [[DDD_Wiki/model_health]] актуализирован, stale снят; FU-2026-10-11-001 resolved. First-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов проходят. [Матрица реализации](../docs/verification/2026-11-09-model-health-code-reconciliation.md) отделяет их от ещё не реализованных evaluator/review/post/withdrawal/correction. Открытых follow-up’ов 18; после ingest 10.11.2026 открытых вопросов нет; три вопроса о зависимостях нарядов answered в [[Wiki/_registry/questions]]; канонических конфликтов 0, legacy-конфликтов 1. Все 60 RAW обработаны. Metadata/fixture подтверждены протоколом 08.11 для revision 49, позиционная точность не подтверждена. Приняты условия зависимости, её пересмотра и разбора взаимного ожидания; технический остаток ведётся отдельно. Датированные записи ниже исторические.
+Открыты 20 follow-up’ов. Два новых относятся к описаниям кода после рефакторинга и к прежней формулировке в карте контекстов. В Vision остаётся активным конфликт о старом Release 1. [[decisions/followups/index]], [[decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]].
+
+Два последних источника охватывают 102 внешних документа и три решения условной организации о физических активах и нарядах. Все 62 RAW обработаны. Открытых вопросов в каноническом реестре нет. [[Vision_wiki/chats/2026-11-21-asset-lifecycle-research]], [[Vision_wiki/chats/2026-11-21-asset-lifecycle-answers]], [[Wiki/_registry/questions]]. Датированные сводки ниже отражают состояние на дату записи.
 
 Продуктовые знания и решения GeoService.
 

@@ -3,9 +3,9 @@ title: Frontend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-11-17
+updated: 2026-11-21
 source: repository-change:2026-11-17
-tags: [frontend, vue, maplibre, architecture]
+tags: [frontend, vue, maplibre, architecture, stale]
 ---
 
 # Frontend Architecture
@@ -16,7 +16,7 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
 
 - `src/main.ts` подключает MapLibre CSS, общий CSS, Pinia и монтирует `App.vue`.
 - `src/App.vue` восстанавливает auth session, показывает `LoginScreen` или role-specific авторизованную страницу: `EditorWorkOrdersView` для `Editor`, reviewer home для `Reviewer`.
-- `src/components/EditorWorkOrdersView.vue` является стартовым экраном `Editor` после login: слева показывает панель `Мои наряды`, справа пустую карту с basemap.
+- `src/components/work_order/EditorWorkOrdersView.vue` является стартовым экраном `Editor` после login: слева показывает панель `Мои наряды`, справа пустую карту с basemap.
 - `src/components/MapView.vue` является основным рабочим экраном карты, выбора слоя, сохранения/удаления и realtime-индикатора. В `mode="empty"` компонент создает только MapLibre basemap без layers/features/realtime/editing overlay.
 
 ## State И API
@@ -32,7 +32,7 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
   `{code, message, correlationId}`; legacy `detail` не выводится пользователю,
   если structured `message` отсутствует, используется общий fallback.
 - `src/stores/edit.ts` хранит polygon edit session, dirty-state, validation errors и version conflict handling.
-- `src/stores/workOrders.ts` хранит назначенные текущему `Editor` work orders,
+- `src/stores/work_order/workOrders.ts` хранит назначенные текущему `Editor` work orders,
   loading/error state и локальный `selectedWorkOrderId`; выбор в списке только
   подсвечивает строку и не открывает edit version.
 - `editorSession.ts` восстанавливает открытую версию из пары идентификаторов наряда и версии в sessionStorage. `useEditVersionEditor.ts` согласует три чтения, каждое со своим состоянием. Модули `editVersionDraft.ts`, `editVersionCommands.ts` и `editorNavigation.ts` отвечают за локальное редактирование, сохранение и откат, переходы и подтверждения. Подробнее в [[edit_version_api_readback]].
@@ -45,7 +45,7 @@ Frontend находится в `apps/frontend` и построен на Vue 3, T
   Подтверждённый ended очищает локальный UI до ожидания публикации marker.
   Поздний старый ответ не очищает новый sid; backend logout не меняет cookie.
 - `src/api/layers.ts` оборачивает layer/feature HTTP API и превращает HTTP failures в `HttpError`.
-- `src/api/workOrders.ts` вызывает `GET /api/v1/work-orders/assigned-to-me` и использует компактный response contract без audit/internal date fields.
+- `src/api/work_order/workOrders.ts` вызывает `GET /api/v1/work-orders/assigned-to-me` и использует компактный response contract без audit/internal date fields.
 
 ## Актуальность восстановления auth
 

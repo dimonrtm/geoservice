@@ -3,7 +3,7 @@ title: Concepts Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-09
+updated: 2026-11-21
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, concept]
 confidence: n/a
@@ -41,3 +41,10 @@ related: [Wiki/index]
 | [[Wiki/concepts/published_result_correction_case]] | Область ответственности за дефект опубликованных данных/evidence, связанные циклы и остатки | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
 
 | [[Wiki/concepts/work_result_dependency]] | Обязательство результата А перед конкретным этапом Б, отдельно от evidence и parent links | high | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-research.md |
+
+## Физическая история сети — 21.11.2026
+
+| Concept | Meaning | Confidence | Source |
+| --- | --- | --- | --- |
+| [[Wiki/concepts/asset_installation_history]] | Подтверждённые периоды установки оборудования на позицию и границы знания о них | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |
+| [[Wiki/concepts/linear_asset_lineage]] | Предшественники и результаты изменения обслуживаемых участков с указанием охвата каждого соответствия | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |

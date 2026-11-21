@@ -3,9 +3,9 @@ title: Backend Architecture
 type: service
 status: active
 created: 2026-05-30
-updated: 2026-11-10
+updated: 2026-11-21
 source: repository-change:2026-11-10
-tags: [backend, fastapi, postgis, architecture]
+tags: [backend, fastapi, postgis, architecture, stale]
 ---
 
 # Backend Architecture

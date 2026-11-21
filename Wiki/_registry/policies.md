@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-09
+updated: 2026-11-21
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -55,3 +55,9 @@ related: [Wiki/index]
 | [[Wiki/policies/published_result_correction_policy]] | Новый связанный WorkOrder для исправления данных; отдельная evidence-only ветка | Прослеживаемая коррекция с сохранением последующих изменений | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
 
 | [[Wiki/policies/dependent_work_coordination_policy]] | Приёмка результата, пересмотр обязательства и разбор взаимного ожидания | Допуск обычных проверок, удержание или принятое перепланирование | high | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers.md |
+
+## Предмет работы — 21.11.2026
+
+| Policy | Rule | Outcome | Confidence | Source |
+| --- | --- | --- | --- | --- |
+| [[Wiki/policies/work_order_target_after_asset_change]] | Выбор по исходной цели наряда и моменту определения объекта | Исполнение по установленному адресату, пересмотр или удержание с явной судьбой остатка | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |

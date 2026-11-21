@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-10
+updated: 2026-11-21
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -12,7 +12,9 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-После сверки кода 2026-11-09 [[DDD_Wiki/model_health]] актуализирован, stale снят; FU-2026-10-11-001 resolved. First-save/API/UI/recovery реализованы; 105 выбранных frontend-тестов проходят. [Матрица реализации](../docs/verification/2026-11-09-model-health-code-reconciliation.md) отделяет их от ещё не реализованных evaluator/review/post/withdrawal/correction. Открытых follow-up’ов 18; после ingest 10.11.2026 открытых вопросов нет; три вопроса о зависимостях нарядов answered в [[Wiki/_registry/questions]]; канонических конфликтов 0, legacy-конфликтов 1. Все 60 RAW обработаны. Metadata/fixture подтверждены протоколом 08.11 для revision 49, позиционная точность не подтверждена. Приняты условия зависимости, её пересмотра и разбора взаимного ожидания; технический остаток ведётся отдельно. Датированные записи ниже исторические.
+Все 62 RAW обработаны. Три последних ответа уточняют периоды установки оборудования, происхождение участков сети и предмет наряда. Открытых вопросов и активных канонических конфликтов нет. [[Wiki/concepts/asset_installation_history]], [[Wiki/concepts/linear_asset_lineage]], [[Wiki/policies/work_order_target_after_asset_change]], [[Wiki/_registry/questions]], [[Wiki/_registry/conflicts]].
+
+Для локальной revision 49 проверены metadata и fixture. Позиционная точность линии L-003 остаётся неподтверждённой. [Протокол проверки](../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Технические остатки и состояние документации ведутся в [[memory/project-state]]. Датированные сводки ниже отражают состояние на дату записи.
 
 `Wiki/` хранит канонические атомарные доменные знания проекта: словарь, сущности, value objects, концепции, участников, внешние системы, команды, события, политики, спецификации, конфликты и вопросы.
 

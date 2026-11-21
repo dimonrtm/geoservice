@@ -3,9 +3,9 @@ title: Frontend Save и восстановление намерения реда
 type: technical-note
 status: active
 created: 2026-10-16
-updated: 2026-11-17
+updated: 2026-11-21
 source: repository-change:2026-11-17
-tags: [frontend, pinia, save, recovery, readback, indexeddb]
+tags: [frontend, pinia, save, recovery, readback, indexeddb, stale]
 ---
 
 # Frontend Save и восстановление намерения редактора

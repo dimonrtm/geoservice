@@ -3,8 +3,8 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-10
-source: repository-change:2026-10-28
+updated: 2026-11-21
+source: Code_wiki/состояние_проекта/repository_change_ingest.md
 tags: [code-wiki, technical-knowledge]
 ---
 
@@ -60,6 +60,10 @@ tags: [code-wiki, technical-knowledge]
 - [Документы Спринта 1](../docs/release_1/sprint_1/README.md) - календарный план, контракты Дня 1, design/implementation plans Дней 2-4, backend foundation Work Orders Дня 5, EditVersion from Default Дня 8, Мои наряды Дня 11 и отделенные исторические generic-планы.
 
 ## Свежие Repository-Change Знания
+
+- В редакторе F1 разделены владельцы списка нарядов, черновика, команд, навигации и сессии. `createEditorWorkflow` координирует их операции, общий runtime создаётся для экземпляра Pinia. Обе обновлённые страницы учтены в [[состояние_проекта/repository_change_ingest]]. [Проверка F1](../docs/full_refactoring/2026-11-17-stage-2-f1-verification.md).
+- FU-2026-11-21-001. Описания открытия версии и проверки геометрии в [[архитектура/backend]] и [[архитектура/edit_version_persistence]] требуют актуализации. Открытие использует прикладной порт транзакций. Структурные правила сохранения линии вынесены в доменную политику, PostGIS поставляет пространственные факты. [Сценарий открытия](../apps/backend/utility_service/use_cases/services/open_edit_version.py), [адаптер PostgreSQL](../apps/backend/utility_service/infrastructure/postgresql/open_edit_version.py), [политика геометрии](../apps/backend/utility_service/domain_services/edit_geometry/save_policy.py).
+- По тому же follow-up страницы [[архитектура/frontend]] и [[архитектура/frontend_save_recovery]] описывают этап F1. Последующие изменения ввели явную привязку HTTP к сессии и отдельный исполнитель восстановления Save/Revert. [Проверка доступа F2](../docs/full_refactoring/2026-11-21-stage-5-f2-verification.md), [проверка восстановления F4](../docs/full_refactoring/2026-11-21-stage-6-f4-verification.md).
 
 - Сверка 2026-11-07 по [[состояние_проекта/repository_change_ingest]]: запись 2026-11-07 отражает единое название HTML/UI при сборке и различие production build args и dev environment; записи 2026-11-04 отражают раздельные чтения EditVersion и владельцев frontend-состояния; записи 2026-11-02 — изоляцию WebSocket-подписок и восстановление кеша; записи 2026-11-01 — фильтрацию Docker context и её проверки. Ссылки: [[архитектура/edit_version_api_readback]], [[архитектура/frontend]], [[архитектура/api_and_realtime]], [[deployment/docker_compose]], [[сборка/ci_and_quality]].
 - [Отчёт S2-X01](../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. Контракт — [[архитектура/frontend_save_recovery]]; актуальная auth-модель — [[архитектура/browser_auth_sessions]].

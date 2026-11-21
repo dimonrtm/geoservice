@@ -3,7 +3,7 @@ title: Публичный Save API и согласованный readback EditVe
 type: technical-note
 status: active
 created: 2026-10-12
-updated: 2026-11-04
+updated: 2026-11-21
 source: repository-change:2026-11-04
 tags: [api, edit-version, readback, baseline, geometry]
 ---
@@ -46,6 +46,6 @@ GET `/features/{feature_id}/baseline` возвращает исходную ге
 
 - `apps/backend/utility_service/web_api/api/work_orders.py`
 - `apps/backend/tests/integration_tests/test_workspace_save_concurrency.py`
-- `apps/frontend/src/composables/useEditVersionEditor.ts`
+- `apps/frontend/src/composables/edit_version/useEditVersionEditor.ts`
 
 Связи: [[edit_version_save_orchestration]], [[frontend_save_recovery]], [[api_and_realtime]], [[edit_version_persistence]].

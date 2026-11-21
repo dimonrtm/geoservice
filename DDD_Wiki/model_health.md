@@ -3,7 +3,7 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-11-10
+updated: 2026-11-21
 source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md; docs/verification/2026-11-09-model-health-code-reconciliation.md"
 tags: [domain-knowledge, ddd, health]
 confidence: high
@@ -12,11 +12,11 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 # Model Health
 
-## Текущее состояние реализации — 2026-11-09
+## Состояние модели на 21.11.2026
 
-Сверка кода завершена: [матрица и проверки](../docs/verification/2026-11-09-model-health-code-reconciliation.md). First-save, публичные Save/Revert/readback и S2-X01 recovery реализованы; 105 выбранных frontend-тестов прошли. Метка stale снята как признак устранённого отставания этого документа. Backend/PostGIS/M4 и БД повторно не проверялись; прежние протоколы сохраняют свою область.
+Сверка реализации от 09.11.2026 — [матрица и проверки](../docs/verification/2026-11-09-model-health-code-reconciliation.md). First-save, публичные Save/Revert/readback и S2-X01 recovery реализованы; 105 выбранных frontend-тестов прошли. Метка stale снята как признак устранённого отставания этого документа. Backend/PostGIS/M4 и БД повторно не проверялись; прежние протоколы сохраняют свою область.
 
-FU-2026-10-11-001 resolved; FU-2026-10-13-004 остаётся open. Открытых follow-up’ов 18; после ingest 10.11.2026 открытых вопросов нет; DISC-2026-11-10-01/02/03 answered; канонических конфликтов 0, legacy-конфликтов 1. ReviewPackage, positional evaluator, submit/review/post и новые withdrawal/correction rules остаются моделью. Актуальность документа не означает завершение этих функций. Активная discovery-очередь ниже обновлена 10.11.2026; остальные датированные сводки исторические.
+В [[Wiki/_registry/questions]] открытых вопросов нет. Три решения об учёте активов и предмете наряда приняты условной организацией по [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]]. Активных канонических конфликтов нет, в Vision остаётся один конфликт о старом Release 1. В [[Vision_wiki/decisions/followups/index]] открыты 20 пунктов. FU-2026-11-21-001 охватывает документацию реализации, FU-2026-11-21-002 — устаревший статус в карте контекстов. Сверка first-save по FU-2026-10-11-001 завершена. Реализация остальных принятых правил, включая координацию зависимых нарядов, остаётся в FU-2026-10-13-004. Датированные сводки ниже исторические.
 
 ## История discovery до сверки кода — 2026-11-09
 
@@ -105,15 +105,15 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 | Aggregates | active | `WorkOrder`, `EditVersion` и `ReviewPackage` активны в доменной модели. |
 | Commands And Events | active | `OpenEditVersion` активна; first write command - `UpdateEditVersionFeatureGeometry`; события `EditVersionChangeSetPersisted` и `EditVersionChangeSetCleared` описывают save/revert, `CommandId` отделяет retry от concurrency. |
 | Policies And Specifications | active | Проверка назначения, [[Wiki/policies/edit_geometry_precision_policy]], [[Wiki/policies/positional_accuracy_acceptance_policy]], persisted change set, basic draft validation, ready-for-review, post allowed, review/post и stale policies активны. |
-| Sprint Planning Inputs | active | Открытых вопросов в `Wiki/_registry/questions.md` нет; технический остаток указан в Current Sprint Planning Queue. |
+| Sprint Planning Inputs | active | Решения об идентичности активов входят в доменную модель. Техническая очередь ведётся отдельно в Current Sprint Planning Queue. |
 
 ## Current Discovery Queue
 
-Открытых вопросов нет. DISC-2026-11-10-01/02/03 answered по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]]; общий корпус 75 документов, 25 новых нормализованных URL. Приняты [[Wiki/concepts/work_result_dependency]], [[Wiki/policies/dependent_work_coordination_policy]], [[Wiki/specifications/dependent_work_step_allowed]] и [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]].
+На 21.11.2026 открытых доменных вопросов нет. DISC-2026-11-21-01/02/03 отвечены. Приняты правила периодов установки экземпляра, происхождения обслуживаемых участков и определения предмета открытого наряда. Основания — [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] и [[DDD_Wiki/use_cases/record_physical_asset_change]]. Вопросы о взаимозависимых нарядах закрыты ранее по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]].
 
-Следующий `/discover` заново сверяет соседние процессы и смысловую новизну. Возможное направление проверки — идентичность и передача обязанностей при физической замене/разделении/слиянии активов; это кандидат контекста, не сформированный вопрос или разрешённая реализация. Сначала сопоставить с уже принятыми representation/record identity правилами. Если новых развилок нет, сообщить об исчерпании темы.
+Для следующего `/discover` кандидат — передача ответственности за ведение данных о действующем участке между организациями при сохранении физического актива. Сначала сверить, осталась ли самостоятельная развилка после принятых правил полномочий по свойствам, передачи остатка наряда и принятия результатов. Это кандидат исследования. Вопросы о возврате аппарата, разделении линии и адресате наряда снимаются с активной очереди.
 
-Не переоткрывать условия зависимостей, замену обязательства, взаимное ожидание, withdrawal/correction, evidence и закрытую сверку first-save/metadata/fixture. FU-2026-10-11-001 resolved; FU-2026-10-13-004 остаётся отдельной технической очередью. Источники не доказывают runtime; baseline, AOI/Feeder и first-save scope неизменны.
+Сверка кода по FU-2026-11-21-001 и редакционная задача по карте контекстов FU-2026-11-21-002 ведутся отдельно. Инварианты текущего first-save — [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]].
 
 ## Current Sprint Planning Queue
 
