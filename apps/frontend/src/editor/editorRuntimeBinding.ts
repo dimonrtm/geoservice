@@ -1,5 +1,37 @@
+import { getActivePinia, type Pinia } from "pinia";
 import type { EditorWorkflow } from "./createEditorWorkflow";
 import type { EditorWorkflowPorts } from "./editorWorkflowPorts";
+export interface EditorRuntime {
+  workflow: EditorWorkflow;
+  sessionAccess: {
+    readonly actorId: string | null;
+    readonly isAuthenticated: boolean;
+    readonly canEdit: boolean;
+    readonly sessionEpoch: number;
+    logout(): Promise<boolean>;
+  };
+  dispose(): void;
+}
+
+const runtimes = new WeakMap<Pinia, EditorRuntime>();
+export function findEditorRuntime(pinia: Pinia): EditorRuntime | undefined {
+  return runtimes.get(pinia);
+}
+export function bindEditorRuntime(
+  pinia: Pinia,
+  runtime: EditorRuntime,
+): () => void {
+  runtimes.set(pinia, runtime);
+  return () => runtimes.delete(pinia);
+}
+export function getEditorRuntime(
+  pinia: Pinia | undefined = getActivePinia(),
+): EditorRuntime {
+  const runtime = pinia && findEditorRuntime(pinia);
+  if (!runtime) throw new Error("Editor runtime must be installed before use");
+  return runtime;
+}
+
 const bindings = new WeakMap<object, EditorWorkflow>();
 // Pinia devtools supplies a fresh Proxy as an action's `this`. Its $state
 // remains the owner's stable identity, including across ordinary $reset.
@@ -15,7 +47,12 @@ const dependencies = new WeakMap<
   Pick<
     EditorWorkflowPorts,
     "editVersionCommands" | "editVersionDraft" | "editorNavigation"
-  >
+  > & {
+    auth: Pick<
+      EditorWorkflowPorts["auth"],
+      "user" | "isAuthenticated" | "sessionEpoch"
+    >;
+  }
 >();
 export function bindEditorDependencies(
   owner: object,

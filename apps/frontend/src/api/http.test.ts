@@ -8,15 +8,18 @@ const { authStoreMock, axiosCreateMock, responseUseMock, requestUseMock } =
       interceptors: {
         request: {
           use: requestUseMock,
+          eject: vi.fn(),
         },
         response: {
           use: responseUseMock,
+          eject: vi.fn(),
         },
       },
     };
 
     return {
       authStoreMock: {
+        user: null,
         token: null as string | null,
         handleUnauthorizedResponse: vi.fn(),
         logout: vi.fn(),
@@ -35,18 +38,33 @@ vi.mock("axios", async (original) => {
   return { default: { ...axios, create: axiosCreateMock } };
 });
 
-vi.mock("@/pinia", () => ({
-  pinia: {},
-}));
-
-vi.mock("@/stores/auth", () => ({
-  useAuthStore: vi.fn(() => authStoreMock),
-}));
-
 describe("http api", () => {
+  it("installs and releases both interceptors explicitly", async () => {
+    const { installHttpSession, http } = await import("@/api/http");
+    expect(requestUseMock).not.toHaveBeenCalled();
+    expect(responseUseMock).not.toHaveBeenCalled();
+    requestUseMock.mockReturnValueOnce(3);
+    responseUseMock.mockReturnValueOnce(5);
+    const release = installHttpSession(authStoreMock);
+    release();
+    release();
+    expect(http.interceptors.request.eject).toHaveBeenCalledExactlyOnceWith(3);
+    expect(http.interceptors.response.eject).toHaveBeenCalledExactlyOnceWith(5);
+    const releaseNext = installHttpSession(authStoreMock);
+    const error = { config: { sessionEpoch: 3 }, response: { status: 401 } };
+    for (const [, reject] of responseUseMock.mock.calls) {
+      await expect(reject(error)).rejects.toBe(error);
+    }
+    expect(
+      authStoreMock.handleUnauthorizedResponse,
+    ).toHaveBeenCalledExactlyOnceWith(error, 3);
+    releaseNext();
+    expect(requestUseMock).toHaveBeenCalledTimes(2);
+    expect(responseUseMock).toHaveBeenCalledTimes(2);
+  });
   it("explicit_null_disables_bearer_for_cookie_only_status", async () => {
     authStoreMock.token = "new-access";
-    await import("@/api/http");
+    (await import("@/api/http")).installHttpSession(authStoreMock);
     const { AxiosHeaders } =
       await vi.importActual<typeof import("axios")>("axios");
     const handler = requestUseMock.mock.calls[0]?.[0] as (config: unknown) => {
@@ -60,7 +78,7 @@ describe("http api", () => {
   });
   it("preserves_explicit_old_bearer_instead_of_current_store_token", async () => {
     authStoreMock.token = "new-access";
-    await import("@/api/http");
+    (await import("@/api/http")).installHttpSession(authStoreMock);
     const handler = requestUseMock.mock.calls[0]?.[0] as (config: unknown) => {
       headers: Record<string, string>;
     };
@@ -70,7 +88,7 @@ describe("http api", () => {
   it.each([401, 403, 503])(
     "caller обрабатывает отказ %s самостоятельно",
     async (status) => {
-      await import("@/api/http");
+      (await import("@/api/http")).installHttpSession(authStoreMock);
       const rejectHandler = responseUseMock.mock.calls[0]?.[1] as (
         error: unknown,
       ) => Promise<never>;
@@ -85,7 +103,7 @@ describe("http api", () => {
   it.each(["ROLE_NOT_ALLOWED", "USER_INACTIVE"])(
     "обычный 403 %s делегируется с epoch",
     async (code) => {
-      await import("@/api/http");
+      (await import("@/api/http")).installHttpSession(authStoreMock);
       const rejectHandler = responseUseMock.mock.calls[0]?.[1] as (
         error: unknown,
       ) => Promise<never>;
@@ -100,6 +118,18 @@ describe("http api", () => {
       );
     },
   );
+  it("leaves assignment-specific 403 to the caller", async () => {
+    (await import("@/api/http")).installHttpSession(authStoreMock);
+    const reject = responseUseMock.mock.calls[0]?.[1] as (
+      error: unknown,
+    ) => Promise<never>;
+    const error = {
+      config: { sessionEpoch: 1 },
+      response: { status: 403, data: { code: "WORK_ORDER_NOT_ASSIGNED" } },
+    };
+    await expect(reject(error)).rejects.toBe(error);
+    expect(authStoreMock.handleUnauthorizedResponse).not.toHaveBeenCalled();
+  });
   afterEach(() => {
     vi.unstubAllEnvs();
   });
@@ -112,36 +142,39 @@ describe("http api", () => {
     authStoreMock.ensureSessionReady.mockResolvedValue(true);
   });
 
-  it("protected_request_waits_for_fresh_session_gate", async () => {
-    authStoreMock.token = "active";
-    authStoreMock.sessionId = "sid-a";
-    let release!: (value: boolean) => void;
-    authStoreMock.ensureSessionReady.mockReturnValue(
-      new Promise((resolve) => {
-        release = resolve;
-      }),
-    );
-    await import("@/api/http");
-    const handler = requestUseMock.mock.calls[0]?.[0] as (
-      config: unknown,
-    ) => Promise<unknown>;
-    let sent = false;
-    const request = Promise.resolve(
-      handler({ url: "/api/v1/work-orders", headers: {} }),
-    ).then(() => {
-      sent = true;
-    });
-    await Promise.resolve();
-    expect(sent).toBe(false);
-    release(true);
-    await request;
-    expect(sent).toBe(true);
-  });
+  it.each(["/api/v1/auth/me", "/api/v1/work-orders"])(
+    "waits for the session gate before %s",
+    async (url) => {
+      authStoreMock.token = "active";
+      authStoreMock.sessionId = "sid-a";
+      let release!: (value: boolean) => void;
+      authStoreMock.ensureSessionReady.mockReturnValue(
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+      );
+      (await import("@/api/http")).installHttpSession(authStoreMock);
+      const handler = requestUseMock.mock.calls[0]?.[0] as (
+        config: unknown,
+      ) => Promise<unknown>;
+      let sent = false;
+      const request = Promise.resolve(handler({ url, headers: {} })).then(
+        () => {
+          sent = true;
+        },
+      );
+      await Promise.resolve();
+      expect(sent).toBe(false);
+      release(true);
+      await request;
+      expect(sent).toBe(true);
+    },
+  );
   it("failed_gate_blocks_protected_request", async () => {
     authStoreMock.token = "active";
     authStoreMock.sessionId = "sid-a";
     authStoreMock.ensureSessionReady.mockResolvedValue(false);
-    await import("@/api/http");
+    (await import("@/api/http")).installHttpSession(authStoreMock);
     const handler = requestUseMock.mock.calls[0]?.[0] as (
       config: unknown,
     ) => Promise<unknown>;
@@ -164,7 +197,7 @@ describe("http api", () => {
         release = resolve;
       }),
     );
-    await import("@/api/http");
+    (await import("@/api/http")).installHttpSession(authStoreMock);
     const handler = requestUseMock.mock.calls[0]?.[0] as (
       config: unknown,
     ) => Promise<unknown>;
@@ -187,7 +220,7 @@ describe("http api", () => {
       authStoreMock.ensureSessionReady.mockRejectedValue(
         new Error("recursive auth"),
       );
-      await import("@/api/http");
+      (await import("@/api/http")).installHttpSession(authStoreMock);
       const handler = requestUseMock.mock.calls[0]?.[0] as (
         config: unknown,
       ) => Promise<{ headers: Record<string, string> }>;
@@ -203,7 +236,7 @@ describe("http api", () => {
   it("использует origin страницы в production без API override", async () => {
     vi.stubEnv("PROD", true);
     vi.stubEnv("VITE_API_BASE_URL", undefined);
-    await import("@/api/http");
+    (await import("@/api/http")).installHttpSession(authStoreMock);
     expect(axiosCreateMock).toHaveBeenCalledWith({
       baseURL: window.location.origin,
       timeout: 30000,
@@ -211,7 +244,7 @@ describe("http api", () => {
   });
 
   it("delegates a 401 to the auth store without backend logout", async () => {
-    await import("@/api/http");
+    (await import("@/api/http")).installHttpSession(authStoreMock);
     const rejectHandler = responseUseMock.mock.calls[0]?.[1] as (
       error: unknown,
     ) => Promise<never>;

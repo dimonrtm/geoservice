@@ -55,7 +55,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { useAuthStore } from "@/stores/auth";
+import { getEditorRuntime } from "@/editor/editorRuntimeBinding";
 import type { LayerDto } from "@/contracts/api";
 import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
 import { useFeatureLoading } from "@/composables/map/useFeatureLoading";
@@ -98,7 +98,7 @@ function setReady(ready: boolean): void {
   startupState.value = ready ? "ready" : "loading";
   emit("readyChange", ready);
 }
-const auth = useAuthStore();
+const { sessionAccess } = getEditorRuntime();
 const { map, createMap, destroyMap } = useMapInstance(mapEl);
 const {
   layers,
@@ -260,10 +260,10 @@ onMounted(async () => {
 });
 
 watch(
-  () => auth.sessionEpoch,
+  () => sessionAccess.sessionEpoch,
   () => {
     disconnectRealtime();
-    if (activeLayer.value && auth.isAuthenticated)
+    if (activeLayer.value && sessionAccess.isAuthenticated)
       void syncRealtimeLayer(activeLayer.value);
   },
 );
@@ -310,13 +310,13 @@ async function onChangeLayer(): Promise<void> {
 
 async function deleteFeature(): Promise<void> {
   const layer = activeLayer.value;
-  const epoch = auth.sessionEpoch;
+  const epoch = sessionAccess.sessionEpoch;
   const generation = getSubscriptionGeneration();
   const deleted = await deleteEditingFeature();
   if (
     !disposed &&
     generation === getSubscriptionGeneration() &&
-    epoch === auth.sessionEpoch &&
+    epoch === sessionAccess.sessionEpoch &&
     layer &&
     activeLayer.value === layer &&
     deleted
@@ -327,7 +327,7 @@ async function deleteFeature(): Promise<void> {
 
 async function saveFeature(): Promise<void> {
   const layer = activeLayer.value;
-  const epoch = auth.sessionEpoch;
+  const epoch = sessionAccess.sessionEpoch;
   const generation = getSubscriptionGeneration();
   const savedFeature = await saveChange();
   if (
@@ -335,7 +335,7 @@ async function saveFeature(): Promise<void> {
     generation === getSubscriptionGeneration() &&
     layer &&
     layer === activeLayer.value &&
-    epoch === auth.sessionEpoch &&
+    epoch === sessionAccess.sessionEpoch &&
     savedFeature
   ) {
     await applyPatchedFeature(activeLayer.value, savedFeature);
@@ -343,12 +343,12 @@ async function saveFeature(): Promise<void> {
 }
 
 async function syncRealtimeLayer(layer: LayerDto | null): Promise<void> {
-  if (!layer || !auth.isAuthenticated) {
+  if (!layer || !sessionAccess.isAuthenticated) {
     disconnectRealtime();
     return;
   }
 
-  await handleRealtimeLayerChange(layer, auth.isAuthenticated);
+  await handleRealtimeLayerChange(layer, sessionAccess.isAuthenticated);
 }
 </script>
 

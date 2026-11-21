@@ -37,6 +37,38 @@ const mutators = new Set([
   "delete",
   "clear",
 ]);
+const sessionConsumers = new Set([
+  "stores/editor_session/editorSession.ts",
+  "components/work_order/EditorWorkOrdersView.vue",
+  "components/workspace/WorkspaceEditCommands.vue",
+  "components/workspace/WorkspaceRecoveryList.vue",
+  "composables/map/useWorkspaceLineInteraction.ts",
+  "components/MapView.vue",
+]);
+
+function violatesSessionBoundary(file, specifier) {
+  const target = (
+    specifier.startsWith(".")
+      ? path.posix.join(path.posix.dirname(file), specifier)
+      : specifier.replace(/^@\//, "")
+  ).replace(/\.ts$/, "");
+  if (file === "api/http.ts")
+    return target === "pinia" || target.startsWith("stores/");
+  if (file === "stores/auth.ts" || file === "auth/sessionAccessEffects.ts")
+    return (
+      target.startsWith("editor/") ||
+      /^stores\/(edit_version|editor_navigation|editor_session|work_order|workspace)\//.test(
+        target,
+      )
+    );
+  if (file === "editor/editorRuntimeBinding.ts")
+    return target.startsWith("stores/") || target === "editor/editorRuntime";
+  return (
+    sessionConsumers.has(file) &&
+    (target === "stores/auth" || target === "editor/editorRuntime")
+  );
+}
+
 function walk(node, visit) {
   if (!node || typeof node !== "object") return;
   if (typeof node.type === "string") visit(node);
@@ -55,6 +87,7 @@ export function analyzeEditorBoundaries(files) {
   for (const file of files) {
     const normalized = file.path.replaceAll("\\", "/");
     if (/\.test\.ts$|\/test\//.test(normalized)) continue;
+    const sourcePath = normalized.replace(/^(?:.*\/)?src\//, "");
     const own = [...ownerNames].find((name) =>
       normalized.endsWith(`/${name}.ts`),
     );
@@ -87,6 +120,16 @@ export function analyzeEditorBoundaries(files) {
     const hooks = new Map(),
       aliases = new Map();
     walk(ast, (node) => {
+      if (
+        node.source &&
+        [
+          "ImportDeclaration",
+          "ExportNamedDeclaration",
+          "ExportAllDeclaration",
+        ].includes(node.type) &&
+        violatesSessionBoundary(sourcePath, node.source.value)
+      )
+        report(node, "session-access-import");
       if (node.type !== "ImportDeclaration" || node.importKind === "type")
         return;
       const source = String(node.source.value);

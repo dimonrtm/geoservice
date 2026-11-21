@@ -167,6 +167,28 @@ describe("editor version session", () => {
     }
   });
 
+  it("keeps the newly opened workspace when an old session's map read finishes late", async () => {
+    const { editorSession, workOrders } = editorTestContext();
+    const auth = useAuthStore();
+    const user = { id: "actor", email: "a@local", role: "editor" as const };
+    auth.setAuth("old", user, { sessionId: "sid-a" });
+    const oldMap = createDeferred<WorkspaceResponse>();
+    readMapMock
+      .mockReturnValueOnce(oldMap.promise)
+      .mockResolvedValueOnce(workspaceResponse("wo-2", "ev-2"));
+    workOrders.selectWorkOrder("wo-1");
+    const oldOpening = editorSession.loadVersion("wo-1", "ev-1");
+    await vi.waitFor(() => expect(readMapMock).toHaveBeenCalledTimes(1));
+    auth.setAuth("new", user, { sessionId: "sid-b" });
+    workOrders.selectWorkOrder("wo-2");
+    await editorSession.loadVersion("wo-2", "ev-2");
+    expect(editorSession.isWorkOrderOpened("wo-2")).toBe(true);
+    oldMap.resolve(workspaceResponse());
+    await oldOpening;
+    expect(editorSession.openedEditVersionId).toBe("ev-2");
+    expect(editorSession.activeWorkspace?.workOrder.id).toBe("wo-2");
+  });
+
   it("resets user-scoped state and invalidates pending requests", async () => {
     sessionStorage.setItem(
       SELECTED_WORK_ORDER_STORAGE_KEY,

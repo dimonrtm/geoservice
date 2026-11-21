@@ -34,6 +34,55 @@ it("rejects a write through destructured workflow dependencies", () => {
     ]),
   ).not.toHaveLength(0);
 });
+
+const publicSessionConsumers = [
+  "stores/editor_session/editorSession.ts",
+  "components/work_order/EditorWorkOrdersView.vue",
+  "components/workspace/WorkspaceRecoveryList.vue",
+  "components/workspace/WorkspaceEditCommands.vue",
+  "composables/map/useWorkspaceLineInteraction.ts",
+  "components/MapView.vue",
+];
+it.each([
+  ["api/http.ts", 'import { pinia } from "../pinia";'],
+  ["api/http.ts", 'import { useAuthStore } from "@/stores/auth";'],
+  [
+    "stores/auth.ts",
+    'import type { ResetWorkOrdersOptions } from "./editor_session/editorSessionStorage";',
+  ],
+  [
+    "stores/auth.ts",
+    'import { useWorkOrdersStore } from "./work_order/workOrders";',
+  ],
+  [
+    "editor/editorRuntimeBinding.ts",
+    'export { useAuthStore as session } from "../stores/auth";',
+  ],
+  ["editor/editorRuntimeBinding.ts", 'export * from "./editorRuntime";'],
+  ...publicSessionConsumers.map((file) => [
+    file,
+    file.endsWith(".vue")
+      ? '<script setup lang="ts">import { useAuthStore } from "@/stores/auth";</script>'
+      : "import { useAuthStore } from " +
+        (file.startsWith("stores/") ? '"../auth";' : '"@/stores/auth";'),
+  ]),
+])("rejects session coupling in %s", (file, source) => {
+  expect(
+    analyzeEditorBoundaries([{ path: "src/" + file, source }]),
+  ).toContainEqual(expect.objectContaining({ rule: "session-access-import" }));
+});
+it.each(["App.vue", "components/LoginScreen.vue", "editor/editorRuntime.ts"])(
+  "allows auth in %s",
+  (file) => {
+    const declaration = 'import { useAuthStore } from "@/stores/auth";';
+    const source = file.endsWith(".vue")
+      ? '<script setup lang="ts">' + declaration + "</script>"
+      : declaration;
+    expect(analyzeEditorBoundaries([{ path: "src/" + file, source }])).toEqual(
+      [],
+    );
+  },
+);
 it("accepts reading and owner operations", () => {
   expect(
     analyzeEditorBoundaries([

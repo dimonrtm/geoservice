@@ -2,15 +2,15 @@
 import { computed, nextTick, ref, watch } from "vue";
 import { useWorkspaceRecoveryStore } from "@/stores/workspace/workspace_recovery/workspaceRecovery";
 import { useWorkOrdersStore } from "@/stores/work_order/workOrders";
-import { useAuthStore } from "@/stores/auth";
+import { getEditorRuntime } from "@/editor/editorRuntimeBinding";
 import { containDialogFocus } from "@/domain/dialogFocus";
 const recovery = useWorkspaceRecoveryStore(),
-  workspace = useWorkOrdersStore(),
-  auth = useAuthStore();
+  workspace = useWorkOrdersStore();
+const { sessionAccess } = getEditorRuntime();
 const records = computed(() =>
   Object.values(recovery.records).filter(
     (r) =>
-      auth.user?.id === r.command.actorId &&
+      sessionAccess.actorId === r.command.actorId &&
       workspace.items.some((w) => w.id === r.command.target.workOrderId),
   ),
 );
@@ -23,7 +23,7 @@ const confirmation = ref<{
 let origin: HTMLElement | null = null;
 async function confirm(key: string, commandId: string) {
   origin = document.activeElement as HTMLElement;
-  confirmation.value = { key, commandId, epoch: auth.sessionEpoch };
+  confirmation.value = { key, commandId, epoch: sessionAccess.sessionEpoch };
   await nextTick();
   dialog.value?.showModal();
   dialog.value?.querySelector("button")?.focus();
@@ -37,7 +37,7 @@ function resume() {
   close();
   if (c) void recovery.resumeAfterAccess(c.key, c.commandId, c.epoch);
 }
-watch(() => auth.sessionEpoch, close);
+watch(() => sessionAccess.sessionEpoch, close);
 function label(id: string) {
   return workspace.items.find((w) => w.id === id)?.code ?? id;
 }

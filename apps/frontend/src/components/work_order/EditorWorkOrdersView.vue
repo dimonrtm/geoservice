@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getEditorRuntime } from "@/editor/editorRuntime";
-const workflow = getEditorRuntime().workflow;
+import { getEditorRuntime } from "@/editor/editorRuntimeBinding";
+const { workflow, sessionAccess } = getEditorRuntime();
 import WorkOrderDataIssues from "./WorkOrderDataIssues.vue";
 import { RefreshCw } from "@lucide/vue";
 import { nextTick, onMounted, ref, watch } from "vue";
@@ -13,7 +13,6 @@ import WorkspaceRecoveryList from "@/components/workspace/WorkspaceRecoveryList.
 import WorkspaceComparisonPanel from "@/components/workspace/WorkspaceComparisonPanel.vue";
 import WorkspaceEditCommands from "@/components/workspace/WorkspaceEditCommands.vue";
 import type { ErrorActionId } from "@/contracts/api-error";
-import { useAuthStore } from "@/stores/auth";
 import { useFeatureBaselineStore } from "@/stores/edit_version/featureBaseline";
 import { useEditVersionChangeSetStore } from "@/stores/edit_version/editVersionChangeSet";
 import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
@@ -29,7 +28,6 @@ const workOrders = useWorkOrdersStore();
 const editor = useEditVersionEditor();
 const changes = useEditVersionChangeSetStore();
 const baseline = useFeatureBaselineStore();
-const auth = useAuthStore();
 const detailsPanelRef = ref<WorkspaceDetailsPanelHandle | null>(null);
 const workspaceAnnouncement = ref("");
 const workspaceMapReady = ref(false);
@@ -61,10 +59,10 @@ watch(
 );
 
 async function loadAssignedAndRestore(): Promise<void> {
-  const epoch = auth.sessionEpoch;
+  const epoch = sessionAccess.sessionEpoch;
   const generation = await workOrders.loadAssigned();
   const isCurrent = () =>
-    epoch === auth.sessionEpoch &&
+    epoch === sessionAccess.sessionEpoch &&
     generation === workOrders.loadAssignedRequestSeq;
   if (!isCurrent()) return;
   await editorSession.reconcileAssignments();
@@ -81,7 +79,7 @@ function handleLoadErrorAction(actionId: ErrorActionId): void {
     return;
   }
   if (actionId === "sign-in") {
-    void auth.logout();
+    void sessionAccess.logout();
   }
 }
 
@@ -99,7 +97,7 @@ function handleWorkspaceErrorAction(actionId: ErrorActionId): void {
     return;
   }
   if (actionId === "sign-in") {
-    void auth.logout();
+    void sessionAccess.logout();
   }
 }
 

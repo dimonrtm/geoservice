@@ -3,7 +3,6 @@ import {
   requireEditorWorkflow,
 } from "@/editor/editorRuntimeBinding";
 import { defineStore } from "pinia";
-import { useAuthStore } from "../auth";
 import { useWorkspaceRecoveryStore } from "../workspace/workspace_recovery/workspaceRecovery";
 import {
   recoveryKey,
@@ -119,14 +118,18 @@ export const useEditorSessionStore = defineStore("editorSession", {
       const key = recoveryKey(context);
       const generation = (this.readGenerations[key] ?? 0) + 1;
       this.readGenerations[key] = generation;
-      return { key, generation, sessionEpoch: useAuthStore().sessionEpoch };
+      return {
+        key,
+        generation,
+        sessionEpoch: editorDependencies(this).auth.sessionEpoch,
+      };
     },
     applyWorkspaceRead(
       ticket: ReadTicket,
       workspace: WorkspaceResponse,
     ): RecoveryApplyResult {
       const workOrders = useWorkOrdersStore();
-      const auth = useAuthStore();
+      const auth = editorDependencies(this).auth;
       if (
         !auth.isAuthenticated ||
         !auth.user ||
@@ -215,7 +218,7 @@ export const useEditorSessionStore = defineStore("editorSession", {
       if (!canLoadVersion(this)) return;
       const orders = useWorkOrdersStore();
       const commands = editorDependencies(this).editVersionCommands;
-      const auth = useAuthStore();
+      const auth = editorDependencies(this).auth;
       const epoch = auth.sessionEpoch;
       const requestSeq = ++this.openWorkspaceRequestSeq;
       this.openingWorkOrderId = workOrderId;
@@ -358,7 +361,7 @@ export const useEditorSessionStore = defineStore("editorSession", {
     },
     async reconcileAssignments(): Promise<void> {
       const editVersionCommands = editorDependencies(this).editVersionCommands;
-      const auth = useAuthStore();
+      const auth = editorDependencies(this).auth;
       const epoch = auth.sessionEpoch;
       const actor = auth.user;
       const orders = useWorkOrdersStore();

@@ -6,7 +6,7 @@ import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, expect, it, vi } from "vitest";
 import { installBrowserAuthEnvironment } from "@/test/browserAuthEnvironment";
 import App from "./App.vue";
-import { useAuthStore } from "./stores/auth";
+import { bindSessionAccessEffects, useAuthStore } from "./stores/auth";
 
 const { refresh, statusCheck, logout } = vi.hoisted(() => ({
   refresh: vi.fn(),
@@ -18,24 +18,6 @@ vi.mock("@/api/auth", () => ({
   login: vi.fn(),
   logoutSession: logout,
   fetchSessionStatus: statusCheck,
-}));
-vi.mock("@/stores/work_order/workOrders", () => ({
-  useWorkOrdersStore: () => ({
-    reset: vi.fn(),
-    suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
-  }),
-}));
-vi.mock("@/stores/edit_version/editVersionCommands", () => ({
-  useEditVersionCommandsStore: () => ({
-    reset: vi.fn(),
-    suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
-  }),
-}));
-vi.mock("@/stores/editor_session/editorSession", () => ({
-  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
-}));
-vi.mock("@/stores/workspace/workspace_recovery/workspaceRecovery", () => ({
-  useWorkspaceRecoveryStore: () => ({ hideActor: vi.fn() }),
 }));
 vi.mock("./components/workspace/WorkspaceNavigationDialog.vue", () => ({
   default: { template: "<div />" },
@@ -50,8 +32,18 @@ vi.mock("./components/ReviewerHome.vue", () => ({
   default: { template: '<div data-test="reviewer" />' },
 }));
 
+function bindEffects() {
+  return bindSessionAccessEffects(useAuthStore(), {
+    beforeAccessLoss: vi.fn(),
+    afterEpochChange: vi.fn(),
+    afterSessionTransition: vi.fn(),
+    prepareExplicitLogin: vi.fn(),
+  });
+}
+let releaseEffects: () => void;
 beforeEach(() => {
   setActivePinia(createPinia());
+  releaseEffects = bindEffects();
   refresh.mockReset();
   installBrowserAuthEnvironment();
   statusCheck.mockReset().mockImplementation(async (session_id: string) => ({
@@ -150,4 +142,37 @@ it("initial_retry_error_can_be_dismissed_to_allow_explicit_login", async () => {
   await flushPromises();
   expect(wrapper.find('[data-test="login-screen"]').exists()).toBe(true);
   wrapper.unmount();
+});
+
+it("restarts an interrupted initial restore when App is remounted with the same Pinia", async () => {
+  const payload = (id: string) => ({
+    access_token: id,
+    session_id: id,
+    user: { id, role: "reviewer", email: id + "@example.local" },
+  });
+  let finishOld!: (result: ReturnType<typeof payload>) => void;
+  refresh
+    .mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishOld = resolve;
+      }),
+    )
+    .mockResolvedValueOnce(payload("current"));
+  const first = mount(App);
+  await flushPromises();
+  expect(refresh).toHaveBeenCalledTimes(1);
+  first.unmount();
+  releaseEffects();
+  releaseEffects = bindEffects();
+  const second = mount(App);
+  try {
+    finishOld(payload("old"));
+    await flushPromises();
+    expect(refresh).toHaveBeenCalledTimes(2);
+    expect(useAuthStore().token).toBe("current");
+    expect(second.find('[data-test="reviewer"]').exists()).toBe(true);
+  } finally {
+    second.unmount();
+    releaseEffects();
+  }
 });

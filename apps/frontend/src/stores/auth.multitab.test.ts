@@ -6,7 +6,7 @@ import {
   AuthCoordinationError,
   createBrowserSessionCoordinator,
 } from "@/auth/browserSessionCoordinator";
-import { useAuthStore } from "./auth";
+import { bindSessionAccessEffects, useAuthStore } from "./auth";
 
 const ports = vi.hoisted(() => ({
   coordinator: null as unknown,
@@ -14,10 +14,6 @@ const ports = vi.hoisted(() => ({
   refresh: vi.fn(),
   logout: vi.fn(),
   status: vi.fn(),
-  reset: vi.fn(),
-  suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
-  hideActor: vi.fn(),
-  suspendActor: vi.fn(),
 }));
 vi.mock("@/auth/browserSessionCoordinator", async (original) => ({
   ...(await original<typeof import("@/auth/browserSessionCoordinator")>()),
@@ -29,18 +25,14 @@ vi.mock("@/api/auth", () => ({
   logoutSession: ports.logout,
   fetchSessionStatus: ports.status,
 }));
-vi.mock("@/stores/work_order/workOrders", () => ({
-  useWorkOrdersStore: () => ports,
-}));
-vi.mock("@/stores/edit_version/editVersionCommands", () => ({
-  useEditVersionCommandsStore: () => ports,
-}));
-vi.mock("@/stores/editor_session/editorSession", () => ({
-  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
-}));
-vi.mock("@/stores/workspace/workspace_recovery/workspaceRecovery", () => ({
-  useWorkspaceRecoveryStore: () => ports,
-}));
+function sessionEffects() {
+  return {
+    beforeAccessLoss: vi.fn(),
+    afterEpochChange: vi.fn(),
+    afterSessionTransition: vi.fn(),
+    prepareExplicitLogin: vi.fn().mockResolvedValue(undefined),
+  };
+}
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -69,6 +61,7 @@ it("shares_session_runtime_across_devtools_action_proxies", async () => {
   const pinia = createPinia();
   createApp({}).use(pinia);
   const auth = useAuthStore(pinia);
+  bindSessionAccessEffects(auth, sessionEffects());
   stores.push(auth);
   auth.setAuth("access-sid-a", user, { sessionId: "sid-a" });
   ports.status.mockResolvedValue({ session_id: "sid-a", state: "active" });
@@ -79,8 +72,9 @@ it("shares_session_runtime_across_devtools_action_proxies", async () => {
   auth.stopBrowserSessionSync();
 });
 
-function store(sid?: string) {
+function store(sid?: string, effects = sessionEffects()) {
   const auth = useAuthStore(createPinia());
+  bindSessionAccessEffects(auth, effects);
   stores.push(auth);
   if (sid) auth.setAuth(`access-${sid}`, user, { sessionId: sid });
   return auth;
@@ -123,33 +117,37 @@ afterEach(() => {
 });
 
 it("same_user_new_sid_invalidates_old_requests", () => {
-  const auth = store("sid-a");
+  const effects = sessionEffects();
+  const auth = store("sid-a", effects);
   const epoch = auth.sessionEpoch;
-  ports.reset.mockClear();
+  effects.afterSessionTransition.mockClear();
   auth.setAuth("new", user, { sessionId: "sid-b" });
   auth.handleUnauthorizedResponse({ response: { status: 401 } }, epoch);
   expect(auth.sessionEpoch).toBeGreaterThan(epoch);
   expect(auth.sessionId).toBe("sid-b");
   expect(auth.user).toEqual(user);
-  expect(ports.reset).toHaveBeenCalledOnce();
-  expect(ports.suspendWorkspaceRecoveryForAccessLoss).toHaveBeenCalledWith(
-    "actor",
-  );
+  expect(effects.afterSessionTransition).toHaveBeenCalledOnce();
+  expect(effects.beforeAccessLoss).toHaveBeenCalledWith("actor");
 });
 it("same_sid_refresh_preserves_workspace", async () => {
-  const auth = store("sid-a");
+  const effects = sessionEffects();
+  const auth = store("sid-a", effects);
   const epoch = auth.sessionEpoch;
-  ports.reset.mockClear();
+  effects.afterSessionTransition.mockClear();
   await auth.restoreSession();
   expect(auth.sessionEpoch).toBe(epoch);
-  expect(ports.reset).not.toHaveBeenCalled();
+  expect(effects.afterSessionTransition).not.toHaveBeenCalled();
 });
 it("two_restores_do_not_clear_each_other", async () => {
-  const first = store();
-  const second = store();
+  const firstEffects = sessionEffects();
+  const secondEffects = sessionEffects();
+  const first = store(undefined, firstEffects);
+  const second = store(undefined, secondEffects);
   await Promise.all([first.restoreSession(), second.restoreSession()]);
   expect(first.isAuthenticated).toBe(true);
   expect(second.isAuthenticated).toBe(true);
+  expect(firstEffects.afterSessionTransition).toHaveBeenCalledOnce();
+  expect(secondEffects.afterSessionTransition).toHaveBeenCalledOnce();
   expect(second.sessionId).toBe("sid-a");
   expect(ports.refresh.mock.calls).toEqual([[undefined], ["sid-a"]]);
   expect(coordinator.readSessionMarker()?.revision).toBe(1);
@@ -329,4 +327,27 @@ it("resume_waits_for_fresh_status_before_allowing_actions", async () => {
   expect(admitted).toBe(false);
   fresh.resolve({ session_id: "sid-a", state: "active" });
   expect(await ready).toBe(true);
+});
+
+it("suspends the old actor before changing epoch and installing the next actor", () => {
+  const effects = sessionEffects();
+  const auth = store("sid-a", effects);
+  const epoch = auth.sessionEpoch;
+  const calls: unknown[] = [];
+  const capture = () => [auth.user?.id, auth.sessionId, auth.sessionEpoch];
+  effects.beforeAccessLoss.mockImplementation((id) =>
+    calls.push(["before", id, ...capture()]),
+  );
+  effects.afterEpochChange.mockImplementation(() =>
+    calls.push(["invalidated", ...capture()]),
+  );
+  effects.afterSessionTransition.mockImplementation((transition) =>
+    calls.push([transition.cause, ...capture()]),
+  );
+  auth.setAuth("next", { ...user, id: "b" }, { sessionId: "sid-b" });
+  expect(calls).toEqual([
+    ["before", user.id, user.id, "sid-a", epoch],
+    ["invalidated", user.id, "sid-a", epoch + 1],
+    ["update", "b", "sid-b", epoch + 1],
+  ]);
 });

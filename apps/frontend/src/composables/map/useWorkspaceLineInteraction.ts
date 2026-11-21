@@ -1,4 +1,4 @@
-import { getEditorRuntime } from "@/editor/editorRuntime";
+import { getEditorRuntime } from "@/editor/editorRuntimeBinding";
 import { computed, onBeforeUnmount, ref, watch, type Ref } from "vue";
 import { Marker, type Map, type MapMouseEvent } from "maplibre-gl";
 import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
@@ -12,7 +12,6 @@ import { useEditVersionDraftStore } from "@/stores/edit_version/editVersionDraft
 import { useEditorNavigationStore } from "@/stores/editor_navigation/editorNavigation";
 import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
 import { useEditVersionEditor } from "@/composables/edit_version/useEditVersionEditor";
-import { useAuthStore } from "@/stores/auth";
 import {
   setWorkspaceDraftData,
   setWorkspaceComparisonData,
@@ -22,13 +21,12 @@ export function useWorkspaceLineInteraction(
   map: Ref<Map>,
   workspace: Ref<WorkspaceResponse>,
 ) {
-  const workflow = getEditorRuntime().workflow;
+  const { workflow, sessionAccess } = getEditorRuntime();
   const editVersionCommands = useEditVersionCommandsStore();
   const editVersionDraft = useEditVersionDraftStore();
   const editorNavigation = useEditorNavigationStore();
   const editorSession = useEditorSessionStore();
   const editor = useEditVersionEditor();
-  const auth = useAuthStore();
   const message = ref("");
   const choices = ref<Array<{ id: string; label: string }>>([]);
   const confirmation = ref<{
@@ -41,7 +39,8 @@ export function useWorkspaceLineInteraction(
   let suppressClick = false;
   let clickTimer: ReturnType<typeof setTimeout> | undefined;
   const versionKey = computed(
-    () => `${auth.user?.id ?? ""}:${editorSession.activeWorkspaceKey ?? ""}`,
+    () =>
+      `${sessionAccess.actorId ?? ""}:${editorSession.activeWorkspaceKey ?? ""}`,
   );
   const matchesCurrentMap = computed(() => {
     const current = editorSession.activeWorkspace?.workOrder;
@@ -55,8 +54,7 @@ export function useWorkspaceLineInteraction(
   });
   const available = computed(
     () =>
-      auth.isAuthenticated &&
-      auth.user?.role === "editor" &&
+      sessionAccess.canEdit &&
       matchesCurrentMap.value &&
       !editorNavigation.workspaceInteractionLocked &&
       !editVersionCommands.recoveryRecord &&

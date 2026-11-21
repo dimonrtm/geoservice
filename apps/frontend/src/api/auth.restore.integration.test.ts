@@ -7,8 +7,8 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { installBrowserAuthEnvironment } from "@/test/browserAuthEnvironment";
 import { setActivePinia } from "pinia";
 import { pinia } from "@/pinia";
-import { http } from "./http";
-import { useAuthStore } from "@/stores/auth";
+import { http, installHttpSession } from "./http";
+import { bindSessionAccessEffects, useAuthStore } from "@/stores/auth";
 
 const effects = vi.hoisted(() => ({
   reset: vi.fn(),
@@ -16,19 +16,6 @@ const effects = vi.hoisted(() => ({
   hideActor: vi.fn(),
   suspendActor: vi.fn(),
 }));
-vi.mock("@/stores/work_order/workOrders", () => ({
-  useWorkOrdersStore: () => effects,
-}));
-vi.mock("@/stores/edit_version/editVersionCommands", () => ({
-  useEditVersionCommandsStore: () => effects,
-}));
-vi.mock("@/stores/editor_session/editorSession", () => ({
-  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
-}));
-vi.mock("@/stores/workspace/workspace_recovery/workspaceRecovery", () => ({
-  useWorkspaceRecoveryStore: () => effects,
-}));
-
 function deferred<T>() {
   let resolve!: (value: T) => void;
   let reject!: (reason: unknown) => void;
@@ -78,14 +65,29 @@ function failure(config: InternalAxiosRequestConfig, status: number) {
       : undefined,
   );
 }
+let releaseEffects: () => void;
+let releaseHttp: () => void;
+const originalAdapter = http.defaults.adapter;
 beforeEach(() => {
   installBrowserAuthEnvironment();
   setActivePinia(pinia);
   useAuthStore().$reset();
+  releaseHttp = installHttpSession(useAuthStore());
+  releaseEffects = bindSessionAccessEffects(useAuthStore(), {
+    beforeAccessLoss: effects.suspendWorkspaceRecoveryForAccessLoss,
+    afterEpochChange: effects.hideActor,
+    afterSessionTransition: effects.reset,
+    prepareExplicitLogin: effects.suspendActor,
+  });
   vi.resetAllMocks();
   effects.suspendActor.mockResolvedValue(undefined);
 });
-afterEach(() => useAuthStore().stopBrowserSessionSync());
+afterEach(() => {
+  useAuthStore().stopBrowserSessionSync();
+  releaseHttp();
+  releaseEffects();
+  http.defaults.adapter = originalAdapter;
+});
 
 it.each(
   [200, 401, 403, 503, 0].flatMap((status) =>
@@ -237,3 +239,38 @@ it.each([false, true])(
     expect(auth.user?.id ?? null).toBe(stale ? "new" : null);
   },
 );
+
+it("a superseded login cannot install its session after recovery suspension", async () => {
+  const auth = useAuthStore();
+  const suspended = deferred<void>();
+  const entered = deferred<void>();
+  effects.suspendActor.mockImplementation(() => {
+    entered.resolve();
+    return suspended.promise;
+  });
+  http.defaults.adapter = async (config) => response(config, "old");
+  const pending = auth.loginWithPassword("old", "test");
+  await entered.promise;
+  auth.clearLocalSession();
+  suspended.resolve();
+  await pending;
+  expect(auth.token).toBeNull();
+  expect(auth.sessionId).toBeNull();
+});
+
+it("ignores a refresh that finishes after app teardown", async () => {
+  const auth = useAuthStore();
+  const started = deferred<InternalAxiosRequestConfig>();
+  const pending = deferred<AxiosResponse>();
+  http.defaults.adapter = (config) => {
+    started.resolve(config);
+    return pending.promise;
+  };
+  const refresh = auth.restoreSession();
+  const config = await started.promise;
+  releaseHttp();
+  releaseEffects();
+  pending.resolve(response(config, "old"));
+  await refresh;
+  expect(auth.token).toBeNull();
+});

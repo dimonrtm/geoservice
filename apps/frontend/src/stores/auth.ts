@@ -1,5 +1,3 @@
-import { useEditorSessionStore } from "@/stores/editor_session/editorSession";
-import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
 import { defineStore } from "pinia";
 import { toRaw } from "vue";
 
@@ -22,12 +20,10 @@ import {
 } from "@/auth/browserSessionCoordinator";
 import { startSessionMonitor } from "@/auth/browserSessionMonitor";
 import type { BrowserSessionMarker } from "@/auth/browserSessionTypes";
-import {
-  useWorkOrdersStore,
-  type ResetWorkOrdersOptions,
-} from "@/stores/work_order/workOrders";
-
-import { useWorkspaceRecoveryStore } from "./workspace/workspace_recovery/workspaceRecovery";
+import type {
+  SessionAccessEffects,
+  SessionIdentity,
+} from "@/auth/sessionAccessEffects";
 
 type AuthState = {
   restoreGeneration: number;
@@ -42,32 +38,21 @@ type AuthState = {
   isLoggingOut: boolean;
 };
 
-function authUserId(user: AuthUser | null): string | null {
-  return user?.id ?? null;
-}
-
-function resetWorkOrdersIfUserIdChanged(
-  previousUserId: string | null,
-  nextUserId: string | null,
-  options: ResetWorkOrdersOptions = {},
-): void {
-  if (previousUserId === nextUserId) {
-    return;
-  }
-
-  resetEditorAndWorkOrders(options);
+function sessionIdentity(state: AuthState): SessionIdentity {
+  return {
+    actorId: state.user?.id ?? null,
+    role: state.user?.role ?? null,
+    sessionId: state.sessionId,
+  };
 }
 
 export type SetAuthOptions = {
   sessionId: string;
-  preserveWorkOrderStateOnInitialUser?: boolean;
-};
-
-type ClearLocalSessionOptions = {
-  forceWorkOrdersReset?: boolean;
+  cause?: "update" | "initial-restore";
 };
 
 type Runtime = {
+  effects?: SessionAccessEffects;
   started: boolean;
   publishing: boolean;
   monitor?: ReturnType<typeof startSessionMonitor>;
@@ -83,6 +68,30 @@ function runtime(store: object): Runtime {
     runtimes.set(store, value);
   }
   return value;
+}
+
+export function bindSessionAccessEffects(
+  auth: ReturnType<typeof useAuthStore>,
+  effects: SessionAccessEffects,
+): () => void {
+  const local = runtime(auth);
+  local.effects = effects;
+  return () => {
+    if (local.effects !== effects) return;
+    auth.restoreGeneration++;
+    if (auth.isRestoring) {
+      auth.isRestoring = false;
+      auth.isReady = false;
+    }
+    local.effects = undefined;
+  };
+}
+
+function accessEffects(store: object): SessionAccessEffects {
+  const effects = runtime(store).effects;
+  if (!effects)
+    throw new Error("Session access effects must be installed before use");
+  return effects;
 }
 
 function publish(store: object, sessionId: string, state: "active" | "ended") {
@@ -124,68 +133,65 @@ export const useAuthStore = defineStore(
     },
     actions: {
       setAuth(token: string, user: AuthUser, options: SetAuthOptions) {
-        const previousUserId = authUserId(this.user);
+        const previous = sessionIdentity(this);
+        const effects = accessEffects(this);
         const sessionChanged = this.sessionId !== options.sessionId;
         const accessChanged =
           sessionChanged || hasUserAccessChanged(this.user, user);
-        if (previousUserId && accessChanged)
-          useEditVersionCommandsStore().suspendWorkspaceRecoveryForAccessLoss(
-            previousUserId,
-          );
+        if (previous.actorId && accessChanged)
+          effects.beforeAccessLoss(previous.actorId);
 
-        if (accessChanged) invalidateSessionAccess(this);
+        if (accessChanged) invalidateSessionAccess(this, effects);
         this.token = token;
         this.sessionId = options.sessionId;
         this.user = user;
         this.sessionError = null;
         this.logoutError = null;
-        const preserveWorkOrderState =
-          options.preserveWorkOrderStateOnInitialUser === true &&
-          previousUserId === null;
-        const resetOptions = {
-          preserveOpenedWorkspace: preserveWorkOrderState,
-          preserveSelectedWorkOrder: preserveWorkOrderState,
-        };
-        if (sessionChanged && previousUserId === user.id) {
-          resetEditorAndWorkOrders(resetOptions);
-        } else
-          resetWorkOrdersIfUserIdChanged(previousUserId, user.id, resetOptions);
+        if (accessChanged)
+          effects.afterSessionTransition({
+            previous,
+            current: sessionIdentity(this),
+            cause: options.cause ?? "update",
+          });
         if (sessionChanged && runtime(this).started)
           this.restartSessionMonitor();
       },
       setUser(user: AuthUser | null) {
-        const previousUserId = authUserId(this.user);
+        const previous = sessionIdentity(this);
+        const effects = accessEffects(this);
         const accessChanged = hasUserAccessChanged(this.user, user);
-        if (previousUserId && accessChanged)
-          useEditVersionCommandsStore().suspendWorkspaceRecoveryForAccessLoss(
-            previousUserId,
-          );
+        if (previous.actorId && accessChanged)
+          effects.beforeAccessLoss(previous.actorId);
 
-        if (accessChanged) invalidateSessionAccess(this);
+        if (accessChanged) invalidateSessionAccess(this, effects);
         this.user = user;
-        resetWorkOrdersIfUserIdChanged(previousUserId, authUserId(user));
+        if (accessChanged)
+          effects.afterSessionTransition({
+            previous,
+            current: sessionIdentity(this),
+            cause: "update",
+          });
       },
-      clearLocalSession(options: ClearLocalSessionOptions = {}) {
+      clearLocalSession(cause: "clear" | "initial-ended" = "clear") {
         this.restoreGeneration++;
         stopSessionMonitor(this);
-        const previousUserId = authUserId(this.user);
-        if (previousUserId || options.forceWorkOrdersReset)
-          useEditVersionCommandsStore().suspendWorkspaceRecoveryForAccessLoss(
-            previousUserId ?? undefined,
-          );
+        const previous = sessionIdentity(this);
+        const effects = accessEffects(this);
+        if (previous.actorId || cause === "initial-ended")
+          effects.beforeAccessLoss(previous.actorId ?? undefined);
 
-        invalidateSessionAccess(this);
+        invalidateSessionAccess(this, effects);
         this.token = null;
         this.sessionId = null;
         this.user = null;
         this.sessionError = null;
         this.logoutError = null;
         markSessionReady(this);
-        if (options.forceWorkOrdersReset) {
-          resetEditorAndWorkOrders();
-        } else {
-          resetWorkOrdersIfUserIdChanged(previousUserId, null);
-        }
+        effects.afterSessionTransition({
+          previous,
+          current: sessionIdentity(this),
+          cause,
+        });
       },
       handleUnauthorizedResponse(error: unknown, requestEpoch?: number): void {
         if (requestEpoch !== undefined && requestEpoch !== this.sessionEpoch)
@@ -302,7 +308,8 @@ export const useAuthStore = defineStore(
             return response;
           },
         );
-        await useWorkspaceRecoveryStore().suspendActor(result.user.id);
+        if (!isCurrentAuthOperation(this, generation)) return result;
+        await accessEffects(this).prepareExplicitLogin(result.user.id);
         if (!isCurrentAuthOperation(this, generation)) return result;
         const current = coordinator.readSessionMarker();
         if (
@@ -329,9 +336,9 @@ export const useAuthStore = defineStore(
           // Только superseded намерение повторяется; каждый HTTP остаётся под lock.
           while (isCurrentAuthOperation(this, generation)) {
             if (marker?.state === "ended") {
-              this.clearLocalSession({
-                forceWorkOrdersReset: restoreMode === "initial",
-              });
+              this.clearLocalSession(
+                restoreMode === "initial" ? "initial-ended" : "clear",
+              );
               return;
             }
             const expectedSid =
@@ -376,7 +383,7 @@ export const useAuthStore = defineStore(
           if (!result) return;
           this.setAuth(result.access_token, result.user, {
             sessionId: result.session_id,
-            preserveWorkOrderStateOnInitialUser: true,
+            cause: restoreMode === "initial" ? "initial-restore" : "update",
           });
         } catch (error: unknown) {
           if (!isCurrentAuthOperation(this, generation)) return;
@@ -386,9 +393,9 @@ export const useAuthStore = defineStore(
             restoreMode === "initial" &&
             (parsed.kind === "api" || parsed.kind === "http") &&
             parsed.status === 401;
-          this.clearLocalSession({
-            forceWorkOrdersReset: initialSessionEnded,
-          });
+          this.clearLocalSession(
+            initialSessionEnded ? "initial-ended" : "clear",
+          );
           this.sessionError = sessionError;
         } finally {
           if (isCurrentAuthOperation(this, generation)) {
@@ -476,23 +483,19 @@ export const useAuthStore = defineStore(
   },
 );
 
-function resetEditorAndWorkOrders(options: ResetWorkOrdersOptions = {}): void {
-  useWorkOrdersStore().reset(options);
-  useEditorSessionStore().resetEditor(options);
-}
-
 function hasUserAccessChanged(
   previous: AuthUser | null,
   next: AuthUser | null,
 ): boolean {
-  return (
-    authUserId(previous) !== authUserId(next) || previous?.role !== next?.role
-  );
+  return previous?.id !== next?.id || previous?.role !== next?.role;
 }
 
-function invalidateSessionAccess(state: AuthState): void {
+function invalidateSessionAccess(
+  state: AuthState,
+  effects: SessionAccessEffects,
+): void {
   state.sessionEpoch++;
-  useWorkspaceRecoveryStore().hideActor();
+  effects.afterEpochChange();
 }
 
 function stopSessionMonitor(store: object): void {

@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { getEditorRuntime } from "@/editor/editorRuntime";
-const workflow = getEditorRuntime().workflow;
+import { getEditorRuntime } from "@/editor/editorRuntimeBinding";
+const { workflow, sessionAccess } = getEditorRuntime();
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
-import { useAuthStore } from "@/stores/auth";
 import { useEditVersionCommandsStore } from "@/stores/edit_version/editVersionCommands";
 import { useEditVersionDraftStore } from "@/stores/edit_version/editVersionDraft";
 import { useEditVersionChangeSetStore } from "@/stores/edit_version/editVersionChangeSet";
@@ -13,13 +12,10 @@ const editVersionCommands = useEditVersionCommandsStore();
 const editVersionDraft = useEditVersionDraftStore();
 const editorSession = useEditorSessionStore();
 const changes = useEditVersionChangeSetStore();
-const auth = useAuthStore();
 const editPanelHeading = ref<HTMLHeadingElement | null>(null);
 const dialog = ref<HTMLDialogElement | null>(null);
 let previousFocus: HTMLElement | null = null;
-const view = useWorkspaceCommandPresentation(
-  () => auth.isAuthenticated && auth.user?.role === "editor",
-);
+const view = useWorkspaceCommandPresentation(() => sessionAccess.canEdit);
 const selectedLabel = computed(() => {
   const draft = editVersionDraft.localDraft;
   if (!draft) return "Выберите линию на карте для редактирования";

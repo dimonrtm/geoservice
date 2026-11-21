@@ -24,22 +24,6 @@ vi.mock("@/api/auth", () => ({
   logoutSession: logoutSessionMock,
 }));
 
-vi.mock("@/stores/work_order/workOrders", () => ({
-  useWorkOrdersStore: () => ({
-    reset: resetWorkOrdersMock,
-    suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
-  }),
-}));
-vi.mock("@/stores/edit_version/editVersionCommands", () => ({
-  useEditVersionCommandsStore: () => ({
-    reset: resetWorkOrdersMock,
-    suspendWorkspaceRecoveryForAccessLoss: vi.fn(),
-  }),
-}));
-vi.mock("@/stores/editor_session/editorSession", () => ({
-  useEditorSessionStore: () => ({ resetEditor: vi.fn() }),
-}));
-
 function createLocalStorageMock() {
   const storage = new Map<string, string>();
 
@@ -86,14 +70,15 @@ function clearLocalStorageMockCalls() {
 }
 
 describe("auth store", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.resetModules();
     loginMock.mockReset();
     fetchMeMock.mockReset();
     refreshSessionMock.mockReset();
     logoutSessionMock.mockReset();
     resetWorkOrdersMock.mockReset();
-    setActivePinia(createPinia());
+    const pinia = createPinia();
+    setActivePinia(pinia);
 
     const localStorageMock = createLocalStorageMock();
     vi.stubGlobal("localStorage", localStorageMock);
@@ -101,19 +86,16 @@ describe("auth store", () => {
     vi.mocked(localStorage.clear).mockClear();
     logoutSessionMock.mockResolvedValue({ ok: true, session_id: "sid-a" });
     sessionStorage.clear();
-    resetWorkOrdersMock.mockImplementation(
-      (options?: {
-        preserveOpenedWorkspace?: boolean;
-        preserveSelectedWorkOrder?: boolean;
-      }) => {
-        if (!options?.preserveOpenedWorkspace) {
-          sessionStorage.removeItem(OPENED_WORKSPACE_STORAGE_KEY);
-        }
-        if (!options?.preserveSelectedWorkOrder) {
-          sessionStorage.removeItem(SELECTED_WORK_ORDER_STORAGE_KEY);
-        }
-      },
-    );
+    const { installEditorRuntime } = await import("@/editor/editorRuntime");
+    const { useWorkOrdersStore } =
+      await import("@/stores/work_order/workOrders");
+    installEditorRuntime(pinia);
+    const orders = useWorkOrdersStore(pinia);
+    const reset = orders.reset;
+    vi.spyOn(orders, "reset").mockImplementation((options) => {
+      resetWorkOrdersMock(options);
+      reset(options);
+    });
   });
 
   it("stores access token only in memory after successful login", async () => {

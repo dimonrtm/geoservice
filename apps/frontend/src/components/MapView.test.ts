@@ -1,6 +1,7 @@
-import { mount } from "@vue/test-utils";
+import { nextTick, reactive } from "vue";
+import { enableAutoUnmount, mount } from "@vue/test-utils";
 import { flushPromises } from "@vue/test-utils";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { WorkspaceResponse } from "@/contracts/work_order/work-orders";
 
 const mocks = vi.hoisted(() => ({
@@ -38,10 +39,11 @@ const mocks = vi.hoisted(() => ({
 vi.mock("maplibre-gl/dist/maplibre-gl.css", () => ({}));
 vi.mock("maplibre-gl", () => ({ Marker: vi.fn() }));
 
-vi.mock("@/stores/auth", () => ({
-  useAuthStore: () => ({
-    isAuthenticated: true,
-  }),
+enableAutoUnmount(afterEach);
+const sessionAccess = reactive({ isAuthenticated: true, sessionEpoch: 1 });
+vi.mock("@/editor/editorRuntimeBinding", async (original) => ({
+  ...(await original<typeof import("@/editor/editorRuntimeBinding")>()),
+  getEditorRuntime: () => ({ sessionAccess }),
 }));
 
 vi.mock("@/composables/map/useMapInstance", () => ({
@@ -201,30 +203,42 @@ describe("MapView", () => {
     );
   });
 
-  it("ignores a local write response after the same layer starts a fresh subscription", async () => {
-    const layer = { id: "layer-1", name: "lines", title: "Lines" };
-    mocks.activeLayer.value = layer;
-    mocks.loadLayers.mockResolvedValue({ status: "ready", total: 1, layer });
-    mocks.getSubscriptionGeneration.mockReturnValue(1);
-    let saved!: (value: unknown) => void;
-    mocks.saveChange.mockReturnValueOnce(
-      new Promise((resolve) => (saved = resolve)),
-    );
-    const { default: MapView } = await import("@/components/MapView.vue");
-    const wrapper = mount(MapView, { props: { mode: "editing" } });
-    try {
-      await flushPromises();
-      await wrapper.get(".actions button").trigger("click");
-      expect(mocks.saveChange).toHaveBeenCalledOnce();
-      mocks.getSubscriptionGeneration.mockReturnValue(2);
-      saved({ id: "f", version: 2 });
-      await flushPromises();
-      expect(mocks.applyPatchedFeature).not.toHaveBeenCalled();
-    } finally {
-      wrapper.unmount();
-      mocks.activeLayer.value = null;
-    }
-  });
+  it.each(["subscription", "session", "current"])(
+    "applies the write response only in the current context: %s",
+    async (change) => {
+      const layer = { id: "layer-1", name: "lines", title: "Lines" };
+      mocks.activeLayer.value = layer;
+      mocks.loadLayers.mockResolvedValue({ status: "ready", total: 1, layer });
+      mocks.getSubscriptionGeneration.mockReturnValue(1);
+      let saved!: (value: unknown) => void;
+      mocks.saveChange.mockReturnValueOnce(
+        new Promise((resolve) => (saved = resolve)),
+      );
+      const { default: MapView } = await import("@/components/MapView.vue");
+      const wrapper = mount(MapView, { props: { mode: "editing" } });
+      try {
+        await flushPromises();
+        await wrapper.get(".actions button").trigger("click");
+        expect(mocks.saveChange).toHaveBeenCalledOnce();
+        if (change === "subscription")
+          mocks.getSubscriptionGeneration.mockReturnValue(2);
+        if (change === "session") {
+          mocks.disconnectRealtime.mockClear();
+          sessionAccess.sessionEpoch++;
+          await nextTick();
+          expect(mocks.disconnectRealtime).toHaveBeenCalledOnce();
+        }
+        saved({ id: "f", version: 2 });
+        await flushPromises();
+        expect(mocks.applyPatchedFeature).toHaveBeenCalledTimes(
+          change === "current" ? 1 : 0,
+        );
+      } finally {
+        wrapper.unmount();
+        mocks.activeLayer.value = null;
+      }
+    },
+  );
 
   it("passes auth readiness to realtime without exposing a token", async () => {
     const layer = {
