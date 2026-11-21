@@ -6,7 +6,18 @@ import { installBrowserAuthEnvironment } from "@/test/browserAuthEnvironment";
 import { useAuthStore } from "@/stores/auth";
 import { useEditVersionDraftStore } from "@/stores/edit_version/editVersionDraft";
 import { editorTestContext } from "@/test/editorTestContext";
-import { target, workspaceFixture } from "@/test/workspaceEditFixture";
+import {
+  candidate,
+  commandId,
+  geometry,
+  successFixture,
+  target,
+  workspaceFixture,
+} from "@/test/workspaceEditFixture";
+import * as snapshots from "@/composables/edit_version/useEditVersionEditor";
+import { workOrderListEntryFixture } from "@/test/workOrderListFixture";
+import { createRecoveryRecord } from "@/contracts/workspace/workspace-recovery";
+import { createRecoveryStorage } from "@/stores/workspace/workspace_recovery/workspaceRecoveryStorage";
 import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, expect, it, vi } from "vitest";
 import { useWorkspaceRecoveryStore } from "@/stores/workspace/workspace_recovery/workspaceRecovery";
@@ -124,6 +135,70 @@ it("reset retains binding and disposal allows a new runtime", async () => {
   const replacement = installEditorRuntime(pinia);
   expect(replacement).not.toBe(runtime);
   replacement.dispose();
+});
+
+it("finishes a previously interrupted GET once through the replacement runtime", async () => {
+  const pinia = createPinia();
+  setActivePinia(pinia);
+  const store = useWorkspaceRecoveryStore(pinia);
+  const bind = vi.spyOn(store, "bindHost");
+  let runtime = installEditorRuntime(pinia);
+  const firstHost = vi.spyOn(bind.mock.calls[0]![0], "complete");
+  let releaseOldRead!: (data: ReturnType<typeof workspaceFixture>) => void;
+  const read = vi
+    .spyOn(snapshots, "readEditVersionSnapshot")
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          releaseOldRead = resolve;
+        }),
+    )
+    .mockResolvedValueOnce(workspaceFixture(true));
+  try {
+    const auth = useAuthStore(pinia);
+    auth.token = "token";
+    auth.user = { id: "actor", role: "editor", email: "actor@example.local" };
+    editorTestContext().workOrders.items = [
+      workOrderListEntryFixture({
+        id: target.workOrderId,
+        code: "WO",
+        title: "Работа",
+        description: null,
+        status: "in_progress",
+      }),
+    ];
+    const record = createRecoveryRecord(
+      {
+        actorId: "actor",
+        target,
+        request: {
+          commandId,
+          draftVersionToken: "revision-a",
+          geometry: candidate,
+        },
+      },
+      { geometry, vertexIndex: 1 },
+    );
+    record.outcome = { kind: "succeeded", result: successFixture() };
+    record.readbackRequired = true;
+    await createRecoveryStorage().insert(record);
+    await store.initializeActor("actor");
+    expect(read).toHaveBeenCalledOnce();
+
+    runtime.dispose();
+    runtime = installEditorRuntime(pinia);
+    const secondHost = vi.spyOn(bind.mock.calls[1]![0], "complete");
+    releaseOldRead(workspaceFixture(true));
+    await store.retryRead(record.key);
+    expect(read).toHaveBeenCalledTimes(2);
+    expect(firstHost).not.toHaveBeenCalled();
+    expect(secondHost).toHaveBeenCalledOnce();
+    expect(store.getRecord(record.key)).toBeNull();
+  } finally {
+    runtime.dispose();
+    bind.mockRestore();
+    read.mockRestore();
+  }
 });
 
 it("resolves the same owner through a Pinia devtools action proxy", () => {

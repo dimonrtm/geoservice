@@ -1,5 +1,6 @@
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
+import { nextTick, watchEffect } from "vue";
 import { IDBFactory, IDBObjectStore } from "fake-indexeddb";
 import {
   candidate,
@@ -70,6 +71,96 @@ afterEach(() => {
   useWorkspaceRecoveryStore().stopRuntime();
   vi.useRealTimers();
 });
+it("publishes additions, phases, removal and collection replacement to Vue readers", async () => {
+  const store = useWorkspaceRecoveryStore();
+  store.bindHost(host);
+  await store.initializeActor("actor");
+  const pending = command();
+  const key = recoveryKey(commandContext(pending));
+  const observed = vi.fn();
+  const stop = watchEffect(() =>
+    observed(
+      store.records,
+      store.records[key]?.command.request.commandId,
+      store.phases[key],
+    ),
+  );
+  try {
+    let release!: (result: ReturnType<typeof successFixture>) => void;
+    api.saveFeatureGeometry.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    );
+    api.readEditVersionSnapshot.mockResolvedValueOnce(workspaceFixture(true));
+    const collection = store.records;
+    await store.submit(pending, { geometry, vertexIndex: 1 });
+    await nextTick();
+    expect(observed).toHaveBeenCalledWith(collection, commandId, "sending");
+    release(successFixture());
+    await vi.waitFor(() => expect(completed).toContain(target.workOrderId));
+    await nextTick();
+    expect(observed).toHaveBeenLastCalledWith(collection, undefined, undefined);
+    session = { actorId: "other", epoch: 2, canEdit: true };
+    await store.initializeActor("other");
+    await nextTick();
+    expect(store.records).not.toBe(collection);
+    expect(observed.mock.lastCall?.[0]).toBe(store.records);
+  } finally {
+    stop();
+  }
+});
+
+it("detaches only its own host while a second Pinia finishes its pending command", async () => {
+  const first = useWorkspaceRecoveryStore(createPinia());
+  const second = useWorkspaceRecoveryStore(createPinia());
+  const doneFirst = vi.fn(),
+    doneSecond = vi.fn();
+  const detach = first.bindHost({ ...host, complete: doneFirst });
+  const detachSecond = second.bindHost({ ...host, complete: doneSecond });
+  try {
+    await first.initializeActor("actor");
+    await second.initializeActor("actor");
+    const a = command("a"),
+      b = command("b");
+    let finishA!: (result: ReturnType<typeof successFixture>) => void;
+    let finishB!: (result: ReturnType<typeof successFixture>) => void;
+    api.saveFeatureGeometry
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishA = resolve;
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishB = resolve;
+          }),
+      );
+    api.readEditVersionSnapshot.mockImplementation(async (wo) => {
+      const workspace = workspaceFixture(true);
+      workspace.workOrder.id = wo;
+      return workspace;
+    });
+    await first.submit(a, { geometry, vertexIndex: 1 });
+    await second.submit(b, { geometry, vertexIndex: 1 });
+    detach();
+    finishA(successFixture());
+    finishB(successFixture());
+    await vi.waitFor(() => expect(doneSecond).toHaveBeenCalledOnce());
+    expect(doneFirst).not.toHaveBeenCalled();
+    expect(first.getRecord(recoveryKey(commandContext(a)))?.outcome.kind).toBe(
+      "unknown",
+    );
+    expect(second.getRecord(recoveryKey(commandContext(b)))).toBeNull();
+  } finally {
+    detach();
+    detachSecond();
+  }
+});
+
 it("unknown A does not block saving independent B and repeats only frozen A", async () => {
   const store = useWorkspaceRecoveryStore();
   store.bindHost(host);
