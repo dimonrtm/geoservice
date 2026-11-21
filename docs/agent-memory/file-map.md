@@ -22,7 +22,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - repository-change ingest workflow and node registry: `.agents/skills/source-command-ingest/SKILL.md`, `Code_wiki/состояние_проекта/repository_change_ingest.md`
 - repository-snapshot ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `Code_wiki/состояние_проекта/repository_snapshot.md`
 - RAW_inputs batch ingest workflow: `.agents/skills/source-command-ingest/SKILL.md`, `docs/knowledge-pipeline/README.md`, `RAW_inputs/index.md`
-- domain sprint planning workflow: `.agents/skills/source-command-plan-sprint/SKILL.md`, `DDD_Wiki/model_health.md`, `Wiki/_registry/questions.md`
+- Планирование спринта от результата, сквозной сценарий и приёмка за 14 дней — `.agents/skills/source-command-plan-sprint/SKILL.md`, `DDD_Wiki/model_health.md`, `Wiki/_registry/questions.md`
 - Release 1 RAW requirements ingest: `RAW_inputs/documents/спринт 1.odt`, `Vision_wiki/chats/2026-05-30-release-1-document.md`, `Vision_wiki/concepts/first_release_mvp.md`, `Vision_wiki/solution/USM.md`, `Vision_wiki/solution/roadmap.md`, `Vision_wiki/solution/nfr.md`, `Vision_wiki/solution/architecture_vision.md`, `Code_wiki/архитектура/api_contract_first_release_requirements.md`
 - initial GeoService discover context: `Vision_wiki/chats/2026-05-31-initial-discover.md`, `Vision_wiki/concepts/about_project.md`, `Vision_wiki/entities/stakeholders/dmitry_popov.md`, `memory/project-state.md`
 - GeoService discover Ф1 why-now research goals: `Vision_wiki/chats/2026-05-31-phase-f1-why-now.md`, `Vision_wiki/concepts/about_project.md`, `Vision_wiki/concepts/product_vision_board.md`, `Vision_wiki/concepts/lean_canvas.md`, `Vision_wiki/decisions/risk_assumption_log.md`
@@ -58,7 +58,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - GeoService Sprint 1 Day 2 implementation: `apps/backend/app/alembic/versions/b82a5f2d91c3_editor_reviewer_roles.py`, `apps/backend/app/api/auth.py`, `apps/backend/app/api/websocket_auth.py`, `apps/backend/app/services/demo_user_seed_service.py`, `apps/frontend/src/domain/authRole.ts`, `apps/frontend/src/components/ReviewerHome.vue`
 - Code_wiki repository snapshot inventory: `Code_wiki/архитектура/backend.md`, `Code_wiki/архитектура/frontend.md`, `Code_wiki/архитектура/api_and_realtime.md`, `Code_wiki/архитектура/data_model.md`, `Code_wiki/dev_setup/local_development.md`, `Code_wiki/deployment/docker_compose.md`, `Code_wiki/сборка/ci_and_quality.md`, `Code_wiki/правила_и_стиль/testing_strategy.md`, `Code_wiki/глоссарий/technical_terms.md`
 - Obsidian wiki graph config: `.obsidian/app.json`, `.obsidian/appearance.json`, `.obsidian/core-plugins.json`, `.obsidian/graph.json`, `.obsidian/templates.json`
-- Выбор темы и смысловая новизна `/discover`, устранение повторов, согласованность реестра/активной очереди/следующего action, параметры `--context` и `--phase` — `.agents/skills/source-command-discover/SKILL.md`, `DDD_Wiki/model_health.md`, `Общие_принципы/Фазы наполнения wiki.md`
+- Долгосрочный `/discover`, топ-15 из 150 по всей модели, смысловая новизна, реестр и активная очередь, акценты `--context` и `--phase` — `.agents/skills/source-command-discover/SKILL.md`, `DDD_Wiki/model_health.md`, `Общие_принципы/Фазы наполнения wiki.md`
 
 ## Project Documentation
 
