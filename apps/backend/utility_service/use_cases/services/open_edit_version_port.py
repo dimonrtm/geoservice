@@ -1,0 +1,59 @@
+from contextlib import AbstractAsyncContextManager
+from datetime import datetime
+from typing import ClassVar, Protocol
+from uuid import UUID
+
+
+class OpenActor(Protocol):
+    @property
+    def role(self) -> str: ...
+
+    @property
+    def is_active(self) -> bool: ...
+
+
+class OpenWorkOrder(Protocol):
+    @property
+    def assignee_user_id(self) -> UUID: ...
+
+    @property
+    def status(self) -> str: ...
+
+
+class OpenVersionRecord(Protocol):
+    @property
+    def id(self) -> UUID: ...
+
+    @property
+    def work_order_id(self) -> UUID: ...
+
+    @property
+    def owner_user_id(self) -> UUID: ...
+
+    @property
+    def base_network_revision(self) -> int: ...
+
+    @property
+    def created_at(self) -> datetime: ...
+
+    @property
+    def last_opened_at(self) -> datetime: ...
+
+
+class OpenEditVersionOperations(Protocol):
+    async def get_actor(self, actor_id: UUID) -> OpenActor | None: ...
+    async def lock_work_order(self, work_order_id: UUID) -> OpenWorkOrder | None: ...
+    async def find_open_version(self, work_order_id: UUID) -> UUID | None: ...
+    async def create_from_active_default(
+        self, work_order_id: UUID, owner_user_id: UUID
+    ) -> OpenVersionRecord | None: ...
+    async def mark_in_progress(self, work_order_id: UUID) -> None: ...
+    async def touch_open_version(self, edit_version_id: UUID) -> OpenVersionRecord: ...
+
+
+class OpenEditVersionTransactions(Protocol):
+    # Raised by the first attempt only after rollback of a competing open.
+    open_version_conflict: ClassVar[type[Exception]]
+
+    def first_attempt(self) -> AbstractAsyncContextManager[OpenEditVersionOperations]: ...
+    def recovery_attempt(self) -> AbstractAsyncContextManager[OpenEditVersionOperations]: ...

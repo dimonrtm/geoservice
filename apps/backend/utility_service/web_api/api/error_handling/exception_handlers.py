@@ -19,9 +19,6 @@ from utility_service.use_cases.domain.exceptions.feature_not_found_exception imp
 from utility_service.use_cases.domain.exceptions.layer_not_found_exception import (
     LayerNotFoundException,
 )
-from utility_service.use_cases.domain.exceptions.unknown_storage_table_error import (
-    UnknownStorageTableError,
-)
 from utility_service.use_cases.domain.exceptions.utility_network_api_error import (
     UtilityNetworkApiError,
 )
@@ -126,10 +123,6 @@ def install_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(BusinessValidationException)
     async def business_validation_error(_: Request, e: BusinessValidationException):
-        return JSONResponse(status_code=422, content={"error": str(e)})
-
-    @app.exception_handler(UnknownStorageTableError)
-    async def unknown_storage_table_error(_: Request, e: UnknownStorageTableError):
         return JSONResponse(status_code=422, content={"error": str(e)})
 
     @app.exception_handler(VersionMismatchException)

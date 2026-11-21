@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from uuid import UUID
 
 from fastapi import Depends, Request
@@ -18,6 +19,10 @@ from utility_service.infrastructure.postgresql.repositories.browser_auth_session
     BrowserAuthSessionRepository,
 )
 from utility_service.infrastructure.postgresql.repositories.layer_repository import LayerRepository
+from utility_service.infrastructure.postgresql.feature_registry import UnknownStorageTableError
+from utility_service.use_cases.domain.exceptions.business_validation_exception import (
+    BusinessValidationException,
+)
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
     DefaultStateRepository,
 )
@@ -35,6 +40,10 @@ from utility_service.infrastructure.postgresql.session import SessionFactory, en
 from utility_service.use_cases.services.auth_session_service import AuthSessionService
 from utility_service.use_cases.services.auth_session_access_service import AuthSessionAccessService
 from utility_service.use_cases.services.auth_service import AuthService
+from utility_service.infrastructure.postgresql.open_edit_version import (
+    PostgresOpenEditVersionTransactions,
+)
+from utility_service.use_cases.services.open_edit_version import OpenEditVersionService
 from utility_service.use_cases.services.edit_version_service import EditVersionService
 from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
 from utility_service.use_cases.services.feature_service import FeatureService
@@ -80,11 +89,15 @@ def get_feature_realtime_publisher(request: Request) -> FeatureRealtimePublisher
     return FeatureRealtimePublisher(connection_manager)
 
 
-def get_feature_service(
+async def get_feature_service(
     session: AsyncSession = Depends(get_session),
     realtime_publisher: FeatureRealtimePublisher = Depends(get_feature_realtime_publisher),
-) -> FeatureService:
-    return FeatureService(session, LayerRepository(session), realtime_publisher)
+) -> AsyncIterator[FeatureService]:
+    service = FeatureService(session, LayerRepository(session), realtime_publisher)
+    try:
+        yield service
+    except UnknownStorageTableError as error:
+        raise BusinessValidationException(str(error)) from error
 
 
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
@@ -125,19 +138,24 @@ def get_work_order_service(
     )
 
 
+def get_open_edit_version_service(
+    session: AsyncSession = Depends(get_session),
+) -> OpenEditVersionService:
+    policy = GeometryPolicy(
+        xy_resolution=settings.utility_geometry_xy_resolution,
+        rounding_mode=settings.utility_geometry_rounding_mode.value,
+    )
+    return OpenEditVersionService(PostgresOpenEditVersionTransactions(session, policy))
+
+
 def get_edit_version_service(
     session: AsyncSession = Depends(get_session),
 ) -> EditVersionService:
     return EditVersionService(
         session,
         UserRepository(session),
-        WorkOrderRepository(session),
         DefaultStateRepository(session),
         edit_version_repository=EditVersionRepository(session),
-        geometry_policy=GeometryPolicy(
-            xy_resolution=settings.utility_geometry_xy_resolution,
-            rounding_mode=settings.utility_geometry_rounding_mode.value,
-        ),
     )
 
 

@@ -14,9 +14,11 @@ from utility_service.infrastructure.postgresql.models.feature_multipolygon impor
     FeatureMultiPolygon,
 )
 from utility_service.infrastructure.postgresql.models.layer import Layer
-from utility_service.use_cases.domain.exceptions.unknown_storage_table_error import (
-    UnknownStorageTableError,
-)
+
+
+class UnknownStorageTableError(Exception):
+    """The layer references a table with no registered feature model."""
+
 
 FEATURE_MODELS_BY_TABLE: dict[str, type] = {
     "feature_points": FeaturePoint,

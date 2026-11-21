@@ -59,7 +59,10 @@ class WorkOrderRepository:
 
     async def get_by_id_for_update(self, work_order_id: UUID) -> WorkOrder | None:
         result = await self.session.execute(
-            select(WorkOrder).where(WorkOrder.id == work_order_id).with_for_update()
+            select(WorkOrder)
+            .where(WorkOrder.id == work_order_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
         )
         return result.scalars().one_or_none()
 

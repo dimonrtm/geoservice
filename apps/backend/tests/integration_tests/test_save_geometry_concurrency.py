@@ -18,6 +18,7 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersion,
     EditVersionFeature,
 )
+from utility_service.use_cases.deps import get_open_edit_version_service
 from utility_service.use_cases.domain.exceptions.work_order_api_error import WorkOrderApiError
 
 
@@ -41,14 +42,22 @@ async def race(
         AsyncSession(engine) as second_session,
         engine.connect() as observer,
     ):
-        first = build_save_service(first_session)
-        second = build_save_service(second_session)
+
+        def participant(session, opening):
+            if opening:
+                service = get_open_edit_version_service(session)
+                return service, service.transactions.users, service.transactions.versions
+            service = build_save_service(session)
+            return service, service.user_repository, service.edit_version_repository
+
+        first, first_users, first_versions = participant(first_session, first_open)
+        second, second_users, _ = participant(second_session, second_open)
         retained = []
-        for name, service, session, ids in (
-            ("first", first, first_session, first_ids),
-            ("second", second, second_session, second_ids),
+        for name, users, session, ids in (
+            ("first", first_users, first_session, first_ids),
+            ("second", second_users, second_session, second_ids),
         ):
-            original_actor = service.user_repository.get_by_id
+            original_actor = users.get_by_id
 
             async def actor(
                 actor_id,
@@ -76,10 +85,10 @@ async def race(
                     second_ready.set()
                 return await original(actor_id)
 
-            service.user_repository.get_by_id = actor
+            users.get_by_id = actor
         method = "touch_edit_version" if first_open else "reserve_command"
         original_method = getattr(
-            first.edit_version_repository,
+            first_versions,
             method,
         )
 
@@ -98,7 +107,7 @@ async def race(
             return result
 
         setattr(
-            first.edit_version_repository,
+            first_versions,
             method,
             hold,
         )

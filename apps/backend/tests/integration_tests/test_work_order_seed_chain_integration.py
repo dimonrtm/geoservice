@@ -1,8 +1,3 @@
-from decimal import Decimal
-from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
-    EditVersionRepository,
-)
-from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 import asyncio
 import os
 from uuid import uuid4
@@ -43,7 +38,6 @@ from utility_service.infrastructure.postgresql.models.utility_network import (
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
     DefaultStateRepository,
 )
-from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
     WorkOrderRepository,
 )
@@ -56,7 +50,7 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     WorkOrder,
     WorkOrderStatus,
 )
-from utility_service.use_cases.services.edit_version_service import EditVersionService
+from utility_service.use_cases.deps import get_open_edit_version_service
 
 
 async def remove_canonical_seed_chain(session: AsyncSession) -> None:
@@ -210,14 +204,9 @@ def test_seed_chain_opens_edit_version_with_full_default_state_slice() -> None:
             if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
         )
 
-        result = await EditVersionService(
-            session,
-            UserRepository(session),
-            WorkOrderRepository(session),
-            DefaultStateRepository(session),
-            edit_version_repository=EditVersionRepository(session),
-            geometry_policy=GeometryPolicy(Decimal("0.0000001")),
-        ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+        result = await get_open_edit_version_service(session).open_for_work_order(
+            SEED_WORK_ORDER_SPEC.id, assignee_id
+        )
 
         edit_feature_count = await session.scalar(
             select(func.count(EditVersionFeature.feature_id)).where(
@@ -247,14 +236,9 @@ def test_seed_chain_edit_version_map_returns_work_order_scope() -> None:
             for spec in SEED_DEMO_USER_SPECS
             if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
         )
-        result = await EditVersionService(
-            session,
-            UserRepository(session),
-            WorkOrderRepository(session),
-            DefaultStateRepository(session),
-            edit_version_repository=EditVersionRepository(session),
-            geometry_policy=GeometryPolicy(Decimal("0.0000001")),
-        ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+        result = await get_open_edit_version_service(session).open_for_work_order(
+            SEED_WORK_ORDER_SPEC.id, assignee_id
+        )
 
         aggregate = await WorkOrderRepository(session).get_edit_version_map(
             work_order_id=SEED_WORK_ORDER_SPEC.id,
@@ -281,14 +265,9 @@ def test_edit_version_map_excludes_association_when_endpoint_feature_is_outside_
             for spec in SEED_DEMO_USER_SPECS
             if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
         )
-        result = await EditVersionService(
-            session,
-            UserRepository(session),
-            WorkOrderRepository(session),
-            DefaultStateRepository(session),
-            edit_version_repository=EditVersionRepository(session),
-            geometry_policy=GeometryPolicy(Decimal("0.0000001")),
-        ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+        result = await get_open_edit_version_service(session).open_for_work_order(
+            SEED_WORK_ORDER_SPEC.id, assignee_id
+        )
 
         inside_feature = await session.scalar(
             select(EditVersionFeature)
@@ -350,14 +329,7 @@ def test_reopening_seeded_edit_version_returns_existing_version_without_duplicat
             for spec in SEED_DEMO_USER_SPECS
             if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
         )
-        service = EditVersionService(
-            session,
-            UserRepository(session),
-            WorkOrderRepository(session),
-            DefaultStateRepository(session),
-            edit_version_repository=EditVersionRepository(session),
-            geometry_policy=GeometryPolicy(Decimal("0.0000001")),
-        )
+        service = get_open_edit_version_service(session)
 
         first_result = await service.open_for_work_order(
             SEED_WORK_ORDER_SPEC.id,
@@ -437,14 +409,9 @@ def test_concurrent_open_seeded_edit_version_returns_one_created_and_one_reopene
 
             async def open_once():
                 async with Session() as session:
-                    return await EditVersionService(
-                        session,
-                        UserRepository(session),
-                        WorkOrderRepository(session),
-                        DefaultStateRepository(session),
-                        edit_version_repository=EditVersionRepository(session),
-                        geometry_policy=GeometryPolicy(Decimal("0.0000001")),
-                    ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
+                    return await get_open_edit_version_service(session).open_for_work_order(
+                        SEED_WORK_ORDER_SPEC.id, assignee_id
+                    )
 
             first_result, second_result = await asyncio.gather(open_once(), open_once())
             created_flags = sorted([first_result.created, second_result.created])

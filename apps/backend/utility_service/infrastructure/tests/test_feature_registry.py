@@ -3,6 +3,7 @@ import pytest
 from utility_service.infrastructure.postgresql.feature_registry import (
     ALL_FEATURE_MODELS,
     FEATURE_MODELS_BY_TABLE,
+    UnknownStorageTableError,
     get_layer_feature_model,
     resolve_feature_model,
 )
@@ -15,9 +16,6 @@ from utility_service.infrastructure.postgresql.models.feature_multipolygon impor
     FeatureMultiPolygon,
 )
 from utility_service.infrastructure.postgresql.models.layer import Layer
-from utility_service.use_cases.domain.exceptions.unknown_storage_table_error import (
-    UnknownStorageTableError,
-)
 
 
 EXPECTED_MODELS = [

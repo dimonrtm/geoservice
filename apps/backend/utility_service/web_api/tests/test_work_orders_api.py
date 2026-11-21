@@ -2,11 +2,12 @@ from utility_service.use_cases.domain.exceptions.work_order_operation_error impo
     WorkOrderOperationCode,
     WorkOrderOperationError,
 )
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -14,6 +15,7 @@ from utility_service.use_cases.deps import (
     get_auth_service,
     get_auth_session_access_service,
     get_edit_version_service,
+    get_open_edit_version_service,
     get_work_order_service,
     get_edit_version_read_service,
 )
@@ -28,7 +30,10 @@ from utility_service.use_cases.schemas.edit_version.version_map import (
     MapScopeOut,
     MapWorkOrderOut,
 )
-from utility_service.use_cases.services.edit_version_service import OpenEditVersionResult
+from utility_service.use_cases.services.open_edit_version import (
+    OpenEditVersionResult,
+    OpenEditVersionSnapshot,
+)
 from utility_service.web_api.tests.auth_user_factory import (
     create_test_access_token as create_access_token,
     access_service_for,
@@ -44,6 +49,8 @@ def build_app(
     edit_version_service: object,
     edit_version_read_service: object | None = None,
     work_order_service: object | None = None,
+    *,
+    save_service: object | None = None,
 ) -> FastAPI:
     app = FastAPI()
     app.add_middleware(CorrelationIdMiddleware)
@@ -53,7 +60,9 @@ def build_app(
     app.dependency_overrides[get_auth_session_access_service] = lambda: access_service_for(
         auth_service
     )
-    app.dependency_overrides[get_edit_version_service] = lambda: edit_version_service
+    app.dependency_overrides[get_open_edit_version_service] = lambda: edit_version_service
+    if save_service is not None:
+        app.dependency_overrides[get_edit_version_service] = lambda: save_service
     if edit_version_read_service is not None:
         app.dependency_overrides[get_edit_version_read_service] = lambda: edit_version_read_service
     if work_order_service is not None:
@@ -75,14 +84,14 @@ def auth_context(role: AuthRole, *, is_active: bool = True):
 
 def edit_version(work_order_id, owner_user_id):
     now = datetime(2026, 6, 19, 9, 0, tzinfo=timezone.utc)
-    return SimpleNamespace(
+    return OpenEditVersionSnapshot(
         id=uuid4(),
         work_order_id=work_order_id,
         owner_user_id=owner_user_id,
         status="open",
         base_network_revision=12,
         created_at=now,
-        last_opened_at=now,
+        last_opened_at=now + timedelta(minutes=5),
     )
 
 
@@ -129,13 +138,14 @@ def workspace_response(work_order_id, edit_version_id) -> EditVersionMapOut:
     )
 
 
-def test_open_edit_version_returns_201_when_created() -> None:
+@pytest.mark.parametrize(("created", "status_code"), [(True, 201), (False, 200)])
+def test_open_edit_version_returns_snapshot(created: bool, status_code: int) -> None:
     work_order_id = uuid4()
     auth_service, token, user_id = auth_context("editor")
     version = edit_version(work_order_id, user_id)
     edit_version_service = AsyncMock()
     edit_version_service.open_for_work_order.return_value = OpenEditVersionResult(
-        created=True,
+        created=created,
         edit_version=version,
     )
 
@@ -144,13 +154,19 @@ def test_open_edit_version_returns_201_when_created() -> None:
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    assert response.status_code == 201
-    assert response.json()["created"] is True
-    assert response.json()["editVersion"]["id"] == str(version.id)
-    assert response.json()["editVersion"]["workOrderId"] == str(work_order_id)
-    assert response.json()["editVersion"]["ownerId"] == str(user_id)
-    assert response.json()["editVersion"]["status"] == "open"
-    assert response.json()["editVersion"]["baseNetworkRevision"] == 12
+    assert response.status_code == status_code
+    assert response.json() == {
+        "created": created,
+        "editVersion": {
+            "id": str(version.id),
+            "workOrderId": str(work_order_id),
+            "ownerId": str(user_id),
+            "status": "open",
+            "baseNetworkRevision": 12,
+            "createdAt": "2026-06-19T09:00:00Z",
+            "lastOpenedAt": "2026-06-19T09:05:00Z",
+        },
+    }
     edit_version_service.open_for_work_order.assert_awaited_once_with(work_order_id, user_id)
 
 
@@ -283,26 +299,6 @@ def test_list_assigned_to_me_preserves_service_order() -> None:
         "WO-002",
         "WO-001",
     ]
-
-
-def test_open_edit_version_returns_200_when_reopened() -> None:
-    work_order_id = uuid4()
-    auth_service, token, user_id = auth_context("editor")
-    version = edit_version(work_order_id, user_id)
-    edit_version_service = AsyncMock()
-    edit_version_service.open_for_work_order.return_value = OpenEditVersionResult(
-        created=False,
-        edit_version=version,
-    )
-
-    response = TestClient(build_app(auth_service, edit_version_service)).post(
-        f"/api/v1/work-orders/{work_order_id}/edit-versions",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response.status_code == 200
-    assert response.json()["created"] is False
-    assert response.json()["editVersion"]["id"] == str(version.id)
 
 
 def test_reviewer_is_denied_before_edit_version_service_call() -> None:

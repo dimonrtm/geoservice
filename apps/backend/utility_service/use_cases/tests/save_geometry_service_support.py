@@ -106,9 +106,7 @@ class SaveFixture:
         self.service = EditVersionService(
             self,
             self,
-            None,
             self,
-            geometry_policy=GeometryPolicy(Decimal("0.001")),
             edit_version_repository=self,
         )
 

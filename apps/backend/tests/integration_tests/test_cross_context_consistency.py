@@ -1,9 +1,4 @@
 from __future__ import annotations
-from decimal import Decimal
-from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
-    EditVersionRepository,
-)
-from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 
 from uuid import uuid4
 
@@ -41,24 +36,14 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     AOI,
     EditVersion,
     EditVersionAssociation,
-    EditVersionFeature,
     WorkOrder,
 )
-from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
-    DefaultStateRepository,
-)
-from utility_service.infrastructure.postgresql.repositories.user_repository import (
-    UserRepository,
-)
-from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
-    WorkOrderRepository,
-)
-from utility_service.use_cases.services.edit_version_service import EditVersionService
+from utility_service.use_cases.deps import get_open_edit_version_service
 
 
 async def remove_cross_context_seed_state(session: AsyncSession) -> None:
     await session.execute(delete(EditVersionAssociation))
-    await session.execute(delete(EditVersionFeature))
+    # Delete versions with their features and commands in the same cascading statement.
     await session.execute(delete(EditVersion))
     await session.execute(delete(DefaultStateAssociation))
     await session.execute(delete(DefaultStateFeature))
@@ -109,15 +94,12 @@ async def ensure_open_seed_edit_version(session: AsyncSession) -> EditVersion:
         for spec in SEED_DEMO_USER_SPECS
         if spec.email == SEED_WORK_ORDER_SPEC.assignee_email
     )
-    result = await EditVersionService(
-        session,
-        UserRepository(session),
-        WorkOrderRepository(session),
-        DefaultStateRepository(session),
-        edit_version_repository=EditVersionRepository(session),
-        geometry_policy=GeometryPolicy(Decimal("0.0000001")),
-    ).open_for_work_order(SEED_WORK_ORDER_SPEC.id, assignee_id)
-    return result.edit_version
+    result = await get_open_edit_version_service(session).open_for_work_order(
+        SEED_WORK_ORDER_SPEC.id, assignee_id
+    )
+    version = await session.get(EditVersion, result.edit_version.id)
+    assert version is not None
+    return version
 
 
 def issue_by_name(

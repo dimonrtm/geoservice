@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import SimpleNamespace
+from unittest.mock import AsyncMock, Mock
 from uuid import UUID
 
 import pytest
@@ -11,6 +12,7 @@ from fastapi.testclient import TestClient
 from utility_service.use_cases.deps import (
     get_auth_session_access_service,
     get_feature_service,
+    get_session,
     get_layer_service,
 )
 from utility_service.use_cases.schemas.feature.delete_feature_response import (
@@ -166,6 +168,27 @@ def build_app(role: str, layer_service: FakeLayerService, feature_service: FakeF
 def auth_headers(role: str) -> dict[str, str]:
     token = create_access_token(str(USER_ID), role)
     return {"Authorization": f"Bearer {token}"}
+
+
+def test_unknown_storage_table_preserves_legacy_422(monkeypatch) -> None:
+    monkeypatch.setattr(auth_api.settings, "legacy_gis_api_enabled", True)
+    app = build_app("editor", FakeLayerService(), FakeFeatureService())
+    del app.dependency_overrides[get_feature_service]
+    app.state.websocket_connection_manager = Mock()
+    result = Mock()
+    result.scalars.return_value.one_or_none.return_value = SimpleNamespace(storage_table="unknown")
+    session = AsyncMock()
+    session.execute.return_value = result
+    app.dependency_overrides[get_session] = lambda: session
+
+    client = TestClient(app, raise_server_exceptions=False)
+    response = client.get(
+        f"/api/v1/layers/{LAYER_ID}/features/{FEATURE_ID}", headers=auth_headers("editor")
+    )
+
+    assert response.status_code == 422
+    assert response.json() == {"error": "Для данного слоя не найдена подходящая модель"}
+    UUID(response.headers["X-Correlation-ID"])
 
 
 @pytest.mark.parametrize(

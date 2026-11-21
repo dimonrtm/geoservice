@@ -7,19 +7,16 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.integration_tests.first_save_schema_support import run_committed_scenario, seed_context
-from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
-    EditVersionRepository,
-)
 from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 from utility_service.infrastructure.postgresql.models.user import UserRole
 from utility_service.infrastructure.postgresql.models.work_order import EditVersion
-from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
-    DefaultStateRepository,
-)
 from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
     WorkOrderRepository,
 )
-from utility_service.use_cases.services.edit_version_service import EditVersionService
+from utility_service.infrastructure.postgresql.open_edit_version import (
+    PostgresOpenEditVersionTransactions,
+)
+from utility_service.use_cases.services.open_edit_version import OpenEditVersionService
 
 
 async def seed_unopened(connection):
@@ -41,22 +38,17 @@ def service(
     grid,
     repository=None,
 ):
-    return EditVersionService(
-        session,
-        SimpleNamespace(
-            get_by_id=AsyncMock(
-                return_value=SimpleNamespace(
-                    id=ids["actor_user_id"],
-                    role=UserRole.EDITOR,
-                    is_active=True,
-                )
-            )
-        ),
-        repository or WorkOrderRepository(session),
-        DefaultStateRepository(session),
-        edit_version_repository=EditVersionRepository(session),
-        geometry_policy=GeometryPolicy(Decimal(grid)),
+    tx = PostgresOpenEditVersionTransactions(session, GeometryPolicy(Decimal(grid)))
+    tx.users.get_by_id = AsyncMock(
+        return_value=SimpleNamespace(
+            id=ids["actor_user_id"],
+            role=UserRole.EDITOR,
+            is_active=True,
+        )
     )
+    if repository is not None:
+        tx.orders = repository
+    return OpenEditVersionService(tx)
 
 
 def test_open_snapshots_policy_and_reopen_keeps_it_across_sessions():
@@ -92,7 +84,10 @@ def test_open_snapshots_policy_and_reopen_keeps_it_across_sessions():
             )
             assert not reopened.created
             assert reopened.edit_version.id == version_id
-            assert reopened.edit_version.geometry_xy_resolution == Decimal("0.0000001")
+            assert (
+                reopened.edit_version.base_network_revision
+                == opened.edit_version.base_network_revision
+            )
         async with AsyncSession(
             engine,
             expire_on_commit=False,

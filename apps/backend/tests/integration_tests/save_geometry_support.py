@@ -9,7 +9,6 @@ from tests.integration_tests.edit_geometry_repository_support import (
     seed_repository_context,
     snapshot_repository_state,
 )
-from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
 from utility_service.domain_services.edit_geometry.types import GeometryValue
 from utility_service.infrastructure.postgresql.models.user import User, UserRole
 from utility_service.infrastructure.postgresql.models.work_order import (
@@ -17,9 +16,6 @@ from utility_service.infrastructure.postgresql.models.work_order import (
     EditVersionChangeEvent,
 )
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
-from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
-    WorkOrderRepository,
-)
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
     DefaultStateRepository,
 )
@@ -68,9 +64,7 @@ def build_save_service(session):
     return EditVersionService(
         session,
         UserRepository(session),
-        WorkOrderRepository(session),
         DefaultStateRepository(session),
-        geometry_policy=GeometryPolicy(Decimal("0.0000001")),
         edit_version_repository=EditVersionRepository(session),
     )
 

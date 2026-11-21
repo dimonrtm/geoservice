@@ -149,9 +149,6 @@ def test_reopen_and_repository_do_not_deadlock(save_first):
     from utility_service.infrastructure.postgresql.repositories.work_order_repository import (
         WorkOrderRepository,
     )
-    from utility_service.use_cases.services.edit_version_service import EditVersionService
-    from utility_service.domain_services.edit_geometry.policy import GeometryPolicy
-    from decimal import Decimal
 
     async def reopen(
         session,
@@ -159,16 +156,9 @@ def test_reopen_and_repository_do_not_deadlock(save_first):
     ):
         repository = WorkOrderRepository(session)
         await repository.get_by_id_for_update(ids["work_order_id"])
-        version = await EditVersionRepository(session).get_open_edit_version(ids["work_order_id"])
-        service = EditVersionService(
-            session,
-            None,
-            repository,
-            None,
-            edit_version_repository=EditVersionRepository(session),
-            geometry_policy=GeometryPolicy(Decimal("0.0000001")),
-        )
-        await service.reopen_edit_version(version)
+        versions = EditVersionRepository(session)
+        version = await versions.get_open_edit_version(ids["work_order_id"])
+        await versions.touch_edit_version(version)
 
     async def save(
         session,

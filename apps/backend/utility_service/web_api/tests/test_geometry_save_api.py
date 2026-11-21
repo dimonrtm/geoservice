@@ -56,8 +56,9 @@ def api_context(
     )
     app = build_app(
         auth,
-        service,
         AsyncMock(),
+        AsyncMock(),
+        save_service=service,
     )
     return (
         TestClient(

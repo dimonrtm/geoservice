@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 
 from utility_service.use_cases.deps import (
     get_edit_version_service,
+    get_open_edit_version_service,
     get_work_order_service,
     get_edit_version_read_service,
 )
@@ -16,6 +17,7 @@ from utility_service.use_cases.schemas.work_order import AssignedWorkOrdersOut
 from utility_service.use_cases.schemas.edit_version.change_set import VersionChangeSetOut
 from utility_service.use_cases.schemas.edit_version.feature_baseline import FeatureBaselineOut
 from utility_service.use_cases.schemas.edit_version.version_map import EditVersionMapOut
+from utility_service.use_cases.services.open_edit_version import OpenEditVersionService
 from utility_service.use_cases.services.edit_version_service import EditVersionService
 from utility_service.use_cases.services.work_order_service import WorkOrderService
 from utility_service.use_cases.services.edit_version_read_service import EditVersionReadService
@@ -53,21 +55,20 @@ async def open_edit_version(
     work_order_id: UUID,
     response: Response,
     user: AuthUserDTO = Depends(require_editor),
-    edit_version_service: EditVersionService = Depends(get_edit_version_service),
+    edit_version_service: OpenEditVersionService = Depends(get_open_edit_version_service),
 ) -> OpenEditVersionOut:
     result = await edit_version_service.open_for_work_order(work_order_id, user.id)
     if not result.created:
         response.status_code = status.HTTP_200_OK
 
     edit_version = result.edit_version
-    status_value = getattr(edit_version.status, "value", edit_version.status)
     return OpenEditVersionOut(
         created=result.created,
         edit_version=EditVersionOut(
             id=edit_version.id,
             work_order_id=edit_version.work_order_id,
             owner_user_id=edit_version.owner_user_id,
-            status=status_value,
+            status=edit_version.status,
             base_network_revision=edit_version.base_network_revision,
             created_at=edit_version.created_at,
             last_opened_at=edit_version.last_opened_at,

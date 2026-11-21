@@ -1,5 +1,6 @@
 import json
 import uuid
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, func, insert, select, update
@@ -8,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utility_service.infrastructure.postgresql.feature_registry import get_layer_feature_model
 from utility_service.infrastructure.postgresql.models.layer import Layer
-from utility_service.use_cases.schemas.geojson.geojson import FeatureProperties
 
 
 class LayerRepository:
@@ -54,7 +54,7 @@ class LayerRepository:
         return res.scalars().one_or_none()
 
     async def create_feature(
-        self, layer: Layer, geometry: dict[str, object], properties: FeatureProperties
+        self, layer: Layer, geometry: dict[str, object], properties: dict[str, Any]
     ):
         geom_expr = self.get_geom_expr(geometry)
         model_type = get_layer_feature_model(layer)
@@ -74,7 +74,7 @@ class LayerRepository:
         layer: Layer,
         feature_id: UUID,
         geometry: dict[str, object] | None,
-        properties: FeatureProperties | None,
+        properties: dict[str, Any] | None,
         expected_version: int,
     ):
         if geometry:
