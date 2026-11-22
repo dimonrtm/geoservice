@@ -1,181 +1,67 @@
 # GeoService
 
-GeoService — экспериментальный MVP для работы с геоданными.
+GeoService — экспериментальное веб-приложение для редактирования геометрии инженерной сети по нарядам. Редактор открывает назначенный участок на карте, вносит правку в рабочую версию и может вернуться к ней после повторного входа. Демо использует синтетические данные условной организации.
 
-Сейчас проект умеет:
+## Локальный запуск
 
-- хранить геообъекты в PostGIS;
-- отдавать слои и объекты через FastAPI;
-- отображать данные на карте через Vue + MapLibre;
-- поддерживать базовое редактирование полигонов на клиенте.
+Для демо достаточно Docker с Compose v2. Запустите сервисы из корня репозитория.
 
-## Стек
-
-- Backend: Python, FastAPI, SQLAlchemy, Alembic, PostGIS
-- Frontend: Vue 3, TypeScript, Pinia, Vite, MapLibre
-- Infra: Docker Compose
-
-## Структура репозитория
-
-```text
-apps/
-  backend/
-    app/
-      alembic/
-      api/
-      core/
-      db/
-      domain/
-      models/
-      repositories/
-      schemas/
-      services/
-      tests/
-  frontend/
-    src/
-      api/
-      assets/
-      components/
-      composables/
-      config/
-      map/
-      parsing/
-      stores/
-docs/
-  project-description.md
-  requirements/
-    action-plan.md
-    requirements-compliance-audit.md
-    sprints/
-infra/
-scripts/
-```
-
-## Быстрый старт
-
-Основной локальный сценарий завязан на Docker Compose из `infra/`.
-
-Что нужно:
-
-- Python 3.12+
-- Node 20+
-- Docker Desktop / WSL2
-
-Полезные точки входа:
-
-- frontend scripts: [package.json](C:/Repositories/geoservice/apps/frontend/package.json)
-- infra compose: [docker-compose.yml](C:/Repositories/geoservice/infra/docker-compose.yml)
-- backend app entry: [main.py](C:/Repositories/geoservice/apps/backend/app/main.py)
-
-### Demo login через Docker Compose
-
-Локальный demo/dev запуск выполняется явно через demo env и demo compose layer:
-
-```bash
+```sh
 cd infra
-docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev up --build
+docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev up -d --build
 ```
 
-При штатном demo startup create-once seeds сначала создают отсутствующие данные,
-после чего `upgrade_demo_fixture` атомарно проверяет materialized-копии `L-003` в
-`NetworkFeature`, `DefaultStateFeature` и существующих `EditVersionFeature`.
-Fresh volume сразу получает трёхвершинную линию. На совместимом старом volume
-безопасные двухвершинные copies обновляются in place, а уже трёхвершинные
-geometry сохраняются. Unsafe или повреждённое состояние останавливает запуск API
-с rollback и требует явного решения пользователя.
+При запуске backend применяет миграции Alembic, подготавливает сеть и наряд, затем проверяет геометрию линии `L-003`. Когда сервисы готовы, откройте [приложение](http://localhost:5173). На порту 8000 доступны [состояние API](http://localhost:8000/health) и [Swagger UI](http://localhost:8000/docs).
 
-Перед первым запуском ветки с production-like migration baseline пересоздайте
-старый disposable Postgres volume. Старые demo/dev volumes с уже примененными
-Alembic revisions не являются поддерживаемым migration path:
+### Первая правка
 
-```bash
-cd infra
-docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml down -v
+1. Войдите как редактор, которому назначен наряд `WO-001` «Проверка участка фидера». Выберите наряд и нажмите **Начать** или **Продолжить**, если рабочая версия уже открывалась. [Данные для входа в демо](apps/backend/seeds/specs/seed_demo_user_specs.py)
+2. Выберите на карте линию `L-003` и немного сдвиньте её среднюю вершину в пределах области работ. **Отменить** снимает несохранённую правку.
+3. Нажмите **Сохранить**. При следующем открытии наряда карта покажет сохранённую геометрию рабочей версии. Чтобы вернуть исходную геометрию, выберите линию, нажмите **Сбросить** и подтвердите действие.
+
+Если связь прервалась после отправки, приложение использует запись команды в IndexedDB, чтобы восстановить её результат. Сервер распознаёт повтор той же команды по идентификатору.
+
+### Остановка и диагностика
+
+Если API не запустился, посмотрите журнал из каталога `infra/`.
+
+```sh
+docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev logs utility_service
 ```
 
-После этого запустите demo/dev compose снова. Команда удаляет локальные данные
-Postgres и предназначена только для disposable demo/dev БД. Для fixture upgrade
-это ручной fallback, а не обязательная часть обычного restart.
+Следующая команда останавливает демо и сохраняет данные до следующего запуска. Выполните её в том же каталоге.
 
-Если после смены demo env `utility_service` становится unhealthy, а в логах
-есть `password authentication failed for user "postgres"`, локальный Docker
-volume `infra_geo_pgdata` был создан с другим паролем. Для disposable demo DB
-пересоздайте его командой выше и затем повторите запуск.
-
-Demo credentials:
-
-- `alexey.editor@example.local` / `alexey-editor-password`
-- `bolat.editor@example.local` / `bolat-editor-password`
-- `marina.reviewer@example.local` / `marina-reviewer-password`
-
-`Editor` видит существующую основу карты и editor workspace. `Reviewer` видит
-отдельную страницу роли без editor workspace; reviewer queue будет добавлена
-в следующем спринте. Legacy credentials `viewer@example.com` удалены.
-
-### PostgreSQL/PostGIS integration-тесты
-
-Полный набор `RUN_DB_TESTS=1` нельзя запускать против demo-БД. Для локального
-прогона используйте отдельный disposable PostGIS:
-
-```bat
-infra\db-tests.cmd
+```sh
+docker compose --env-file demo.env -f docker-compose.yml -f docker-compose.demo.yml --profile dev down
 ```
 
-Команда требует только Docker Compose и не использует host Python. Она создаёт
-отдельный проект `geoservice-db-tests`, выполняет Alembic и весь каталог
-`tests/integration_tests` в БД `geo_test`, а затем удаляет test containers и
-`tmpfs`. `dev-up.cmd`, demo-контейнеры и volume `infra_geo_pgdata` не
-перезапускаются и не изменяются.
+При повторном запуске совместимая старая демо-БД получает трёхвершинную `L-003`. Если обновление линии небезопасно, оно откатывается и запуск API останавливается. Старый том, созданный до замены истории миграций, требует пересоздания. Если в журнале есть `password authentication failed`, проверьте, совпадает ли пароль в конфигурации с паролем, заданным при создании тома. Для одноразовой демо-БД, данные которой можно удалить, добавьте `-v` к команде `down` и повторите запуск. Это удалит и сохранённые правки.
 
-При `RUN_DB_TESTS=1` pytest требует отдельный `TEST_DATABASE_URL`. Отсутствующий,
-совпадающий с `DATABASE_URL` или не оканчивающийся на `_test` URL отклоняется до
-Alembic, collection и первого SQL-запроса. DB-тесты не создают и не
-восстанавливают `EditVersion` в demo-БД.
+## Код и конфигурация
 
-Проверка login flow:
+| Часть проекта | Где искать |
+| --- | --- |
+| Backend на Python 3.12 и FastAPI | [Точка входа API](apps/backend/utility_service/web_api/main.py), [сценарии приложения](apps/backend/utility_service/use_cases/), [доменные правила](apps/backend/utility_service/domain_services/) |
+| Хранение геометрии и миграции | [PostgreSQL/PostGIS, SQLAlchemy и Alembic](apps/backend/utility_service/infrastructure/postgresql/), [демо-данные](apps/backend/seeds/) |
+| Frontend на Vue 3, TypeScript и Pinia | [Интерфейс](apps/frontend/src/App.vue), [сценарии редактора](apps/frontend/src/editor/), [карта MapLibre](apps/frontend/src/map/), [команды Vite и тестов](apps/frontend/package.json) |
+| Инфраструктура | [Базовый Compose](infra/docker-compose.yml), [настройки демо](infra/docker-compose.demo.yml), [описание развёртывания](Code_wiki/deployment/docker_compose.md) |
 
-```bash
-curl -X POST http://localhost:8000/api/v1/auth/login -H "Content-Type: application/json" -d "{\"email\":\"alexey.editor@example.local\",\"password\":\"alexey-editor-password\"}"
-```
+Демо использует публичные настройки. Vite получает адрес API через `VITE_API_BASE_URL`. Войти через API можно запросом `POST /api/v1/auth/login` с полями `email` и `password`. Для проверки входа передайте полученный `access_token` в заголовке `Authorization: Bearer <access_token>` запроса `GET /api/v1/auth/me`. [Настройки демо](infra/demo.env)
 
-После получения `access_token` можно проверить сессию:
+Для базового Compose задайте собственные `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DATABASE_URL` и `JWT_SECRET`. Миграции в этой конфигурации выполняет отдельный сервис `migrate`. В профиле `prod` nginx отдаёт frontend и проксирует запросы `/api/v1/` на backend. Для cookie браузерной сессии включён флаг `Secure`. [Пример конфигурации](infra/.env.example)
 
-```bash
-curl http://localhost:8000/api/v1/auth/me -H "Authorization: Bearer <access_token>"
-```
+Рабочее пространство использует API нарядов `/api/v1/work-orders`. Прежний API слоёв `/api/v1/layers` по умолчанию отключён. Параметр `UTILITY_GEOMETRY_XY_RESOLUTION` задаёт шаг координатной сетки для новых рабочих версий (по умолчанию `0.0000001`), а `UTILITY_GEOMETRY_ROUNDING_MODE` — правило округления `ROUND_HALF_AWAY_FROM_ZERO`. [Настройки backend](apps/backend/utility_service/utils/settings.py)
 
-Повторный запуск backend не должен создавать дубликаты demo-пользователей:
-существующий `seed_demo_users.py` приводит записи к ожидаемому baseline по
-стабильному ID, роли, паролю и active status и не требует `dev-login` для
-локального demo-сценария.
+## Проверки
 
-## Конфигурация
-
-Backend-конфигурация централизована в [settings.py](C:/Repositories/geoservice/apps/backend/utility_service/utils/settings.py).
-
-Важно:
-
-- production-safe `infra/docker-compose.yml` требует `JWT_SECRET` и DB env через окружение или `infra/.env`;
-- `infra/demo.env` содержит public demo-only значения для локального сценария;
-- `UTILITY_GEOMETRY_XY_RESOLUTION` задаёт координатную сетку и по умолчанию равен `0.0000001`;
-- `UTILITY_GEOMETRY_ROUNDING_MODE` поддерживает `ROUND_HALF_AWAY_FROM_ZERO`;
-- `DEV_MODE` больше не включает `/api/v1/auth/dev-login`;
-- `VITE_API_BASE_URL` задаёт базовый URL API для frontend.
+- **Backend.** Из корня репозитория соберите тестовый образ командой `docker build --target dev -t geoservice-backend-tests apps/backend`, затем выполните `docker run --rm geoservice-backend-tests python -m pytest` для проверок без PostGIS.
+- **Интеграция с PostGIS.** В Windows из корня выполните `.\infra\db-tests.cmd`. Скрипт применяет миграции и запускает `tests/integration_tests` в отдельной БД `geo_test` в памяти, затем удаляет тестовые контейнеры. При ручном запуске с `RUN_DB_TESTS=1` нужен отдельный `TEST_DATABASE_URL` с именем БД на `_test`. [Тестовый Compose](infra/docker-compose.test.yml)
+- **Frontend.** В каталоге `apps/frontend/` выполните `npm ci`, затем `npm test`, `npm run lint`, `npm run typecheck` и `npm run build`. Для локального запуска подходит Node.js 20.19.x.
+- **Сквозной сценарий.** Браузерные проверки проходят сохранение и сброс через интерфейс, потерю ответа сервера и восстановление команды после перезапуска. [Запуск Playwright с отдельной БД](infra/m4/README.md)
 
 ## Документация
 
-В `docs/` сейчас лежат рабочие документы по анализу проекта и планированию:
-
-- [project-description.md](C:/Repositories/geoservice/docs/project-description.md)
-- [agent-memory](docs/agent-memory/README.md)
-- [project knowledge wiki](C:/Repositories/geoservice/index.md)
-- [knowledge pipeline runbook](C:/Repositories/geoservice/docs/knowledge-pipeline/README.md)
-- [action-plan.md](C:/Repositories/geoservice/docs/requirements/action-plan.md)
-- [requirements-compliance-audit.md](C:/Repositories/geoservice/docs/requirements/requirements-compliance-audit.md)
-- [Спецификации и результаты проверок Спринта 1](C:/Repositories/geoservice/docs/release_1/sprint_1/README.md)
-
-## Project Knowledge Wiki
-
-Knowledge wiki lives in `RAW_inputs/`, `Vision_wiki/`, `Code_wiki/`, `memory/`, and `Общие_принципы/`. Human-readable wiki content is written in Russian. Obsidian graph configuration is stored in `.obsidian/`.
-
-Use `/ingest repository-snapshot` to add already existing unchanged repository knowledge to `Code_wiki`. After the full implementation plan or a major repository task is complete, the agent should run `/ingest repository-change` before the final report. Pre-commit does not run or check repository-change ingest.
+- [Указатель знаний проекта](index.md) связывает [предметную область](Wiki/index.md), [DDD-модель](DDD_Wiki/index.md) и [техническую документацию](Code_wiki/index.md).
+- [Архитектура backend](Code_wiki/архитектура/backend.md) и [архитектура frontend](Code_wiki/архитектура/frontend.md) описывают устройство приложения.
+- [План Release 1](docs/release_1/README.md), [материалы Sprint 1](docs/release_1/sprint_1/README.md) и [приёмка Sprint 2](docs/sprint_2/README.md) описывают развитие рабочего сценария. [Материалы Release 2](docs/release_2/README.md) содержат проекты будущих изменений.
+- [Порядок работы с источниками и wiki](docs/knowledge-pipeline/README.md) описывает, как знания попадают в репозиторий. Правила для агентов собраны в [AGENTS.md](AGENTS.md).
