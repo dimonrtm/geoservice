@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-21
+updated: 2026-11-22
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -61,3 +61,10 @@ related: [Wiki/index]
 | Policy | Rule | Outcome | Confidence | Source |
 | --- | --- | --- | --- | --- |
 | [[Wiki/policies/work_order_target_after_asset_change]] | Выбор по исходной цели наряда и моменту определения объекта | Исполнение по установленному адресату, пересмотр или удержание с явной судьбой остатка | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |
+
+## Осмотр и внешние данные — 22.11.2026
+
+| Policy | Rule | Outcome | Confidence | Source |
+| --- | --- | --- | --- | --- |
+| [[Wiki/policies/inspection_work_policy]] | Проверяется ожидаемый результат наряда, обязательство перед каждым заявителем и правило календаря | Принятый отчёт по осмотру, явный остаток и объяснимый очередной срок | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-11]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-12]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-13]] |
+| [[Wiki/policies/external_inventory_delivery_policy]] | Проверяются охват замещения и соответствие версий справочника | Окончание утверждения поставщика, допустимая классификация либо удержание непригодной части поставки | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-16]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-17]] |

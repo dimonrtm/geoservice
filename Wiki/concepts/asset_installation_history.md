@@ -3,7 +3,7 @@ title: Экземпляр оборудования и история устан�
 type: concept
 status: active
 created: 2026-11-21
-updated: 2026-11-21
+updated: 2026-11-22
 source: RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers.md
 tags: [domain-knowledge, asset-lifecycle, simulated-organization]
 confidence: high
@@ -19,3 +19,7 @@ related: [Wiki/concepts/dataset_instance_and_record_identity, Wiki/policies/work
 После ремонта тот же экземпляр открывает следующий период при доказанной преемственности. При утраченной маркировке или противоречии допустимо зафиксировать присутствие аппарата с неустановленной идентичностью. Пустое место требует собственного подтверждения. Позднее уточнение позволяет восстановить состояние на дату и то, что было известно при прежнем решении.
 
 Основание — решение условной организации по DISC-2026-11-21-01. Уверенность относится к принятому правилу. [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]], [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-research]], [[Wiki/policies/work_order_target_after_asset_change]].
+
+## Прекращение использования и физическое присутствие
+
+Кабель, оставленный в грунте, исключают из перечня действующих с даты подтверждённого вывода. Для запросов о присутствии на территории остаются доступны прежняя идентичность, геометрия с известным качеством, источник и область. Физический учёт заканчивают на дату подтверждённого удаления только в установленных границах. Отсутствие на новой карте или финансовое списание не заменяет акта удаления. История остаётся доступной после завершения периода. Разбор карточек и временных находок — [[Wiki/concepts/asset_identity_resolution]]. [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-08]].

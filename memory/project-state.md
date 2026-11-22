@@ -3,7 +3,7 @@ title: Состояние Проекта GeoService
 type: state
 status: active
 created: 2026-05-30
-updated: 2026-11-21
+updated: 2026-11-22
 source: null
 tags: [project-state, geoservice]
 ---
@@ -12,11 +12,11 @@ tags: [project-state, geoservice]
 
 ## Живое состояние
 
-Последний `/sync-vision` — 2026-11-21 19:48 +05:00 (Asia/Qyzylorda).
+Последний `/sync-vision` — 2026-11-21 23:51 +05:00 (Asia/Qyzylorda).
 
 GeoService моделирует условную организацию через экспертную персону `expert_repson`. Доменные решения хранятся в Wiki и DDD_Wiki, их источники — в RAW и Vision, сведения о реализации — в Code_wiki. [Режим работы](../docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md).
 
-- Все 62 RAW обработаны. Последний `/ingest` от 21.11.2026 связал исследование по 102 документам и три ответа об активах с канонической моделью. В реестре открытых доменных вопросов нет. [[Vision_wiki/chats/2026-11-21-asset-lifecycle-research]], [[Vision_wiki/chats/2026-11-21-asset-lifecycle-answers]], [[../Wiki/_registry/questions]].
+- Все 64 RAW обработаны. Последний `/ingest` от 22.11.2026 включил исследование по 101 документу и 15 ответов. В реестре 61 вопрос со статусом `answered`, открытых нет. [[../RAW_inputs/index]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]].
 - Открыты 20 follow-up’ов. Канонических конфликтов в активном статусе нет. В Vision остаётся один активный конфликт о старом Release 1. [[../Vision_wiki/decisions/followups/index]], [[../Wiki/_registry/conflicts]], [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]].
 - Пять страниц помечены `stale`. Четыре технических описания перечислены в [[../Code_wiki/index#Свежие Repository-Change Знания]]. В [[../DDD_Wiki/context_map/geoservice_context_map]] устарел статус разграничения Reviewer/Publisher. Действующее решение — [[../Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
 - Wiki-lint от 21.11.2026 обнаружил 37 известных `missing_frontmatter` в исходных RAW Markdown. Расхождение между требованиями линтера и неизменяемостью источников отслеживает FU-2026-06-01-004.
@@ -27,6 +27,6 @@ GeoService моделирует условную организацию чере
 
 ## Следующее действие
 
-Для технической wiki нужен `/ingest repository-change` по FU-2026-11-21-001. Отдельная редакционная задача FU-2026-11-21-002 относится к карте контекстов. Новых RAW для обычного `/ingest` нет.
+Для четырёх технических страниц нужен `/ingest repository-change` по FU-2026-11-21-001. Актуализация карты контекстов ведётся отдельно в FU-2026-11-21-002. [[../Vision_wiki/decisions/followups/index]].
 
-Следующее доменное действие — `/discover` по соседнему процессу передачи ответственности за ведение данных без физической замены участка. Сначала проверить новизну по прежним решениям о полномочиях, передаче обязанностей и приёмке. Ответы об установках, происхождении участков и предмете наряда уже приняты. [[DDD_Wiki/use_cases/record_physical_asset_change]], [[../DDD_Wiki/model_health#Current Discovery Queue]].
+Следующее доменное действие — `/discover` по всей модели и её межконтекстным связям. При отборе свериться с 15 принятыми решениями от 22.11.2026 и прежними ответами о физических преобразованиях и зависимых нарядах. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]], [[../DDD_Wiki/model_health#Current Discovery Queue]].

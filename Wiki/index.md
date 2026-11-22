@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-21
+updated: 2026-11-22
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -12,7 +12,7 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-Все 62 RAW обработаны. Три последних ответа уточняют периоды установки оборудования, происхождение участков сети и предмет наряда. Открытых вопросов и активных канонических конфликтов нет. [[Wiki/concepts/asset_installation_history]], [[Wiki/concepts/linear_asset_lineage]], [[Wiki/policies/work_order_target_after_asset_change]], [[Wiki/_registry/questions]], [[Wiki/_registry/conflicts]].
+Все 64 RAW обработаны. Ответы от 22.11.2026 уточнили права на исторические поправки, тождество активов, самостоятельные осмотры, проверки и выдачу карт. В реестре нет открытых доменных вопросов или активных канонических конфликтов. [[Wiki/concepts/data_stewardship_period]], [[Wiki/policies/inspection_work_policy]], [[Wiki/policies/external_inventory_delivery_policy]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[Wiki/_registry/conflicts]].
 
 Для локальной revision 49 проверены metadata и fixture. Позиционная точность линии L-003 остаётся неподтверждённой. [Протокол проверки](../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Технические остатки и состояние документации ведутся в [[memory/project-state]]. Датированные сводки ниже отражают состояние на дату записи.
 

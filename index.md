@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-21
+updated: 2026-11-22
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -34,10 +34,13 @@ tags: [knowledge, index, geoservice]
 
 ## Свежие Изменения
 
-- 21.11.2026 — обработаны исследование по 102 документам и три ответа об учёте физических активов. Все 62 RAW учтены. Открытых доменных вопросов нет. [[Vision_wiki/chats/2026-11-21-asset-lifecycle-research]], [[Vision_wiki/chats/2026-11-21-asset-lifecycle-answers]], [[DDD_Wiki/use_cases/record_physical_asset_change]].
+- 22.11.2026 — исследование охватило 101 документ и дало ответы на 15 вопросов о работе редактора сети. Приняты правила ведения записей после передачи участка, приёмки осмотра без правки, проверки одобрения и исправления выпущенной карты. [[Vision_wiki/chats/2026-11-22-utility-editor-governance-research]], [[Vision_wiki/chats/2026-11-22-utility-editor-governance-answers]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
 
-- 2026-11-21 — после синхронизации 10 ноября обработаны два RAW о зависимых нарядах. Они добавили понятие, политику, спецификацию, сценарий и два конспекта в Vision. Новых нод типов decision, entity и solution за этот период нет. За 15–21 ноября новых RAW и доменных нод нет. Все 60 источников учтены. [[RAW_inputs/index]], [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]].
+- За 15–21 ноября добавлены и обработаны два RAW об учёте физических активов. Исследование по 102 документам и три ответа условной организации вошли в модель как два понятия, одна политика и один сценарий. В Vision добавлены два конспекта. Новых нод типов `decision`, `entity` и `solution` за неделю нет. Всего обработаны 62 источника. [[RAW_inputs/index]], [[Vision_wiki/chats/2026-11-21-asset-lifecycle-research]], [[Vision_wiki/chats/2026-11-21-asset-lifecycle-answers]], [[DDD_Wiki/use_cases/record_physical_asset_change]].
+- 21.11.2026 — по обновлённой методике `/discover` отобраны 15 вопросов из 150 по всей модели. В числе приоритетов — передача ответственности за данные, две карточки одного актива и срок действия одобрения Reviewer. [[docs/knowledge-pipeline/README]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]].
+
 - Разделение состояния редактора отражено в [[Code_wiki/index]]. Четыре технические страницы отстают от кода открытия версии, проверки геометрии, доступа к сессии и восстановления команд. В карте контекстов сохранился прежний статус границы Reviewer/Publisher. Обе задачи внесены в [[Vision_wiki/decisions/followups/index]].
+- На момент сверки 21.11.2026 в 19:48 в журнале было 60 обработанных RAW. Два источника о зависимых нарядах, учтённые после синхронизации 10 ноября, добавили понятие, политику, спецификацию, сценарий и два конспекта в Vision. [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]].
 - 2026-11-10: исследование зависимых нарядов и ответы обработаны `/ingest`: 75 документов, 25 новых нормализованных URL; 60 RAW обработаны, открытых вопросов 0, follow-up 18. [[Vision_wiki/chats/2026-11-10-dependencies-research]], [[Vision_wiki/chats/2026-11-10-dependencies-answers]]. Реестр, Current Discovery Queue и live state согласованы; runtime не проверялся.
 
 - 2026-11-10: `/discover` выделил 3 открытых вопроса о зависимых нарядах: условие выполнения зависимости, её изменение и взаимное ожидание. [[Wiki/_registry/questions]], Current Discovery Queue в [[DDD_Wiki/model_health]] и следующий шаг [[memory/project-state]] согласованы. Постановка до исследования; теперь все три answered по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]]; правила отзыва/коррекции и first-save не переоткрываются.
@@ -177,7 +180,7 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
-- Открытых доменных вопросов нет. Правила физической замены, разделения и слияния линии и адресации уже выданного наряда приняты. [[Wiki/_registry/questions#Идентичность активов после физических работ]], [[DDD_Wiki/model_health#Current Discovery Queue]].
+- Все 15 вопросов обзора получили ответы условной организации. Текущая очередь и ссылки на ответы — [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[DDD_Wiki/model_health#Current Discovery Queue]].
 - FU-2026-10-11-001 закрыт. Для локальной revision 49 проверены metadata и fixture. Точность L-003 по-прежнему требует позиционного доказательства. [Протокол проверки](docs/verification/2026-11-08-demo-dataset-runtime-check.md).
 - Сохранение одной линии, чтение результата и восстановление команды реализованы. Ближайшая техническая зависимость для review — проверка позиционных доказательств и готовности к передаче пакета. Открытые работы ведутся в FU-2026-10-13-004. [Матрица реализации](docs/verification/2026-11-09-model-health-code-reconciliation.md).
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.

@@ -3,7 +3,7 @@ title: Concepts Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-21
+updated: 2026-11-22
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, concept]
 confidence: n/a
@@ -48,3 +48,11 @@ related: [Wiki/index]
 | --- | --- | --- | --- |
 | [[Wiki/concepts/asset_installation_history]] | Подтверждённые периоды установки оборудования на позицию и границы знания о них | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |
 | [[Wiki/concepts/linear_asset_lineage]] | Предшественники и результаты изменения обслуживаемых участков с указанием охвата каждого соответствия | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |
+
+## Учёт сведений и выпуски карты — 22.11.2026
+
+| Concept | Meaning | Confidence | Source |
+| --- | --- | --- | --- |
+| [[Wiki/concepts/data_stewardship_period]] | Полномочие стороны вести свойство за определённый период и регистрировать историческую поправку | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-04]] |
+| [[Wiki/concepts/asset_identity_resolution]] | Доказанное тождество карточек и временное дело для идентификации находки | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-06]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-07]] |
+| [[Wiki/concepts/dataset_delivery_edition]] | Дата среза, связь редакций одного выпуска и история выдачи адресату | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-18]] |

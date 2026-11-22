@@ -3,7 +3,7 @@ title: Коррекция опубликованного результата
 type: policy
 status: active
 created: 2026-11-09
-updated: 2026-11-09
+updated: 2026-11-22
 source: RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md
 tags: [domain-knowledge, publication, correction, simulated-organization]
 confidence: high
@@ -36,3 +36,7 @@ related: [Wiki/concepts/published_result_correction_case, Wiki/specifications/pu
 ## Exceptions
 
 Закрытие исходного наряда не разрешает неограниченную запись в его историю. Неизвестные внешние копии не объявляются отозванными. Simulated post сохраняет метку симуляции. Никаких новых guards Save, aggregate, auth roles или реализованного publisher этим правилом не создаётся.
+
+## Исправление датированной карты
+
+После установления существенной ошибки на дату среза выпускают новую редакцию того же выпуска и связывают её с прежней. Физическое изменение после даты среза относится к следующему выпуску. Известных получателей ошибочной редакции предупреждают до готовности замены. Для каждого видны первоначальная выдача, результат предупреждения и судьба исправленного экземпляра. [[Wiki/concepts/dataset_delivery_edition]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-18]].

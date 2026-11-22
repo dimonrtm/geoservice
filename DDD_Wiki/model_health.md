@@ -3,7 +3,7 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-11-21
+updated: 2026-11-22
 source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md; docs/verification/2026-11-09-model-health-code-reconciliation.md"
 tags: [domain-knowledge, ddd, health]
 confidence: high
@@ -12,11 +12,11 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 # Model Health
 
-## Состояние модели на 21.11.2026
+## Состояние модели на 22.11.2026
 
 Сверка реализации от 09.11.2026 — [матрица и проверки](../docs/verification/2026-11-09-model-health-code-reconciliation.md). First-save, публичные Save/Revert/readback и S2-X01 recovery реализованы; 105 выбранных frontend-тестов прошли. Метка stale снята как признак устранённого отставания этого документа. Backend/PostGIS/M4 и БД повторно не проверялись; прежние протоколы сохраняют свою область.
 
-В [[Wiki/_registry/questions]] открытых вопросов нет. Три решения об учёте активов и предмете наряда приняты условной организацией по [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]]. Активных канонических конфликтов нет, в Vision остаётся один конфликт о старом Release 1. В [[Vision_wiki/decisions/followups/index]] открыты 20 пунктов. FU-2026-11-21-001 охватывает документацию реализации, FU-2026-11-21-002 — устаревший статус в карте контекстов. Сверка first-save по FU-2026-10-11-001 завершена. Реализация остальных принятых правил, включая координацию зависимых нарядов, остаётся в FU-2026-10-13-004. Датированные сводки ниже исторические.
+В [[Wiki/_registry/questions]] открытых вопросов нет. Все 15 вопросов обзора получили ответы по [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]]. Путь от обследования до выпуска описан в [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. Три решения об учёте активов и предмете наряда приняты условной организацией по [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]]. Активных канонических конфликтов нет, в Vision остаётся один конфликт о старом Release 1. В [[Vision_wiki/decisions/followups/index]] открыты 20 пунктов. FU-2026-11-21-001 охватывает документацию реализации, FU-2026-11-21-002 — устаревший статус в карте контекстов. Сверка first-save по FU-2026-10-11-001 завершена. Реализация остальных принятых правил, включая координацию зависимых нарядов, остаётся в FU-2026-10-13-004. Датированные сводки ниже исторические.
 
 ## История discovery до сверки кода — 2026-11-09
 
@@ -109,9 +109,11 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 
 ## Current Discovery Queue
 
-На 21.11.2026 открытых доменных вопросов нет. DISC-2026-11-21-01/02/03 отвечены. Приняты правила периодов установки экземпляра, происхождения обслуживаемых участков и определения предмета открытого наряда. Основания — [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] и [[DDD_Wiki/use_cases/record_physical_asset_change]]. Вопросы о взаимозависимых нарядах закрыты ранее по [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]].
+На 22.11.2026 открытых доменных вопросов нет. DISC-2026-11-21-04…18 переведены в `answered`. Для каждого решения сохранены основание, рассмотренные альтернативы и случай, при котором вывод удерживают. [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]].
 
-Для следующего `/discover` кандидат — передача ответственности за ведение данных о действующем участке между организациями при сохранении физического актива. Сначала сверить, осталась ли самостоятельная развилка после принятых правил полномочий по свойствам, передачи остатка наряда и принятия результатов. Это кандидат исследования. Вопросы о возврате аппарата, разделении линии и адресате наряда снимаются с активной очереди.
+В следующем `/discover` провести обзор всей модели. Проверять новизну по решениям о владельце сведений и идентичности, о приёмке осмотров, о полномочиях Reviewer и о выпусках. Граница first-save, наличие реализации и результаты проверок относятся к технической очереди. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
+
+DISC-2026-11-21-01/02/03 отвечены. Приняты правила периодов установки экземпляра, происхождения обслуживаемых участков и определения предмета открытого наряда. [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]], [[DDD_Wiki/use_cases/record_physical_asset_change]]. Ответы о взаимозависимых нарядах — [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]].
 
 Сверка кода по FU-2026-11-21-001 и редакционная задача по карте контекстов FU-2026-11-21-002 ведутся отдельно. Инварианты текущего first-save — [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]].
 
