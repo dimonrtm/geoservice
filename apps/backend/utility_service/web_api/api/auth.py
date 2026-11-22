@@ -12,11 +12,11 @@ from fastapi import APIRouter, Cookie, Depends, Header, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import jwt
 
+from utility_service.realtime_dependencies import get_websocket_connection_manager
 from utility_service.use_cases.deps import (
     get_auth_service,
     get_auth_session_service,
     get_auth_session_access_service,
-    get_websocket_connection_manager,
 )
 from utility_service.use_cases.dtos import AuthUserDTO, AuthenticatedSession
 from utility_service.use_cases.domain.exceptions.auth_api_error import AuthApiError
@@ -32,9 +32,7 @@ from utility_service.use_cases.schemas.auth.browser_session_out import (
 from utility_service.use_cases.services.auth_session_access_service import AuthSessionAccessService
 from utility_service.use_cases.services.auth_session_service import AuthSessionService
 from utility_service.use_cases.services.auth_service import AuthService
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
 from utility_service.utils.settings import settings
 
 

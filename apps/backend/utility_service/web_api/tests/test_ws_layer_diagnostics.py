@@ -5,17 +5,13 @@ from fastapi import WebSocketDisconnect
 from uuid import uuid4
 
 from utility_service.web_api.api.ws_layers import subscribe_to_layer_updates
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
-from utility_service.use_cases.tests.test_realtime_connection_manager import (
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
+from utility_service.web_api.tests.realtime_support import (
+    ControlledSocket,
     active_session,
     build_user_context,
-)
-from utility_service.use_cases.tests.test_realtime_delivery_diagnostics import (
-    ControlledSocket,
-    publish_change,
     delivery_records,
+    publish_change,
 )
 
 

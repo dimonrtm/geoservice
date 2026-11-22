@@ -27,10 +27,8 @@ from utility_service.use_cases.deps import (
 from utility_service.use_cases.domain.exceptions.websocket_ticket_error import (
     WebSocketTicketError,
 )
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
-from utility_service.use_cases.tests.test_realtime_connection_manager import (
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
+from utility_service.web_api.tests.realtime_support import (
     DummyWebSocket,
 )
 from utility_service.web_api.api.auth import create_access_token

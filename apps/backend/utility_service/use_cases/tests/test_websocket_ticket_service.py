@@ -11,6 +11,7 @@ from utility_service.use_cases.domain.exceptions.websocket_ticket_error import (
     WebSocketTicketError,
 )
 from utility_service.use_cases.dtos import AuthRole, AuthUserDTO
+from utility_service.use_cases.dtos.websocket_user_context import WebSocketUserContext
 from utility_service.use_cases.services.websocket_ticket_service import (
     WebSocketTicketService,
     hash_websocket_ticket,
@@ -210,10 +211,12 @@ def test_consume_ticket_returns_user_context_once() -> None:
 
     context = asyncio.run(service.consume_ticket(issued.ticket, layer.id))
 
-    assert context.session_id == _repository.created[0].browser_session_id
-    assert context.user_id == orm_user.id
-    assert context.email == orm_user.email
-    assert context.role == "editor"
+    assert context == WebSocketUserContext(
+        user_id=orm_user.id,
+        email=orm_user.email,
+        role="editor",
+        session_id=_repository.created[0].browser_session_id,
+    )
     assert service.session.begin_calls == 2
     assert service.session.completed_begin_calls == 2
     assert service.user_repository.get_by_id_in_transaction == [False]

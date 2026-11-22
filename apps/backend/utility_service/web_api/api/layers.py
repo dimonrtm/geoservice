@@ -17,7 +17,7 @@ from utility_service.use_cases.schemas.feature.patch_feature_succes_response imp
 from utility_service.use_cases.schemas.feature.delete_feature_request import DeleteFeatureRequest
 from utility_service.use_cases.schemas.feature.delete_feature_response import DeleteFeatureResponse
 from utility_service.use_cases.schemas.layer.layer_list_out import LayerListOut
-from utility_service.use_cases.deps import get_feature_service
+from utility_service.realtime_dependencies import get_feature_service
 from utility_service.use_cases.deps import get_layer_service
 from utility_service.use_cases.services.feature_service import FeatureService
 from utility_service.use_cases.services.layer_service import LayerService

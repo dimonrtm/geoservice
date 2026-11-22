@@ -29,10 +29,8 @@ from utility_service.web_api.api.ws_layers import ws_layers_router
 from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-    WebSocketUserContext,
-)
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
+from utility_service.use_cases.dtos.websocket_user_context import WebSocketUserContext
 
 
 async def active_session(session_id):

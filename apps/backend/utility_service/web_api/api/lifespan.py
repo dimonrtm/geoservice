@@ -11,9 +11,7 @@ from utility_service.use_cases.deps import (
     close_runtime_resources,
     get_realtime_session_checker,
 )
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
 
 
 @asynccontextmanager

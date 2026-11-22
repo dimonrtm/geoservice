@@ -8,7 +8,7 @@ from utility_service.use_cases.domain.exceptions.websocket_ticket_error import (
     INVALID_WEBSOCKET_TICKET_MESSAGE,
     WebSocketTicketError,
 )
-from utility_service.use_cases.services.realtime_connection_manager import WebSocketUserContext
+from utility_service.use_cases.dtos.websocket_user_context import WebSocketUserContext
 from utility_service.use_cases.services.websocket_ticket_service import WebSocketTicketService
 
 

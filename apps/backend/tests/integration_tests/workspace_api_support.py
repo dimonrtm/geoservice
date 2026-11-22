@@ -7,9 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from utility_service.infrastructure.postgresql.session import get_session
 from utility_service.infrastructure.postgresql.repositories.user_repository import UserRepository
 from utility_service.use_cases.deps import get_auth_session_service, get_realtime_session_checker
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
 from utility_service.use_cases.mappers import to_auth_user_dto
 from utility_service.web_api.api.auth import auth_router, create_access_token
 from utility_service.web_api.api.error_handling.exception_handlers import install_exception_handlers

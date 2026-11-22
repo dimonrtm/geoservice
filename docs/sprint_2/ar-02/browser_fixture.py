@@ -22,7 +22,7 @@ from utility_service.infrastructure.postgresql.repositories.user_repository impo
 )
 from utility_service.infrastructure.postgresql.session import engine
 from utility_service.use_cases.deps import get_realtime_session_checker
-from utility_service.use_cases.services.realtime_connection_manager import (
+from utility_service.web_api.realtime.realtime_connection_manager import (
     WebSocketConnectionManager,
 )
 from utility_service.utils.passwords import hash_password

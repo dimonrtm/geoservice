@@ -20,7 +20,7 @@ from utility_service.use_cases.domain.exceptions.websocket_ticket_error import (
 )
 from utility_service.use_cases.dtos import AuthUserDTO
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
-from utility_service.use_cases.services.realtime_connection_manager import WebSocketUserContext
+from utility_service.use_cases.dtos.websocket_user_context import WebSocketUserContext
 from utility_service.utils.settings import settings
 
 

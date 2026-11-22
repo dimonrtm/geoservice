@@ -24,10 +24,8 @@ from utility_service.web_api.api.error_handling.exception_handlers import instal
 from utility_service.web_api.middleware.correlation_id import CorrelationIdMiddleware
 from utility_service.web_api.tests.auth_user_factory import auth_user
 from utility_service.use_cases.tests.test_auth_session_access_service import access_fixture, signed
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
-from utility_service.use_cases.tests.test_realtime_connection_manager import active_session
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
+from utility_service.web_api.tests.realtime_support import active_session
 
 
 def build_auth_app(

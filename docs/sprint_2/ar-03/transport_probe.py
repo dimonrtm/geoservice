@@ -22,8 +22,10 @@ sys.path.insert(0, "/app")
 def build_probe_app():
     from fastapi import FastAPI, WebSocket
     from utility_service.use_cases.dtos.realtime_diagnostics import RealtimeEventContext
-    from utility_service.use_cases.services.realtime_connection_manager import (
+    from utility_service.web_api.realtime.realtime_connection_manager import (
         WebSocketConnectionManager,
+    )
+    from utility_service.use_cases.dtos.websocket_user_context import (
         WebSocketUserContext,
     )
     from utility_service.web_api.api.ws_layers import subscribe_to_layer_updates

@@ -246,3 +246,17 @@ def test_open_has_independent_imports():
         cwd=BACKEND_ROOT,
         check=True,
     )
+
+
+def test_feature_realtime_publisher_imports_without_websocket_transport():
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys\n"
+            "sys.modules.update(dict.fromkeys(('fastapi', 'starlette', 'utility_service.web_api')))\n"
+            "from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher",
+        ],
+        cwd=BACKEND_ROOT,
+        check=True,
+    )

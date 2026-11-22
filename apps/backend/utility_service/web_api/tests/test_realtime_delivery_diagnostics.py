@@ -4,53 +4,17 @@ from uuid import uuid4
 
 import pytest
 
-from utility_service.use_cases.dtos.realtime_diagnostics import (
-    RealtimeEventContext,
-    RealtimeFailureReason,
-)
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
-from utility_service.use_cases.tests.test_realtime_connection_manager import (
+from utility_service.use_cases.dtos.realtime_diagnostics import RealtimeFailureReason
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
+from utility_service.web_api.tests.realtime_support import (
+    ControlledSocket,
     DummyWebSocket,
+    delivery_records,
+    publish_change,
     active_session,
     build_user_context,
 )
 from utility_service.use_cases.tests.test_realtime_publication_diagnostics import diagnostic_records
-
-
-class ControlledSocket(DummyWebSocket):
-    def __init__(self, *, fail=False):
-        super().__init__()
-        self.entered = asyncio.Event()
-        self.release = asyncio.Event()
-        self.fail = fail
-
-    async def send_json(self, payload):
-        if payload["type"] != "connected":
-            self.entered.set()
-            await self.release.wait()
-            if self.fail:
-                raise OSError("SECRET")
-        await super().send_json(payload)
-
-
-def publish_change(manager, layer, number, padding=""):
-    context = RealtimeEventContext(f"evt_{number}", "feature_updated", layer, uuid4(), number)
-    manager.publish_event(
-        context,
-        lambda: {
-            "type": "feature_updated",
-            "eventId": context.event_id,
-            "padding": padding,
-        },
-    )
-
-
-def delivery_records(caplog):
-    return [
-        item for item in diagnostic_records(caplog) if item["event"] == "realtime_delivery_failed"
-    ]
 
 
 @pytest.mark.parametrize(

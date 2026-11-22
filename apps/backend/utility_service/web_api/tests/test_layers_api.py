@@ -9,9 +9,9 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from utility_service.realtime_dependencies import get_feature_service
 from utility_service.use_cases.deps import (
     get_auth_session_access_service,
-    get_feature_service,
     get_session,
     get_layer_service,
 )

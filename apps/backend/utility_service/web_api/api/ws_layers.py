@@ -12,10 +12,10 @@ from fastapi import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from utility_service.realtime_dependencies import get_websocket_connection_manager
 from utility_service.use_cases.deps import (
     get_layer_service,
     get_session_factory,
-    get_websocket_connection_manager,
     get_websocket_ticket_service,
 )
 from utility_service.use_cases.dtos import AuthUserDTO, AuthenticatedSession
@@ -23,10 +23,8 @@ from utility_service.use_cases.dtos.realtime_diagnostics import RealtimeFailureR
 from utility_service.web_api.api.auth import get_auth_context, require_legacy_gis_editor
 from utility_service.utils.websocket_ticket_auth import authenticate_websocket_ticket
 from utility_service.use_cases.schemas.realtime import WebSocketTicketOut
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-    WebSocketUserContext,
-)
+from utility_service.web_api.realtime.realtime_connection_manager import WebSocketConnectionManager
+from utility_service.use_cases.dtos.websocket_user_context import WebSocketUserContext
 from utility_service.use_cases.services.websocket_ticket_service import (
     WebSocketTicketService,
 )

@@ -15,15 +15,8 @@ from utility_service.use_cases.dtos.realtime_diagnostics import (
     RealtimeEventContext,
     RealtimeFailureReason,
 )
+from utility_service.use_cases.dtos.websocket_user_context import WebSocketUserContext
 from utility_service.utils.realtime_logging import log_realtime_failure
-
-
-@dataclass(frozen=True)
-class WebSocketUserContext:
-    user_id: UUID
-    email: str
-    role: str
-    session_id: UUID
 
 
 SessionActivityChecker = Callable[[UUID], Awaitable[bool]]

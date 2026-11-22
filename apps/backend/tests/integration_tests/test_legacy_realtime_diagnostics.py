@@ -12,8 +12,8 @@ from tests.integration_tests.test_legacy_patch_properties import (
 )
 from tests.integration_tests.workspace_api_support import build_workspace_api
 from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
-from utility_service.use_cases.services.realtime_connection_manager import WebSocketUserContext
-from utility_service.use_cases.tests.test_realtime_connection_manager import DummyWebSocket
+from utility_service.use_cases.dtos.websocket_user_context import WebSocketUserContext
+from utility_service.web_api.tests.realtime_support import DummyWebSocket
 from utility_service.use_cases.tests.test_realtime_publication_diagnostics import diagnostic_records
 from utility_service.utils.settings import settings
 from utility_service.web_api.api.auth import create_access_token

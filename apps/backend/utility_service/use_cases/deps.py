@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator
+from collections.abc import Awaitable, Callable
 from uuid import UUID
 
-from fastapi import Depends, Request
-from starlette.requests import HTTPConnection
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from utility_service.infrastructure.postgresql.repositories.edit_version_repository import (
     EditVersionRepository,
@@ -19,10 +18,6 @@ from utility_service.infrastructure.postgresql.repositories.browser_auth_session
     BrowserAuthSessionRepository,
 )
 from utility_service.infrastructure.postgresql.repositories.layer_repository import LayerRepository
-from utility_service.infrastructure.postgresql.feature_registry import UnknownStorageTableError
-from utility_service.use_cases.domain.exceptions.business_validation_exception import (
-    BusinessValidationException,
-)
 from utility_service.infrastructure.postgresql.repositories.default_state_repository import (
     DefaultStateRepository,
 )
@@ -45,13 +40,7 @@ from utility_service.infrastructure.postgresql.open_edit_version import (
 )
 from utility_service.use_cases.services.open_edit_version import OpenEditVersionService
 from utility_service.use_cases.services.edit_version_service import EditVersionService
-from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
-from utility_service.use_cases.services.feature_service import FeatureService
 from utility_service.use_cases.services.layer_service import LayerService
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-    SessionActivityChecker,
-)
 from utility_service.use_cases.services.utility_network_service import UtilityNetworkService
 from utility_service.use_cases.services.websocket_ticket_service import WebSocketTicketService
 from utility_service.use_cases.services.work_order_service import WorkOrderService
@@ -82,22 +71,6 @@ def get_auth_session_service(
         UserRepository(session),
         BrowserAuthSessionRepository(session),
     )
-
-
-def get_feature_realtime_publisher(request: Request) -> FeatureRealtimePublisher:
-    connection_manager = request.app.state.websocket_connection_manager
-    return FeatureRealtimePublisher(connection_manager)
-
-
-async def get_feature_service(
-    session: AsyncSession = Depends(get_session),
-    realtime_publisher: FeatureRealtimePublisher = Depends(get_feature_realtime_publisher),
-) -> AsyncIterator[FeatureService]:
-    service = FeatureService(session, LayerRepository(session), realtime_publisher)
-    try:
-        yield service
-    except UnknownStorageTableError as error:
-        raise BusinessValidationException(str(error)) from error
 
 
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
@@ -169,16 +142,14 @@ def get_edit_version_read_service(
     )
 
 
-def get_realtime_session_checker(session_factory=SessionFactory) -> SessionActivityChecker:
+def get_realtime_session_checker(
+    session_factory=SessionFactory,
+) -> Callable[[UUID], Awaitable[bool]]:
     async def is_session_active(session_id: UUID) -> bool:
         async with session_factory() as session:
             return await get_auth_session_access_service(session).is_session_active(session_id)
 
     return is_session_active
-
-
-def get_websocket_connection_manager(connection: HTTPConnection) -> WebSocketConnectionManager:
-    return connection.app.state.websocket_connection_manager
 
 
 async def close_runtime_resources() -> None:

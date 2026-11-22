@@ -1,19 +1,11 @@
 import asyncio
-from datetime import datetime
 from uuid import uuid4
 
+import pytest
+
+from utility_service.use_cases.dtos.realtime_diagnostics import RealtimeEventContext
 from utility_service.use_cases.schemas.feature.feature_out import FeatureOut
-from utility_service.use_cases.services.feature_realtime_publisher import (
-    FeatureRealtimePublisher,
-)
-from utility_service.use_cases.services.realtime_connection_manager import (
-    WebSocketConnectionManager,
-)
-from utility_service.use_cases.tests.test_realtime_connection_manager import (
-    DummyWebSocket,
-    active_session,
-    build_user_context,
-)
+from utility_service.use_cases.services.feature_realtime_publisher import FeatureRealtimePublisher
 
 
 POLYGON_GEOMETRY = {
@@ -31,62 +23,32 @@ def build_feature() -> FeatureOut:
     )
 
 
-def assert_common_event_fields(payload: dict[str, object], layer_id) -> None:
-    assert payload["layerId"] == str(layer_id)
-    assert isinstance(payload["eventId"], str)
-    assert str(payload["eventId"]).startswith("evt_")
-    assert isinstance(payload["occurredAt"], str)
-    assert str(payload["occurredAt"]).endswith("Z")
-    datetime.fromisoformat(str(payload["occurredAt"]).replace("Z", "+00:00"))
-
-
-async def capture_publication(layer_id, operation):
-    manager = WebSocketConnectionManager(active_session)
-    socket = DummyWebSocket()
-    await manager.connect(layer_id, socket, build_user_context())
-    await socket.next_event()
-    try:
-        await operation(FeatureRealtimePublisher(manager))
-        return await socket.next_event()
-    finally:
-        await manager.shutdown()
-
-
-def test_publish_feature_created_sends_expected_payload() -> None:
-    layer_id = uuid4()
+@pytest.mark.parametrize("event_type", ["feature_created", "feature_updated", "feature_deleted"])
+@pytest.mark.parametrize("supply_context", [False, True])
+def test_publishes_committed_change(event_type, supply_context):
     feature = build_feature()
-    payload = asyncio.run(
-        capture_publication(
-            layer_id, lambda publisher: publisher.publish_feature_created(layer_id, feature)
-        )
+    layer = uuid4()
+    context = (
+        RealtimeEventContext("evt_known", event_type, layer, feature.id, feature.version)
+        if supply_context
+        else None
     )
-    assert payload["type"] == "feature_created"
-    assert payload["feature"] == feature.model_dump(mode="json")
-    assert_common_event_fields(payload, layer_id)
-
-
-def test_publish_feature_updated_sends_expected_payload() -> None:
-    layer_id = uuid4()
-    feature = build_feature()
-    payload = asyncio.run(
-        capture_publication(
-            layer_id, lambda publisher: publisher.publish_feature_updated(layer_id, feature)
+    changes = []
+    publisher = FeatureRealtimePublisher(lambda ctx, snapshot: changes.append((ctx, snapshot)))
+    if event_type == "feature_created":
+        operation = publisher.publish_feature_created(layer, feature, context=context)
+    elif event_type == "feature_updated":
+        operation = publisher.publish_feature_updated(layer, feature, context=context)
+    else:
+        operation = publisher.publish_feature_deleted(
+            layer, feature.id, feature.version, context=context
         )
+    asyncio.run(operation)
+    [(published, snapshot)] = changes
+    assert published.event_id.startswith("evt_")
+    assert published == RealtimeEventContext(
+        published.event_id, event_type, layer, feature.id, feature.version
     )
-    assert payload["type"] == "feature_updated"
-    assert payload["feature"] == feature.model_dump(mode="json")
-    assert_common_event_fields(payload, layer_id)
-
-
-def test_publish_feature_deleted_sends_expected_payload() -> None:
-    layer_id = uuid4()
-    feature_id = uuid4()
-    payload = asyncio.run(
-        capture_publication(
-            layer_id, lambda publisher: publisher.publish_feature_deleted(layer_id, feature_id, 3)
-        )
-    )
-    assert payload["type"] == "feature_deleted"
-    assert payload["deletedVersion"] == 3
-    assert payload["featureId"] == str(feature_id)
-    assert_common_event_fields(payload, layer_id)
+    if supply_context:
+        assert published is context
+    assert snapshot is (None if event_type == "feature_deleted" else feature)
