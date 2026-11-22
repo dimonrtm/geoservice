@@ -4,7 +4,7 @@ type: use-case
 status: active
 created: 2026-11-22
 updated: 2026-11-22
-source: RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [domain-knowledge, ddd, utility-gis, simulated-organization]
 confidence: high
 related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/review_post, DDD_Wiki/bounded_contexts/audit]
@@ -23,6 +23,12 @@ related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/w
 | Довести результат до получателей | Ответственный за выпуск, Audit | Установить, что означают пропуски и коды поставщика. При ошибке выпущенной карты связать исходную и исправленную редакции с адресатами, временем выдачи и исходом уведомления. Аудит сохраняет основания решений. [[Wiki/policies/external_inventory_delivery_policy]], [[Wiki/concepts/dataset_delivery_edition]]. |
 
 **Пример завершения.** Два обращения относятся к одному месту. Осмотр подтвердил сведения карты, отчёт принят, первый заявитель получил ответ, а для второго доставка не состоялась. Наряд на осмотр завершён. Вторая обязанность по ответу остаётся открытой. Создания пустого пакета публикации для такого результата не требуется.
+
+## Если осмотр состоит из нескольких проходов
+
+Исполнитель сдаёт отдельные записи проходов с идентификаторами обследования и актива. Редактор сверяет привязку каждого файла, систему отсчёта и фактическую видимость требуемого свойства. Владелец наряда принимает только доказанный охват и закрепляет остаток за текущим или согласованным последующим заданием. Например, два пересекающихся интервала длиной 60 и 35 м с общими 5 м дают 90 м обследования одного свойства. Внешний акт с замечанием хранится вместе с версией применимых требований и самой незакрытой обязанностью.
+
+Если целью была актуализация геометрии, доказанное расхождение передают в [[DDD_Wiki/use_cases/utility_editor_workflow]]. Результат прохода по графу в пакете review и результаты физического осмотра имеют свои основания и области. [[Wiki/concepts/field_observation_acceptance]], [[Wiki/policies/inspection_work_policy]], [[Wiki/concepts/network_representation_and_operational_state]], [[Wiki/policies/external_inventory_delivery_policy]], [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]].
 
 **Граница применимости.** Геометрический Save защищают [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]]. Осмотр без правки не служит обходом проверки готовности изменённой линии к review. Внешняя дельта не изменяет локальный актив автоматически. Действующие технические проверки и очередь разработки — [[DDD_Wiki/model_health#Current Sprint Planning Queue]].
 

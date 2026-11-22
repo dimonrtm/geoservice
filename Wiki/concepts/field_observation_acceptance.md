@@ -3,8 +3,8 @@ title: Принятие полевого свидетельства
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-11-08
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md"
+updated: 2026-11-22
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/edit_change_justification_policy, Wiki/specifications/saved_line_quality_assessment]
@@ -43,3 +43,11 @@ USX допускает принятие всей съёмки, части либ
 Ручная матрица охвата связывает объекты/участки, свойства, наблюдаемое состояние и выполненные проверки. AOI задания, survey extent и область проверки различаются. «Не проверено», «проверено и не соответствует», «не найдено в выдаче» и обоснованная неприменимость не смешиваются; отсутствие записи не удостоверяет отсутствие физического объекта.
 
 Внешние основания: Watercare R59, Water Corporation R60, Ohio DNR R61, Philadelphia R65 и Giswater R78 в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]. Это уточнение принятой модели условной организации, не новая классификация API. Численные допуски владельцев не перенесены в GeoService.
+
+## Доставка и принадлежность вложения
+
+Для утверждения, которое зависит от записи или снимка, проверяют три факта. Был ли файл предусмотрен составом сдачи? Какая сторона действительно получила нужный экземпляр и может ли проверяющий прочитать его в разрешённом виде? Сохранилась ли связь с исходным осмотром и обозначаемым активом после переноса? История задания и устойчивый ключ родительской записи помогают проверить эту связь.
+
+При выборочной синхронизации отсутствие копии на планшете проверяющего может означать, что файл доступен на сервере. В этом случае решают вопрос доступа или загрузки нужного файла. Если после объединения полевых данных фото указывает на соседний объект, сначала сверяют историю связей. Удерживают зависимое утверждение и сохраняют поступившие материалы. Подтверждённую коррекцию ссылки записывают с её основанием. Допустимость выписки вместо оригинала определяется [[Wiki/policies/reviewer_post_policy]].
+
+Решение условной организации. Примеры F08, F12, F18, F20 и F21 — [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]].

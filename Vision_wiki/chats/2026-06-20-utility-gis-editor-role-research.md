@@ -3,12 +3,23 @@ title: Utility GIS Editor Role Research
 type: session
 status: active
 created: 2026-06-20
-updated: 2026-06-20
+updated: 2026-11-22
 source: RAW_inputs/documents/UtilityGisEditorRole.md
 tags: [research, utility-gis-editor, persona, role, operational-utility-gis, field-sync]
 ---
 
 # Utility GIS Editor Role Research
+
+## Редакция 22 ноября 2026 года
+
+По запросу пользователя актуализирован и повторно обработан исходный [[RAW_inputs/documents/UtilityGisEditorRole]]. В матрице сопоставлены 98 первичных документов, из которых 66 адресов впервые встретились после нормализации при сравнении с остальными Markdown-файлами RAW. Среди них есть инструкции владельцев сетей, операторские кейсы, руководства разработчиков и исследования. Исторические тезисы и follow-up ниже относятся к июньской редакции.
+
+- Редактор и владелец наряда могут принять материал о нескольких проходах и вычислить охват каждого свойства с учётом пересечений и пробелов. [[Wiki/policies/inspection_work_policy]].
+- Получение формы, доступность вложения у конкретного получателя и принадлежность файла осматриваемому объекту проверяются отдельно. [[Wiki/concepts/field_observation_acceptance]].
+- Для вывода о пройденной части линии нужны границы результата трассировки. [[Wiki/concepts/network_representation_and_operational_state]].
+- Профиль сдачи выбирают по основанию конкретной поставки. Замечания к прежней сдаче и обязательства по внешнему акту остаются прослеживаемыми. [[Wiki/policies/external_inventory_delivery_policy]].
+
+Эти правила приняты через `expert_repson` для условной организации. Сквозной сценарий и границы реализации — [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]], [[DDD_Wiki/use_cases/utility_editor_workflow]], [[DDD_Wiki/model_health]]. Снижение повторных выездов остаётся гипотезой. Рыночная распространённость стеков и показатели работы по корпусу не измерялись. Вопросы обзора от 21 ноября имеют собственные принятые ответы.
 
 ## Контекст
 

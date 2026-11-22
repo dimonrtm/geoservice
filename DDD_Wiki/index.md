@@ -14,6 +14,8 @@ tags: [domain-knowledge, ddd]
 
 Принят сценарий [[DDD_Wiki/use_cases/record_physical_asset_change]]. Принят сквозной сценарий [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. Все 15 вопросов о ведении данных, осмотрах и выпусках получили ответы. [[DDD_Wiki/model_health#Current Discovery Queue]]. Решения о зависимых нарядах учтены в [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]]. В [[DDD_Wiki/context_map/geoservice_context_map]] устарела пометка о границе Reviewer/Publisher. Принятое разделение обязанностей описано в [[DDD_Wiki/bounded_contexts/review_post]] и [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
 
+Для повторных проходов и неполной сдачи уточнён переход от осмотра к правке. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records#Если осмотр состоит из нескольких проходов]], [[DDD_Wiki/use_cases/utility_editor_workflow#Основание полевой правки и границы проверки]].
+
 Сохранение и восстановление правки реализованы. Проверка позиционных доказательств, подготовка пакета и публикация остаются в технической очереди. Актуальные очереди и основания — [[DDD_Wiki/model_health]]. Датированные сводки ниже отражают состояние на дату записи.
 
 `DDD_Wiki/` хранит доменную модель в терминах Domain-Driven Design: домен, поддомены, bounded contexts, context map, aggregates, state machines, invariants, use cases и integration patterns.

@@ -14,6 +14,8 @@ tags: [domain-knowledge, ddd]
 
 Все 64 RAW обработаны. Ответы от 22.11.2026 уточнили права на исторические поправки, тождество активов, самостоятельные осмотры, проверки и выдачу карт. В реестре нет открытых доменных вопросов или активных канонических конфликтов. [[Wiki/concepts/data_stewardship_period]], [[Wiki/policies/inspection_work_policy]], [[Wiki/policies/external_inventory_delivery_policy]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[Wiki/_registry/conflicts]].
 
+Два прохода осмотра с разных концов можно объединить, если сопоставимы их отсчёты и видимость проверяемого свойства. Обновлённое описание роли также уточняет принадлежность вложения, границы сетевой трассировки и редакцию требований к сдаче. [[Wiki/policies/inspection_work_policy]], [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/network_representation_and_operational_state]], [[Wiki/policies/external_inventory_delivery_policy]].
+
 Для локальной revision 49 проверены metadata и fixture. Позиционная точность линии L-003 остаётся неподтверждённой. [Протокол проверки](../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Технические остатки и состояние документации ведутся в [[memory/project-state]]. Датированные сводки ниже отражают состояние на дату записи.
 
 `Wiki/` хранит канонические атомарные доменные знания проекта: словарь, сущности, value objects, концепции, участников, внешние системы, команды, события, политики, спецификации, конфликты и вопросы.

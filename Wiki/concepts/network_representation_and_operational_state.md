@@ -3,8 +3,8 @@ title: Представление сети и эксплуатационное �
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-11-08
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md"
+updated: 2026-11-22
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_version_persisted_edit_invariants]
@@ -37,3 +37,11 @@ related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_
 Внешние примеры: R21 — отдельное сохранение съёмочных координат при размещении GIS относительно кадастровой основы; R56 — множественность геометрических представлений MUDDI; R66 — синтез геометрии nonspatial объекта. Источник: [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]], раздел 2. Это не универсальная норма размещения и не новое multi-geometry storage.
 
 Решение условной организации уточняет прежнее разделение представления и эксплуатации. Доступность картинки не доказывает измеренность линии; карта не заменяет исходное свидетельство. Связи: [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/assessment_statement_lifecycle]].
+
+## Область результата трассировки
+
+Выделение целой записи сообщает об участии линии в результате. Для утверждения о пройденном отрезке проверяющему нужны границы внутри линии или равносильная геометрия части, версия графа, постановка проверки и вид результата. Например, при остановке на 30-м метре стометровой линии выборка может подсветить всю линию. Остаток в 70 м остаётся за пределами этого прохода по графу. Натурный осмотр имеет собственный охват согласно [[Wiki/policies/inspection_work_policy]].
+
+Когда вывод сделан по производной схеме, учитывают зависимость от её шаблона и состояния топологии. При изменении шаблона проверяют пригодность прежнего изображения для того утверждения, на которое ссылается пакет. Для утверждения только о вхождении ID в выборку точные границы каждого отрезка могут не требоваться. Доказательность результата оценивается по цели проверки.
+
+Решение условной организации для разбора пакета. Поведение продуктов и ограничения N21–N24 — [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]].

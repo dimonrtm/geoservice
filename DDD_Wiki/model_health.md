@@ -18,6 +18,8 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 В [[Wiki/_registry/questions]] открытых вопросов нет. Все 15 вопросов обзора получили ответы по [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]]. Путь от обследования до выпуска описан в [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. Три решения об учёте активов и предмете наряда приняты условной организацией по [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]]. Активных канонических конфликтов нет, в Vision остаётся один конфликт о старом Release 1. В [[Vision_wiki/decisions/followups/index]] открыты 20 пунктов. FU-2026-11-21-001 охватывает документацию реализации, FU-2026-11-21-002 — устаревший статус в карте контекстов. Сверка first-save по FU-2026-10-11-001 завершена. Реализация остальных принятых правил, включая координацию зависимых нарядов, остаётся в FU-2026-10-13-004. Датированные сводки ниже исторические.
 
+В повторном ingest описания роли приняты четыре уточнения сквозного сценария. Для каждого приведён пример с ожидаемым исходом. Решения приняты условной организацией, статус реализации ведётся в очереди спринта. [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
+
 ## История discovery до сверки кода — 2026-11-09
 
 DISC-2026-11-09-01/02 answered по [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]], общий корпус — 88 документов. Приняты отзыв до допуска post и новый связанный цикл коррекции. Обработаны оба новых RAW; всего 58. Открытых вопросов 0, follow-up’ов 19, активных канонических конфликтов 0, legacy-конфликтов 1. Stale сохраняется из-за сверки реализации; исследование не является runtime-приёмкой.
@@ -111,7 +113,7 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 
 На 22.11.2026 открытых доменных вопросов нет. DISC-2026-11-21-04…18 переведены в `answered`. Для каждого решения сохранены основание, рассмотренные альтернативы и случай, при котором вывод удерживают. [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]].
 
-В следующем `/discover` провести обзор всей модели. Проверять новизну по решениям о владельце сведений и идентичности, о приёмке осмотров, о полномочиях Reviewer и о выпусках. Граница first-save, наличие реализации и результаты проверок относятся к технической очереди. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
+В следующем `/discover` провести обзор всей модели. Проверять новизну по решениям о владельце сведений и идентичности, о приёмке осмотров, о полномочиях Reviewer и о выпусках. Для составных осмотров, связей вложений, области трассировки и применимого профиля сдачи учитывать [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]]. Граница first-save, наличие реализации и результаты проверок относятся к технической очереди. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
 
 DISC-2026-11-21-01/02/03 отвечены. Приняты правила периодов установки экземпляра, происхождения обслуживаемых участков и определения предмета открытого наряда. [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]], [[DDD_Wiki/use_cases/record_physical_asset_change]]. Ответы о взаимозависимых нарядах — [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]].
 

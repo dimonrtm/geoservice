@@ -4,7 +4,7 @@ type: policy
 status: active
 created: 2026-11-22
 updated: 2026-11-22
-source: RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md"
 tags: [domain-knowledge, policy, simulated-organization]
 confidence: high
 related: [Wiki/concepts/dataset_delivery_edition, Wiki/concepts/dataset_instance_and_record_identity]
@@ -23,3 +23,11 @@ related: [Wiki/concepts/dataset_delivery_edition, Wiki/concepts/dataset_instance
 Локальная карта, утверждения разных поставщиков и результаты приёмки получателем имеют отдельные основания. Можно установить, какие сведения перестали подтверждаться прежней поставкой, где сохранилась достоверная менее детальная классификация и какая часть работы требует уточнения.
 
 Решение условной организации от 22.11.2026. [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-16]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-17]].
+
+## Редакция требований и замечания при сдаче
+
+Для конкретной поставки устанавливают владельца требований, событие, определяющее их редакцию, и согласованные исключения. Дата технического согласования или выдачи разрешения может отличаться от даты загрузки. При неоднозначности сохраняют поступивший материал и уточняют основание выбора профиля. Ссылка поставщика на ограничения его программы сама по себе не предоставляет исключение.
+
+Если общий формат не выражает класс, принимающая сторона может согласовать дополнительную таблицу или чертёж со связью с основным комплектом. В журнале сдачи различают редакцию требований, переданный комплект, результат приёмки и открытые замечания. При повторной подаче связывают исправленный материал с замечанием к предыдущему комплекту. Внешнее свидетельство с замечаниями сохраняет обязательства, указанные в нём. Обязательные основания допуска пакета в GeoService проверяются по [[Wiki/specifications/post_allowed]].
+
+Решение условной организации. Сопоставление практик O01–O04, O08, O09, O14–O17 и S14 — [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]].
