@@ -3,7 +3,7 @@ title: Model Health
 type: state
 status: active
 created: 2026-06-24
-updated: 2026-11-22
+updated: 2026-11-24
 source: "docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/tolerance_rules.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-recovery-use-case-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-answers.md; RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-answers.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-answers.md; docs/verification/2026-11-09-model-health-code-reconciliation.md"
 tags: [domain-knowledge, ddd, health]
 confidence: high
@@ -12,13 +12,17 @@ related: [DDD_Wiki/index, Wiki/_registry/conflicts, Wiki/_registry/questions]
 
 # Model Health
 
-## Состояние модели на 22.11.2026
+## Состояние модели на 24.11.2026
 
 Сверка реализации от 09.11.2026 — [матрица и проверки](../docs/verification/2026-11-09-model-health-code-reconciliation.md). First-save, публичные Save/Revert/readback и S2-X01 recovery реализованы; 105 выбранных frontend-тестов прошли. Метка stale снята как признак устранённого отставания этого документа. Backend/PostGIS/M4 и БД повторно не проверялись; прежние протоколы сохраняют свою область.
 
 В [[Wiki/_registry/questions]] открытых вопросов нет. Все 15 вопросов обзора получили ответы по [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]]. Путь от обследования до выпуска описан в [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. Три решения об учёте активов и предмете наряда приняты условной организацией по [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]]. Активных канонических конфликтов нет, в Vision остаётся один конфликт о старом Release 1. В [[Vision_wiki/decisions/followups/index]] открыты 20 пунктов. FU-2026-11-21-001 охватывает документацию реализации, FU-2026-11-21-002 — устаревший статус в карте контекстов. Сверка first-save по FU-2026-10-11-001 завершена. Реализация остальных принятых правил, включая координацию зависимых нарядов, остаётся в FU-2026-10-13-004. Датированные сводки ниже исторические.
 
-В повторном ingest описания роли приняты четыре уточнения сквозного сценария. Для каждого приведён пример с ожидаемым исходом. Решения приняты условной организацией, статус реализации ведётся в очереди спринта. [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
+В редакции роли от 22.11.2026 приняты четыре уточнения сквозного сценария. Для каждого приведён пример с ожидаемым исходом. Решения приняты условной организацией, статус реализации ведётся в очереди спринта. [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
+
+24.11.2026 по 97 рассказам практиков уточнены происхождение возвращённых полей, завершение узкой проверки при открытом расследовании и допустимая выдача смене, если её карта отстаёт. [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]], [[DDD_Wiki/use_cases/utility_editor_workflow#Когда следующий шаг выполняет другая смена]].
+
+24.11.2026 в действующих сценариях уточнены условия пересъёмки, применимость сводки при выборочном обследовании и подтверждение длины пути по графу. Разбор касается доменных правил. Статус реализации опирается на ранее указанную сверку. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records#Что делать с результатом проверки отчёта]], [[DDD_Wiki/use_cases/utility_editor_workflow#Основание полевой правки и границы проверки]].
 
 ## История discovery до сверки кода — 2026-11-09
 
@@ -111,9 +115,9 @@ FU-2026-10-11-001 сохраняет расхождение между ожид�
 
 ## Current Discovery Queue
 
-На 22.11.2026 открытых доменных вопросов нет. DISC-2026-11-21-04…18 переведены в `answered`. Для каждого решения сохранены основание, рассмотренные альтернативы и случай, при котором вывод удерживают. [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]].
+На 24.11.2026 открытых доменных вопросов нет. DISC-2026-11-21-04…18 переведены в `answered`. Для каждого решения сохранены основание, рассмотренные альтернативы и случай, при котором вывод удерживают. [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]].
 
-В следующем `/discover` провести обзор всей модели. Проверять новизну по решениям о владельце сведений и идентичности, о приёмке осмотров, о полномочиях Reviewer и о выпусках. Для составных осмотров, связей вложений, области трассировки и применимого профиля сдачи учитывать [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]]. Граница first-save, наличие реализации и результаты проверок относятся к технической очереди. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
+В следующем `/discover` провести обзор всей модели. Проверять новизну по решениям о владельце сведений и идентичности, о приёмке осмотров, о полномочиях Reviewer и о выпусках. При проверке новизны учитывать также выбор повторной съёмки, знаменатель сводки и включение последней трубы в длину трассировки. [[Wiki/policies/inspection_work_policy]], [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/concepts/network_representation_and_operational_state]]. Для составных осмотров, связей вложений, области трассировки и применимого профиля сдачи учитывать [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]]. Источник предзаполненного значения, ошибочный кандидат в очереди и выдача временной копии разобраны в [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]]. Граница first-save, наличие реализации и результаты проверок относятся к технической очереди. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
 
 DISC-2026-11-21-01/02/03 отвечены. Приняты правила периодов установки экземпляра, происхождения обслуживаемых участков и определения предмета открытого наряда. [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]], [[DDD_Wiki/use_cases/record_physical_asset_change]]. Ответы о взаимозависимых нарядах — [[RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers]].
 

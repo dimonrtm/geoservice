@@ -3,7 +3,7 @@ title: Concepts Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-22
+updated: 2026-11-24
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, concept]
 confidence: n/a
@@ -15,12 +15,12 @@ related: [Wiki/index]
 | Concept | Meaning | Related | Confidence | Source |
 | --- | --- | --- | --- | --- |
 | [[Wiki/concepts/authoritative_utility_workflow]] | Процесс от `WorkOrder` до authoritative post; ближайший кодовый слой сначала доказывает persisted edit change set. | [[DDD_Wiki/use_cases/utility_editor_workflow]] | high | `Vision_wiki/decisions/release_1_utility_workflow.md`; `RAW_inputs/meetings/increment_after_open_workspace.md` |
-| [[Wiki/concepts/field_observation_acceptance]] | Область принятого утверждения, поступление файла к получателю и проверка его принадлежности осмотру и активу | [[Wiki/policies/edit_change_justification_policy]] | high | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md`, [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]] |
-| [[Wiki/concepts/network_representation_and_operational_state]] | Представления актива, эксплуатация и расчётная модель. Охват трассировки с точностью до части линии | [[Wiki/policies/network_edit_semantics_policy]] | high | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md`, [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]] |
+| [[Wiki/concepts/field_observation_acceptance]] | Область принятого утверждения, поступление файла к получателю и проверка его принадлежности осмотру и активу, происхождение предзаполненного значения | [[Wiki/policies/edit_change_justification_policy]] | high | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md`, [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]] |
+| [[Wiki/concepts/network_representation_and_operational_state]] | Представления актива, эксплуатация и расчётная модель. Охват трассировки и учёт пограничной трубы при проверке длины | [[Wiki/policies/network_edit_semantics_policy]] | high | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md`, [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]], [[Vision_wiki/chats/2026-11-24-utility-editor-survey-and-trace]] |
 | [[Wiki/concepts/change_basis_lifecycle]] | Редакция основания, время наблюдения и история решения отдельно от geometry | [[Wiki/policies/change_basis_revision_policy]] | high | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md` |
 | [[Wiki/concepts/evidence_dependency]] | Копии общего наблюдения не являются независимыми подтверждениями | [[Wiki/concepts/field_observation_acceptance]] | high | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md` |
 
-| [[Wiki/concepts/assessment_statement_lifecycle]] | Состояние, утверждение, выпуск и применимость различаются | [[Wiki/policies/assessment_issue_and_correction_policy]] | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md` |
+| [[Wiki/concepts/assessment_statement_lifecycle]] | Применимость утверждения, выпуск и знаменатель сводки по оценённым участкам | [[Wiki/policies/assessment_issue_and_correction_policy]] | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md`, [[Vision_wiki/chats/2026-11-24-awwa-condition-assessment]] |
 | [[Wiki/concepts/assessment_delivery_and_acceptance]] | Доставка, ограничения, обязанность и приёмка для цели различаются | [[Wiki/policies/assessment_issue_and_correction_policy]] | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md` |
 
 | [[Wiki/concepts/dataset_instance_and_record_identity]] | Логический набор, экземпляр, запись и обозначаемый актив различаются | [[Wiki/specifications/demo_dataset_instance_qualified]] | high | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md` |
@@ -55,4 +55,4 @@ related: [Wiki/index]
 | --- | --- | --- | --- |
 | [[Wiki/concepts/data_stewardship_period]] | Полномочие стороны вести свойство за определённый период и регистрировать историческую поправку | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-04]] |
 | [[Wiki/concepts/asset_identity_resolution]] | Доказанное тождество карточек и временное дело для идентификации находки | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-06]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-07]] |
-| [[Wiki/concepts/dataset_delivery_edition]] | Дата среза, связь редакций одного выпуска и история выдачи адресату | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-18]] |
+| [[Wiki/concepts/dataset_delivery_edition]] | Дата среза, связь редакций одного выпуска, выдача адресату и замена временной полевой копии | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-18]], [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]] |

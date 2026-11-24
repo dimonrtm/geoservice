@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-22
+updated: 2026-11-24
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -12,13 +12,17 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-Все 64 RAW обработаны. Ответы от 22.11.2026 уточнили права на исторические поправки, тождество активов, самостоятельные осмотры, проверки и выдачу карт. В реестре нет открытых доменных вопросов или активных канонических конфликтов. [[Wiki/concepts/data_stewardship_period]], [[Wiki/policies/inspection_work_policy]], [[Wiki/policies/external_inventory_delivery_policy]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[Wiki/_registry/conflicts]].
+Все 67 RAW обработаны. Ответы от 22.11.2026 уточнили права на исторические поправки, тождество активов, самостоятельные осмотры, проверки и выдачу карт. В реестре нет открытых доменных вопросов или активных канонических конфликтов. [[Wiki/concepts/data_stewardship_period]], [[Wiki/policies/inspection_work_policy]], [[Wiki/policies/external_inventory_delivery_policy]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[Wiki/_registry/conflicts]].
 
 Два прохода осмотра с разных концов можно объединить, если сопоставимы их отсчёты и видимость проверяемого свойства. Обновлённое описание роли также уточняет принадлежность вложения, границы сетевой трассировки и редакцию требований к сдаче. [[Wiki/policies/inspection_work_policy]], [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/network_representation_and_operational_state]], [[Wiki/policies/external_inventory_delivery_policy]].
 
 Для локальной revision 49 проверены metadata и fixture. Позиционная точность линии L-003 остаётся неподтверждённой. [Протокол проверки](../docs/verification/2026-11-08-demo-dataset-runtime-check.md). Технические остатки и состояние документации ведутся в [[memory/project-state]]. Датированные сводки ниже отражают состояние на дату записи.
 
 `Wiki/` хранит канонические атомарные доменные знания проекта: словарь, сущности, value objects, концепции, участников, внешние системы, команды, события, политики, спецификации, конфликты и вопросы.
+
+Материалы от 24.11.2026 уточняют границы измерения по трассировке, знаменатель сводки состояния и выбор между исправлением отчёта и новым осмотром. [[Wiki/concepts/network_representation_and_operational_state#Длина при остановке внутри линии]], [[Wiki/concepts/assessment_statement_lifecycle#Знаменатель сводки о состоянии сети]], [[Wiki/policies/inspection_work_policy#Ошибка в разметке или недостаток съёмки]].
+
+Как разобрать унаследованное поле, завершить проверку без изменения карты и передать рабочий экземпляр смене — [[Wiki/concepts/field_observation_acceptance#Как значение попало в полевую форму]], [[Wiki/policies/inspection_work_policy#Когда проверка не привела к правке]], [[Wiki/concepts/dataset_delivery_edition#Выдача следующей смене при отставании полевой карты]].
 
 ## Реестры
 

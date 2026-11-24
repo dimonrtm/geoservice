@@ -3,8 +3,8 @@ title: Жизненный цикл утверждения о качестве
 type: concept
 status: active
 created: 2026-10-22
-updated: 2026-11-08
-source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md"
+updated: 2026-11-24
+source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url"
 tags: [domain-knowledge, assessment, simulated-organization]
 confidence: high
 related: [Wiki/concepts/change_basis_lifecycle, Wiki/concepts/evidence_dependency, Wiki/policies/assessment_issue_and_correction_policy]
@@ -46,3 +46,9 @@ RAW исследование: G13 (предварительные/выпущен
 Полнота переданных известных записей, полнота ответа на фильтрованный запрос и полнота сведений о физических активах различаются. Заключение называет набор/поставщика, область, фильтр, охват страниц и редакцию; отсутствие записи не доказывает отсутствие коммуникации на местности.
 
 Внешние основания: историческое описание требований поставки NUAR R53 и контракт OGC API Features R79 в [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]], раздел 4. Исторический документ не объявляется действующей общей нормой. Решение условной организации конкретизирует охват; полного обследования всей сети ради одной учебной правки не требует.
+
+## Знаменатель сводки о состоянии сети
+
+В сводке по осмотрам указывают единицу подсчёта, долю оценённых участков среди подлежащих оценке, долю участков с данным результатом среди оценённых и основание отбора на осмотр. Для участка без оценки сохраняется «не оценён». Если сначала осматривали участки с наиболее тяжёлыми последствиями отказа, перенос доли на всю сеть потребовал бы отдельного обоснования представительности.
+
+Это применение правила о границах утверждения в условной организации. В отчёте Downers Grove около 20 % канализационных линий получили оценку PACP. Указанные оператором 4 % с оценкой, требующей рассмотрения ремонта или замены в пятилетнем плане, отнесены к уже оценённым. [[Vision_wiki/chats/2026-11-24-awwa-condition-assessment]].

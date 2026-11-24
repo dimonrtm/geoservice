@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-22
+updated: 2026-11-24
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -14,7 +14,9 @@ tags: [domain-knowledge, ddd]
 
 Принят сценарий [[DDD_Wiki/use_cases/record_physical_asset_change]]. Принят сквозной сценарий [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. Все 15 вопросов о ведении данных, осмотрах и выпусках получили ответы. [[DDD_Wiki/model_health#Current Discovery Queue]]. Решения о зависимых нарядах учтены в [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]]. В [[DDD_Wiki/context_map/geoservice_context_map]] устарела пометка о границе Reviewer/Publisher. Принятое разделение обязанностей описано в [[DDD_Wiki/bounded_contexts/review_post]] и [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
 
-Для повторных проходов и неполной сдачи уточнён переход от осмотра к правке. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records#Если осмотр состоит из нескольких проходов]], [[DDD_Wiki/use_cases/utility_editor_workflow#Основание полевой правки и границы проверки]].
+Принятый отчёт, остаток по обращению и экземпляр, доступный следующей смене, разграничены в [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records#Решение по конкретному утверждению]] и [[DDD_Wiki/use_cases/utility_editor_workflow#Когда следующий шаг выполняет другая смена]].
+
+Сценарии охватывают приёмку повторных проходов, выбор между исправлением отчёта и повторной съёмкой, передачу сводки по оценённым участкам и проверку заявленной длины трассировки. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records#Если осмотр состоит из нескольких проходов]], [[DDD_Wiki/use_cases/utility_editor_workflow#Основание полевой правки и границы проверки]].
 
 Сохранение и восстановление правки реализованы. Проверка позиционных доказательств, подготовка пакета и публикация остаются в технической очереди. Актуальные очереди и основания — [[DDD_Wiki/model_health]]. Датированные сводки ниже отражают состояние на дату записи.
 

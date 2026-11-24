@@ -3,7 +3,7 @@ title: Vision_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-22
+updated: 2026-11-24
 source: null
 tags: [vision-wiki, product]
 ---
@@ -14,9 +14,13 @@ tags: [vision-wiki, product]
 
 Открыты 20 follow-up’ов. Два новых относятся к описаниям кода после рефакторинга и к прежней формулировке в карте контекстов. В Vision остаётся активным конфликт о старом Release 1. [[decisions/followups/index]], [[decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]].
 
-Все 64 RAW обработаны. Исследование от 22.11.2026 сопоставило 101 документ. Агент через `expert_repson` ответил на все 15 вопросов обзора. Вопросы о поведении условной организации закрыты со ссылками на основания. [[Vision_wiki/chats/2026-11-22-utility-editor-governance-research]], [[Vision_wiki/chats/2026-11-22-utility-editor-governance-answers]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]]. Датированные сводки ниже отражают состояние на дату записи.
+Все 67 RAW обработаны. Исследование от 22.11.2026 сопоставило 101 документ. Агент через `expert_repson` ответил на все 15 вопросов обзора. Вопросы о поведении условной организации закрыты со ссылками на основания. [[Vision_wiki/chats/2026-11-22-utility-editor-governance-research]], [[Vision_wiki/chats/2026-11-22-utility-editor-governance-answers]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]]. Датированные сводки ниже отражают состояние на дату записи.
 
 В тот же день повторно обработано исходное описание роли. Отдельный корпус из 98 документов уточняет, как определить проверенную часть участка, подтвердить принадлежность вложения и принять комплект по применимой редакции требований. [[Vision_wiki/chats/2026-06-20-utility-gis-editor-role-research#Редакция 22 ноября 2026 года]].
+
+Три источника от 24.11.2026 разобраны по отдельности. [[Vision_wiki/chats/2026-11-24-utility-editor-survey-and-trace]], [[Vision_wiki/chats/2026-11-24-awwa-condition-assessment]], [[Vision_wiki/chats/2026-11-24-western-virginia-cctv]].
+
+Сценарий редактора дополнен опубликованными свидетельствами полевых исполнителей и принимающих смен. [[Vision_wiki/chats/2026-06-20-utility-gis-editor-role-research#Редакция 24 ноября 2026 года]].
 
 Продуктовые знания и решения GeoService.
 

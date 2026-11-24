@@ -3,8 +3,8 @@ title: Представление сети и эксплуатационное �
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-11-22
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/documents/UtilityGisEditorRole.md"
+updated: 2026-11-24
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/241126.txt"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_version_persisted_edit_invariants]
@@ -45,3 +45,9 @@ related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_
 Когда вывод сделан по производной схеме, учитывают зависимость от её шаблона и состояния топологии. При изменении шаблона проверяют пригодность прежнего изображения для того утверждения, на которое ссылается пакет. Для утверждения только о вхождении ID в выборку точные границы каждого отрезка могут не требоваться. Доказательность результата оценивается по цели проверки.
 
 Решение условной организации для разбора пакета. Поведение продуктов и ограничения N21–N24 — [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]].
+
+## Длина при остановке внутри линии
+
+При проверке расстояния редактор различает заданный предел обхода, место фактической остановки и сумму длин целых записей в выборке. Например, последние 20 м из заданных 500 м могут приходиться на трубу длиной 80 м. При полном прохождении первых 480 м сумма по выбранным трубам составит 480 м без последней или 560 м при её включении. Для вывода о пройденных 500 м проверяют положение границы и частичную геометрию либо равноценное свидетельство по той же версии графа.
+
+Так условная организация применяет правило об охвате трассировки к количественному утверждению. Числа примера учебные. Внешнее основание — описание функционального барьера в документации Esri. [[Vision_wiki/chats/2026-11-24-utility-editor-survey-and-trace]].

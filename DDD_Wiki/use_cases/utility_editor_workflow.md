@@ -3,8 +3,8 @@ title: Utility Editor Workflow
 type: use-case
 status: active
 created: 2026-06-24
-updated: 2026-11-22
-source: "Vision_wiki/decisions/release_1_utility_workflow.md; docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research.md; RAW_inputs/documents/UtilityGisEditorRole.md"
+updated: 2026-11-24
+source: "Vision_wiki/decisions/release_1_utility_workflow.md; docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/meetings/increment_after_open_workspace.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md; RAW_inputs/meetings/first_save_for_edit_version.md; RAW_inputs/meetings/demo_utility_gis.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-data-quality-research.md; RAW_inputs/research_results/2026-10-16-utility-gis-editor-network-semantics-research.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/241126.txt"
 tags: [domain-knowledge, ddd, use-case]
 confidence: high
 related: [Wiki/glossary/utility_gis_editing, Wiki/commands/open_edit_version, Wiki/commands/update_edit_version_feature_geometry, Wiki/policies/positional_accuracy_acceptance_policy, Wiki/commands/post_to_default]
@@ -21,6 +21,12 @@ related: [Wiki/glossary/utility_gis_editing, Wiki/commands/open_edit_version, Wi
 Входом может служить принятый результат [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. Редактор устанавливает, по какой части актива и какому свойству есть основание, связывает материал с порученной правкой и сохраняет сомнения по остатку. Если осмотр подтверждает исходную карту, самостоятельный наряд на осмотр может завершиться принятым отчётом.
 
 Когда пакет использует трассировку, Editor указывает вид результата и область вывода. Если в выборку попала линия целиком, а проверка касается только её части, Reviewer сопоставляет заявленные границы с результатом по той же версии и постановке проверки. Для обычного Save обязательность трассировки не вводится. Основания — [[Wiki/concepts/network_representation_and_operational_state]], [[DDD_Wiki/aggregates/review_package]], [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]].
+
+Если в пакете заявлена длина пути, Reviewer сверяет место остановки и режим включения пограничного объекта. Когда расчёт построен только на полных длинах выбранных труб, он может подтверждать перечень затронутых активов. Заключение о длине ожидает проверки границы внутри последней трубы. [[Wiki/concepts/network_representation_and_operational_state#Длина при остановке внутри линии]].
+
+## Когда следующий шаг выполняет другая смена
+
+После положительного решения Reviewer ответственный за публикацию сверяет допуск к текущей версии. После выпуска проверяет, какой срез доступен эксплуатации по её каналу. Если рабочая веб-карта отстаёт, адресная выписка имеет редакцию, охват, получателя и условие замены. Если исходом был принятый осмотр без изменения учёта, передаются отчёт и ссылка на действующую карту. У спорных атрибутов, незакрытых обращений и непринятых замечаний сохраняются ответственные. [[Wiki/concepts/dataset_delivery_edition]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]], [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]].
 
 ## Current Implemented Slice
 

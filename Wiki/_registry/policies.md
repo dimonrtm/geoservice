@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-22
+updated: 2026-11-24
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -66,5 +66,5 @@ related: [Wiki/index]
 
 | Policy | Rule | Outcome | Confidence | Source |
 | --- | --- | --- | --- | --- |
-| [[Wiki/policies/inspection_work_policy]] | Цель осмотра, объединённый охват проходов по свойству, обязательства перед заявителями и календарь | Принятый отчёт по осмотру, явный остаток и объяснимый очередной срок | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-11]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-12]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-13]], [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]] |
+| [[Wiki/policies/inspection_work_policy]] | Цель осмотра, охват проходов, опровергнутое подозрение, исправление разметки или пересъёмка, обязательства по обращениям и календарю | Принятый отчёт по осмотру, явный остаток и объяснимый очередной срок | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-11]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-12]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-13]], [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]], [[Vision_wiki/chats/2026-11-24-western-virginia-cctv]] |
 | [[Wiki/policies/external_inventory_delivery_policy]] | Применимая редакция требований, замечания к сдаче, охват замещения и версии справочника | Окончание утверждения поставщика, допустимая классификация либо удержание непригодной части поставки | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-16]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-17]], [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]] |

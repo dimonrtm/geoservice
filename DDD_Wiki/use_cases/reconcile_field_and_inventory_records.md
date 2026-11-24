@@ -3,8 +3,8 @@ title: Принять результат обследования и согла�
 type: use-case
 status: active
 created: 2026-11-22
-updated: 2026-11-22
-source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md"
+updated: 2026-11-24
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url"
 tags: [domain-knowledge, ddd, utility-gis, simulated-organization]
 confidence: high
 related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/review_post, DDD_Wiki/bounded_contexts/audit]
@@ -33,3 +33,16 @@ related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/w
 **Граница применимости.** Геометрический Save защищают [[DDD_Wiki/invariants/edit_version_persisted_edit_invariants]]. Осмотр без правки не служит обходом проверки готовности изменённой линии к review. Внешняя дельта не изменяет локальный актив автоматически. Действующие технические проверки и очередь разработки — [[DDD_Wiki/model_health#Current Sprint Planning Queue]].
 
 Основания — [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-research]].
+
+## Что делать с результатом проверки отчёта
+
+1. Для видимого на исходном видео, но неверно закодированного дефекта редактор запрашивает исправленную интерпретацию. Проверяющий при необходимости расширяет проверку на ту же серию отчётов. Владелец наряда назначает повторное обследование, если для требуемого свойства отсутствует пригодное наблюдение или измерение. [[Wiki/policies/inspection_work_policy#Ошибка в разметке или недостаток съёмки]].
+2. Если принятые отчёты передают для сводки, получатель видит, какие участки оценены и почему именно они попали в программу. Доля участков, требующих внимания, рассчитывается по указанной совокупности. Остальные сохраняют статус «не оценён». [[Wiki/concepts/assessment_statement_lifecycle#Знаменатель сводки о состоянии сети]].
+
+## Решение по конкретному утверждению
+
+1. Уточнить, существует ли предмет проверки по заявленному адресу и стороне. Если существование доказано, можно отдельно выяснять материал, положение и связь. Отсутствие доступа даёт незакрытый вопрос. Данными о предмете и происхождении полей владеет Utility Network. [[Wiki/concepts/field_observation_acceptance]].
+2. Выделить цель каждой работы. Проверка подозрения по конкретному объекту может завершиться отрицательным результатом, а поиск причины по обращению — продолжиться. В Work Order сохраняют принятый результат, получателя и ответственность за оставшуюся работу. [[Wiki/policies/inspection_work_policy#Когда проверка не привела к правке]].
+3. Установить доступный смене результат. При обычном доступе достаточно ссылки на принятую редакцию. Если выдавался временный экземпляр, прослеживают его замену. [[Wiki/concepts/dataset_delivery_edition#Выдача следующей смене при отставании полевой карты]].
+
+Основания — G14, G17, P07, P20, P28, W19 и E01. [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]].
