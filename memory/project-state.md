@@ -16,11 +16,11 @@ tags: [project-state, geoservice]
 
 GeoService моделирует условную организацию через экспертную персону `expert_repson`. Доменные решения хранятся в Wiki и DDD_Wiki, их источники — в RAW и Vision, сведения о реализации — в Code_wiki. [Режим работы](../docs/agent-memory/decisions/2026-10-13-simulated-domain-organization.md).
 
-- Обработан 71 источник RAW. Последний `/ingest` от 26.11.2026 охватил исследование полевых свидетельств и ответы. В реестре 78 отвеченных вопросов, открытых нет. [[Vision_wiki/chats/2026-11-26-field-evidence-analysis]] и [[Vision_wiki/chats/2026-11-26-field-evidence-answers]] · [[Wiki/_registry/questions#Исправление записи о соединении волокон — 26 ноября]].
+- Обработаны 73 источника RAW. Последний `/ingest` от 26.11.2026 охватил анализ 85 публикаций и ответы о приёмке полевых сведений. В реестре 79 отвеченных вопросов, открытых нет. [[Vision_wiki/chats/2026-11-26-editor-practice-analysis]] · [[Vision_wiki/chats/2026-11-26-editor-practice-answers]] · [[Wiki/_registry/questions#Раздельная прокладка основного и резервного кабелей — 26 ноября]].
 - Открыты 20 follow-up’ов. Канонических конфликтов в активном статусе нет. В Vision остаётся один активный конфликт о старом Release 1. [[../Vision_wiki/decisions/followups/index]], [[../Wiki/_registry/conflicts]], [[../Vision_wiki/decisions/conflicts/2026-06-11-old-release-1-vs-utility-workflow]].
 - Пять страниц помечены `stale`. Четыре технических описания перечислены в [[../Code_wiki/index#Свежие Repository-Change Знания]]. В [[../DDD_Wiki/context_map/geoservice_context_map]] устарел статус разграничения Reviewer/Publisher. Действующее решение — [[../Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
 - Wiki-lint от 26.11.2026 обнаружил 36 известных `missing_frontmatter` в исходных RAW Markdown. Расхождение между требованиями линтера и неизменяемостью источников отслеживает FU-2026-06-01-004.
-- В каталоге DDD 20 самостоятельных сценариев. По 18 кандидатам из практики операторов зафиксированы девять принятых сценариев, три варианта, два отложенных предложения и четыре задачи смежных служб. [Решения и основания](../DDD_Wiki/use_cases/candidates/_info.md).
+- В каталоге DDD 22 самостоятельных сценария. Эксплуатация получает заключение о физическом разнесении путей, распорядитель качества — результат выборочной проверки обработанных изменений. [Каталог](../DDD_Wiki/use_cases/_info.md) · [[RAW_inputs/documents/2026-11-26-editor-practice-analysis#Решения по целям участников]].
 
 ## Требует внимания
 
@@ -32,4 +32,4 @@ GeoService моделирует условную организацию чере
 
 Для четырёх технических страниц нужен `/ingest repository-change` по FU-2026-11-21-001. В описании backend сверить в том числе сборку зависимостей WebSocket после B4. В карте контекстов исправить статус границы Reviewer/Publisher по FU-2026-11-21-002. [[../Code_wiki/index#Свежие Repository-Change Знания]], [[../Vision_wiki/decisions/followups/index]].
 
-Доменная очередь пуста. Решения по двум вопросам о соединениях волокон и границы их применения сохранены в [[RAW_inputs/documents/2026-11-26-field-evidence-answers]].
+Доменная очередь пуста. Ответ по разнесению кабелей сохранён в [[RAW_inputs/documents/2026-11-26-editor-practice-answers#DISC-2026-11-26-03]]. Следующий `/discover` без параметров обозревает всю модель и задаёт 15 открытых вопросов из 150 кандидатов с учётом уже разобранных эпизодов.

@@ -4,7 +4,7 @@ type: use-case
 status: active
 created: 2026-11-24
 updated: 2026-11-26
-source: "DDD_Wiki/use_cases/candidates/_info.md; RAW_inputs/documents/2026-11-26-field-evidence-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-analysis.md"
+source: "DDD_Wiki/use_cases/candidates/_info.md; RAW_inputs/documents/2026-11-26-field-evidence-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-analysis.md; RAW_inputs/documents/2026-11-26-editor-practice-analysis.md; RAW_inputs/documents/2026-11-26-editor-practice-answers.md"
 tags: [domain-knowledge, ddd, use-case, simulated-organization]
 confidence: high
 related: [Wiki/concepts/dataset_delivery_edition, Wiki/policies/external_inventory_delivery_policy, Wiki/concepts/data_stewardship_period]
@@ -35,6 +35,10 @@ related: [Wiki/concepts/dataset_delivery_edition, Wiki/policies/external_invento
 ## Если формат скрывает неизвестное продолжение
 
 В исходной ведомости прежняя пара опровергнута, продолжение пока неизвестно. Перед выдачей редактор открывает экземпляр в представлении получателя и проверяет, различимы ли исключённый путь, область неопределённости и её последствия для поручения. Для смены, распределяющей ресурс, пустая ячейка может читаться как «свободно». В таком случае выдачу для этой цели удерживают. Известных держателей прежней редакции предупреждают адресно с указанием записи и ограничения. Выдачу завершают, когда в применяемом получателем экземпляре или согласованном с ним сопровождающем материале это ограничение можно однозначно прочитать. При зависимом действии проверяют полученную редакцию. [[Wiki/policies/published_result_correction_policy#Опровержение связи без установленной замены]], [[RAW_inputs/documents/2026-11-26-field-evidence-answers#DISC-2026-11-26-02]].
+
+## Справка по полевому эскизу
+
+Бригада уже передала эскиз изменённого подключения, основная карта ещё проходит обработку. Справочная служба проверяет происхождение эскиза, объект, дату, подтверждённое свойство и допустимость его выдачи для конкретного запроса. На выдаваемом экземпляре указывает, какие сведения взяты из полевой записи и к какой дате относится основная карта. Владелец выдачи отслеживает, нужна ли этому адресату замена после выпуска карты. Если получателю необходима уже принятая редакция реестра, ему сообщают ограничение и ответственного за последующую передачу. Пригодность для справки и принятие изменения карты прослеживаются по своим основаниям. [Практика wesernetz](../../docs/sources/2026-11-26-editor-practice-water.md#w01) · [[RAW_inputs/documents/2026-11-26-editor-practice-answers]].
 
 ## Условия завершения
 

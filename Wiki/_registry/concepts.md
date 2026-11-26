@@ -64,3 +64,8 @@ related: [Wiki/index]
 | [[Wiki/concepts/asset_service_point]] | У точки обслуживания есть устойчивая эксплуатационная граница. Привязки адресов, договоров и установленных экземпляров могут меняться с разными датами. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-02]] |
 | [[Wiki/concepts/duct_capacity_reservation]] | Для обещанного места учитывать обладателя, границы, объём и основание завершения резерва. Отдельно проверять техническую пригодность нужного пролёта. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-03]] |
 | [[Wiki/concepts/defect_episode]] | Эпизод проявления связывает исходное наблюдение, подтверждение результата ремонта и возможный повтор. Повторное обращение, повтор проявления и подтверждённый дефект считаются по разным основаниям. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-07]] |
+
+## Разнесение маршрутов и охват проверки — 26.11.2026
+
+- [[Wiki/concepts/network_representation_and_operational_state#Разнесение двух физических маршрутов]] — утверждение о паре путей с уровнем конструкции, датой и охватом. [[RAW_inputs/documents/2026-11-26-editor-practice-answers#DISC-2026-11-26-03]].
+- [[Wiki/concepts/assessment_statement_lifecycle#Вывод по серии обработанных обновлений]] — состав серии и свойства, проверенные в выборке. [[RAW_inputs/documents/2026-11-26-editor-practice-analysis]].

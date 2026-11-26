@@ -4,7 +4,7 @@ type: use-case
 status: active
 created: 2026-11-22
 updated: 2026-11-26
-source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md; RAW_inputs/documents/2026-11-24-field-records-analysis.md; RAW_inputs/documents/2026-11-26-field-evidence-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-analysis.md"
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md; RAW_inputs/documents/2026-11-24-field-records-analysis.md; RAW_inputs/documents/2026-11-26-field-evidence-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-analysis.md; RAW_inputs/documents/2026-11-26-editor-practice-analysis.md; RAW_inputs/documents/2026-11-26-editor-practice-answers.md"
 tags: [domain-knowledge, ddd, utility-gis, simulated-organization]
 confidence: high
 related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/review_post, DDD_Wiki/bounded_contexts/audit]
@@ -61,3 +61,7 @@ related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/w
 ## Повторная сдача после переделки
 
 При повторной сдаче того же стыка бригада указывает, какую попытку заменяет и что переделано. Редактор связывает акт, измерения, фотографии и подпись с конкретной попыткой. Проверяющий открывает отказ по первой попытке и удостоверяет, что условия, вызвавшие отказ, проверены на второй. Результат сдачи содержит принятую попытку и её область. Если фотографии относятся к первой, а акт ко второй, комплект возвращают за установлением принадлежности. Сохраняются обе попытки и причина повторной проверки. [[Wiki/concepts/field_observation_acceptance#Какая попытка была проверена]] · [Случай TVIS](../../docs/sources/2026-11-26-heat-field-practice.md#h14).
+
+## Как инженер повторно находит кадр
+
+При задании на передачу видео моделисту или проверяющему редактор сохраняет идентификатор участка на дату осмотра, проход, исходный файл или носитель и главу либо время. Принимая результат, открывает с доступом получателя целевой фрагмент, сверяет ориентир с записью и подтверждает нужное свойство. Кадр помогает найти место в оригинале. При смене формата проверяют сохранение указателя. Если все файлы доставлены, а поиск из карточки участка ещё не работает, фиксируют принятую поставку и поручение связать материалы с ГИС. Повторная съёмка нужна при недостающем наблюдении. [Привязка фрагмента у SSM](../../docs/sources/2026-11-26-editor-practice-water.md#w18) · [Решение о дальнейшей интеграции в Дерби](../../docs/sources/2026-11-26-editor-practice-water.md#w14) · [Ответы по полевому материалу](../../RAW_inputs/documents/2026-11-26-editor-practice-answers.md).

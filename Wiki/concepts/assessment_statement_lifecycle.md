@@ -3,8 +3,8 @@ title: Жизненный цикл утверждения о качестве
 type: concept
 status: active
 created: 2026-10-22
-updated: 2026-11-24
-source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md"
+updated: 2026-11-26
+source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md; RAW_inputs/documents/2026-11-26-editor-practice-analysis.md"
 tags: [domain-knowledge, assessment, simulated-organization]
 confidence: high
 related: [Wiki/concepts/change_basis_lifecycle, Wiki/concepts/evidence_dependency, Wiki/policies/assessment_issue_and_correction_policy]
@@ -56,3 +56,7 @@ RAW исследование: G13 (предварительные/выпущен
 ## Сопоставление оценок после изменения шкалы
 
 Кроме охвата и знаменателя фиксируют единицу наблюдения, обе шкалы и правило пересчёта. Прямой вывод возможен, если для порога «тяжёлый» классификации эквивалентны или старые итоги однозначно приводятся к общей шкале. Если старый класс пересекает новый порог, показывают диапазон возможной прежней доли. Ухудшение можно утверждать лишь когда изменение сохраняет знак при всех допустимых пересчётах и учтены прочие условия сравнимости. Иначе ставят разрыв ряда или переоценивают первичные материалы. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-14]].
+
+## Вывод по серии обработанных обновлений
+
+Для вывода указывают состав серии и период, правило отбора записей, проверенное свойство и глубину проверки. Сверка идентификаторов по всей серии, просмотр исходных видео по выборке и оценка срока обработки дают три разных результата. При отборе по тяжести последствий доля ошибок относится к проверенным записям. У замечания есть адресат и следующий шаг, у решения расширить проверку — причина и область. [Сценарий контроля серии](../../DDD_Wiki/use_cases/audit_completed_map_updates.md) · [[RAW_inputs/documents/2026-11-26-editor-practice-analysis]].

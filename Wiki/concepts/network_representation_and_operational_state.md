@@ -3,8 +3,8 @@ title: Представление сети и эксплуатационное �
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-11-24
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/241126.txt"
+updated: 2026-11-26
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/241126.txt; RAW_inputs/documents/2026-11-26-editor-practice-answers.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_version_persisted_edit_invariants]
@@ -51,3 +51,9 @@ related: [Wiki/policies/network_edit_semantics_policy, DDD_Wiki/invariants/edit_
 При проверке расстояния редактор различает заданный предел обхода, место фактической остановки и сумму длин целых записей в выборке. Например, последние 20 м из заданных 500 м могут приходиться на трубу длиной 80 м. При полном прохождении первых 480 м сумма по выбранным трубам составит 480 м без последней или 560 м при её включении. Для вывода о пройденных 500 м проверяют положение границы и частичную геометрию либо равноценное свидетельство по той же версии графа.
 
 Так условная организация применяет правило об охвате трассировки к количественному утверждению. Числа примера учебные. Внешнее основание — описание функционального барьера в документации Esri. [[Vision_wiki/chats/2026-11-24-utility-editor-survey-and-trace]].
+
+## Разнесение двух физических маршрутов
+
+Раздельная прокладка — утверждение о паре путей между согласованными концами, на дату, по определённому критерию. Критерий задаёт уровень сравнения (канал, коллектор, ввод), границы и допустимые исключения. Для каждого участка указывают основания размещения обоих кабелей и принадлежности каналов сооружению. Зазор между линиями на плане может возникнуть при условном изображении двух труб по измеренной середине. Принятое для расчёта свойство также сохраняет своё происхождение: допущение о виде изоляции действует в границах расчёта.
+
+Один установленный общий коллектор опровергает требование разных коллекторов по всему пути. Неизвестное размещение оставляет участок открытым. Для положительного вывода нужны основания по обоим путям на всём согласованном протяжении. Готовность резервной услуги проверяет эксплуатация. [Сценарий проверки](../../DDD_Wiki/use_cases/verify_physical_route_diversity.md) · [[RAW_inputs/documents/2026-11-26-editor-practice-answers#DISC-2026-11-26-03]] · [Практика изображения труб в Евле](../../docs/sources/2026-11-26-editor-practice-heat.md#h01).
