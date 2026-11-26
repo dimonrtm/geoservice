@@ -3,7 +3,7 @@ title: Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-24
+updated: 2026-11-26
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -12,7 +12,9 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-Все 69 RAW обработаны. Для вопросов обзора от 24.11.2026 приняты правила передачи секций, проверки полевого свидетельства, приёмки, оспаривания и выдачи результата. В реестре 76 ответов. Открытых доменных вопросов и активных канонических конфликтов нет. [[Wiki/concepts/asset_service_point]], [[Wiki/concepts/duct_capacity_reservation]], [[Wiki/concepts/defect_episode]], [[Wiki/_registry/questions#Обзор всей доменной модели — 24 ноября]], [[Wiki/_registry/conflicts]].
+Применение доменных правил по задачам участников собрано в [[DDD_Wiki/use_cases/_info]]. Решения по 18 предложенным сценариям и основания выбора — в [[DDD_Wiki/use_cases/candidates/_info]].
+
+Обработан 71 источник RAW. Для вопросов обзора от 24.11.2026 приняты правила передачи секций, проверки полевого свидетельства, приёмки, оспаривания и выдачи результата. В реестре 78 отвеченных вопросов, открытых нет. Решения о подробной ведомости и снятии ошибочной пары отражены в [[Wiki/entities/network_association]] и [[Wiki/policies/published_result_correction_policy]]. Активных канонических конфликтов нет. [[Wiki/concepts/asset_service_point]], [[Wiki/concepts/duct_capacity_reservation]], [[Wiki/concepts/defect_episode]], [[Wiki/_registry/questions#Исправление записи о соединении волокон — 26 ноября]], [[Wiki/_registry/conflicts]].
 
 Два прохода осмотра с разных концов можно объединить, если сопоставимы их отсчёты и видимость проверяемого свойства. Обновлённое описание роли также уточняет принадлежность вложения, границы сетевой трассировки и редакцию требований к сдаче. [[Wiki/policies/inspection_work_policy]], [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/network_representation_and_operational_state]], [[Wiki/policies/external_inventory_delivery_policy]].
 

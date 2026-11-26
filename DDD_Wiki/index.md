@@ -3,7 +3,7 @@ title: DDD Wiki
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-24
+updated: 2026-11-26
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, ddd]
 ---
@@ -12,7 +12,7 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-В доменной модели 20 самостоятельных сценариев. Новые страницы охватывают работу до наряда, проверку учтённой связи, использование сети диспетчером и выдачу доказуемых сведений. [Каталог по задачам участников](use_cases/_info.md) · [Решения по всем 18 кандидатам](use_cases/candidates/_info.md).
+В доменной модели 20 самостоятельных сценариев. По полевым свидетельствам от 26 ноября уточнены четыре варианта в трёх сценариях. [[RAW_inputs/documents/2026-11-26-field-evidence-analysis#Решения по целям участников]]. Новые страницы охватывают работу до наряда, проверку учтённой связи, использование сети диспетчером и выдачу доказуемых сведений. [Каталог по задачам участников](use_cases/_info.md) · [Решения по всем 18 кандидатам](use_cases/candidates/_info.md).
 
 Принят сценарий [[DDD_Wiki/use_cases/record_physical_asset_change]]. Принят сквозной сценарий [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. На вопросы обзора 21 ноября получены ответы. По всем 15 вопросам от 24 ноября приняты решения, включая поэтапный ввод, повтор дефекта после ремонта и оспаривание одобрения перед публикацией. [[DDD_Wiki/model_health#Current Discovery Queue]]. Решения о зависимых нарядах учтены в [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]]. В [[DDD_Wiki/context_map/geoservice_context_map]] устарела пометка о границе Reviewer/Publisher. Принятое разделение обязанностей описано в [[DDD_Wiki/bounded_contexts/review_post]] и [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
 
@@ -40,7 +40,7 @@ tags: [domain-knowledge, ddd]
 
 [[DDD_Wiki/state_machines/editor_save_recovery]] — принятая 2026-10-12 модель осведомлённости редактора и восстановления. Не заменяет состояние серверной операции; разграничение принято по [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]].
 
-Текущие пробелы, противоречия и готовность к discovery фиксируются в [[DDD_Wiki/model_health]].
+Текущие пробелы и открытые вопросы собраны в [[DDD_Wiki/model_health]]. Упоминания незавершённой сверки metadata/fixture в записях за 7–8 ноября относятся к периоду до проверки локальной revision 49. [Протокол проверки](../docs/verification/2026-11-08-demo-dataset-runtime-check.md).
 
 Сверка 2026-11-07: [Отчёт S2-X01](../docs/sprint_2/2026-10-23-s2-x01-recovery-implementation-report.md) фиксирует завершение реализации и проверок 2026-10-23: IndexedDB recovery, возврат доступа, независимые наряды и сравнение отклонённой попытки. При `/sync-vision` runtime-проверки повторно не выполнялись. Автоматический перенос candidate, evaluator и восстановление уничтоженного storage не входят в этот результат. Доменная очередь и два вопроса metadata/fixture остаются на сверке; [[DDD_Wiki/model_health]] сохраняет `stale`. Актуальное техническое чтение карты, ChangeSet и baseline — [[Code_wiki/архитектура/edit_version_api_readback]].
 

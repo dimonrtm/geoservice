@@ -3,7 +3,7 @@ title: RAW_inputs
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-24
+updated: 2026-11-26
 source: null
 tags: [raw-inputs, source-of-truth]
 ---
@@ -100,3 +100,5 @@ tags: [raw-inputs, source-of-truth]
 | 2026-11-24 | `RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url` | Раздел CS-4 об измерении длины, контроле разметки и повторной телеинспекции. [Стандарт Western Virginia с Addendum 1](https://www.westernvawater.org/home/showpublisheddocument/14522/639010601448130000). | Да — [[Vision_wiki/chats/2026-11-24-western-virginia-cctv]], [[Wiki/policies/inspection_work_policy]] |
 | 2026-11-24 | `RAW_inputs/documents/2026-11-24-field-records-analysis.md` | 101 первичное свидетельство о полевых данных и прирост модели по 15 развилкам | Да — [[Vision_wiki/chats/2026-11-24-field-records-analysis]], [[Wiki/concepts/field_observation_acceptance]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]] |
 | 2026-11-24 | `RAW_inputs/documents/2026-11-24-field-records-answers.md` | Вопросы исходного сценария и решения условной организации по DISC-2026-11-24-01…15 | Да — [[Vision_wiki/chats/2026-11-24-field-records-answers]], [[Wiki/_registry/questions#Обзор всей доменной модели — 24 ноября]] |
+| 2026-11-26 | `RAW_inputs/documents/2026-11-26-field-evidence-analysis.md` | Корпус из 99 первичных свидетельств и дополнительный материал, сравнение действий и решения по целям | Да — [[Vision_wiki/chats/2026-11-26-field-evidence-analysis]], [[DDD_Wiki/use_cases/candidates/_info]] |
+| 2026-11-26 | `RAW_inputs/documents/2026-11-26-field-evidence-answers.md` | Ответы по исходному сценарию и DISC-2026-11-26-01…02 | Да — [[Vision_wiki/chats/2026-11-26-field-evidence-answers]], [[Wiki/_registry/questions#Исправление записи о соединении волокон — 26 ноября]], [[DDD_Wiki/use_cases/correct_recorded_network_connection]] |

@@ -3,8 +3,8 @@ title: Принять результат обследования и согла�
 type: use-case
 status: active
 created: 2026-11-22
-updated: 2026-11-24
-source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md; RAW_inputs/documents/2026-11-24-field-records-analysis.md"
+updated: 2026-11-26
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md; RAW_inputs/documents/2026-11-24-field-records-analysis.md; RAW_inputs/documents/2026-11-26-field-evidence-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-analysis.md"
 tags: [domain-knowledge, ddd, utility-gis, simulated-organization]
 confidence: high
 related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/review_post, DDD_Wiki/bounded_contexts/audit]
@@ -57,3 +57,7 @@ related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/w
 | Владелец выпуска и Audit | Для производной карты определяют цель, получателя и разрешения источников. При сравнении сводок проверяют шкалы и знаменатели. После выбытия материалов удостоверяют основание и исполнение уничтожения по сохранившемуся следу. [[Wiki/concepts/dataset_delivery_edition]], [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/policies/change_history_retention_policy]]. |
 
 **Пример сдачи без правки.** В наряде требуется подтвердить положение конкретной задвижки. Мастер передаёт новый эскиз после перестройки двора. Редактор устанавливает, что изменился ориентир, а новое измерение подтверждает прежнюю координату. Reviewer принимает отчёт в пределах измеренного свойства. Изменение ориентира можно зарегистрировать отдельным утверждением, если это входит в поручение. Получатель видит редакцию и охват подтверждения. Если относимость замера к задвижке остаётся спорной, запрос возвращается за различающим свидетельством. [[RAW_inputs/documents/2026-11-24-field-records-answers]], [[RAW_inputs/documents/2026-11-24-field-records-analysis]].
+
+## Повторная сдача после переделки
+
+При повторной сдаче того же стыка бригада указывает, какую попытку заменяет и что переделано. Редактор связывает акт, измерения, фотографии и подпись с конкретной попыткой. Проверяющий открывает отказ по первой попытке и удостоверяет, что условия, вызвавшие отказ, проверены на второй. Результат сдачи содержит принятую попытку и её область. Если фотографии относятся к первой, а акт ко второй, комплект возвращают за установлением принадлежности. Сохраняются обе попытки и причина повторной проверки. [[Wiki/concepts/field_observation_acceptance#Какая попытка была проверена]] · [Случай TVIS](../../docs/sources/2026-11-26-heat-field-practice.md#h14).

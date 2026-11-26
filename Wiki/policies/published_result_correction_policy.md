@@ -3,8 +3,8 @@ title: Коррекция опубликованного результата
 type: policy
 status: active
 created: 2026-11-09
-updated: 2026-11-22
-source: RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md
+updated: 2026-11-26
+source: "RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-analysis.md"
 tags: [domain-knowledge, publication, correction, simulated-organization]
 confidence: high
 related: [Wiki/concepts/published_result_correction_case, Wiki/specifications/published_result_correction_closed, Wiki/policies/assessment_issue_and_correction_policy, DDD_Wiki/use_cases/correct_published_result]
@@ -40,3 +40,9 @@ related: [Wiki/concepts/published_result_correction_case, Wiki/specifications/pu
 ## Исправление датированной карты
 
 После установления существенной ошибки на дату среза выпускают новую редакцию того же выпуска и связывают её с прежней. Физическое изменение после даты среза относится к следующему выпуску. Известных получателей ошибочной редакции предупреждают до готовности замены. Для каждого видны первоначальная выдача, результат предупреждения и судьба исправленного экземпляра. [[Wiki/concepts/dataset_delivery_edition]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-18]].
+
+## Опровержение связи без установленной замены
+
+Держатель подробной записи может принять отдельное снятие ранее учтённой пары. Проверяющий устанавливает идентичность обоих обозначений, дату и исходную редакцию, метод прямой проверки и утверждение, которое он исключает. У неизвестного продолжения есть владелец уточнения. Прежняя запись сохраняется в истории. Даты наблюдения и принятия поправки отделяют от даты переключения или демонтажа, если такое физическое событие установлено.
+
+Для каждой затронутой выдачи проверяют, сможет ли её получатель отличить неизвестный путь от свободного ресурса, отсутствия услуги или подтверждённого обрыва. Если формат скрывает это различие либо действует блокирующее условие [[Wiki/specifications/post_allowed]], выпуск удерживают и предупреждают известных получателей прежней редакции. Принятие держателем, допуск к публикации и доступность заменяющей редакции у получателя проверяются по своим основаниям. После обнаружения нового конца положительная запись о нём проходит отдельное рассмотрение. [[RAW_inputs/documents/2026-11-26-field-evidence-answers#DISC-2026-11-26-02]], [[DDD_Wiki/use_cases/issue_map_for_recipient]].

@@ -3,7 +3,7 @@ title: Policies Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-24
+updated: 2026-11-26
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, policy]
 confidence: n/a
@@ -52,7 +52,7 @@ related: [Wiki/index]
 | Policy | Rule | Outcome | Confidence | Source |
 | --- | --- | --- | --- | --- |
 | [[Wiki/policies/review_package_withdrawal_policy]] | Отзыв точного пакета до допуска исполнения; порядок гонки, терминальность и новая подача | Запрет post либо выяснение допущенного outcome | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
-| [[Wiki/policies/published_result_correction_policy]] | Новый связанный WorkOrder для исправления данных; отдельная evidence-only ветка | Прослеживаемая коррекция с сохранением последующих изменений | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
+| [[Wiki/policies/published_result_correction_policy]] | Связанный WorkOrder, отдельная документальная ветвь, снятие доказанно ошибочной пары до установления действительного конца | Редакция и историческая связь, допустимость выдачи и владелец уточнения | high | [[RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers]], [[RAW_inputs/documents/2026-11-26-field-evidence-answers#DISC-2026-11-26-02]] |
 
 | [[Wiki/policies/dependent_work_coordination_policy]] | Приёмка результата, пересмотр обязательства и разбор взаимного ожидания | Допуск обычных проверок, удержание или принятое перепланирование | high | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-answers.md |
 

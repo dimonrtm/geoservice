@@ -3,8 +3,8 @@ title: Принятие полевого свидетельства
 type: concept
 status: active
 created: 2026-10-18
-updated: 2026-11-24
-source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/documents/2026-11-24-field-records-answers.md"
+updated: 2026-11-26
+source: "RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md; RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/documents/2026-11-24-field-records-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-answers.md; RAW_inputs/documents/2026-11-26-field-evidence-analysis.md"
 tags: [domain-knowledge, research, simulated-organization]
 confidence: high
 related: [Wiki/policies/edit_change_justification_policy, Wiki/specifications/saved_line_quality_assessment]
@@ -63,3 +63,7 @@ USX допускает принятие всей съёмки, части либ
 Хранят исходную глубину до названной точки трубы относительно прежней поверхности. Расчёт допустим в том же плане и высотной системе, если известны изменение поверхности в точке, положение трубы, неопределённости и допустимость метода для цели. При неподвижной трубе подъём поверхности увеличивает глубину. Указывают дату и происхождение обоих входов, метод и область. Если одно из условий неизвестно или для решения нужен независимый натурный замер, заказывают измерение. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-05]].
 
 Связывают уведомление изготовителя с партией, поставкой, датами и всеми местами установки, совместимыми с документами выдачи. Все три участка получают задание на проверку возможного происхождения. Отдельно записывают принадлежность к партии и диагноз конкретной детали. Маркировка, прослеживаемая выдача или обследование сужают круг. Даже доказанная принадлежность к партии с сообщением о риске не подтверждает дефект каждой детали. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-06]].
+
+## Какая попытка была проверена
+
+После переделки акты на один объект относятся к разным попыткам. Для каждой указывают исполнителя, время, проверенное свойство, метод, относящиеся к ней вложения и решение принимающего. Между попытками сохраняют связь «переделано после». По ней проверяющий восстанавливает причину отказа и определяет, какой результат приняла следующая смена. В случае TVIS сохраняют связь повторной сварки на муфте с предшествующей попыткой, результаты машины, подпись исполнителя и фотографии. Это основание для правила условной организации. [Эпизод TVIS](../../docs/sources/2026-11-26-heat-field-practice.md#h14) · [[RAW_inputs/documents/2026-11-26-field-evidence-analysis]].

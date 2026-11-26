@@ -3,7 +3,7 @@ title: Индекс Знаний GeoService
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-24
+updated: 2026-11-26
 source: null
 tags: [knowledge, index, geoservice]
 ---
@@ -34,6 +34,10 @@ tags: [knowledge, index, geoservice]
 
 ## Свежие Изменения
 
+- 26.11.2026 обработаны ответы и исследование 99 первичных свидетельств полевой работы. Уточнены четыре варианта трёх действующих сценариев, включая работу с опровергнутой парой при неизвестном продолжении. [[RAW_inputs/documents/2026-11-26-field-evidence-answers]] · [[RAW_inputs/documents/2026-11-26-field-evidence-analysis]].
+
+- В каталоге DDD теперь 20 сценариев. Из 18 целей, выявленных в материалах операторов, условная организация приняла девять как самостоятельные сценарии и три как варианты существующих. Две цели отложены, четыре относятся к смежным службам. Для каждой цели можно проследить путь от рабочего эпизода до решения. [[Vision_wiki/chats/2026-11-24-utility-source-review]], [[DDD_Wiki/use_cases/candidates/_info]], [[DDD_Wiki/use_cases/_info]].
+- За 20–26 ноября добавлены 11 RAW, 8 доменных понятий, 3 политики, 11 сценариев DDD и 12 конспектов источников в Vision. Обработан 71 источник RAW. [[RAW_inputs/index]], [[Wiki/_registry/concepts]], [[Wiki/_registry/policies]], [[Vision_wiki/index]].
 - 24.11.2026 обработаны исследование 101 первичной публикации и ответы на вопросы о принятии полевых сведений. У 99 оригиналов новые ссылки. Все 15 вопросов обзора закрыты. [[RAW_inputs/documents/2026-11-24-field-records-answers]], [[RAW_inputs/documents/2026-11-24-field-records-analysis]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]].
 - К синхронизации 24 ноября после сверки 21 ноября добавлены и обработаны пять RAW. Повторно обработаны две редакции существующего описания роли. В Wiki появились три понятия и две политики, в DDD — сценарий сверки полевых и учётных записей, в Vision — пять конспектов. Новых нод типов `decision`, `entity` и `solution` за этот период нет. [[RAW_inputs/index]], [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]], [[Vision_wiki/index]].
 - 24.11.2026 уточнено, когда достаточно исправить разметку видео, какой знаменатель использовать для сводки по обследованным трубам и как учитывать трубу, внутри которой остановилась трассировка. Описание роли также фиксирует, что получает следующая смена при отставании полевой карты. [[Wiki/policies/inspection_work_policy#Ошибка в разметке или недостаток съёмки]], [[Wiki/concepts/assessment_statement_lifecycle#Знаменатель сводки о состоянии сети]], [[Wiki/concepts/network_representation_and_operational_state#Длина при остановке внутри линии]], [[Wiki/concepts/dataset_delivery_edition#Выдача следующей смене при отставании полевой карты]].
@@ -184,10 +188,10 @@ tags: [knowledge, index, geoservice]
 
 ## Открытые Вопросы
 
-- В реестре 76 отвеченных вопросов и 0 открытых. Решения обзора от 24 ноября связаны с конкретными эпизодами и каноническими правилами. [[Wiki/_registry/questions#Обзор всей доменной модели — 24 ноября]], [[DDD_Wiki/model_health#Current Discovery Queue]].
+- В реестре 78 отвеченных вопросов, открытых нет. [[Wiki/_registry/questions#Исправление записи о соединении волокон — 26 ноября]] · [[DDD_Wiki/model_health#Current Discovery Queue]].
 - Открыты 20 follow-up’ов. Четыре страницы Code_wiki требуют сверки с кодом, включая перенос доставки WebSocket в `web_api`. В карте контекстов устарела пометка о границе Reviewer/Publisher. [[Code_wiki/index#Свежие Repository-Change Знания]], [[Vision_wiki/decisions/followups/index]], [[memory/project-state]].
 - FU-2026-10-11-001 закрыт. Для локальной revision 49 проверены metadata и fixture. Точность L-003 по-прежнему требует позиционного доказательства. [Протокол проверки](docs/verification/2026-11-08-demo-dataset-runtime-check.md).
-- Сохранение одной линии, чтение результата и восстановление команды реализованы. Ближайшая техническая зависимость для review — проверка позиционных доказательств и готовности к передаче пакета. Открытые работы ведутся в FU-2026-10-13-004. [Матрица реализации](docs/verification/2026-11-09-model-health-code-reconciliation.md).
+- Ближайшая задача редактора — сохранить правки двух линий в одной рабочей версии, повторно открыть наряд и откатить одну правку, сохранив другую. После приёмки полного редактора в очереди стоят анализ путей, review и публикация. [Очередь разработки и критерии приёмки](docs/planning/network-editor-backlog.md).
 - Для `Utility GIS editor` нужно реализовать полный путь work order -> edit version -> validation -> reconcile -> conflict resolution -> review -> post -> audit на `synthetic_utility_feeder_01`.
 - Нужно восстановить доступные URL для non-Esri vendor-specific утверждений из research по collaborative editing.
 - Нужно согласовать `lint-wiki.py` с правилом неизменяемости RAW Markdown.
@@ -206,7 +210,7 @@ tags: [knowledge, index, geoservice]
 ## Ручной Pipeline
 
 - Утро: запустить `/sync-vision`, прочитать `memory/project-state.md`, проверить новые файлы в `RAW_inputs/`, затем запустить `/ingest` для новых RAW inputs.
-- Для исследования предметной области запустить `/discover`. Команда отбирает топ-15 из 150 вопросов по всей модели. Параметры `--context` и `--phase` задают акцент обзора.
+- `/discover` по умолчанию рассматривает один рабочий сценарий и выдаёт до 15 открытых вопросов. Если тема исчерпана, список может быть пустым. `--context` и `--phase` ограничивают область, а `--wide` задаёт обзор всей модели. [[docs/knowledge-pipeline/README]].
 - Для выбора результата на 14 дней запустить `/plan-sprint`. В первом содержательном ответе команда задаёт пользователю 15 из 150 вопросов одним нумерованным списком. После ответов на все 15, включая явно делегированные решения, составляет план и критерии приёмки. [[docs/knowledge-pipeline/README]].
 - После встречи: положить транскрипт в `RAW_inputs/meetings/`, запустить `/ingest`, обновить wiki-ноды, конфликты, follow-up'ы и project state.
 - Раз в неделю: запустить `/lint-wiki`, затем `/sync-vision`, затем проверить отчет о здоровье wiki.
