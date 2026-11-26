@@ -12,13 +12,15 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-Принят сценарий [[DDD_Wiki/use_cases/record_physical_asset_change]]. Принят сквозной сценарий [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. Все 15 вопросов о ведении данных, осмотрах и выпусках получили ответы. [[DDD_Wiki/model_health#Current Discovery Queue]]. Решения о зависимых нарядах учтены в [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]]. В [[DDD_Wiki/context_map/geoservice_context_map]] устарела пометка о границе Reviewer/Publisher. Принятое разделение обязанностей описано в [[DDD_Wiki/bounded_contexts/review_post]] и [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
+В доменной модели 20 самостоятельных сценариев. Новые страницы охватывают работу до наряда, проверку учтённой связи, использование сети диспетчером и выдачу доказуемых сведений. [Каталог по задачам участников](use_cases/_info.md) · [Решения по всем 18 кандидатам](use_cases/candidates/_info.md).
+
+Принят сценарий [[DDD_Wiki/use_cases/record_physical_asset_change]]. Принят сквозной сценарий [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records]]. На вопросы обзора 21 ноября получены ответы. По всем 15 вопросам от 24 ноября приняты решения, включая поэтапный ввод, повтор дефекта после ремонта и оспаривание одобрения перед публикацией. [[DDD_Wiki/model_health#Current Discovery Queue]]. Решения о зависимых нарядах учтены в [[DDD_Wiki/use_cases/coordinate_dependent_work_orders]]. В [[DDD_Wiki/context_map/geoservice_context_map]] устарела пометка о границе Reviewer/Publisher. Принятое разделение обязанностей описано в [[DDD_Wiki/bounded_contexts/review_post]] и [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
 
 Принятый отчёт, остаток по обращению и экземпляр, доступный следующей смене, разграничены в [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records#Решение по конкретному утверждению]] и [[DDD_Wiki/use_cases/utility_editor_workflow#Когда следующий шаг выполняет другая смена]].
 
 Сценарии охватывают приёмку повторных проходов, выбор между исправлением отчёта и повторной съёмкой, передачу сводки по оценённым участкам и проверку заявленной длины трассировки. [[DDD_Wiki/use_cases/reconcile_field_and_inventory_records#Если осмотр состоит из нескольких проходов]], [[DDD_Wiki/use_cases/utility_editor_workflow#Основание полевой правки и границы проверки]].
 
-Сохранение и восстановление правки реализованы. Проверка позиционных доказательств, подготовка пакета и публикация остаются в технической очереди. Актуальные очереди и основания — [[DDD_Wiki/model_health]]. Датированные сводки ниже отражают состояние на дату записи.
+В приложении уже можно сохранить и восстановить правку одной линии. Ближайшая задача — исправить две линии в одном наряде и выборочно откатить одну из правок. Геометрия, создание и удаление объектов, атрибуты и соединения входят в очередь до анализа путей, проверки и публикации. [Очередь и критерии приёмки](../docs/planning/network-editor-backlog.md) · [[DDD_Wiki/model_health#Current Sprint Planning Queue]].
 
 `DDD_Wiki/` хранит доменную модель в терминах Domain-Driven Design: домен, поддомены, bounded contexts, context map, aggregates, state machines, invariants, use cases и integration patterns.
 
@@ -31,7 +33,7 @@ tags: [domain-knowledge, ddd]
 - `DDD_Wiki/aggregates/` - агрегаты, корни агрегатов и инварианты транзакционной согласованности.
 - `DDD_Wiki/state_machines/` - жизненные циклы ключевых сущностей.
 - `DDD_Wiki/invariants/` - правила, которые модель обязана сохранять.
-- `DDD_Wiki/use_cases/` - сценарии, связывающие команды, события и политики.
+- [Каталог сценариев](use_cases/_info.md) связывает действия участников, доменные правила и результаты.
 - `DDD_Wiki/integration_patterns/` - ACL, published language, open host service и другие интеграционные решения DDD.
 
 ## Здоровье Модели

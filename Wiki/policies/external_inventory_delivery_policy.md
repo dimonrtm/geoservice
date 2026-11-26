@@ -3,8 +3,8 @@ title: Интерпретация пропусков и кодов во внеш
 type: policy
 status: active
 created: 2026-11-22
-updated: 2026-11-22
-source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md"
+updated: 2026-11-24
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/documents/2026-11-24-field-records-answers.md"
 tags: [domain-knowledge, policy, simulated-organization]
 confidence: high
 related: [Wiki/concepts/dataset_delivery_edition, Wiki/concepts/dataset_instance_and_record_identity]
@@ -31,3 +31,7 @@ related: [Wiki/concepts/dataset_delivery_edition, Wiki/concepts/dataset_instance
 Если общий формат не выражает класс, принимающая сторона может согласовать дополнительную таблицу или чертёж со связью с основным комплектом. В журнале сдачи различают редакцию требований, переданный комплект, результат приёмки и открытые замечания. При повторной подаче связывают исправленный материал с замечанием к предыдущему комплекту. Внешнее свидетельство с замечаниями сохраняет обязательства, указанные в нём. Обязательные основания допуска пакета в GeoService проверяются по [[Wiki/specifications/post_allowed]].
 
 Решение условной организации. Сопоставление практик O01–O04, O08, O09, O14–O17 и S14 — [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]].
+
+## Приёмка партии по выборке
+
+Партию как единицу поставки можно принять по заранее согласованному плану с определённым составом, методом отбора, критериями и последствиями ошибки. Регистрируют состав и проверенные паспорта, результаты и решение полномочного получателя. Остальные 90 получают связь с принятой партией и отметку о способе приёмки. Их индивидуальные свойства остаются непроверенными. При существенном отклонении применяют предусмотренное расширение выборки, возврат либо сплошную проверку. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-10]].

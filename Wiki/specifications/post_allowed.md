@@ -3,8 +3,8 @@ title: Post Allowed
 type: specification
 status: active
 created: 2026-06-24
-updated: 2026-11-09
-source: "Vision_wiki/decisions/release_2_conflict_explanation.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md"
+updated: 2026-11-24
+source: "Vision_wiki/decisions/release_2_conflict_explanation.md; Code_wiki/архитектура/data_model.md; RAW_inputs/meetings/implementation_contract_for_review_and_post.md; RAW_inputs/meetings/ic_review_package_and_simulated_post.md; RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md; RAW_inputs/documents/2026-11-24-field-records-answers.md"
 tags: [domain-knowledge, specification, post]
 confidence: high
 related: [Wiki/commands/post_to_default, Wiki/policies/stale_approval_policy, Wiki/policies/reviewer_post_policy, Wiki/policies/review_package_withdrawal_policy]
@@ -41,3 +41,7 @@ Simulated/technical post должен быть заблокирован, что�
 Владелец публикации упорядочивает отзыв и допуск. Запрос отзыва после допуска не отменяет известный/возможный эффект: до установления исхода новой попытки нет. Две одновременно неразобранные попытки одного пакета недопустимы. Доказанное окончание без публикации должно исключать поздний эффект ещё работающего исполнителя. Подробности — [[Wiki/policies/review_package_withdrawal_policy]].
 
 Факт допуска попытки не вводит durable post_authorized. API, транспорт и механизм упорядочивания проектируются отдельно; текущий Save не меняется.
+
+## Удержание до рассмотрения возражения
+
+В доменной модели координатор review регистрирует удержание конкретного пакета, если оспариваемый вывод может изменить обязательное условие допуска. Пока удержание действует, следующая попытка post не допускается. После рассмотрения допуск вычисляют заново. Если попытка уже получила допуск, сначала устанавливают её исход, а для опубликованного результата действует порядок коррекции. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-12]], [[Wiki/policies/reviewer_post_policy]].

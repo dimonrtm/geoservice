@@ -3,7 +3,7 @@ title: Specifications Registry
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-11-09
+updated: 2026-11-24
 source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
 tags: [domain-knowledge, registry, specification]
 confidence: n/a
@@ -18,7 +18,7 @@ related: [Wiki/index]
 | [[Wiki/specifications/edit_version_has_persisted_change_set]] | В `EditVersion` есть current diff одной line feature и одной внутренней вершины относительно базового состояния работы; response + durable readback доказывают persisted state. | Workspace пока read-only или UI-only draft; submit/review преждевременны. | high | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md`; `RAW_inputs/meetings/tolerance_rules.md` |
 | [[Wiki/specifications/edit_version_basic_draft_validation]] | First save канонизирует изменённую вершину, проверяет hard guards и отдельно фиксирует `POSITIONAL_ACCURACY_UNVERIFIED`, пока нет specification/evidence. | Hard failure отклоняет save атомарно; unverified positional status разрешает working draft, но не review. | high | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md`; `RAW_inputs/meetings/tolerance_rules.md`; `RAW_inputs/meetings/demo_utility_gis.md` |
 | [[Wiki/specifications/edit_version_ready_for_review]] | Persisted change set, basic draft validation, `POSITIONAL_ACCURACY_VERIFIED`, freshness/evidence, затем полный reconcile/default predicate. | Review преждевременен или blocked. | high | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/first_save_for_edit_version.md`; `RAW_inputs/meetings/demo_utility_gis.md` |
-| [[Wiki/specifications/post_allowed]] | Computed `can_post`: package approved, not stale, no absolute veto, `Default` fresh, required evidence complete, pre-post gate passed. | Simulated/technical post blocked. | high | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
+| [[Wiki/specifications/post_allowed]] | Допуск вычисляют для конкретной попытки по актуальному пакету, `Default`, обязательным доказательствам и запретам. В модели также учитываются отзыв, конкурирующая попытка и действующее удержание по возражению. | Публикация ожидает решения по препятствию и новой проверки допуска. | high | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`, [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-12]] |
 
 | [[Wiki/specifications/simulated_line_positional_acceptance]] | SIM-UGIS-POS-001 v1.0: полный scope, max(e+u)<=0,50 м, u<=0,10 м | Учебные pass/fail/unverified; не автоматический backend VERIFIED | high | `RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md` |
 

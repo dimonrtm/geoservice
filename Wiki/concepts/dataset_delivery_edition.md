@@ -4,7 +4,7 @@ type: concept
 status: active
 created: 2026-11-22
 updated: 2026-11-24
-source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md"
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/documents/2026-11-24-field-records-answers.md"
 tags: [domain-knowledge, concept, simulated-organization]
 confidence: high
 related: [Wiki/concepts/assessment_delivery_and_acceptance, Wiki/policies/published_result_correction_policy]
@@ -23,3 +23,7 @@ related: [Wiki/concepts/assessment_delivery_and_acceptance, Wiki/policies/publis
 Когда редакция уже принята, но рабочая веб-карта, планшет или бумажный комплект смены ещё показывает прежний срез, ответственный за выдачу указывает адресату, где доступно принятое основание. Если зависимую работу можно продолжить по выписке, с ней передают участок, дату среза, редакцию, разрешённое применение и известные пробелы. У выписки есть получатель и условие замены штатным комплектом. При отсутствии подходящего представления зависимое действие ожидает актуальных данных.
 
 Проверка доступности редакции и подтверждение её открытия конкретным человеком — разные сведения. Последнее нужно, когда это предусмотрено соглашением или условиями начала следующей работы. Результат осмотра при неизменной карте передают ссылкой на принятый отчёт и соответствующую редакцию карты. Решение GeoService по P02, P07, P28, E09 и G04. [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]].
+
+## Разрешение на производный результат
+
+Ответственный за выпуск сверяет разрешение на конкретный производный продукт, цель, адресата, детализацию, срок и разрешённую дальнейшую передачу. Проверяет, допускают ли условия источника вычисление и внешнюю выдачу и можно ли восстановить защищённые сведения из результата. Если основания не хватает, запрашивает разрешение, согласует допустимый агрегат либо исключает показатель и отмечает пробел. Факт внутреннего доступа и удаление подписей объектов недостаточны. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-13]].

@@ -12,7 +12,7 @@ tags: [domain-knowledge, ddd]
 
 ## Текущее состояние
 
-Все 67 RAW обработаны. Ответы от 22.11.2026 уточнили права на исторические поправки, тождество активов, самостоятельные осмотры, проверки и выдачу карт. В реестре нет открытых доменных вопросов или активных канонических конфликтов. [[Wiki/concepts/data_stewardship_period]], [[Wiki/policies/inspection_work_policy]], [[Wiki/policies/external_inventory_delivery_policy]], [[Wiki/_registry/questions#Обзор всей доменной модели — 21 ноября]], [[Wiki/_registry/conflicts]].
+Все 69 RAW обработаны. Для вопросов обзора от 24.11.2026 приняты правила передачи секций, проверки полевого свидетельства, приёмки, оспаривания и выдачи результата. В реестре 76 ответов. Открытых доменных вопросов и активных канонических конфликтов нет. [[Wiki/concepts/asset_service_point]], [[Wiki/concepts/duct_capacity_reservation]], [[Wiki/concepts/defect_episode]], [[Wiki/_registry/questions#Обзор всей доменной модели — 24 ноября]], [[Wiki/_registry/conflicts]].
 
 Два прохода осмотра с разных концов можно объединить, если сопоставимы их отсчёты и видимость проверяемого свойства. Обновлённое описание роли также уточняет принадлежность вложения, границы сетевой трассировки и редакцию требований к сдаче. [[Wiki/policies/inspection_work_policy]], [[Wiki/concepts/field_observation_acceptance]], [[Wiki/concepts/network_representation_and_operational_state]], [[Wiki/policies/external_inventory_delivery_policy]].
 

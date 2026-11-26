@@ -4,7 +4,7 @@ type: concept
 status: active
 created: 2026-10-22
 updated: 2026-11-24
-source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url"
+source: "RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research.md; RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research.md; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md"
 tags: [domain-knowledge, assessment, simulated-organization]
 confidence: high
 related: [Wiki/concepts/change_basis_lifecycle, Wiki/concepts/evidence_dependency, Wiki/policies/assessment_issue_and_correction_policy]
@@ -52,3 +52,7 @@ RAW исследование: G13 (предварительные/выпущен
 В сводке по осмотрам указывают единицу подсчёта, долю оценённых участков среди подлежащих оценке, долю участков с данным результатом среди оценённых и основание отбора на осмотр. Для участка без оценки сохраняется «не оценён». Если сначала осматривали участки с наиболее тяжёлыми последствиями отказа, перенос доли на всю сеть потребовал бы отдельного обоснования представительности.
 
 Это применение правила о границах утверждения в условной организации. В отчёте Downers Grove около 20 % канализационных линий получили оценку PACP. Указанные оператором 4 % с оценкой, требующей рассмотрения ремонта или замены в пятилетнем плане, отнесены к уже оценённым. [[Vision_wiki/chats/2026-11-24-awwa-condition-assessment]].
+
+## Сопоставление оценок после изменения шкалы
+
+Кроме охвата и знаменателя фиксируют единицу наблюдения, обе шкалы и правило пересчёта. Прямой вывод возможен, если для порога «тяжёлый» классификации эквивалентны или старые итоги однозначно приводятся к общей шкале. Если старый класс пересекает новый порог, показывают диапазон возможной прежней доли. Ухудшение можно утверждать лишь когда изменение сохраняет знак при всех допустимых пересчётах и учтены прочие условия сравнимости. Иначе ставят разрыв ряда или переоценивают первичные материалы. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-14]].

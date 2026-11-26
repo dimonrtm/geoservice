@@ -3,8 +3,8 @@ title: Определение срока хранения истории изм�
 type: policy
 status: active
 created: 2026-10-11
-updated: 2026-10-13
-source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md"
+updated: 2026-11-24
+source: "RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md; docs/sprint_2/2026-10-12-save-recovery-rules-decision.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-expert-recovery-governance.md; RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md; RAW_inputs/documents/2026-11-24-field-records-answers.md"
 tags: [domain-knowledge, policy, audit, retention]
 confidence: high
 related: [Wiki/value_objects/command_id, Wiki/domain_events/edit_version_change_set_persisted, Wiki/domain_events/edit_version_change_set_cleared, DDD_Wiki/bounded_contexts/audit]
@@ -42,6 +42,10 @@ Revert не стирает историю. Ответ 15: отказы испо�
 ## Exceptions
 
 Редактор получает материалы своих работ, Reviewer/распорядитель — проверяемые материалы, поддержка — нужную диагностику. Это целевая политика, не реализованная ACL. Реализация архива/очистки и проверок доступа отдельно в FU-2026-10-13-004. Требования реальных сотрудников и неизвестного срока больше не открыты.
+
+## Свидетельство об исполненном уничтожении
+
+Распорядитель архива хранит отдельное свидетельство исполнения с идентификатором серии или перечня, охватом и периодом, редакцией правила, проверкой зависимостей и удержаний, разрешившим и исполнившим лицами, датой, результатом и исключениями. Срок самого свидетельства определяется его собственной архивной категорией. На запрос различают пригодный сохранившийся первичный материал, подтверждённое уничтожение и неполный поиск. Состав или правильность прежнего решения подтверждают только сохранившимися независимыми записями в пределах их содержания. [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-15]].
 
 ## Историческое основание — не текущие открытые требования
 

@@ -56,3 +56,11 @@ related: [Wiki/index]
 | [[Wiki/concepts/data_stewardship_period]] | Полномочие стороны вести свойство за определённый период и регистрировать историческую поправку | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-04]] |
 | [[Wiki/concepts/asset_identity_resolution]] | Доказанное тождество карточек и временное дело для идентификации находки | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-06]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-07]] |
 | [[Wiki/concepts/dataset_delivery_edition]] | Дата среза, связь редакций одного выпуска, выдача адресату и замена временной полевой копии | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-18]], [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]] |
+
+## Эксплуатационные обязанности и повторные наблюдения — 24.11.2026
+
+| Понятие | Что различает | Источник |
+| --- | --- | --- |
+| [[Wiki/concepts/asset_service_point]] | У точки обслуживания есть устойчивая эксплуатационная граница. Привязки адресов, договоров и установленных экземпляров могут меняться с разными датами. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-02]] |
+| [[Wiki/concepts/duct_capacity_reservation]] | Для обещанного места учитывать обладателя, границы, объём и основание завершения резерва. Отдельно проверять техническую пригодность нужного пролёта. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-03]] |
+| [[Wiki/concepts/defect_episode]] | Эпизод проявления связывает исходное наблюдение, подтверждение результата ремонта и возможный повтор. Повторное обращение, повтор проявления и подтверждённый дефект считаются по разным основаниям. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-07]] |

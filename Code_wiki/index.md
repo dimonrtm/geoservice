@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-21
+updated: 2026-11-24
 source: Code_wiki/состояние_проекта/repository_change_ingest.md
 tags: [code-wiki, technical-knowledge]
 ---
@@ -61,6 +61,7 @@ tags: [code-wiki, technical-knowledge]
 
 ## Свежие Repository-Change Знания
 
+- После B4 в [[архитектура/backend#Пакеты И Границы]] требуется уточнить, где собираются зависимости realtime. Прикладной издатель получает функцию публикации, доставкой управляет `web_api/realtime`, а связывает их `realtime_dependencies.py`. Это входит в открытую сверку FU-2026-11-21-001. [Фабрики зависимостей](../apps/backend/utility_service/realtime_dependencies.py), [проверка B4](../docs/full_refactoring/2026-11-22-stage-7-b4-verification.md).
 - В редакторе F1 разделены владельцы списка нарядов, черновика, команд, навигации и сессии. `createEditorWorkflow` координирует их операции, общий runtime создаётся для экземпляра Pinia. Обе обновлённые страницы учтены в [[состояние_проекта/repository_change_ingest]]. [Проверка F1](../docs/full_refactoring/2026-11-17-stage-2-f1-verification.md).
 - FU-2026-11-21-001. Описания открытия версии и проверки геометрии в [[архитектура/backend]] и [[архитектура/edit_version_persistence]] требуют актуализации. Открытие использует прикладной порт транзакций. Структурные правила сохранения линии вынесены в доменную политику, PostGIS поставляет пространственные факты. [Сценарий открытия](../apps/backend/utility_service/use_cases/services/open_edit_version.py), [адаптер PostgreSQL](../apps/backend/utility_service/infrastructure/postgresql/open_edit_version.py), [политика геометрии](../apps/backend/utility_service/domain_services/edit_geometry/save_policy.py).
 - По тому же follow-up страницы [[архитектура/frontend]] и [[архитектура/frontend_save_recovery]] описывают этап F1. Последующие изменения ввели явную привязку HTTP к сессии и отдельный исполнитель восстановления Save/Revert. [Проверка доступа F2](../docs/full_refactoring/2026-11-21-stage-5-f2-verification.md), [проверка восстановления F4](../docs/full_refactoring/2026-11-21-stage-6-f4-verification.md).

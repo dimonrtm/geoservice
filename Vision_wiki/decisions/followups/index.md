@@ -3,7 +3,7 @@ title: Follow-ups
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-22
+updated: 2026-11-24
 source: null
 tags: [followups, conflicts]
 ---
@@ -16,7 +16,7 @@ tags: [followups, conflicts]
 
 | ID | Статус | Область | Источник | Требуемое действие |
 | --- | --- | --- | --- | --- |
-| FU-2026-11-21-001 | open | Code_wiki, границы ответственности после рефакторинга | [[Code_wiki/index]], изменения B1/B2 и F2/F4 | Через `/ingest repository-change` актуализировать [[Code_wiki/архитектура/backend]], [[Code_wiki/архитектура/edit_version_persistence]], [[Code_wiki/архитектура/frontend]] и [[Code_wiki/архитектура/frontend_save_recovery]]. Сверить открытие версии через прикладной порт, политику проверки геометрии, привязку HTTP к сессии и исполнителя восстановления Save/Revert. Снять метки после сверки описаний с кодом. |
+| FU-2026-11-21-001 | open | Code_wiki, границы ответственности после рефакторинга | [[Code_wiki/index]], изменения B1/B2 и F2/F4, [проверка B4](../../../docs/full_refactoring/2026-11-22-stage-7-b4-verification.md) | Через `/ingest repository-change` актуализировать [[Code_wiki/архитектура/backend]], [[Code_wiki/архитектура/edit_version_persistence]], [[Code_wiki/архитектура/frontend]] и [[Code_wiki/архитектура/frontend_save_recovery]]. Сверить открытие версии через прикладной порт, политику проверки геометрии, сборку зависимостей издателя и доставку WebSocket в `web_api/realtime`, привязку HTTP к сессии и исполнителя восстановления Save/Revert. Снять метки после сверки описаний с кодом. |
 | FU-2026-11-21-002 | open | DDD, карта контекстов | [[DDD_Wiki/context_map/geoservice_context_map]], [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]], [[DDD_Wiki/bounded_contexts/review_post]] | При содержательной актуализации карты исправить в разделе Risks прежний статус границы Reviewer/Publisher по принятому решению. |
 | FU-2026-11-01-001 | resolved | Code_wiki: frontend Docker context | apps/frontend/.dockerignore; [[Code_wiki/сборка/ci_and_quality]]; runbook INF-03 | Post-ingest correction: deployment/docker_compose отражает фильтрацию локальных env/dependencies; границы внешнего HTTPS и same-origin сохранены. |
 | FU-2026-10-11-002 | resolved | Принятие research-правил | `docs/sprint_2/2026-10-12-save-recovery-rules-decision.md` | Пользователь принял правила 2026-10-12; конфликт observer/operation разрешён, D5-Q1 принято. Реализация отдельно запланирована в S2-X01 вне дней. Реальные ответственные, specification и срок history остаются открыты в FU-2026-10-11-003 и реестре вопросов. |

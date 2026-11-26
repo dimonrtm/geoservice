@@ -4,7 +4,7 @@ type: use-case
 status: active
 created: 2026-11-22
 updated: 2026-11-24
-source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url"
+source: "RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers.md; RAW_inputs/documents/UtilityGisEditorRole.md; RAW_inputs/docs/Western-Virginia-Regional-Design-and-Construction-Standards-2024-Addendum-1.url; RAW_inputs/docs/AWWA-2017-Leading-Business-Practices-in-Asset-Management.url; RAW_inputs/documents/2026-11-24-field-records-answers.md; RAW_inputs/documents/2026-11-24-field-records-analysis.md"
 tags: [domain-knowledge, ddd, utility-gis, simulated-organization]
 confidence: high
 related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/review_post, DDD_Wiki/bounded_contexts/audit]
@@ -46,3 +46,14 @@ related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/w
 3. Установить доступный смене результат. При обычном доступе достаточно ссылки на принятую редакцию. Если выдавался временный экземпляр, прослеживают его замену. [[Wiki/concepts/dataset_delivery_edition#Выдача следующей смене при отставании полевой карты]].
 
 Основания — G14, G17, P07, P20, P28, W19 и E01. [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]].
+
+## Когда наблюдение затрагивает разные эксплуатационные решения
+
+| Кто принимает решение | Что устанавливает и передаёт |
+| --- | --- |
+| Исполнитель и редактор (Utility Network) | Указывают физический предмет, позицию, дату, фактический охват и свойство. Для общего ввода связывают адресатов с [[Wiki/concepts/asset_service_point]]. Неизвестная дата замены допускает двух кандидатов. Геометрию, историю установки, занятие канала и [[Wiki/concepts/duct_capacity_reservation]] проверяют отдельно. |
+| Владелец обязанности и координатор работ (Work Order) | Начинают обход по переданной секции. Повторное обращение связывают с [[Wiki/concepts/defect_episode]]. Проверяют результат ремонта, полномочие на отсрочку и следующую контрольную дату. При общем окне доступа сохраняют вытесненную работу и названного ответственного. [[Wiki/policies/inspection_work_policy]]. |
+| Получатель поставки и Reviewer | Принятую по выборке партию связывают с проверенными паспортами. Для единственного решающего свидетельства проверяют независимость Reviewer. Возражение принимают к разбору по указанному критерию. Существенное удержание адресуют точному пакету до допуска очередной попытки. [[Wiki/policies/external_inventory_delivery_policy]], [[Wiki/policies/reviewer_post_policy]], [[Wiki/specifications/post_allowed]]. |
+| Владелец выпуска и Audit | Для производной карты определяют цель, получателя и разрешения источников. При сравнении сводок проверяют шкалы и знаменатели. После выбытия материалов удостоверяют основание и исполнение уничтожения по сохранившемуся следу. [[Wiki/concepts/dataset_delivery_edition]], [[Wiki/concepts/assessment_statement_lifecycle]], [[Wiki/policies/change_history_retention_policy]]. |
+
+**Пример сдачи без правки.** В наряде требуется подтвердить положение конкретной задвижки. Мастер передаёт новый эскиз после перестройки двора. Редактор устанавливает, что изменился ориентир, а новое измерение подтверждает прежнюю координату. Reviewer принимает отчёт в пределах измеренного свойства. Изменение ориентира можно зарегистрировать отдельным утверждением, если это входит в поручение. Получатель видит редакцию и охват подтверждения. Если относимость замера к задвижке остаётся спорной, запрос возвращается за различающим свидетельством. [[RAW_inputs/documents/2026-11-24-field-records-answers]], [[RAW_inputs/documents/2026-11-24-field-records-analysis]].

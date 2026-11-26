@@ -58,7 +58,7 @@ Compact topic-to-file map for agent retrieval. Keep entries short and update onl
 - GeoService Sprint 1 Day 2 implementation: `apps/backend/app/alembic/versions/b82a5f2d91c3_editor_reviewer_roles.py`, `apps/backend/app/api/auth.py`, `apps/backend/app/api/websocket_auth.py`, `apps/backend/app/services/demo_user_seed_service.py`, `apps/frontend/src/domain/authRole.ts`, `apps/frontend/src/components/ReviewerHome.vue`
 - Code_wiki repository snapshot inventory: `Code_wiki/архитектура/backend.md`, `Code_wiki/архитектура/frontend.md`, `Code_wiki/архитектура/api_and_realtime.md`, `Code_wiki/архитектура/data_model.md`, `Code_wiki/dev_setup/local_development.md`, `Code_wiki/deployment/docker_compose.md`, `Code_wiki/сборка/ci_and_quality.md`, `Code_wiki/правила_и_стиль/testing_strategy.md`, `Code_wiki/глоссарий/technical_terms.md`
 - Obsidian wiki graph config: `.obsidian/app.json`, `.obsidian/appearance.json`, `.obsidian/core-plugins.json`, `.obsidian/graph.json`, `.obsidian/templates.json`
-- Долгосрочный `/discover`, топ-15 из 150 по всей модели, смысловая новизна, реестр и активная очередь, акценты `--context` и `--phase` — `.agents/skills/source-command-discover/SKILL.md`, `DDD_Wiki/model_health.md`, `Общие_принципы/Фазы наполнения wiki.md`
+- Предметный `/discover`, граница темы и `--wide`, проверка новых целей при `/ingest`, сравнение с каталогом сценариев и ведение очереди — `.agents/skills/source-command-discover/SKILL.md`, `.agents/skills/source-command-ingest/SKILL.md`, `DDD_Wiki/use_cases/_info.md`, `docs/knowledge-pipeline/README.md`
 
 ## Project Documentation
 
