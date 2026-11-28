@@ -11,12 +11,11 @@ GeoService — эксперимент по разработке приложен
 - Перед выдачей доменного ответа проверить: не переложено ли исследование на пользователя, не запрашиваются ли несуществующие сотрудники или документы, указано ли происхождение существенных решений.
 - Режим не отменяет принятые инварианты, границы реализации и правила Git; прежние предложения не становятся автоматически принятыми.
 
-## Граница требования 75 источников
+## Источники доменного исследования
 
-- Минимум 75 внешних источников применяется только к отдельному исследованию для уточнения доменной модели после `/discover`.
-- Сам вызов `/discover`, просьба о глубоком анализе или использование `Wiki/DDD_Wiki` не запускают это требование.
-- При разборе технической задачи спринта, уточнении требований, анализе текущего кода, проектировании реализации и проверок опираться на материалы репозитория и ответы пользователя. Внешние источники привлекать для конкретных пробелов, без обязательной квоты.
-- Не превращать технический разбор в отдельное доменное исследование и не задерживать его завершение ради набора 75 источников.
+Для отдельно запрошенного исследования после `/discover` количество источников определяется вопросом. Обязательного минимума нет. Указывать, какое решение о сети обосновывает каждый использованный источник. Если свидетельств недостаточно или они расходятся, обозначить конкретную неопределённость.
+
+Для технического разбора спринта использовать материалы репозитория и ответы пользователя. Внешние источники привлекать для конкретных пробелов.
 
 Before working in this repository:
 
@@ -250,7 +249,6 @@ This repository also contains a broader project knowledge wiki:
 - `RAW_inputs/` stores raw source materials.
 - `Wiki/` stores canonical domain entities, concepts, actors, commands, events, policies, specifications, conflicts, questions, and registries.
 - `DDD_Wiki/` stores the DDD domain model: domains, subdomains, bounded contexts, context maps, aggregates, invariants, state machines, use cases, integration patterns, and model health.
-- `Vision_wiki/` stores legacy/source product knowledge, decisions, conflicts, assumptions, stakeholders, and follow-ups.
 - `Code_wiki/` stores technical knowledge, architecture notes, runbooks, ADRs, API notes, and repository-change ingest entries.
 - `memory/` stores live wiki state and LLM-wiki method files.
 - `Общие_принципы/` stores reusable discovery and meeting methodology.
@@ -258,16 +256,18 @@ This repository also contains a broader project knowledge wiki:
 
 Human-readable wiki content, implementation plans, runbooks, follow-ups, and state files must be written in Russian. Do not translate paths, commands, file names, API names, types, identifiers, package names, or code.
 
+Начальная доменная модель от 27.11.2026 основана только на `RAW_inputs/documents/UtilityGisEditor.md`. Для /discover и сравнения при /ingest брать действующий состав модели из `Wiki/`, `DDD_Wiki/` и источников этого среза в `RAW_inputs/index.md`. Отметки о прежней обработке RAW относятся к истории.
+
 Manual wiki workflow:
 
 1. Morning: run `/sync-vision`, check `memory/project-state.md`, check new files in `RAW_inputs/`, then run `/ingest` for new raw inputs.
-2. `/discover` без параметров ищет пробелы по всей доменной модели. Из 150 разных кандидатов выбрать 15 открытых вопросов о конкретных рабочих эпизодах. Исключить смысловые повторы и развилки, уже разрешённые принятыми правилами. Выдать только нумерованный список вопросов. `--wide` эквивалентен запуску без параметров. При явном ограничении темы, в том числе через `--context` или `--phase`, выдать до 15 вопросов в её границах. Ответы исследовать по отдельному поручению. При `/ingest` RAW этого исследования сверить цели и результаты из эпизодов с `DDD_Wiki/use_cases/`, включая задачи вне исходной анкеты. [Процесс и критерии отбора](docs/knowledge-pipeline/README.md).
+2. `/discover` и `/discover --wide` ищут пробелы по всей модели редактора инженерной сети из `RAW_inputs/documents/UtilityGisEditor.md` и её принятых уточнений. Из пула до 150 кандидатов выдать до 15 неповторяющихся вопросов. Для каждого требуется рабочий эпизод и конкретное различие в модели, которое определит ответ. Если подходящих вопросов меньше, вернуть столько, сколько прошло отбор. `--context` и `--phase` сужают ту же область. Ответы исследовать по отдельному поручению. При доменном `/ingest` принимать новый сценарий, только когда по источнику ясны задача редактора, сетевые данные, решение, получатель и самостоятельный результат, ещё не покрытый каталогом. [Процесс и критерии отбора](docs/knowledge-pipeline/README.md).
 3. Для планирования ближайших 14 дней запускать `/plan-sprint`. Сверить исходное состояние с кодом, `Code_wiki/`, `Wiki/`, `DDD_Wiki/` и конфликтами. Из 150 вопросов выбрать 15, влияющих на цель, объём, порядок работ или приёмку, и задать пользователю все 15 одним нумерованным списком в первом содержательном ответе в чате. При частичных ответах уточнить оставшиеся пункты. Составлять план только после ответов пользователя по всем 15 вопросам, учитывая явно делегированные решения. Из ответов вывести демонстрируемый результат, минимальный сквозной сценарий, календарь, критерии приёмки и допустимое сокращение объёма.
-4. After a meeting: put the transcript in `RAW_inputs/meetings/`, run `/ingest`, update `Wiki/DDD_Wiki` first, keep `Vision_wiki` as legacy/source knowledge, record conflicts/follow-ups, and update `memory/project-state.md`.
+4. После встречи сохранить материал в `RAW_inputs/meetings/`, выполнить `/ingest` и записать результат разбора в `RAW_inputs/index.md`. При установленном предметном вкладе обновить соответствующие узлы модели. Зафиксировать выявленные конфликты и обновить состояние проекта при изменении очереди или следующего действия.
 5. Weekly: run `/lint-wiki`, run `/sync-vision`, and produce a wiki health report.
 6. Weekly: run `/audit-memory`; present cleanup candidates and wait for confirmation before deleting or merging anything.
 
-When `/ingest` is run without parameters, process 1-5 unambiguous newly added RAW inputs sequentially. Do not reread old already processed raw files automatically; changed old raw files are ambiguity and require confirmation. Process any new raw file, not only files with questions or answers. If there are more than 5 RAW candidates or any ambiguity, list the candidates and ask for confirmation before processing. If there are no new RAW inputs, do not edit files; report that ingest was not performed and suggest an explicit path, `/ingest repository-snapshot`, or `/ingest repository-change` if appropriate.
+When `/ingest` is run without parameters, process 1-5 unambiguous newly added RAW inputs sequentially. An already processed RAW is eligible for reprocessing only when explicitly selected. Changed old raw files are ambiguous and require confirmation. Process any new raw file, not only files with questions or answers. If there are more than 5 RAW candidates or any ambiguity, list the candidates and ask for confirmation before processing. If there are no new RAW inputs, do not edit files; report that ingest was not performed and suggest an explicit path, `/ingest repository-snapshot`, or `/ingest repository-change` if appropriate.
 
 Use `/ingest repository-snapshot` through `.agents/skills/source-command-ingest/SKILL.md` when existing unchanged repository content needs to be added to `Code_wiki`: initial technical inventory, large external changes, or stale Code_wiki. Snapshot writes only knowledge documentation and must not edit code, configuration, migrations, or tests.
 
@@ -275,6 +275,6 @@ Invoke `/ingest repository-change` only when completed work contains new durable
 
 Do not edit `C:\Repositories\ai-po-template-experiments`. It is a read-only reference for template/methodology ideas only. Do not copy project-specific facts from it.
 
-If new knowledge conflicts with old documentation, `/ingest` must record the conflict or follow-up. After `/ingest`, old documentation may be corrected only for conflicts that already exist in `Vision_wiki/decisions/followups/index.md`, are related to `Code_wiki`, and can be resolved from new knowledge. Code, configuration, migrations, and tests require a separate explicit implementation task.
+If new knowledge conflicts with old documentation, `/ingest` must record the conflict or follow-up. After `/ingest`, old documentation may be corrected only for conflicts that already exist in `Wiki/_registry/conflicts.md`, are related to `Code_wiki`, and can be resolved from new knowledge. Code, configuration, migrations, and tests require a separate explicit implementation task.
 
 Обновление оперативных статусов, реестра вопросов, активной Current Discovery Queue и live state по установленным ответам/протоколам не является запрещённым смысловым исправлением исторических нод. При /ingest и /sync-vision эти управляющие места согласуются между собой; исходные RAW и история решений сохраняются.

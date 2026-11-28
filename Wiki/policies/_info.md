@@ -1,13 +1,13 @@
 ---
-title: Policies Catalog
+title: "Правила"
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-24
+updated: 2026-11-27
 source: null
 tags: [domain-knowledge, policy]
 ---
 
-# Policies Catalog
+# Правила
 
-Каталог политик: правил, которые принимают доменные решения и запускают реакции.
+Основания для публикации, принятия полевых сведений и оперативной трассировки. [[Wiki/_registry/policies|Действующий реестр]].

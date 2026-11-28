@@ -86,5 +86,4 @@ tags: [api, release-1, contract, realtime, geojson]
 
 - [[api_and_realtime]]
 - [[data_model]]
-- [[../../Vision_wiki/solution/USM]]
-- [[../../Vision_wiki/concepts/first_release_mvp]]
+- [Исходные требования первого релиза](<../../RAW_inputs/documents/спринт 1.odt>)

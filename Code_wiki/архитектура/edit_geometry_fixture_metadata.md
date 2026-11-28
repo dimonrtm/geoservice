@@ -24,7 +24,7 @@ tags: [fixture, seed, geometry, metadata, edit-version]
 
 ## Связь с открытыми вопросами
 
-Для [[Wiki/_registry/questions]] найдены технические основания выбора fixture и реализованной policy. Это устраняет прежнее утверждение об отсутствии eligible объекта в seed, но не закрывает автоматически вопросы в доменном реестре. Нужно различать проверенные исходники, фактическую БД и принятую [[Wiki/specifications/simulated_line_positional_acceptance]]. SIM-EVID-001 не доказывает точность L-003; technical Save по-прежнему возвращает `POSITIONAL_ACCURACY_UNVERIFIED`, topology/review/post не реализуются этой fixture.
+Для спринта установлены технические основания выбора fixture и реализованной policy. Позиционные критерии, принятые для этой проверки, описаны в [решениях от 13.10.2026](../../RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md). SIM-EVID-001 не доказывает точность L-003; technical Save по-прежнему возвращает `POSITIONAL_ACCURACY_UNVERIFIED`, topology/review/post не реализуются этой fixture.
 
 ## Источники
 

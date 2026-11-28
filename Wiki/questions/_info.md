@@ -3,7 +3,7 @@ title: Questions Catalog
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-24
+updated: 2026-11-27
 source: null
 tags: [domain-knowledge, question]
 ---
@@ -11,3 +11,5 @@ tags: [domain-knowledge, question]
 # Questions Catalog
 
 Каталог вопросов discovery и планирования спринтов. Вопросы должны быть связаны с пробелом модели, конфликтом или решением по планированию.
+
+[Реестр открытых вопросов](../_registry/questions.md#открытые) содержит действующие статусы. Для исследования полевых сведений отдельно разобран [остаток NET-11](project_change_after_construction.md). Остальные открытые решения касаются полномочий на публикацию (NET-02), перепроверки смежного изменения (NET-06), зоны обслуживания (NET-14) и действительности выданного наряда (NET-15).

@@ -1,13 +1,13 @@
 ---
-title: Value Objects Catalog
+title: "Объекты-значения"
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-24
+updated: 2026-11-27
 source: null
 tags: [domain-knowledge, value-object]
 ---
 
-# Value Objects Catalog
+# Объекты-значения
 
-Каталог value objects: неизменяемых значений, равенство которых определяется структурой.
+Состав значений, условия сравнения и использование прежних значений после уточнения. [[Wiki/_registry/value_objects|Действующий реестр]].

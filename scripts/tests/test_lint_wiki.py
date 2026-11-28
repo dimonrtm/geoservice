@@ -32,25 +32,25 @@ class LintWikiTests(unittest.TestCase):
         return path
 
     def test_reports_missing_frontmatter(self):
-        self.write("Vision_wiki/concepts/no-frontmatter.md", "# No Frontmatter\n")
+        self.write("Code_wiki/concepts/no-frontmatter.md", "# No Frontmatter\n")
 
         lint_wiki = load_module()
         issues = lint_wiki.lint(self.root)
 
         self.assertIssue(
-            issues, "missing_frontmatter", "Vision_wiki/concepts/no-frontmatter.md"
+            issues, "missing_frontmatter", "Code_wiki/concepts/no-frontmatter.md"
         )
 
     def test_reports_broken_wikilink(self):
         self.write(
-            "Vision_wiki/concepts/source.md",
+            "Code_wiki/concepts/source.md",
             "---\ntitle: Source\ntype: concept\nstatus: active\ncreated: 2026-05-30\nupdated: 2026-05-30\nsource: RAW_inputs/example.md\ntags: []\n---\n\n[[Missing/Node]]\n",
         )
 
         lint_wiki = load_module()
         issues = lint_wiki.lint(self.root)
 
-        self.assertIssue(issues, "broken_wikilink", "Vision_wiki/concepts/source.md")
+        self.assertIssue(issues, "broken_wikilink", "Code_wiki/concepts/source.md")
 
     def test_reports_required_source_for_non_index_wiki_nodes(self):
         self.write(

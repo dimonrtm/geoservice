@@ -1,17 +1,20 @@
 ---
-title: External Systems Registry
+title: "Внешние системы"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-06-24
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, external-system]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index]
+related: [Wiki/external_systems/external_gis_stack, Wiki/entities/integration_job]
 ---
 
-# External Systems Registry
+# Внешние системы
 
-| System | Direction | Contract | Confidence | Source |
-| --- | --- | --- | --- | --- |
-| [[Wiki/external_systems/external_gis_stack]] | Внешний источник evidence/baseline | Антикоррупционная граница для языка review/post | medium | `RAW_inputs/documents/UtilityGisEditorRole.md` |
+- [[Wiki/external_systems/external_gis_stack|Получатели и поставщики данных о сети]]
+- [Где проходит граница ответственности при обмене](../external_systems/external_gis_stack.md#где-проходит-граница-ответственности)
+
+Предмет отдельной передачи описан в [[Wiki/entities/integration_job|задании обмена с внешней системой]].
+
+[UtilityGisEditor.md](../../RAW_inputs/documents/UtilityGisEditor.md)

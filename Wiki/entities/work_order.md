@@ -1,32 +1,23 @@
 ---
-title: Work Order
+title: "Наряд и позиции работ"
 type: entity
 status: active
-created: 2026-06-24
-updated: 2026-07-25
-source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Code_wiki/архитектура/data_model.md; Code_wiki/архитектура/api_and_realtime.md; RAW_inputs/meetings/first_save_for_edit_version.md"
-tags: [domain-knowledge, entity, work-order]
-confidence: high
-related: [Wiki/actors/editor, Wiki/entities/edit_version, Wiki/value_objects/aoi, DDD_Wiki/aggregates/work_order]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [Wiki/entities/network_feature, Wiki/entities/field_observation, DDD_Wiki/aggregates/network_work_order, DDD_Wiki/use_cases/outage_workflow]
 ---
 
-# Work Order
+# Наряд и позиции работ
 
-## Identity
+Наряд задаёт работу с сетью. Офисный процесс также может начинаться с заявки на изменение. В аварийном процессе диспетчер формирует задание по результату трассировки. Бригада получает относящиеся к работе активы и возвращает сведения об исполнении.
 
-`WorkOrder` имеет стабильный `id` и человекочитаемый `code`.
+В концептуальной диаграмме документа наряд содержит позиции, каждая позиция относится к активу. После восстановления услуги сеть и статусы работ актуализируют согласованно. Названия статусов и полный жизненный цикл наряда источник оставляет открытыми.
 
-## Lifecycle
+[UtilityGisEditor.md · Базовые и продвинутые workflows](../../RAW_inputs/documents/UtilityGisEditor.md#базовые-и-продвинутые-workflows)
 
-В Sprint 1 подтвержден минимальный переход `assigned -> in_progress`, который выполняется при первом успешном создании `EditVersion`. First save не создает нового lifecycle transition: `WorkOrder` остается `open/in_progress`.
+В задании по отключению диспетчер различает расчётный охват и фактически восстановленную часть. Полученное подтверждение закрывает только охваченный им объём. При наличии остатка наряд остаётся открытым. [[Wiki/commands/record_service_restoration|Учесть восстановление по части задания]]. [NET-03](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-03) · [NET-12](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-12).
 
-## Responsibilities
-
-`WorkOrder` связывает назначенного `Editor`, `AOI`, `Feeder`, `DefaultState` и единственную активную `EditVersion`. Для first save он задает внешние ограничения aggregate: editor assignment, AOI, бизнес-контекст, lifecycle и разрешенный scope; атомарное draft state принадлежит `EditVersion`.
-
-## Invariants
-
-- Назначен ровно одному активному `Editor`.
-- Открыть задачу может только назначенный `Editor`.
-- Ссылается ровно на один `AOI` и один `Feeder`.
-- Имеет не более одной активной `EditVersion`.
+В исходной диаграмме каждый экземпляр `WORK_ORDER_ITEM` относится к одному наряду (`WORK_ORDER`) и одному активу. Один актив может участвовать в нескольких позициях. Даже если позиция указывает задвижку, принадлежность [[Wiki/entities/field_observation|конкретного замера]] требуется установить отдельно. Общий статус задания и учтённый объём его позиций согласуются внутри [[DDD_Wiki/aggregates/network_work_order|агрегата наряда]]. [Связи в диаграмме](../../RAW_inputs/documents/UtilityGisEditor.md#бизнес-модели-и-метрики-успеха) · [NET-07](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-07).

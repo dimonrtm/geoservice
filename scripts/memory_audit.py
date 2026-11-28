@@ -33,7 +33,8 @@ CANONICAL_PREFIXES = (
     "docs/superpowers/plans/",
     "docs/superpowers/specs/",
     "docs/sprint_1/",
-    "Vision_wiki/",
+    "Wiki/",
+    "DDD_Wiki/",
     "Code_wiki/",
     "RAW_inputs/",
 )

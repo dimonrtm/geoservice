@@ -3,7 +3,7 @@ title: Code_wiki
 type: index
 status: active
 created: 2026-05-30
-updated: 2026-11-24
+updated: 2026-11-27
 source: Code_wiki/состояние_проекта/repository_change_ingest.md
 tags: [code-wiki, technical-knowledge]
 ---
@@ -54,10 +54,11 @@ tags: [code-wiki, technical-knowledge]
 - [[сборка/ci_and_quality]] - CI jobs, build/test/lint gates и wiki checks.
 - [[правила_и_стиль/testing_strategy]] - backend/frontend/pipeline тестовая стратегия.
 - [[глоссарий/technical_terms]] - термины текущей технической модели и desired vocabulary utility demo.
-- [[../Vision_wiki/decisions/release_1_utility_workflow]] - активный desired contract нового Release 1; текущий код требует отдельной compliance matrix.
+- [Проектный контракт Release 1](../docs/superpowers/specs/2026-06-11-release-1-utility-workflow-design.md) описывает требования этого релиза.
 - [Code compliance matrix](../docs/requirements/release-1-utility-code-compliance.md) - фактические foundation/gap/superseded статусы перед реализацией.
-- [Крупноуровневый план по спринтам](../docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md) - семь двухнедельных продуктовых инкрементов нового Release 1.
+- [Крупноуровневый план Release 1 от 11 июня 2026 года](../docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md) описывает семь инкрементов, предложенных для этого релиза.
 - [Документы Спринта 1](../docs/release_1/sprint_1/README.md) - календарный план, контракты Дня 1, design/implementation plans Дней 2-4, backend foundation Work Orders Дня 5, EditVersion from Default Дня 8, Мои наряды Дня 11 и отделенные исторические generic-планы.
+- [Очередь работ по доменным сценариям](../docs/planning/network-editor-backlog.md#что-предстоит-реализовать-по-сценариям) содержит варианты для планирования.
 
 ## Свежие Repository-Change Знания
 

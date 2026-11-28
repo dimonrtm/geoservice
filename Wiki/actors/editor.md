@@ -1,27 +1,29 @@
 ---
-title: Editor
+title: "Участники работ с сетью"
 type: actor
 status: active
-created: 2026-06-24
-updated: 2026-06-24
-source: "docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; Vision_wiki/concepts/utility_gis_editing_domain.md"
-tags: [domain-knowledge, actor, release-1]
-confidence: high
-related: [Wiki/entities/work_order, Wiki/commands/open_edit_version, DDD_Wiki/bounded_contexts/work_order]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [Wiki/actors/organization_and_access, Wiki/policies/publication, Wiki/external_systems/external_gis_stack, DDD_Wiki/use_cases/_info]
 ---
 
-# Editor
+# Участники работ с сетью
 
-## Responsibility
+| Участник | Что решает или передаёт |
+| --- | --- |
+| ГИС-редактор и специалист по качеству данных | Редактор готовит изменения в рабочей версии. В обязанности редакторов и ответственных за качество входят ведение справочников, правил и слоёв, проверка данных и публикация в пределах полномочий. |
+| Полевая бригада | Получает задание и данные района, находит актив, фиксирует положение, состояние, схему подключения и материалы осмотра. Возвращает результат в офис, в том числе после работы без связи. |
+| Диспетчер | Выбирает условия трассировки, находит отключающие устройства, оценивает охват и выдаёт задание аварийной команде. При восстановлении сопоставляет полученные сведения с частью задания. |
+| Эксплуатация и аварийная команда | Команда сообщает о выполненном переключении или ремонте и фактически проверенной услуге. Эксплуатация подтверждает ограничение работы и ввод построенного участка. |
+| Проектировщик | Готовит и согласует трассу для строительства. Выданная редакция чертежа и утверждённые изменения служат основанием для сверки исполнительной съёмки. |
+| Подрядчик | Получает проектное задание для строительства, возвращает полевые и исполнительные материалы для учёта построенного участка в ГИС. |
+| ИТ и специалисты по безопасности | Отвечают за разграничение доступа, аудит и управляемый обмен с корпоративными системами. |
 
-`Editor` получает назначенную `WorkOrder`, открывает `EditVersion`, работает в изолированном workspace и готовит изменения инженерной сети к validation, reconcile и review.
+Такое распределение полевых решений принято условной организацией. Бригада может передать замер до опознания актива. За выбор координат и установление привязки отвечает редактор. Эксплуатация оценивает обнаруженный дефект и подтверждает последствия для работы участка. [NET-07](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-07) · [NET-01](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-01) · [NET-03](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-03) · [NET-08](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-08) · [NET-10](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-10) · [NET-11](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-11).
 
-## Permissions
+Автор различает полномочия проверки, утверждения и публикации. Совмещение полномочий утверждения и публикации остаётся открытым в NET-02. [[Wiki/actors/organization_and_access|Организация и назначение роли пользователю]].
 
-- Видит только назначенные ему `WorkOrder`.
-- Может открыть editor workspace только для назначенной `WorkOrder`.
-- Не может открыть reviewer workspace и не должен менять authoritative `Default` напрямую.
-
-## Open Questions
-
-Нужно проверить на реальных пользователях, какие действия роли называются `Utility GIS editor`, `GIS editor`, `utility network editor` или другой должностной формулировкой.
+[UtilityGisEditor.md · Цели и основные пользователи](../../RAW_inputs/documents/UtilityGisEditor.md#цели-и-основные-пользователи)

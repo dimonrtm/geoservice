@@ -1,13 +1,13 @@
 ---
-title: Domain Events Catalog
+title: "Доменные события"
 type: index
 status: active
 created: 2026-06-24
-updated: 2026-06-24
+updated: 2026-11-27
 source: null
 tags: [domain-knowledge, domain-event]
 ---
 
-# Domain Events Catalog
+# Доменные события
 
-Каталог доменных событий: значимых фактов, которые уже произошли в предметной области.
+Утверждение и публикация, проверенная привязка полевых данных и эксплуатационные факты. [[Wiki/_registry/domain_events|Действующий реестр]].

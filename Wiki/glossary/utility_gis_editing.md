@@ -1,23 +1,40 @@
 ---
-title: Utility GIS Editing
+title: "Словарь редактора инженерной сети"
 type: glossary
 status: active
-created: 2026-06-24
-updated: 2026-06-24
-source: "RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; Vision_wiki/concepts/utility_gis_editing_domain.md"
-tags: [domain-knowledge, glossary, utility-network]
-confidence: high
-related: [DDD_Wiki/subdomains/utility_authoritative_editing, DDD_Wiki/bounded_contexts/work_order]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [Wiki/concepts/network_data, Wiki/concepts/authoritative_utility_workflow]
 ---
 
-# Utility GIS Editing
+# Словарь редактора инженерной сети
 
-`Utility GIS editing` - управляемое изменение инженерной сети через рабочие версии, проверки сетевых правил, обнаружение конфликтов и контролируемую публикацию в authoritative state.
+| Термин | Значение в модели |
+| --- | --- |
+| Авторитетная модель сети | Официальное пространственно-топологическое представление сети, которым пользуются после публикации изменений. |
+| Актив | Объект инженерной сети, например кабель, опора или задвижка. Имеет тип, положение и технические характеристики. |
+| Связность | Возможность пройти от одного элемента к другому по допустимым связям сети. По ней выполняют трассировку. |
+| Рабочая версия | Редакция сетевых данных, в которой готовят и проверяют изменения до публикации. |
+| Согласование версий (reconcile) | Сопоставление изменений рабочей версии с актуальной сетью и выявление расхождений. |
+| Публикация (post) | Перенос проверенных и утверждённых изменений в официальную версию. |
+| Наряд (work order) | Задание на работу. Его позиции связывают задание с затронутыми активами. |
+| Полевые пометки (redlines) | Исправления и обозначения, которыми бригада показывает замеченное на месте расхождение. |
+| Исполнительные сведения (as-built) | Данные о том, как сеть фактически построена. По ним можно учесть исполненную часть проекта. |
 
-Это не CRUD по геометрии карты: изменение geometry, attributes или association может нарушить connectivity, trace, topology, downstream use или trust к authoritative layer.
+## Термины из исследования полевых сведений
 
-## Language Boundary
+| Термин | Что он позволяет различить |
+| --- | --- |
+| Полевое наблюдение | Замер или результат осмотра с собственным обозначением по наряду. Его можно найти, пока привязка к активу уточняется. [[Wiki/entities/field_observation]]. |
+| Время действия положения | Момент, на который источник подтверждает положение устройства. Порядок доставки сообщений может отличаться от порядка действия. [NET-13](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-13). |
+| Расчётный охват отключения | Ветви, затронутые во всех рассмотренных вариантах, и дополнительные ветви, затрагиваемые в части вариантов. [[Wiki/value_objects/calculated_outage_extent]]. |
+| Подтверждённый объём восстановления | Часть задания, для которой установлено возвращение услуги на указанный момент. [[Wiki/domain_events/service_restoration_confirmed]]. |
+| Стык труб | Физическое соединение двух опознанных труб через установленную соединительную деталь. От вывода о стыке зависит, появится ли переход в графе. [Основание для узла](../specifications/pipe_joint_evidenced.md). |
+| Охват осмотра | Объём, обследованный на указанном физическом активе в момент осмотра. После деления ребра первоначальный осмотр остаётся применимым в прежних границах. [Физический актив](../../DDD_Wiki/aggregates/network_asset.md). |
+| Ввод в эксплуатацию | Подтверждение эксплуатации о допуске определённой построенной части к работе. Для участия в трассировке дополнительно устанавливаются рабочие подключения. [Условие трассировки](../specifications/built_part_traceable.md). |
+| Применимая редакция проекта | Чертёж, выданный для работ, с утверждёнными изменениями, действие которых установлено для рассматриваемой части. [Правило сверки с проектом](../specifications/project_revision_applicable.md). |
 
-Канонический workflow: `WorkOrder` -> `EditVersion` -> editing -> validation -> reconcile -> conflict resolution -> review -> post -> audit.
-
-См. [[DDD_Wiki/use_cases/utility_editor_workflow]] и [[DDD_Wiki/invariants/release1_safety_invariants]].
+[UtilityGisEditor.md · Как я интерпретировал Use Case](../../RAW_inputs/documents/UtilityGisEditor.md#как-я-интерпретировал-use-case)

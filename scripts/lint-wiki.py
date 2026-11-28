@@ -13,7 +13,6 @@ from pathlib import Path
 WIKI_ROOTS = (
     "Wiki",
     "DDD_Wiki",
-    "Vision_wiki",
     "Code_wiki",
     "RAW_inputs",
     "memory",
@@ -192,7 +191,6 @@ def source_required(node_type: str, relative: Path) -> bool:
     if node_type in SOURCE_OPTIONAL_TYPES:
         return False
     return node_type in SOURCE_REQUIRED_TYPES or relative.parts[0] in {
-        "Vision_wiki",
         "Code_wiki",
         "Wiki",
         "DDD_Wiki",

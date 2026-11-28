@@ -1,24 +1,19 @@
 ---
-title: Conflicts Registry
+title: "Конфликты"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-10-13
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, conflict]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index, DDD_Wiki/model_health]
+related: [DDD_Wiki/use_cases/_info]
 ---
 
-# Conflicts Registry
+# Конфликты
 
-| Conflict | Blocks | Status | Question | Source |
-| --- | --- | --- | --- | --- |
-| [[Wiki/conflicts/2026-10-11-save-outcome-observer-vs-operation]] | Однозначная модель восстановления API/UI; не блокирует существующий synchronous Save | resolved | Принято: неизвестность наблюдателя отдельно; durable pending status не вводится | `RAW_inputs/research_results/2026-10-11-utility-gis-editor-save-recovery-research.md` | <!-- Решение: docs/sprint_2/2026-10-12-save-recovery-rules-decision.md -->
-| [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]] | Модель ролей и прав для финальной публикации | resolved | `Publisher` - отдельная technical role; v0.1 использует system `post-gate`; `Reviewer` - semantic approval | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
-| [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]] | Единая state machine review/post и границы спринта | resolved | Review/post остается must для downstream slice, но не раньше persisted edit change set | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md`; `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; `RAW_inputs/meetings/increment_after_open_workspace.md` |
-| [[Wiki/conflicts/2026-06-26-legacy-contract-vs-integrated-flow]] | Source of truth для нового review/post implementation contract | resolved | Новый contract отдельный и встроенный в `WorkOrder` / `EditVersion` flow; старый artifact - legacy/reference | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; user chat 2026-06-26 |
-| [[Wiki/conflicts/2026-06-27-review-post-before-edit-persistence]] | Sprint planning после открытия workspace | resolved | Сначала persisted geometry diff существующей линии + readback persisted object + baseline diff + basic draft validation; review/post layers откладываются | `RAW_inputs/meetings/increment_after_open_workspace.md`; `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md` |
-| [[Wiki/conflicts/2026-07-25-edit-version-event-cadence]] | Единая семантика событий save/revert/no-op/retry | resolved | Persisted event на каждый content-changing non-empty save; cleared event на revert; no-op/retry без событий | `RAW_inputs/meetings/first_save_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md` |
+В пределах единственного начального источника противоречий между принятыми утверждениями не зафиксировано. Раздел для расхождений между источниками. Конфликт полевого и офисного изменения — предмет рабочего сценария.
 
-| [[Wiki/conflicts/2026-10-13-real-organization-vs-simulated-decisions]] | Требование реальных организационных входов | resolved | Решения принимает агент за условную организацию; внешние факты и симуляция различаются | `RAW_inputs/research_results/2026-10-13-utility-gis-editor-simulated-organization-decisions.md` |
+Для последнего исследования сопоставлены [основания при неизвестном стыке и списанном активе](../conflicts/_info.md). Открытой пары противоречащих правил не выявлено. Пределы применения позднего распоряжения рассматриваются в [NET-11](../questions/project_change_after_construction.md).
+
+[UtilityGisEditor.md](../../RAW_inputs/documents/UtilityGisEditor.md)

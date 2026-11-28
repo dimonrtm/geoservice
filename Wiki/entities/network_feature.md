@@ -1,31 +1,23 @@
 ---
-title: Network Feature
+title: "Актив инженерной сети"
 type: entity
 status: active
-created: 2026-06-24
-updated: 2026-07-25
-source: "RAW_inputs/documents/utility_gis_editor_domain_dictionary.md; docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md; RAW_inputs/meetings/persisted_edit_slice_EditVersion.md; RAW_inputs/meetings/first_save_for_edit_version.md"
-tags: [domain-knowledge, entity, utility-network]
-confidence: high
-related: [Wiki/entities/feeder, Wiki/entities/network_association, DDD_Wiki/bounded_contexts/utility_network]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [Wiki/entities/network_project, Wiki/entities/network_association, Wiki/entities/work_order, Wiki/entities/inspection, Wiki/entities/asset_attachment, DDD_Wiki/aggregates/network_asset]
 ---
 
-# Network Feature
+# Актив инженерной сети
 
-## Identity
+Кабель, труба, опора и задвижка — примеры активов (`ASSET` в исходной диаграмме). Тип актива определяет инженерный смысл объекта. Геометрия и технические атрибуты позволяют редактору описать его положение и свойства. Вложения и результаты осмотров связывают запись с тем, что обнаружено на месте.
 
-`NetworkFeature` имеет стабильный `id` и `assetCode`, уникальный в пределах dataset.
+В примере диаграммы актив принадлежит [[Wiki/entities/network_project|слою проекта ГИС и имеет инженерный тип]]. Его участие в графе представлено [[Wiki/entities/network_association|узлом или ребром]], а участие в [[Wiki/entities/work_order|наряде]] — позицией работ. [[Wiki/entities/asset_attachment|Вложения]] сохраняют материалы об активе, [[Wiki/entities/inspection|осмотры]] — результаты обследования с их датой и охватом. Детальный справочник типов для конкретной отрасли в документе не выбран.
 
-## Lifecycle
+[UtilityGisEditor.md · Данные, форматы и интеграции](../../RAW_inputs/documents/UtilityGisEditor.md#данные-форматы-и-интеграции)
 
-В рабочей версии может быть прочитан, изменен, включен в change set и затем опубликован в authoritative state.
+При установке задвижки на сохранившейся трубе идентичность трубы и исходный охват осмотра сохраняются. Дефект, физическое присутствие и доступность в эксплуатации устанавливают по отдельным свидетельствам. Для найденного списанного насоса редактор сохраняет сведения о присутствии и выясняет факт и характер отключения. [NET-05](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-05) · [NET-08](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-08) · [NET-16](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-16).
 
-## Responsibilities
-
-Представляет пространственный объект инженерной сети: junction, line, device или другой feature type.
-
-Для непустого first persisted change set разрешена только одна существующая line feature и только сдвиг ровно одной внутренней вершины без изменения endpoints, остальных координат, vertex/part count, identity, attributes и associations. Equality с baseline используется для revert/no-op. Identity внутренней вершины в этом slice задается позицией в immutable baseline coordinate array.
-
-## Relationships
-
-Связан с `Feeder`, `NetworkAssociation`, `AOI`, workspace filtering и `EditVersion`.
+Принятую границу для изменения сведений об одном физическом активе описывает [[DDD_Wiki/aggregates/network_asset|агрегат сетевого актива]].

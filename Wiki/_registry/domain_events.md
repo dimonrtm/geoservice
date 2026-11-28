@@ -1,25 +1,35 @@
 ---
-title: Domain Events Registry
+title: "Доменные события"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-10-18
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, domain-event]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index]
+related: [DDD_Wiki/use_cases/_info]
 ---
 
-# Domain Events Registry
+# Доменные события
 
-## Исторические названия
+Доменные события фиксируют состоявшиеся решения и изменения, на которые опирается следующий участник. Место факта важно для его смысла. Например, стык в рабочей версии становится доступен в официальной сети после публикации.
 
-[[Wiki/domain_events/edit_version_feature_updated]] имеет статус `superseded`; для first persisted edit slice его заменяет [[Wiki/domain_events/edit_version_change_set_persisted]]. Ниже перечислены актуальные события.
+## Официальная модель и проект
 
-| Event | Source Aggregate | Reactions | Confidence | Source |
-| --- | --- | --- | --- | --- |
-| [[Wiki/domain_events/edit_version_opened]] | [[DDD_Wiki/aggregates/work_order]] | Workspace может загрузиться, `WorkOrder` переходит в работу | high | `Code_wiki/архитектура/api_and_realtime.md` |
-| [[Wiki/domain_events/edit_version_change_set_persisted]] | [[DDD_Wiki/aggregates/edit_version]] | Audit фиксирует каждый content-changing save с line identity, before/after, actor, time, baseline и `CommandId`; current diff материализуется отдельно | high | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md`; `RAW_inputs/meetings/tolerance_rules.md` |
-| [[Wiki/domain_events/edit_version_change_set_cleared]] | [[DDD_Wiki/aggregates/edit_version]] | Read model удаляет current diff; audit сохраняет before/after факт revert к baseline | high | `RAW_inputs/meetings/first_save_for_edit_version.md`; `RAW_inputs/meetings/tolerance_rules.md` |
-| [[Wiki/domain_events/review_package_approved]] | [[DDD_Wiki/aggregates/review_package]] | System `post-gate` может вычислить `can_post`; approval не равно technical authorization | medium | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
-| [[Wiki/domain_events/authoritative_post_completed]] | Граница review/post | Аудит и downstream доверие обновляются | medium | `docs/release_1/2026-06-11-release-1-utility-workflow-sprints.md` |
+- [[Wiki/domain_events/design_revision_issued|Редакция проекта выдана для работ]]
+- [[Wiki/domain_events/pipe_joint_recorded|Подтверждённый стык внесён в рабочую версию]]
+- [[Wiki/domain_events/pipe_edge_divided|Ребро разделено на сохранившейся трубе]]
+- [[Wiki/domain_events/network_changes_approved|Изменения сети утверждены]]
+- [[Wiki/domain_events/network_changes_published|Изменения включены в официальную сеть]]
+
+## Наблюдения и эксплуатация
+
+- [[Wiki/domain_events/observed_asset_identified|Установлена принадлежность наблюдения активу]]
+- [[Wiki/domain_events/field_defect_recorded|Дефект зафиксирован при осмотре]]
+- [[Wiki/domain_events/part_commissioning_confirmed|Ввод построенной части подтверждён эксплуатацией]]
+- [[Wiki/domain_events/operational_restriction_established|Подтверждено эксплуатационное ограничение актива]]
+- [[Wiki/domain_events/device_position_confirmed|Положение устройства подтверждено]]
+- [[Wiki/domain_events/outage_work_order_issued|Бригаде выдано оперативное задание]]
+- [[Wiki/domain_events/service_restoration_confirmed|Восстановление услуги подтверждено]]
+
+[Исходная модель](../../RAW_inputs/documents/UtilityGisEditor.md#базовые-и-продвинутые-workflows) · [Решения условной организации по полевым сведениям](../../RAW_inputs/documents/2026-11-27-field-information-answers.md).

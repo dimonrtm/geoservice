@@ -1,71 +1,19 @@
 ---
-title: Concepts Registry
+title: "Понятия"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-11-26
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, concept]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index]
+related: [Wiki/concepts/network_data, Wiki/concepts/authoritative_utility_workflow, Wiki/concepts/design_revision]
 ---
 
-# Concepts Registry
+# Понятия
 
-| Concept | Meaning | Related | Confidence | Source |
-| --- | --- | --- | --- | --- |
-| [[Wiki/concepts/authoritative_utility_workflow]] | Процесс от `WorkOrder` до authoritative post; ближайший кодовый слой сначала доказывает persisted edit change set. | [[DDD_Wiki/use_cases/utility_editor_workflow]] | high | `Vision_wiki/decisions/release_1_utility_workflow.md`; `RAW_inputs/meetings/increment_after_open_workspace.md` |
-| [[Wiki/concepts/field_observation_acceptance]] | Область принятого утверждения, поступление файла к получателю и проверка его принадлежности осмотру и активу, происхождение предзаполненного значения и принадлежность акта конкретной попытке после переделки | [[Wiki/policies/edit_change_justification_policy]] | high | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md`, [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]], [[RAW_inputs/documents/2026-11-26-field-evidence-analysis]] |
-| [[Wiki/concepts/network_representation_and_operational_state]] | Представления актива, эксплуатация и расчётная модель. Охват трассировки и учёт пограничной трубы при проверке длины | [[Wiki/policies/network_edit_semantics_policy]] | high | `RAW_inputs/research_results/2026-10-18-utility-gis-editor-domain-knowledge-analysis.md`, [[RAW_inputs/documents/UtilityGisEditorRole#Прирост модели]], [[Vision_wiki/chats/2026-11-24-utility-editor-survey-and-trace]] |
-| [[Wiki/concepts/change_basis_lifecycle]] | Редакция основания, время наблюдения и история решения отдельно от geometry | [[Wiki/policies/change_basis_revision_policy]] | high | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md` |
-| [[Wiki/concepts/evidence_dependency]] | Копии общего наблюдения не являются независимыми подтверждениями | [[Wiki/concepts/field_observation_acceptance]] | high | `RAW_inputs/research_results/2026-10-19-utility-gis-editor-change-basis-research.md` |
+- [[Wiki/concepts/network_data|Данные инженерной сети и их связи]]
+- [[Wiki/concepts/authoritative_utility_workflow|Как изменение попадает в официальную модель сети]]
+- [[Wiki/concepts/design_revision|Редакция проекта строительства и фактическая съёмка]]
 
-| [[Wiki/concepts/assessment_statement_lifecycle]] | Применимость утверждения, выпуск и знаменатель сводки по оценённым участкам | [[Wiki/policies/assessment_issue_and_correction_policy]] | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md`, [[Vision_wiki/chats/2026-11-24-awwa-condition-assessment]] |
-| [[Wiki/concepts/assessment_delivery_and_acceptance]] | Доставка, ограничения, обязанность и приёмка для цели различаются | [[Wiki/policies/assessment_issue_and_correction_policy]] | high | `RAW_inputs/research_results/2026-10-22-utility-gis-editor-assessment-research.md` |
-
-| [[Wiki/concepts/dataset_instance_and_record_identity]] | Логический набор, экземпляр, запись и обозначаемый актив различаются | [[Wiki/specifications/demo_dataset_instance_qualified]] | high | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md` |
-| [[Wiki/concepts/coordinate_operation_provenance]] | CRS, операция, ресурсы и история координат отдельно от сетки и точности | [[Wiki/policies/demo_dataset_qualification_policy]] | high | `RAW_inputs/research_results/2026-11-07-utility-gis-editor-dataset-qualification-research.md` |
-
-## Уточнение существующих понятий — 2026-11-08
-
-По [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-verification-research]]: [[Wiki/concepts/field_observation_acceptance]] — метод и охват свойства; [[Wiki/concepts/assessment_statement_lifecycle]] — пределы отрицательного результата проверки; [[Wiki/concepts/dataset_instance_and_record_identity]] — сверка конечного представления после переноса; [[Wiki/concepts/assessment_delivery_and_acceptance]] — отправка, применение и наблюдение результата. Новых дублирующих понятий нет.
-
-## Представление, идентификатор и полнота — 2026-11-08
-
-По [[RAW_inputs/research_results/2026-11-08-utility-gis-editor-representation-research]] дополнены существующие понятия: [[Wiki/concepts/network_representation_and_operational_state]] — назначение геометрии; [[Wiki/concepts/dataset_instance_and_record_identity]] — физический ключ, идентификатор обмена и актив; [[Wiki/concepts/assessment_statement_lifecycle]] — знаменатель полноты. Новых дублирующих нод нет.
-
-## Коррекция публикации — 2026-11-09
-
-| Concept | Meaning | Confidence | Source |
-| --- | --- | --- | --- |
-| [[Wiki/concepts/published_result_correction_case]] | Область ответственности за дефект опубликованных данных/evidence, связанные циклы и остатки | high | RAW_inputs/research_results/2026-11-09-utility-gis-editor-publication-answers.md |
-
-| [[Wiki/concepts/work_result_dependency]] | Обязательство результата А перед конкретным этапом Б, отдельно от evidence и parent links | high | RAW_inputs/research_results/2026-11-10-utility-gis-editor-dependencies-research.md |
-
-## Физическая история сети — 21.11.2026
-
-| Concept | Meaning | Confidence | Source |
-| --- | --- | --- | --- |
-| [[Wiki/concepts/asset_installation_history]] | Подтверждённые периоды установки оборудования на позицию и границы знания о них | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |
-| [[Wiki/concepts/linear_asset_lineage]] | Предшественники и результаты изменения обслуживаемых участков с указанием охвата каждого соответствия | high | [[RAW_inputs/research_results/2026-11-21-utility-gis-editor-asset-lifecycle-answers]] |
-
-## Учёт сведений и выпуски карты — 22.11.2026
-
-| Concept | Meaning | Confidence | Source |
-| --- | --- | --- | --- |
-| [[Wiki/concepts/data_stewardship_period]] | Полномочие стороны вести свойство за определённый период и регистрировать историческую поправку | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-04]] |
-| [[Wiki/concepts/asset_identity_resolution]] | Доказанное тождество карточек и временное дело для идентификации находки | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-06]], [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-07]] |
-| [[Wiki/concepts/dataset_delivery_edition]] | Дата среза, связь редакций одного выпуска, выдача адресату и замена временной полевой копии | high | [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-18]], [[RAW_inputs/documents/UtilityGisEditorRole#Что изменилось в понимании работы редактора]] |
-
-## Эксплуатационные обязанности и повторные наблюдения — 24.11.2026
-
-| Понятие | Что различает | Источник |
-| --- | --- | --- |
-| [[Wiki/concepts/asset_service_point]] | У точки обслуживания есть устойчивая эксплуатационная граница. Привязки адресов, договоров и установленных экземпляров могут меняться с разными датами. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-02]] |
-| [[Wiki/concepts/duct_capacity_reservation]] | Для обещанного места учитывать обладателя, границы, объём и основание завершения резерва. Отдельно проверять техническую пригодность нужного пролёта. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-03]] |
-| [[Wiki/concepts/defect_episode]] | Эпизод проявления связывает исходное наблюдение, подтверждение результата ремонта и возможный повтор. Повторное обращение, повтор проявления и подтверждённый дефект считаются по разным основаниям. | [[RAW_inputs/documents/2026-11-24-field-records-answers#DISC-2026-11-24-07]] |
-
-## Разнесение маршрутов и охват проверки — 26.11.2026
-
-- [[Wiki/concepts/network_representation_and_operational_state#Разнесение двух физических маршрутов]] — утверждение о паре путей с уровнем конструкции, датой и охватом. [[RAW_inputs/documents/2026-11-26-editor-practice-answers#DISC-2026-11-26-03]].
-- [[Wiki/concepts/assessment_statement_lifecycle#Вывод по серии обработанных обновлений]] — состав серии и свойства, проверенные в выборке. [[RAW_inputs/documents/2026-11-26-editor-practice-analysis]].
+[UtilityGisEditor.md](../../RAW_inputs/documents/UtilityGisEditor.md)

@@ -1,21 +1,46 @@
 ---
-title: Commands Registry
+title: "Команды"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-07-31
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, command]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index]
+related: [DDD_Wiki/use_cases/_info]
 ---
 
-# Commands Registry
+# Команды
 
-| Command | Actor | Target | Outcome | Confidence | Source |
-| --- | --- | --- | --- | --- | --- |
-| [[Wiki/commands/open_edit_version]] | [[Wiki/actors/editor]] | [[Wiki/entities/work_order]] | [[Wiki/domain_events/edit_version_opened]] | high | `Code_wiki/архитектура/api_and_realtime.md` |
-| [[Wiki/commands/update_edit_version_feature_geometry]] | [[Wiki/actors/editor]] | [[Wiki/entities/edit_version]] | Server-canonical full geometry одной line feature; одна внутренняя вершина; safe retry/readback; [[Wiki/domain_events/edit_version_change_set_persisted]] или [[Wiki/domain_events/edit_version_change_set_cleared]] | high | `RAW_inputs/meetings/persisted_edit_slice_EditVersion.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md`; `RAW_inputs/meetings/tolerance_rules.md`; `RAW_inputs/meetings/demo_utility_gis.md` |
-| [[Wiki/commands/submit_for_review]] | [[Wiki/actors/editor]] | [[Wiki/entities/edit_version]] | `ReviewPackage` snapshot поверх persisted change set | medium | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md`; `RAW_inputs/meetings/increment_after_open_workspace.md` |
-| [[Wiki/commands/approve_review_package]] | [[Wiki/actors/reviewer]] | [[Wiki/entities/review_decision]] | [[Wiki/domain_events/review_package_approved]]; system `post-gate` может вычислить `can_post` | medium | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
-| [[Wiki/commands/post_to_default]] | [[Wiki/actors/publisher]] / system `post-gate` | [[Wiki/entities/default_state]] | Simulated post outcome в v0.1; future [[Wiki/domain_events/authoritative_post_completed]] | high | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
+Команды выражают намерение участника изменить сеть, наблюдение или задание. Область действия каждой команды ограничена указанным объектом и основанием.
+
+## Офисная правка и публикация
+
+- [[Wiki/commands/prepare_network_changes|Подготовить правку сети в рабочей версии]]
+- [[Wiki/commands/submit_network_changes|Передать проверенный объём на утверждение]]
+- [[Wiki/commands/approve_network_changes|Утвердить проверенные изменения сети]]
+- [[Wiki/commands/publish_network_changes|Опубликовать утверждённое изменение сети]]
+
+## Полевой обмен и связность
+
+- [[Wiki/commands/record_field_observation|Зарегистрировать полевое наблюдение по наряду]]
+- [[Wiki/commands/identify_observed_asset|Привязать наблюдение к опознанному активу]]
+- [[Wiki/commands/resolve_asset_coordinates|Выбрать геометрию при расхождении координат]]
+- [[Wiki/commands/record_pipe_joint|Внести подтверждённый стык труб]]
+- [[Wiki/commands/split_preserved_pipe_edge|Разделить ребро при установке задвижки]]
+- [[Wiki/commands/record_operational_restriction|Учесть эксплуатационное ограничение актива]]
+
+## Проект и построенная сеть
+
+- [[Wiki/commands/issue_design_for_construction|Передать согласованную трассу для строительства]]
+- [[Wiki/commands/accept_surveyed_part|Принять исполнительную съёмку построенной части]]
+- [[Wiki/commands/assess_built_part_design|Установить соответствие построенной части проекту]]
+- [[Wiki/commands/record_commissioned_part|Учесть ввод построенной части в эксплуатацию]]
+
+## Аварийное задание
+
+- [[Wiki/commands/account_device_position|Учесть подтверждённое положение устройства]]
+- [[Wiki/commands/issue_outage_work_order|Сформировать оперативное задание по трассировке]]
+- [[Wiki/commands/record_service_restoration|Учесть восстановление услуги по части задания]]
+
+[Исходная модель](../../RAW_inputs/documents/UtilityGisEditor.md#базовые-и-продвинутые-workflows) · [Решения условной организации по полевым сведениям](../../RAW_inputs/documents/2026-11-27-field-information-answers.md).

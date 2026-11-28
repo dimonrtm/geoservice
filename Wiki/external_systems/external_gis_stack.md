@@ -1,23 +1,37 @@
 ---
-title: External GIS Stack
+title: "Получатели и поставщики данных о сети"
 type: external-system
-status: planned
-created: 2026-06-24
-updated: 2026-06-24
-source: "RAW_inputs/documents/UtilityGisEditorRole.md; Vision_wiki/decisions/release_2_conflict_explanation.md"
-tags: [domain-knowledge, external-system, gis]
-confidence: medium
-related: [DDD_Wiki/integration_patterns/external_gis_anticorruption_boundary, DDD_Wiki/context_map/geoservice_context_map]
+status: active
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [Wiki/entities/integration_job, Wiki/actors/organization_and_access, DDD_Wiki/context_map/geoservice_context_map, DDD_Wiki/integration_patterns/asset_status_reconciliation]
 ---
 
-# External GIS Stack
+# Получатели и поставщики данных о сети
 
-External GIS stack включает ArcGIS Utility Network, QGIS/QField, GISwater/PostGIS и соседние операционные системы, которые используются как evidence, baseline или точка сравнения для utility editing workflows.
+Автор выделяет четыре группы взаимодействий.
 
-## Integration Boundary
+| Группа систем | Предмет обмена или доступа |
+| --- | --- |
+| Корпоративная ГИС и базы пространственных данных | Слои, активы, геометрия и опубликованное представление сети. |
+| Управление активами, ресурсами и эксплуатацией | Заказы на работы, данные об активах, отключения и состояние исполнения. Автор приводит EAM, ERP, OMS, ADMS и CRM, в обзоре также упоминает SCADA. |
+| Управление идентификацией и доступом | Установление личности и ролей для разграничения доступа к данным и операциям. |
+| Полевые и документальные системы | Пакеты работ, полевые уточнения, фотографии, чертежи и исполнительные документы. |
 
-GeoService должен использовать внешние GIS-факты как evidence, но сохранять собственный язык для review package, stale approval, hard blockers и безопасности post.
+Документ перечисляет варианты систем, форматов и интерфейсов. Конкретные пары систем, направления отдельных сообщений и обязательный состав поставки требуют уточнения.
 
-## Open Questions
+[UtilityGisEditor.md · Данные, форматы и интеграции](../../RAW_inputs/documents/UtilityGisEditor.md#данные-форматы-и-интеграции)
 
-Какие интеграции нужны для developer demo, а какие остаются research context?
+Для редактора сообщение учётной системы о списании опознанного оборудования означает повод сверить актив с полевыми и эксплуатационными сведениями. Независимое показание о возврате услуги может подтвердить восстановление в охваченных точках. Тип прибора и интерфейс конкретной системы исследование оставляет открытыми. [NET-16](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-16) · [NET-03](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-03).
+
+## Где проходит граница ответственности
+
+| Поставщик или получатель | Что происходит по другую сторону обмена |
+| --- | --- |
+| Получатель опубликованной сети | Корпоративная ГИС или мобильный клиент получает изменения после публикации. Внешняя система (`EXTERNAL_SYSTEM`) фигурирует в [задании обмена](../entities/integration_job.md) своего проекта. Состояние доставки и статус публикации относятся к разным решениям. [Офисный процесс](../../RAW_inputs/documents/UtilityGisEditor.md#базовые-и-продвинутые-workflows). |
+| Контур эксплуатации и учёта | Учёт оборудования ведёт сведения о списании. Эксплуатация подтверждает отключение или вывод. Редактор привязывает эти сведения к конкретному активу и определяет, какие данные сети следует обновить. [Сверка статусов оборудования](../../DDD_Wiki/integration_patterns/asset_status_reconciliation.md). |
+| Полевой и документальный контур | Устройство бригады возвращает замер и материалы даже при неустановленном активе. Редактор проверяет привязку. Для исполнительной съёмки отдельно устанавливает границу построенной части и основание для учёта врезки. [NET-07](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-07) · [NET-09](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-09). |
+| Поставщик идентификации | Подтверждает личность при входе. Предметные полномочия участника, например допуск к публикации проверенной версии, связаны с [ролью и правилами организации](../actors/organization_and_access.md). [Доступ и безопасность](../../RAW_inputs/documents/UtilityGisEditor.md#производительность-безопасность-ux-desktopmobileoffline). |

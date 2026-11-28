@@ -1,25 +1,19 @@
 ---
-title: Authoritative Utility Workflow
+title: "Как изменение попадает в официальную модель сети"
 type: concept
 status: active
-created: 2026-06-24
-updated: 2026-06-27
-source: "Vision_wiki/decisions/release_1_utility_workflow.md; Vision_wiki/concepts/utility_gis_editing_domain.md; RAW_inputs/meetings/increment_after_open_workspace.md"
-tags: [domain-knowledge, concept, workflow]
-confidence: high
-related: [Wiki/glossary/utility_gis_editing, DDD_Wiki/use_cases/utility_editor_workflow]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [Wiki/entities/edit_version, Wiki/policies/publication, Wiki/entities/edit_event, Wiki/entities/integration_job, DDD_Wiki/use_cases/_info]
 ---
 
-# Authoritative Utility Workflow
+# Как изменение попадает в официальную модель сети
 
-Authoritative utility workflow - полный пользовательский путь, в котором изменения сети проходят через `WorkOrder`, изолированную edit version, validation, reconcile, conflict resolution, review, post и audit.
+Работа начинается с заявки на изменение или [[Wiki/entities/work_order|наряда]]. Редактор получает [[Wiki/entities/edit_version|рабочую версию сети]], меняет геометрию, атрибуты и связи. Основанием для изменения могут служить офисное задание, [[Wiki/entities/field_observation|результат выезда]] или [[Wiki/concepts/design_revision|исполнительные сведения после строительства]].
 
-## Why It Matters
+Перед [[Wiki/policies/publication|публикацией]] изменения проверяют по правилам и топологии. Ошибка или конфликт возвращает работу к исправлению и повторной проверке. Проверенный результат проходит рассмотрение и утверждение. Опубликованный результат передают мобильным клиентам и [[Wiki/external_systems/external_gis_stack|смежным системам]]. [[Wiki/entities/edit_event|История версии]] позволяет установить, кто работал с ней, а [[Wiki/entities/integration_job|задание обмена]] указывает, с какой системой организована передача.
 
-Этот concept отделяет продуктовый сценарий Release 1 от generic GIS CRUD: пользовательская ценность возникает в безопасном post в authoritative `Default`, а не в факте сохранения геометрии.
-
-## Related Nodes
-
-Ближайший кодовый инкремент после открытия workspace должен сначала доказать настоящее редактирование версии: persisted update existing feature, readback diff и draft validation flags. Review/post нельзя планировать как первый слой, если в коде еще нет persisted change set.
-
-[[DDD_Wiki/use_cases/utility_editor_workflow]], [[DDD_Wiki/invariants/release1_safety_invariants]], [[Wiki/conflicts/2026-06-24-release1-vs-release2-review-policy]].
+[UtilityGisEditor.md · Базовые и продвинутые workflows](../../RAW_inputs/documents/UtilityGisEditor.md#базовые-и-продвинутые-workflows)

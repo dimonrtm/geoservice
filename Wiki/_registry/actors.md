@@ -1,19 +1,18 @@
 ---
-title: Actors Registry
+title: "Участники"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-06-26
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, actor]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index]
+related: [Wiki/actors/editor, Wiki/actors/organization_and_access]
 ---
 
-# Actors Registry
+# Участники
 
-| Actor | Responsibility | Permissions | Confidence | Source |
-| --- | --- | --- | --- | --- |
-| [[Wiki/actors/editor]] | Открывает назначенную `WorkOrder` и `EditVersion`, готовит изменения. | Только назначенные `WorkOrder` | high | `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md` |
-| [[Wiki/actors/reviewer]] | Проверяет package и принимает `approve package`, `return for changes`, `request evidence` или `escalate`. | Semantic decision по review package; не technical post authorization | high | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
-| [[Wiki/actors/publisher]] | Целевая technical role; в developer demo заменена system actor `post-gate`. | Simulated post после computed `can_post`; future post в authoritative `Default` | high | `RAW_inputs/meetings/ic_review_package_and_simulated_post.md` |
+- [[Wiki/actors/editor|Участники работ с сетью]]
+- [[Wiki/actors/organization_and_access|Организация, пользователь и роль доступа]]
+
+[UtilityGisEditor.md](../../RAW_inputs/documents/UtilityGisEditor.md)

@@ -44,5 +44,5 @@ Domain commands `CreateEditVersion`, `ValidateTopology`, `RunReconcile`, `Resolv
 - [[../архитектура/backend]]
 - [[../архитектура/frontend]]
 - [[../архитектура/data_model]]
-- [[../../Vision_wiki/concepts/utility_gis_editing_domain]]
-- [[../../Vision_wiki/solution/architecture_vision]]
+- [[Wiki/glossary/utility_gis_editing]]
+- [[Code_wiki/архитектура/backend]]

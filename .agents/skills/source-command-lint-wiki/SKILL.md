@@ -7,7 +7,7 @@ description: Ручная процедура /lint-wiki для проверки 
 
 ## Текущая Нормативная Процедура
 
-`/lint-wiki` проверяет все wiki roots: `Wiki/`, `DDD_Wiki/`, `Vision_wiki/`, `Code_wiki/`, `RAW_inputs/`, `memory/`, `Общие_принципы/` и `docs/knowledge-pipeline/`.
+`/lint-wiki` проверяет все wiki roots: `Wiki/`, `DDD_Wiki/`, `Code_wiki/`, `RAW_inputs/`, `memory/`, `Общие_принципы/` и `docs/knowledge-pipeline/`.
 
 Для `Wiki/` и `DDD_Wiki/` дополнительно проверять доменную структуру: содержательные узлы должны иметь `source`, `confidence` и `related`; commands, domain events, policies, specifications, value objects, bounded contexts, subdomains и context maps должны иметь обязательные DDD-секции, которые проверяет `scripts/lint-wiki.py`.
 
@@ -37,7 +37,7 @@ python scripts/lint-wiki.py --root .
 После технической проверки вручную оценить:
 
 - дублирующиеся ноды;
-- противоречия между `Vision_wiki` и `Code_wiki`;
+- противоречия между доменной моделью и `Code_wiki`;
 - устаревшие решения;
 - follow-up'ы без статуса;
 - новые RAW inputs без ingest.
@@ -58,7 +58,7 @@ python scripts/audit-memory.py --root . --format markdown
 - пустые `_info.md`;
 - индексы wiki.
 
-Конфликты старой документации с новыми знаниями исправлять только после `/ingest`, только если конфликт уже есть в `Vision_wiki/decisions/followups/index.md` и связан с `Code_wiki`.
+Конфликты старой документации с новыми знаниями исправлять только после `/ingest`, только если конфликт уже есть в `Wiki/_registry/conflicts.md` и связан с `Code_wiki`.
 
 ## Шаг 4. Отчет
 

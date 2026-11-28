@@ -7,11 +7,11 @@ description: Ручная процедура /sync-vision для синхрон�
 
 ## Область синхронизации
 
-`/sync-vision` синхронизирует граф знаний проекта: `Wiki/`, `DDD_Wiki/`, `Vision_wiki/`, `Code_wiki/`, `RAW_inputs/`, `memory/`, `Общие_принципы/` и `docs/knowledge-pipeline/`.
+`/sync-vision` синхронизирует граф знаний проекта: `Wiki/`, `DDD_Wiki/`, `Code_wiki/`, `RAW_inputs/`, `memory/`, `Общие_принципы/` и `docs/knowledge-pipeline/`.
 
 При сборе изменений обязательно учитывать новые и измененные файлы в `Wiki/` и `DDD_Wiki/`. При обновлении индексов поддерживать `Wiki/index.md`, `Wiki/_registry/*.md`, `DDD_Wiki/index.md`, `DDD_Wiki/model_health.md`, корневой `index.md` и `memory/project-state.md`.
 
-Каноническая доменная модель хранится в `Wiki/` и `DDD_Wiki/`. По `Vision_wiki/` проверять происхождение решений.
+Каноническая доменная модель хранится в `Wiki/` и `DDD_Wiki/`. Происхождение решений проверять по полю `source` и журналу `RAW_inputs/index.md`.
 
 `/sync-vision` синхронизирует состояние wiki. Он не переписывает смысл нод без отдельного запроса.
 
@@ -27,7 +27,6 @@ description: Ручная процедура /sync-vision для синхрон�
 Проверить изменения в:
 
 - `RAW_inputs/`
-- `Vision_wiki/`
 - `Code_wiki/`
 - `memory/`
 - `Общие_принципы/`
@@ -36,7 +35,7 @@ description: Ручная процедура /sync-vision для синхрон�
 Можно использовать:
 
 ```powershell
-git log --since="7 days ago" --pretty=format:"%h %ad %s" --date=short -- RAW_inputs/ Vision_wiki/ Code_wiki/ memory/ Общие_принципы/
+git log --since="7 days ago" --pretty=format:"%h %ad %s" --date=short -- RAW_inputs/ Wiki/ DDD_Wiki/ Code_wiki/ memory/ Общие_принципы/
 ```
 
 ## Шаг 2. Обновить Индексы
@@ -53,6 +52,7 @@ git log --since="7 days ago" --pretty=format:"%h %ad %s" --date=short -- RAW_inp
 
 - основные области знаний;
 - свежие важные изменения;
+- ссылку на [очередь разработки редактора](../../../docs/planning/network-editor-backlog.md). Проверить также путь к ней из Current Sprint Planning Queue в `DDD_Wiki/model_health.md` и из `memory/project-state.md`. Очередь вопросов discovery имеет отдельный реестр и статусы;
 - открытые вопросы;
 - ссылку на `memory/project-state.md`.
 
@@ -73,7 +73,7 @@ git log --since="7 days ago" --pretty=format:"%h %ad %s" --date=short -- RAW_inp
 
 - не удалять ее;
 - добавить `stale` в `tags`;
-- при необходимости добавить follow-up в `Vision_wiki/decisions/followups/index.md`.
+- при необходимости добавить follow-up в `Wiki/_registry/conflicts.md`.
 
 ## Шаг 5. Обновить `memory/project-state.md`
 

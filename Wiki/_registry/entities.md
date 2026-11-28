@@ -1,23 +1,26 @@
 ---
-title: Entities Registry
+title: "Сущности"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-11-26
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, entity]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index]
+related: [Wiki/entities/network_project, Wiki/entities/network_feature, Wiki/entities/network_association, Wiki/entities/edit_version, Wiki/entities/edit_event, Wiki/entities/work_order, Wiki/entities/field_observation, Wiki/entities/inspection, Wiki/entities/asset_attachment, Wiki/entities/integration_job]
 ---
 
-# Entities Registry
+# Сущности
 
-| Entity | Identity | Aggregate | Confidence | Source |
-| --- | --- | --- | --- | --- |
-| [[Wiki/entities/work_order]] | `id`, `code` | [[DDD_Wiki/aggregates/work_order]] | high | `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md`; `RAW_inputs/meetings/first_save_for_edit_version.md` |
-| [[Wiki/entities/edit_version]] | `id`, `workOrderId`, `baseNetworkRevision` | [[DDD_Wiki/aggregates/edit_version]] | high | `Code_wiki/архитектура/data_model.md`; `RAW_inputs/meetings/persisted_edit_slice_for_edit_version.md`; `RAW_inputs/meetings/first_save_for_edit_version.md`; `RAW_inputs/meetings/tolerance_rules.md` |
-| [[Wiki/entities/default_state]] | `WorkOrder` + `baseNetworkRevision` | [[DDD_Wiki/aggregates/work_order]] | high | `Code_wiki/архитектура/data_model.md` |
-| [[Wiki/entities/feeder]] | `id`, `code` | Граница utility network / work order. Согласование концов разных фидеров описано в [[Wiki/entities/feeder#Стык двух моделей фидеров]] | high | `docs/release_1/sprint_1/2026-06-12-sprint-1-day-1-domain-model-design.md`, [[RAW_inputs/research_results/2026-11-22-utility-gis-editor-governance-answers#DISC-2026-11-21-05]] |
-| [[Wiki/entities/network_feature]] | `id`, `assetCode` | Utility network | high | `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md`; `RAW_inputs/meetings/first_save_for_edit_version.md` |
-| [[Wiki/entities/network_association]] | `id`, endpoints, type. Связи сетевых объектов и подробные пары волокон имеют свой уровень учёта | Utility Network и держатель инженерной ведомости | high | `RAW_inputs/documents/utility_gis_editor_domain_dictionary.md`, [[RAW_inputs/documents/2026-11-26-field-evidence-answers#DISC-2026-11-26-01]] |
-| [[Wiki/entities/review_decision]] | package id + actor + decision scope | [[DDD_Wiki/aggregates/review_package]] | high | `RAW_inputs/meetings/implementation_contract_for_review_and_post.md` |
+- [[Wiki/entities/network_project|Проект ГИС, слой и тип актива]]. Находят проект, набор пространственных данных и инженерный тип объекта.
+- [[Wiki/entities/network_feature|Актив инженерной сети]]. Связывают геометрию, инженерные свойства и историю с физическим объектом.
+- [[Wiki/entities/network_association|Узлы и рёбра сети]]. Устанавливают, между какими узлами проходит ребро и как сеть связана через них.
+- [[Wiki/entities/edit_version|Рабочая версия сети]]. Готовят и проверяют изменения до публикации.
+- [[Wiki/entities/edit_event|Запись действия в истории версии]]. Прослеживают действие пользователя в конкретной версии.
+- [[Wiki/entities/work_order|Наряд и позиции работ]]. Связывают задание с активами и учитывают подтверждённый объём восстановления.
+- [[Wiki/entities/field_observation|Полевое наблюдение]]. Передают замер по наряду до опознания актива и сохраняют основание привязки.
+- [[Wiki/entities/inspection|Осмотр актива и обследованный участок]]. Прослеживают результат обследования и исходный охват при последующих изменениях сети.
+- [[Wiki/entities/asset_attachment|Вложение и подтверждаемое им сведение]]. Сопоставляют документ или фото с конкретным утверждением об активе.
+- [[Wiki/entities/integration_job|Задание обмена с внешней системой]]. Определяют проект и внешнюю систему для отдельного обмена.
+
+[Исходная диаграмма](../../RAW_inputs/documents/UtilityGisEditor.md#бизнес-модели-и-метрики-успеха) · [Принятые уточнения по полевым сведениям](../../RAW_inputs/documents/2026-11-27-field-information-model-analysis.md#что-добавилось-к-начальной-модели)

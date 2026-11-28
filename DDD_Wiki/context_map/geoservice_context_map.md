@@ -1,30 +1,40 @@
 ---
-title: GeoService Context Map
+title: "Как связаны сеть, полевые работы и обмен"
 type: context-map
 status: active
-created: 2026-06-24
-updated: 2026-11-21
-source: "Code_wiki/архитектура/data_model.md; Code_wiki/архитектура/api_and_realtime.md; Vision_wiki/decisions/release_2_conflict_explanation.md"
-tags: [domain-knowledge, ddd, context-map, stale]
-confidence: high
-related: [DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/review_post]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md; RAW_inputs/documents/2026-11-27-field-information-answers.md; RAW_inputs/documents/2026-11-27-field-information-model-analysis.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [DDD_Wiki/bounded_contexts/utility_network, DDD_Wiki/bounded_contexts/field_work, DDD_Wiki/bounded_contexts/integration_exchange]
 ---
 
-# GeoService Context Map
+# Как связаны сеть, полевые работы и обмен
 
 ## Upstream Downstream
 
-| Upstream | Downstream | Relationship |
+| Кто передаёт | Что получает другая сторона |
+| --- | --- |
+| Офис → бригада | Задание, район и исходные данные активов для выезда. |
+| Бригада → офис | Измерения, пометки и вложения для согласования с актуальной сетью. |
+| Проектировщик → подрядчик → офис | Согласованную трассу передают в строительство. По завершении работ поле возвращает фактическое исполнение. |
+| Редактор → потребители сети | После утверждения мобильные клиенты и внешние системы получают опубликованные изменения. |
+
+В ходе исследования `expert_repson` уточнил, что вправе заключить получатель по переданному материалу.
+
+| Источник → получатель | Какие сведения передаются | Решение получателя |
 | --- | --- | --- |
-| Auth Context | Work Order Context | Auth поставляет active user и role; work order владеет assignment rules. |
-| Utility Network Context | Work Order Context | Utility network поставляет feeder/default snapshots; work order владеет `AOI` и edit version workspace. |
-| Work Order Context | Review Post Context | Work order/edit version поставляет package input; review/post владеет approval и post gate. |
-| Review Post Context | Audit Context | Review/post публикует decisions, stale events и post outcomes. |
+| Бригада → редактор | Обозначение наблюдения по наряду, способ измерения, возможные активы | Офис принимает наблюдение до однозначного опознания. Для правки карточки сохраняет основание выбора актива и координат. [NET-07](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-07) · [NET-01](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-01). |
+| Подрядчик и эксплуатация → редактор и диспетчер | Снятая граница, сведения о врезке, отдельное подтверждение ввода | Редактор может опубликовать проверенную геометрию. Диспетчер учитывает введённую и подключённую часть. [NET-09](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-09) · [NET-10](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-10). |
+| Бригада или оперативный источник → диспетчер → бригада | Подтверждённое положение и время действия, по результату расчёта — определённая и возможная части охвата | Диспетчер передаёт границу неопределённости в задании. Возврат услуги учитывает по отдельному свидетельству об охваченной части. [NET-13](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-13) · [NET-12](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-12) · [NET-03](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-03). |
+| Учёт оборудования и эксплуатация → редактор | Списание и эксплуатационное подтверждение с указанием объёма и времени | Списание запускает сверку. Подтверждение эксплуатации устанавливает, как изменить доступность оборудования. [Правило сверки](../integration_patterns/asset_status_reconciliation.md). |
+| Бригада или подрядчик → редактор → потребители топологии | Исполнительный материал показывает соединительную деталь и обе присоединённые трубы либо оставляет стык неизвестным | Редактор определяет, может ли правка добавить общий узел. Трассировка получает новый путь только через подтверждённое соединение. [NET-04](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-04). |
+| Бригада → редактор → эксплуатация | Место задвижки на сохранившейся трубе, дата и исходный охват осмотра, по возможности место дефекта | После разделения на два ребра история доступна по физической трубе. Эксплуатация видит дефект на конкретном отрезке только при достаточной привязке и отдельно сообщает об установленном ограничении. [NET-05](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-05) · [NET-08](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-08). |
+| Проектировщик и подрядчик → редактор | Выданная для работ редакция, съёмка конкретного участка, последнее утверждённое изменение и охваченные им работы | Съёмку сравнивают с применимым требованием. Когда распоряжение молчит о ранее уложенной части, измерения сохраняются, а заключение о соответствии остаётся открытым. [NET-11](../../RAW_inputs/documents/2026-11-27-field-information-answers.md#net-11). |
 
 ## Integration Pattern
 
-Текущая реализация использует repositories application layer вместо cross-schema foreign keys между будущими service boundaries. Это осознанная anti-corruption boundary между persistence schemas и domain contexts.
+Полевая бригада возвращает сведения после работы без связи. Офис принимает материал, привязывает замер к объекту и оценивает предлагаемую правку в [рабочей версии](../aggregates/network_edit_version.md). Для оперативного задания действует другой порядок. Диспетчер может обновить расчёт по [подтверждённому положению](../aggregates/device_position_history.md) ещё до публикации постоянной правки. Вернувшийся результат по услуге учитывает в [наряде](../aggregates/network_work_order.md). Для внешних систем исходный документ связывает задание обмена с проектом. Выбор протокола и границ транзакций остаётся открытым. [Полевой и оперативный обмен](../integration_patterns/field_office_evidence_exchange.md).
 
-## Risks
-
-Граница между `Reviewer` и `Publisher` остается нерешенной; см. [[Wiki/conflicts/2026-06-24-reviewer-vs-publisher]].
+[UtilityGisEditor.md · Базовые и продвинутые workflows](../../RAW_inputs/documents/UtilityGisEditor.md#базовые-и-продвинутые-workflows)

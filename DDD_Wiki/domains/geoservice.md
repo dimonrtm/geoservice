@@ -1,23 +1,23 @@
 ---
-title: GeoService Domain
+title: "Ведение авторитетной модели инженерной сети"
 type: domain
 status: active
-created: 2026-06-24
-updated: 2026-06-24
-source: "Vision_wiki/decisions/release_1_utility_workflow.md; RAW_inputs/documents/utility_gis_editor_domain_dictionary.md"
-tags: [domain-knowledge, ddd, domain]
-confidence: high
-related: [DDD_Wiki/subdomains/utility_authoritative_editing, Wiki/glossary/utility_gis_editing]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md; RAW_inputs/documents/2026-11-27-field-information-answers.md; RAW_inputs/documents/2026-11-27-field-information-model-analysis.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [DDD_Wiki/use_cases/_info, Wiki/concepts/network_data]
 ---
 
-# GeoService Domain
+# Ведение авторитетной модели инженерной сети
 
-GeoService исследует управляемое редактирование данных инженерной сети. Главный домен текущего release - безопасное изменение authoritative utility network state через `WorkOrder`, isolated `EditVersion`, validation, reconcile, review, post и audit.
+Цель оператора — иметь согласованное представление о том, где находятся активы, как они соединены и какие изменения подтверждены. Офис, бригада, диспетчер и проектировщик работают с одной сетью в разных обстоятельствах. Связь между их результатами проходит через сетевой объект, задание, версию или исполнительные сведения.
 
-## Business Capability
+Модель охватывает ведение топологии, полевой обмен, использование связности при отключении и учёт построенного. Описание допускает электрические, тепловые, водопроводные, канализационные, газовые и телекоммуникационные сети. Специфические правила одной отрасли потребуют отдельного основания.
 
-Дать пользователю путь от назначенной `WorkOrder` до проверенного изменения сети без silent overwrite и без прямой правки authoritative `Default`.
+Автор реконструировал типовой сценарий по обзору. В этом начальном срезе четыре описанных процесса приняты как предмет моделирования условной организации. Предложения по лицензированию, стоимости, поставщикам и продуктовой стратегии относятся к обзору рынка.
 
-## Boundaries
+[UtilityGisEditor.md · Как я интерпретировал Use Case](../../RAW_inputs/documents/UtilityGisEditor.md#как-я-интерпретировал-use-case)
 
-Generic GIS CRUD, загрузка layer bbox, рендеринг MapLibre и raw feature WebSocket остаются техническим основанием, а не отдельным продуктовым сценарием.
+После исследования полевых сведений модель различает три вопроса об одном сетевом участке. Что фактически обнаружили и к какому активу относится материал? Какую проверенную геометрию, связь или историю можно предъявить потребителю официальной сети? Что известно об эксплуатации и услуге на конкретной части в заданное время? Порядок перехода между ответами зависит от свидетельства. Например, публикация построенной трубы позволяет показать её на карте. Для оперативной трассировки важны также ввод этой части и подтверждённые рабочие подключения. Эти правила выбраны условной организацией по материалам исследования. [Поддомены и границы решений](../subdomains/utility_authoritative_editing.md) · [Разбор исходных эпизодов и решений](../../RAW_inputs/documents/2026-11-27-field-information-model-analysis.md).

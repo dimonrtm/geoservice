@@ -1,17 +1,23 @@
 ---
-title: System Events Registry
+title: "Системные события"
 type: index
 status: active
-created: 2026-06-24
-updated: 2026-06-24
-source: docs/superpowers/specs/2026-06-24-domain-knowledge-layer-design.md
-tags: [domain-knowledge, registry, system-event]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md"
+tags: [domain-knowledge, utility-gis]
 confidence: n/a
-related: [Wiki/index]
+related: [DDD_Wiki/use_cases/_info]
 ---
 
-# System Events Registry
+# Системные события
 
-| Event | Producer | Consumers | Confidence | Source |
-| --- | --- | --- | --- | --- |
-| [[Wiki/system_events/workspace_loaded]] | Workspace API | Frontend workspace редактора | high | `Code_wiki/архитектура/api_and_realtime.md` |
+Получение данных устанавливает, что они стали доступны конкретному получателю. Основание для публикации, изменения связности или положения устройства участник проверяет отдельно. Форматы, гарантии доставки и протоколы в источниках не определены.
+
+## Получение сведений
+
+- [[Wiki/system_events/field_package_received|Полевой пакет поступил в офис]]
+- [[Wiki/system_events/device_report_received|Получено сообщение о положении устройства]]
+- [[Wiki/system_events/published_changes_received|Потребитель получил обновление официальной сети]]
+
+[Исходная модель](../../RAW_inputs/documents/UtilityGisEditor.md#базовые-и-продвинутые-workflows) · [Решения условной организации по полевым сведениям](../../RAW_inputs/documents/2026-11-27-field-information-answers.md).

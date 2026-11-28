@@ -1,25 +1,29 @@
 ---
-title: Utility Authoritative Editing Subdomain
+title: "Области ответственности при работе с сетью"
 type: subdomain
 status: active
-created: 2026-06-24
-updated: 2026-06-24
-source: "Vision_wiki/decisions/release_1_utility_workflow.md; Vision_wiki/concepts/utility_gis_editing_domain.md"
-tags: [domain-knowledge, ddd, subdomain, core]
-confidence: high
-related: [Wiki/glossary/utility_gis_editing, DDD_Wiki/bounded_contexts/work_order, DDD_Wiki/bounded_contexts/review_post]
+created: 2026-11-27
+updated: 2026-11-27
+source: "RAW_inputs/documents/UtilityGisEditor.md; RAW_inputs/documents/2026-11-27-field-information-answers.md; RAW_inputs/documents/2026-11-27-field-information-model-analysis.md"
+tags: [domain-knowledge, utility-gis]
+confidence: inferred
+related: [DDD_Wiki/context_map/geoservice_context_map]
 ---
 
-# Utility Authoritative Editing Subdomain
+# Области ответственности при работе с сетью
 
 ## Classification
 
-Core subdomain. Он определяет ценность GeoService: безопасный workflow изменения authoritative utility network state, а не просто отображение и CRUD геометрии.
+Центральная задача — ведение авторитетной сети, включая геометрию, топологию, версионную правку и утверждение. Полевое исполнение связывает задание с фактом, установленным бригадой. Обмен и аудит доставляют сведения между участниками и позволяют проследить публикацию.
 
-## Business Capability
+Такое разбиение следует предложенным автором трём продуктовым модулям. Их использование как границ языка в начальной модели — интерпретация. Классификация ниже отражает цель условной организации. [Начальный источник](../../RAW_inputs/documents/UtilityGisEditor.md#gap-analysis-и-рекомендации-по-стратегии-продукта) · [Разбор полевых эпизодов](../../RAW_inputs/documents/2026-11-27-field-information-model-analysis.md).
 
-`WorkOrder` -> `EditVersion` -> editing -> validation -> reconcile -> conflict resolution -> review -> post -> audit.
+| Поддомен | Что требуется решить | Предметная граница |
+| --- | --- | --- |
+| Ведение и использование авторитетной сети — основной | Какие факты о положении, идентичности и связях можно опубликовать. Какие из опубликованных связей доступны диспетчеру на заданный момент с учётом ввода и оперативного положения устройств. | Геометрия построенного участка может быть известна раньше, чем подтверждены врезка и допуск к работе. Временное положение устройства влияет на расчёт до изменения постоянной схемы. [Авторитетная сеть](../bounded_contexts/utility_network.md). |
+| Исполнение полевых работ — поддерживающий | Какое задание получает бригада, какое наблюдение возвращает и какая часть услуги восстановлена по фактическому свидетельству. | Два похожих актива позволяют сдать неопознанный замер по наряду. Возврат услуги на одной ветви позволяет учесть только её часть в наряде. [Полевые работы](../bounded_contexts/field_work.md). |
+| Обмен и аудит — поддерживающий | Как передать основания изменений и проследить действие участника, версию и содержательный результат обмена. | Доставленное уведомление о списании подтверждает учётную операцию. Для изменения доступности сети редактор сверяет физический актив и эксплуатационные сведения. [Обмен и аудит](../bounded_contexts/integration_exchange.md). |
 
-## Related Contexts
+Исполнительная съёмка проходит через все три области. Поле фиксирует фактическую границу, редактор определяет допустимый объём публикации, потребители получают утверждённое изменение. Назначение ремонта, выполнение переключения на месте и бухгалтерское списание остаются задачами служб, от которых модель получает сведения. [Сценарий учёта строительства](../use_cases/as_built_workflow.md) · [Разбор кандидатов](../use_cases/candidates/_info.md).
 
-[[DDD_Wiki/bounded_contexts/work_order]], [[DDD_Wiki/bounded_contexts/utility_network]], [[DDD_Wiki/bounded_contexts/review_post]], [[DDD_Wiki/bounded_contexts/audit]].
+[UtilityGisEditor.md · Gap analysis и рекомендации по стратегии продукта](../../RAW_inputs/documents/UtilityGisEditor.md#gap-analysis-и-рекомендации-по-стратегии-продукта)
